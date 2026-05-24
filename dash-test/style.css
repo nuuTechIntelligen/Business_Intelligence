@@ -95,7 +95,7 @@ body {
 }
 .card-header-block h2 { margin: 0; font-size: 18px; text-transform: uppercase; }
 
-/* REGLA MAESTRA DE RESPONSIVIDAD EN REJILLAS DE COLUMNAS INDEPENDIENTES */
+/* REGLA MAESTRA DE RESPONSIVIDAD EN REJILLAS */
 .table-grid { 
     display: flex; 
     flex-direction: column; 
@@ -108,9 +108,14 @@ body {
     width: 100%;
 }
 
-/* Títulos por defecto en móvil para dar contexto */
-.flex-mobile-title {
-    display: block;
+/* Fichas técnicas individuales de beneficiarios por defecto para móviles */
+.beneficiary-card-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid #dcdcdc;
+    margin-bottom: 10px;
+    background: #ffffff;
 }
 
 @media (min-width: 750px) {
@@ -120,14 +125,31 @@ body {
     }
     .grid-1 { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
-    .grid-4 { grid-template-columns: repeat(4, 1fr); }
     
-    /* El truco contents funciona perfecto para la rejilla fija de 4 columnas de beneficiarios */
-    .grid-4 .grid-column-group {
+    /* EN PC: Forzamos a la tabla de beneficiarios a comportarse como una grilla plana tradicional */
+    .grid-4 { 
+        grid-template-columns: repeat(4, 1fr); 
+    }
+    
+    /* Desintegramos la tarjeta móvil en PC para alinear las sub-celdas de forma horizontal limpia */
+    .grid-4 .beneficiary-card-group {
         display: contents !important;
     }
+    
+    /* Desactivamos las etiquetas de texto sobrantes en PC ya que no se requieren horizontalmente */
+    .grid-4 .beneficiary-card-group .sub-cell span {
+        display: none !important;
+    }
+    
+    /* Forzamos a que en PC vuelvan a lucir con el formato de celda clásico de la tabla */
+    .grid-4 .beneficiary-card-group .sub-cell {
+        border: 1px solid #dcdcdc;
+        padding: 10px;
+        font-size: 14px;
+        justify-content: center;
+        box-sizing: border-box;
+    }
 
-    /* Evita el desalineado vertical en las rejillas asimétricas (Bloques 1 y 2) */
     .grid-3 .grid-column-group {
         display: flex !important;
         flex-direction: column;
@@ -137,15 +159,10 @@ body {
     .grid-3 .grid-column-group .cell:last-child {
         flex-grow: 1;
     }
-
-    /* Ocultamos las etiquetas de texto sobrantes en PC ya que la cabecera general da el contexto horizontal */
-    .grid-4 .flex-mobile-title {
-        display: none !important;
-    }
 }
 
 .cell { border: 1px solid #dcdcdc; padding: 10px; font-size: 14px; box-sizing: border-box; }
-.sub-cell { border-bottom: 1px solid #e2e8f0; padding: 6px 12px; display: flex; justify-content: space-between; font-size: 13px; }
+.sub-cell { border-bottom: 1px solid #e2e8f0; padding: 6px 12px; display: flex; justify-content: space-between; font-size: 13px; box-sizing: border-box; }
 .sub-cell:last-child { border-bottom: none; }
 .list-container-cell { background: #f7fafc; padding: 5px 0; max-height: 120px; overflow-y: auto; }
 .border-top-dash { border-top: 1px dashed var(--navy-light); }
