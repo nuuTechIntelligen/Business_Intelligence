@@ -6,7 +6,6 @@
     <title>Control de Pólizas Maestras | Conny CRM</title>
     
     <link rel="shortcut icon" href="#">
-
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -34,7 +33,6 @@
     <div class="dashboard-container">
         
         <div class="main-card">
-            
             <div class="card-header-block">
                 <h2 id="lbl-contratante">SELECCIONA UN CLIENTE</h2>
                 <div class="plan-selector-box">
@@ -49,12 +47,10 @@
                 <div class="cell bg-navy font-white">Estructura Comercial</div>
 
                 <div class="cell font-bold text-center" id="txt-poliza">-</div>
-                
                 <div class="cell no-padding">
                     <div id="wrapper-asegurados" class="list-container-cell"></div>
                     <div class="sub-cell border-top-dash"><span>Cumpleaños:</span> <strong id="txt-nacimiento">-</strong></div>
                 </div>
-                
                 <div class="cell no-padding">
                     <div class="sub-cell"><span>PPR:</span> <strong id="txt-ppr">-</strong></div>
                     <div class="sub-cell"><span>Prox F. Dotal:</span> <strong id="txt-dotal">-</strong></div>
@@ -114,30 +110,41 @@
             </div>
 
             <div class="bg-navy font-white panel-title">Estructura de Beneficiarios</div>
-            <div class="table-grid grid-4" id="grid-beneficiarios">
-                </div>
-
+            <div class="table-grid grid-4" id="grid-beneficiarios"></div>
         </div>
 
         <div class="alerts-sidebar">
             <h3>Alertas Tempranas</h3>
+            
             <div class="alert-card alert-birthday">
                 <span class="icon">🎂</span>
                 <div>
                     <h4 id="count-cumple">0 Cumpleaños</h4>
-                    <p>Celebrando hoy</p>
+                    <p>En los próximos 7 días</p>
                 </div>
+                <div class="alert-names-list" id="list-cumple-alert"></div>
             </div>
-            <div class="alert-card alert-payment">
-                <span class="icon">💳</span>
+            
+            <div class="alert-card alert-upcoming-payment">
+                <span class="icon">⏳</span>
                 <div>
-                    <h4 id="count-pagos">0 Vencimientos</h4>
-                    <p>Alertas de pago esta semana</p>
+                    <h4 id="count-proximos">0 Por Vencer</h4>
+                    <p>Cobros en los próximos 7 días</p>
                 </div>
+                <div class="alert-names-list" id="list-proximos-alert"></div>
+            </div>
+
+            <div class="alert-card alert-payment">
+                <span class="icon">🚨</span>
+                <div>
+                    <h4 id="count-vencidas">0 Vencidas</h4>
+                    <p>Pólizas con impagos vigentes</p>
+                </div>
+                <div class="alert-names-list" id="list-vencidas-alert"></div>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=1.5"></script>
+    <script src="script.js?v=1.7"></script>
 </body>
 </html>
