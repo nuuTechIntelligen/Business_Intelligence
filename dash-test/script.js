@@ -67,9 +67,6 @@ async function cargarBaseDeDatos() {
     }
 }
 
-/**
- * CONTROL DE ALERTAS CRUZADAS: Motor predictivo de fechas y plazos comerciales
- */
 function actualizarContadoresAlertas() {
     const hoy = new Date();
     const diaHoy = hoy.getDate();
@@ -78,80 +75,67 @@ function actualizarContadoresAlertas() {
 
     if (!baseDatosCompleta || baseDatosCompleta.length === 0) return;
 
-    // Arrays para clasificar perfiles
     let cumpleaniosSemana = [];
     let proximosCobros = [];
     let polizasVencidas = [];
 
     baseDatosCompleta.forEach(c => {
-        // --- 1. MATEMÁTICA DE CUMPLEAÑOS DE LA SEMANA ---
         if (c.nacimiento && c.nacimiento.includes('/')) {
             const partes = c.nacimiento.split('/');
             const diaNac = parseInt(partes[0]);
             const mesNac = parseInt(partes[1]) - 1;
             
-            // Creamos un objeto fecha simulando que el cumpleaños cae este año
             let fechaCumpleEsteAño = new Date(añoHoy, mesNac, diaNac);
-            
-            // Calculamos la diferencia en días naturales
             const diffTiempo = fechaCumpleEsteAño - hoy;
             const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
             
-            // Si cae entre hoy (0) y los próximos 7 días, entra a la lista
             if (diffDias >= 0 && diffDias <= 7) {
                 cumpleaniosSemana.push({ data: c, diasPara: diffDias });
             }
         }
 
-        // --- 2. MATEMÁTICA DE ADEUDOS (PROXIMOS VS VENCIDAS) ---
         const diaCobroNum = parseInt(c.dia_cobro || 0);
         const esEstatusVencido = c.estatus && String(c.estatus).toLowerCase() === "vencido";
         const tieneLetraV = c.cobranza && c.cobranza.includes("V");
 
         if (esEstatusVencido || tieneLetraV) {
             if (diaCobroNum >= diaHoy && diaCobroNum <= (diaHoy + 7)) {
-                // Caso A: Próximo Vencimiento (Adeudo que cae en los próximos 7 días)
                 const diasFaltantes = diaCobroNum - diaHoy;
                 proximosCobros.push({ data: c, diasRestantes: diasFaltantes });
             } else if (diaCobroNum < diaHoy || esEstatusVencido) {
-                // Caso B: Ya Vencida (El día de cobro ya pasó en el mes actual)
-                const diasRetraso = diaCobroNum < diaHoy ? (diaHoy - diaCobroNum) : 15; // 15 días default si es estatus macro
+                const diasRetraso = diaCobroNum < diaHoy ? (diaHoy - diaCobroNum) : 15; 
                 polizasVencidas.push({ data: c, diasAtraso: diasRetraso });
             }
         }
     });
 
-    // --- RENDERIZADO VISUAL EN EL SIDEBAR ---
-    // Inyección de Cumpleaños
     const countCumpleEl = document.getElementById('count-cumple');
     if(countCumpleEl) countCumpleEl.innerText = `${cumpleaniosSemana.length} Cumpleaños`;
     const listCumpleEl = document.getElementById('list-cumple-alert');
     if(listCumpleEl) {
-        listCumpleEl.innerHTML = cumpleaniosSemana.length > 0 ? '' : '<div class="alert-empty-msg">Sin cumpleaños esta semana</div>';
+        listCumpleEl.innerHTML = cumpleaniosSemana.length > 0 ? '' : '<div class="alert-empty-msg">Sin birthdays esta semana</div>';
         cumpleaniosSemana.sort((a,b) => a.diasPara - b.diasPara).forEach(item => {
-            const tagDia = item.diasPara === 0 ? "¡HOY!" : `en ${item.diasPara} días`;
+            const tagDia = item.diasPara === 0 ? "¡HOY!" : `en ${item.diasPara} d`;
             listCumpleEl.innerHTML += `<div class="alert-name-item" onclick="seleccionarClientePorNombre('${item.data.contratante}')">🎉 ${item.data.contratante} <small>${tagDia}</small></div>`;
         });
     }
 
-    // Inyección de Próximos Vencimientos
     const countProximosEl = document.getElementById('count-proximos');
     if(countProximosEl) countProximosEl.innerText = `${proximosCobros.length} Por Vencer`;
     const listProximosEl = document.getElementById('list-proximos-alert');
     if(listProximosEl) {
-        listProximosEl.innerHTML = proximosCobros.length > 0 ? '' : '<div class="alert-empty-msg">Sin cobros próximos esta semana</div>';
+        listProximosEl.innerHTML = proximosCobros.length > 0 ? '' : '<div class="alert-empty-msg">Sin cobros próximos</div>';
         proximosCobros.sort((a,b) => a.diasRestantes - b.diasRestantes).forEach(item => {
-            const tagProx = item.diasRestantes === 0 ? "Cobrar HOY" : `Faltan ${item.diasRestantes} días`;
+            const tagProx = item.diasRestantes === 0 ? "Cobrar HOY" : `Faltan ${item.diasRestantes} d`;
             listProximosEl.innerHTML += `<div class="alert-name-item alert-item-warn" onclick="seleccionarClientePorNombre('${item.data.contratante}')">⏳ ${item.data.contratante} <small>${tagProx}</small></div>`;
         });
     }
 
-    // Inyección de Pólizas Vencidas
     const countVencidasEl = document.getElementById('count-vencidas');
     if(countVencidasEl) countVencidasEl.innerText = `${polizasVencidas.length} Vencidas`;
     const listVencidasEl = document.getElementById('list-vencidas-alert');
     if(listVencidasEl) {
-        listVencidasEl.innerHTML = polizasVencidas.length > 0 ? '' : '<div class="alert-empty-msg">Felicidades, cartera al día</div>';
+        listVencidasEl.innerHTML = polizasVencidas.length > 0 ? '' : '<div class="alert-empty-msg">Cartera al día</div>';
         polizasVencidas.sort((a,b) => b.diasAtraso - a.diasAtraso).forEach(item => {
             listVencidasEl.innerHTML += `<div class="alert-name-item alert-item-danger" onclick="seleccionarClientePorNombre('${item.data.contratante}')">🚨 ${item.data.contratante} <small>Atraso: ${item.diasAtraso}d</small></div>`;
         });
@@ -313,33 +297,20 @@ function enviarMensajeWA(tipo) {
     const c = clienteSeleccionado;
     let mensaje = "";
     if(tipo === 'cumple') {
-        mensaje = `¡Hola *${c.contratante}*! 🎉 Te mandamos un fuerte saludo de parte de *Conny* y el equipo. Queremos desearte un muy feliz cumpleaños hoy en tu día, ¡que te la pases excelente! 🎂🎈`;
+        value = `¡Hola *${c.contratante}*! 🎉 Te mandamos un fuerte saludo de parte de *Conny* y el equipo. Queremos desearte un muy feliz cumpleaños hoy en tu día, ¡que te la pases excelente! 🎂🎈`;
     } else if(tipo === 'pago') {
         mensaje = `Estimado(a) *${c.contratante}*, te saludamos para recordarte que la fecha límite de tu pago *${c.forma_pago.toUpperCase()}* para tu póliza de *${c.ramo}* (No. *${c.poliza}*) es el próximo *${c.dia_cobro}* de este mes. El monto correspondiente al periodo es de *$${c.cobro_pesos} MXN*. Quedamos a tus órdenes para procesar el movimiento. 💳✨`;
     }
     window.open(`https://wa.me/52${c.telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
-// ... Todo tu código anterior de script.js se mantiene exactamente igual ...
-// (Conserva las funciones consultarUDIRealTime, cargarBaseDeDatos, actualizarContadoresAlertas, etc.)
-
-/**
- * CONTROL DE ACORDEÓN INTERACTIVO: Abre y cierra las listas de alerta de forma fluida
- * @param {string} idLista - El contenedor específico que se desea alternar
- */
 function conmutarAcordeon(idLista) {
     const listaObjetivo = document.getElementById(idLista);
     if (!listaObjetivo) return;
-
-    // Evaluamos el estado actual de visibilidad de la lista seleccionada
     const estaAbierta = listaObjetivo.classList.contains('active');
-
-    // Cierre maestro opcional: Cierra las otras dos listas para mantener orden de acordeón puro
     document.querySelectorAll('.alert-names-list').forEach(lista => {
         lista.classList.remove('active');
     });
-
-    // Si la lista no estaba abierta, la activamos agregándole la clase CSS
     if (!estaAbierta) {
         listaObjetivo.classList.add('active');
     }
