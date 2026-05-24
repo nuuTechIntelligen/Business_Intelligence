@@ -108,25 +108,39 @@ body {
     width: 100%;
 }
 
+/* Títulos por defecto en móvil para dar contexto */
+.flex-mobile-title {
+    display: block;
+}
+
 @media (min-width: 750px) {
     .table-grid { 
         display: grid; 
-        align-items: stretch; /* Obliga a que todas las columnas hereden la misma altura máxima */
+        align-items: stretch; 
     }
     .grid-1 { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
     .grid-4 { grid-template-columns: repeat(4, 1fr); }
     
-    /* SOLUCIÓN AL DESALINEADO: Mantenemos el bloque intacto en PC y estiramos las celdas */
-    .grid-column-group {
+    /* El truco contents funciona perfecto para la rejilla fija de 4 columnas de beneficiarios */
+    .grid-4 .grid-column-group {
+        display: contents !important;
+    }
+
+    /* Evita el desalineado vertical en las rejillas asimétricas (Bloques 1 y 2) */
+    .grid-3 .grid-column-group {
         display: flex !important;
         flex-direction: column;
         height: 100%;
     }
     
-    /* El contenedor secundario absorbe el aire sobrante para cuadrar las líneas perfectamente */
-    .grid-column-group .cell:last-child {
+    .grid-3 .grid-column-group .cell:last-child {
         flex-grow: 1;
+    }
+
+    /* Ocultamos las etiquetas de texto sobrantes en PC ya que la cabecera general da el contexto horizontal */
+    .grid-4 .flex-mobile-title {
+        display: none !important;
     }
 }
 
