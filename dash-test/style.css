@@ -113,24 +113,50 @@ body {
 .btn-wa-pago { background-color: #ff9f1c; }
 
 /* ==========================================
-   ESTILOS AVANZADOS PARA LISTAS DE ALERTAS
+   ESTILOS AVANZADOS PARA LISTAS DE ALERTAS (CON EFECTO ACORDEÓN)
    ========================================== */
 .alerts-sidebar { display: flex; flex-direction: column; gap: 15px; }
 .alerts-sidebar h3 { margin: 0; font-size: 16px; color: var(--navy-dark); text-transform: uppercase; }
+
 .alert-card { 
     background: var(--white); border-radius: 8px; padding: 12px; 
     display: flex; flex-direction: column; align-items: flex-start !important; 
-    gap: 10px; border: 1px solid #e2e8f0; 
+    gap: 0px; border: 1px solid #e2e8f0; cursor: pointer;
+    transition: box-shadow 0.2s, background-color 0.2s;
 }
-.alert-card > div:first-of-type { display: flex; align-items: center; gap: 12px; }
+.alert-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #fafafa;
+}
+
+.alert-card-header { display: flex; align-items: center; gap: 12px; width: 100%; }
 .alert-card .icon { font-size: 20px; }
 .alert-card h4 { margin: 0; font-size: 14px; color: var(--navy-dark); }
 .alert-card p { margin: 0; font-size: 12px; color: #718096; }
 
+/* REGLA DEL ACORDEÓN: Oculto por defecto mediante altura cero y opacidad */
 .alert-names-list {
-    width: 100%; margin-top: 5px; border-top: 1px solid #e2e8f0;
-    padding-top: 8px; display: flex; flex-direction: column; gap: 5px;
+    width: 100%; 
+    max-height: 0; 
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    margin-top: 0;
+    border-top: 1px solid transparent;
+    display: flex; flex-direction: column; gap: 5px;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease, padding 0.2s;
 }
+
+/* CLASE ACTIVA: JavaScript inyectará esta clase al hacer clic para desplegar suavemente */
+.alert-names-list.active {
+    max-height: 250px; /* Altura máxima permitida con scroll automático si se llena mucho */
+    opacity: 1;
+    overflow-y: auto;
+    padding-top: 10px;
+    margin-top: 8px;
+    border-top: 1px solid #e2e8f0;
+}
+
 .alert-name-item {
     font-size: 12px; font-weight: bold; color: var(--navy-light);
     padding: 6px 8px; background-color: #f7fafc; border-radius: 4px;
