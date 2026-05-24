@@ -52,19 +52,32 @@ async function cargarBaseDeDatos() {
     }
 }
 
-// Lógica inteligente para las Alertas Tempranas de Conny
+// Lógica inteligente y protegida para las Alertas Tempranas de Conny
 function actualizarContadoresAlertas() {
     const hoy = new Date();
     const diaHoy = String(hoy.getDate()).padStart(2, '0');
     const mesHoy = String(hoy.getMonth() + 1).padStart(2, '0');
-    const fechaCortadaHoy = `${diaHoy}/${mesHoy}`; // DD/MM
+    const fechaCortadaHoy = `${diaHoy}/${mesHoy}`; // Formato "DD/MM"
 
-    // 1. Contador de Cumpleaños
-    const cumpleaniosHoy = baseDatosCompleta.filter(c => c.nacimiento.startsWith(fechaCortadaHoy));
+    // BLINDAJE 1: Validamos que la base de datos no esté vacía antes de procesar
+    if (!baseDatosCompleta || baseDatosCompleta.length === 0) {
+        document.getElementById('count-cumple').innerText = "0 Cumpleaños";
+        document.getElementById('count-pagos').innerText = "0 Vencimientos";
+        return;
+    }
+
+    // BLINDAJE 2: Agregamos una verificación (c.nacimiento) para ignorar celdas vacías o corruptas
+    const cumpleaniosHoy = baseDatosCompleta.filter(c => {
+        return c.nacimiento && typeof c.nacimiento === 'string' && c.nacimiento.startsWith(fechaCortadaHoy);
+    });
     document.getElementById('count-cumple').innerText = `${cumpleaniosHoy.length} Cumpleaños`;
 
-    // 2. Contador de Pagos Vencidos (Pólizas con estatus Vencido o cadena con 'V' en el mes actual)
-    const pagosVencidos = baseDatosCompleta.filter(c => c.estatus === "Vencido" || c.cobranza.includes("V"));
+    // BLINDAJE 3: Protegemos la lectura de cobranza y estatus ante posibles nulos
+    const pagosVencidos = baseDatosCompleta.filter(c => {
+        const estatusVencido = c.estatus && String(c.estatus).toLowerCase() === "vencido";
+        const cobranzaVencida = c.cobranza && typeof c.cobranza === 'string' && c.cobranza.includes("V");
+        return estatusVencido || cobranzaVencida;
+    });
     document.getElementById('count-pagos').innerText = `${pagosVencidos.length} Vencimientos`;
 }
 
