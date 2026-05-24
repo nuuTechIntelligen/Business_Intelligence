@@ -59,23 +59,31 @@ body {
     position: relative; 
 }
 
-/* ESTRUCTURA GRID RESPONSIVA (Móvil Primero -> 2 Columnas en PC) */
+/* ESTRUCTURA GRID - DISEÑO DE UNA COLUMNA POR DEFECTO (MÓVIL PRIMERO) */
+.grid-layout {
+    display: grid;
+    grid-template-columns: 1fr; /* Una columna por defecto */
+    gap: 20px; /* Espacio reducido para móviles */
+    align-items: start;
+}
+
+/* ESTRUCTURA GRID - DISEÑO DE DOS COLUMNAS PARA PC (Mínimo 800px) */
 @media (min-width: 800px) {
     .grid-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px; 
-        align-items: start;
+        grid-template-columns: 1fr 1fr; /* Dos columnas en pantallas grandes */
+        gap: 40px; /* Espacio mayor para PC */
     }
 }
 
-/* MODIFICACIÓN 1: Estilos del Carrusel Fotográfico de Román */
+/* MODIFICACIÓN: Estilos del Carrusel Fotográfico de Román */
 .carousel-container {
     position: relative;
     width: 100%;
     height: 250px;
     overflow: hidden;
     border-bottom: 3px solid var(--turquesa);
+    /* CORRECCIÓN: Habilita el desplazamiento táctil nativo (swipe) */
+    touch-action: pan-x; 
 }
 
 .carousel-track {
@@ -83,8 +91,12 @@ body {
     width: 100%;
     height: 100%;
     transition: transform 0.4s ease-in-out;
+    /* CORRECCIÓN: Asegura que el contenido del carrusel sea scrollable horizontalmente en móviles si es necesario */
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
 }
 
+/* MODIFICACIÓN: Asegura que las imágenes ocupen todo el ancho y alto del carrusel */
 .carousel-track img {
     width: 100%;
     height: 100%;
@@ -110,7 +122,7 @@ body {
 .carousel-btn.prev { left: 15px; }
 .carousel-btn.next { right: 15px; }
 
-/* MODIFICACIÓN 2: Alineación y tamaño de los Logos Dinámicos */
+/* MODIFICACIÓN: Alineación y tamaño de los Logos Dinámicos */
 .tour-title-wrapper, .cotizador-header-wrapper {
     display: flex;
     align-items: center;
