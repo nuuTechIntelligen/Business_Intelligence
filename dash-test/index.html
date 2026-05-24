@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Pólizas Maestras | Conny CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label>Empresa</label>
+            <select id="filtro-empresa" onchange="filtrarClientesPorEmpresa()">
+                <option value="ALL">All Companies / Todas</option>
+                <option value="GNP">GNP Seguros</option>
+                <option value="AXA">AXA México</option>
+                <option value="METLIFE">MetLife</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Cliente / Póliza</label>
+            <select id="filtro-cliente" onchange="cargarDatosCliente()">
+                <option value="">Selecciona un cliente...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        
+        <div class="main-card">
+            
+            <div class="card-header-block">
+                <h2 id="lbl-contratante">SELECCIONA UN CLIENTE</h2>
+                <div class="plan-selector-box">
+                    <label>Plan Activo:</label>
+                    <select id="plan-select" onchange="actualizarPlanEspecifico()">
+                        </select>
+                </div>
+            </div>
+
+            <div class="table-grid grid-3">
+                <div class="cell bg-navy font-white">Póliza</div>
+                <div class="cell bg-navy font-white">Cumpleaños</div>
+                <div class="cell bg-navy font-white">Estructura Comercial</div>
+
+                <div class="cell font-bold text-center" id="txt-poliza">-</div>
+                <div class="cell no-padding">
+                    <div class="sub-cell"><span>F. Nacimiento:</span> <strong id="txt-nacimiento">-</strong></div>
+                </div>
+                <div class="cell no-padding">
+                    <div class="sub-cell"><span>PPR:</span> <strong id="txt-ppr">-</strong></div>
+                    <div class="sub-cell"><span>Prox F. Dotal:</span> <strong id="txt-dotal">-</strong></div>
+                    <div class="sub-cell"><span>Deducible:</span> <strong id="txt-deducible">-</strong></div>
+                    <div class="sub-cell"><span>Coaseguro:</span> <strong id="txt-coaseguro">-</strong></div>
+                </div>
+            </div>
+
+            <div class="table-grid grid-3 separator-gold">
+                <div class="cell no-padding">
+                    <div class="sub-cell bg-navy font-white">Ramo</div>
+                    <div class="sub-cell text-center font-bold" id="txt-ramo">-</div>
+                    <div class="sub-cell bg-navy font-white">Suma Asegurada</div>
+                    <div class="sub-cell text-center font-bold" id="txt-suma">-</div>
+                    <div class="sub-cell bg-navy font-white">Moneda</div>
+                    <div class="sub-cell text-center font-bold" id="txt-moneda">-</div>
+                </div>
+                
+                <div class="cell no-padding">
+                    <div class="sub-cell bg-navy font-white">Vigencias e Indicadores</div>
+                    <div class="sub-cell"><span>F. Emisión:</span> <strong id="txt-emision">-</strong></div>
+                    <div class="sub-cell"><span>F. Vencimiento:</span> <strong id="txt-vencimiento">-</strong></div>
+                    <div class="sub-cell"><span>Tipo Cambio:</span> <strong id="txt-tc">-</strong></div>
+                    
+                    <div class="wa-actions-container">
+                        <button onclick="enviarMensajeWA('cumple')" class="btn-wa btn-wa-cumple">🎂 Felicitación Cumpleaños (WA)</button>
+                        <button onclick="enviarMensajeWA('pago')" class="btn-wa btn-wa-pago">💳 Recordatorio de Pago (WA)</button>
+                    </div>
+                </div>
+
+                <div class="cell no-padding">
+                    <div class="sub-cell bg-navy font-white">Estatus General</div>
+                    <div class="sub-cell text-center font-bold font-green" id="txt-estatus">-</div>
+                    <div class="sub-cell"><span>Prima Anual:</span> <strong id="txt-prima-anual">-</strong></div>
+                    <div class="sub-cell"><span>Prima de Pago:</span> <strong id="txt-prima-pago">-</strong></div>
+                    <div class="sub-cell"><span>Al Cobro (Pesos):</span> <strong id="txt-cobro-pesos">-</strong></div>
+                    <div class="sub-cell"><span>Día de cobro:</span> <strong id="txt-dia-cobro">-</strong></div>
+                </div>
+            </div>
+
+            <div class="bg-navy font-white panel-title">Estatus de Cobranza Anual</div>
+            <div class="cobranza-timeline" id="timeline-cobranza">
+                </div>
+
+            <div class="bg-navy font-white panel-title">Estructura de Beneficiarios</div>
+            <div class="table-grid grid-4" id="grid-beneficiarios">
+                <div class="cell bg-grey font-bold">Beneficiario</div>
+                <div class="cell bg-grey font-bold">Motivo</div>
+                <div class="cell bg-grey font-bold">Porcentaje</div>
+                <div class="cell bg-grey font-bold">Fecha Nacimiento</div>
+                </div>
+
+        </div>
+
+        <div class="alerts-sidebar">
+            <h3>Alertas Tempranas</h3>
+            <div class="alert-card alert-birthday" onclick="filtrarPorAlerta('cumple')">
+                <span class="icon">🎂</span>
+                <div>
+                    <h4 id="count-cumple">0 Cumpleaños</h4>
+                    <p>Celebrando hoy</p>
+                </div>
+            </div>
+            <div class="alert-card alert-payment" onclick="filtrarPorAlerta('pagos')">
+                <span class="icon">💳</span>
+                <div>
+                    <h4 id="count-pagos">0 Vencimientos</h4>
+                    <p>Alertas de pago esta semana</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script id="sheetdb-script">
+        // Inyectamos las variables de control que usará el JS
+        const TELEFONO_CLIENTE_DEMO = "4422264286"; 
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
