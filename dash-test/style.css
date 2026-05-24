@@ -16,21 +16,75 @@ body {
     color: var(--text-dark);
 }
 
-/* BARRA DE FILTROS SUPERIOR: Distribución flexible que envuelve componentes si reduce la pantalla */
+/* ==========================================
+   BARRA DE FILTROS SUPERIOR (OPTIMIZADA)
+   ========================================== */
 .filter-bar {
     background-color: var(--navy-dark);
     padding: 15px;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    /* En móviles: cada selector y el badge ocupan su propia fila independiente */
+    grid-template-columns: 1fr; 
     gap: 15px;
-    align-items: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-.filter-group { display: flex; flex-direction: column; }
-.filter-bar label { color: #eef4ed; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px;}
+
+.filter-group { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.filter-bar label { 
+    color: #eef4ed; 
+    font-size: 11px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    margin-bottom: 5px;
+}
+
 .filter-bar select {
-    padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid var(--navy-light);
-    background-color: var(--navy-light); color: var(--white); font-weight: bold; outline: none; min-width: 180px;
+    padding: 10px 12px; 
+    font-size: 14px; 
+    border-radius: 6px; 
+    border: 1px solid var(--navy-light);
+    background-color: var(--navy-light); 
+    color: var(--white); 
+    font-weight: bold; 
+    outline: none; 
+    width: 100%; /* Se adapta al ancho de la pantalla del celular */
+    box-sizing: border-box;
+}
+
+/* BADGE DE LA UDI RESPONSIVO */
+.udi-live-badge {
+    background: #1e3a5f; 
+    color: #ff9f1c; 
+    padding: 10px; 
+    border-radius: 6px; 
+    font-size: 13px; 
+    text-align: center; /* Centrado estético en móviles */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* ==========================================
+   QUIEBRE DE PANTALLA PARA COMPUTADORAS (PC)
+   ========================================== */
+@media (min-width: 768px) {
+    .filter-bar {
+        /* En computadoras: se alinean de forma horizontal en una sola línea */
+        grid-template-columns: auto auto 1fr; 
+        align-items: flex-end;
+    }
+    .filter-bar select {
+        min-width: 220px; /* Tamaño fijo elegante para escritorio */
+        width: auto;
+    }
+    .udi-live-badge {
+        width: auto;
+        margin-left: auto; /* Empuja el badge al extremo derecho solo en PC */
+        padding: 8px 15px;
+    }
 }
 /* Distintivo de la UDI: Empuja el badge hacia el extremo derecho de la barra */
 .udi-live-badge {
