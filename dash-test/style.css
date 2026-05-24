@@ -109,13 +109,24 @@ body {
 }
 
 @media (min-width: 750px) {
-    .table-grid { display: grid; }
+    .table-grid { 
+        display: grid; 
+        align-items: stretch; /* Obliga a que todas las columnas hereden la misma altura máxima */
+    }
     .grid-1 { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
     .grid-4 { grid-template-columns: repeat(4, 1fr); }
     
+    /* SOLUCIÓN AL DESALINEADO: Mantenemos el bloque intacto en PC y estiramos las celdas */
     .grid-column-group {
-        display: contents; /* Desintegra el contenedor intermedio para alinearse a la rejilla maestra */
+        display: flex !important;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    /* El contenedor secundario absorbe el aire sobrante para cuadrar las líneas perfectamente */
+    .grid-column-group .cell:last-child {
+        flex-grow: 1;
     }
 }
 
