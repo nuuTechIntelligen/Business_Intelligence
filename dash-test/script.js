@@ -2,17 +2,15 @@
 const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di?sheet=Base_Datos'; 
 
 // Repositorios de datos globales de la aplicación en memoria
-let baseDatosCompleta = []; // Almacena el JSON crudo devuelto por la API
-let clienteSeleccionado = null; // Guarda el objeto del plan activo en pantalla
-let udiValorActualGlobal = 8.85; // Valor pivote por si el cliente no tiene red
+let baseDatosCompleta = []; 
+let clienteSeleccionado = null; 
+let udiValorActualGlobal = 8.8437; // Indicador financiero oficial de 2026
 
 /**
- * SOLUCIÓN ERROR 3: Eliminamos la petición CORS externa y fijamos el indicador financiero oficial 
- * de la UDI de manera local para garantizar velocidad de carga y consola limpia.
+ * MOTOR DE INDICADORES: Setea el valor oficial de la UDI de manera local
  */
 async function consultarUDIRealTime() {
     udiValorActualGlobal = 8.8437; 
-    
     const badge = document.getElementById('udi-val-live');
     if(badge) {
         badge.innerText = udiValorActualGlobal.toFixed(4);
@@ -20,11 +18,10 @@ async function consultarUDIRealTime() {
 }
 
 /**
- * CONEXIÓN CORE: Descarga la información del Excel y la procesa en un array tipado
+ * CONEXIÓN CORE: Descarga la información del Excel vía API SheetDB
  */
 async function cargarBaseDeDatos() {
     await consultarUDIRealTime(); 
-    
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
@@ -89,12 +86,14 @@ function actualizarContadoresAlertas() {
     if (!baseDatosCompleta || baseDatosCompleta.length === 0) return;
 
     const cumpleaniosHoy = baseDatosCompleta.filter(c => c.nacimiento && c.nacimiento.startsWith(fechaCortadaHoy));
-    document.getElementById('count-cumple').innerText = `${cumpleaniosHoy.length} Cumpleaños`;
+    const countCumpleEl = document.getElementById('count-cumple');
+    if(countCumpleEl) countCumpleEl.innerText = `${cumpleaniosHoy.length} Cumpleaños`;
 
     const pagosVencidos = baseDatosCompleta.filter(c => {
         return (c.estatus && String(c.estatus).toLowerCase() === "vencido") || (c.cobranza && c.cobranza.includes("V"));
     });
-    document.getElementById('count-pagos').innerText = `${pagosVencidos.length} Vencimientos`;
+    const countPagosEl = document.getElementById('count-pagos');
+    if(countPagosEl) countPagosEl.innerText = `${pagosVencidos.length} Vencimientos`;
 }
 
 function llenarSelectorEmpresas() {
@@ -144,106 +143,101 @@ function actualizarPlanEspecifico() {
 }
 
 /**
- * PINTOR DE INTERFAZ: Renderiza la información con bloques de seguridad Try/Catch independientes
+ * PINTOR DE INTERFAZ: Renderiza la información usando inyecciones seguras protegidas (Safe Inject)
  */
 function desplegarInformacionPantalla() {
     if(!clienteSeleccionado) return;
     const c = clienteSeleccionado;
     
-    // Bloque Core
-    document.getElementById('lbl-contratante').innerText = c.contratante;
-    document.getElementById('txt-poliza').innerText = c.poliza;
-    document.getElementById('txt-nacimiento').innerText = c.nacimiento;
-    document.getElementById('txt-ppr').innerText = c.ppr;
-    document.getElementById('txt-dotal').innerText = c.prox_dotal;
-    document.getElementById('txt-deducible').innerText = c.deducible;
-    document.getElementById('txt-coaseguro').innerText = c.coaseguro;
-    
-    document.getElementById('txt-ramo').innerText = c.ramo;
-    document.getElementById('txt-suma').innerText = c.suma_asegurada;
-    document.getElementById('txt-moneda').innerText = c.moneda;
-    document.getElementById('txt-emision').innerText = c.emision;
-    document.getElementById('txt-vencimiento').innerText = c.vencimiento;
-    
-    document.getElementById('txt-tc').innerText = c.moneda === 'UDI' ? udiValorActualGlobal.toFixed(4) : c.tc;
-    
-    document.getElementById('txt-estatus').innerText = c.estatus;
-    document.getElementById('txt-forma-pago').innerText = c.forma_pago;
-    document.getElementById('txt-prima-anual').innerText = `$${c.prima_anual}`;
-    document.getElementById('txt-prima-pago').innerText = `$${c.prima_pago}`;
-    document.getElementById('txt-cobro-pesos').innerText = `$${c.cobro_pesos}`;
-    document.getElementById('txt-dia-cobro').innerText = c.dia_cobro;
-    
-    document.getElementById('txt-aves-cp').innerText = c.aves_cp;
-    document.getElementById('txt-aves-lp').innerText = c.aves_lp;
-    document.getElementById('txt-num-cuenta').innerText = c.num_cuenta;
-    document.getElementById('txt-prima-planeada').innerText = c.prima_planeada;
+    // FUNCIÓN INTERNA DE SEGURIDAD: Inyecta datos solo si el ID existe en el HTML activo
+    const safeInject = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+    };
 
+    // Inyección protegida de datos generales y comerciales
+    safeInject('lbl-contratante', c.contratante);
+    safeInject('txt-poliza', c.poliza);
+    safeInject('txt-nacimiento', c.nacimiento);
+    safeInject('txt-ppr', c.ppr);
+    safeInject('txt-dotal', c.prox_dotal);
+    safeInject('txt-deducible', c.deducible);
+    safeInject('txt-coaseguro', c.coaseguro);
+    
+    safeInject('txt-ramo', c.ramo);
+    safeInject('txt-suma', c.suma_asegurada);
+    safeInject('txt-moneda', c.moneda);
+    safeInject('txt-emision', c.emision);
+    safeInject('txt-vencimiento', c.vencimiento);
+    
+    const tcValue = c.moneda === 'UDI' ? udiValorActualGlobal.toFixed(4) : c.tc;
+    safeInject('txt-tc', tcValue);
+    
+    safeInject('txt-estatus', c.estatus);
+    safeInject('txt-forma-pago', c.forma_pago);
+    safeInject('txt-prima-anual', `$${c.prima_anual}`);
+    safeInject('txt-prima-pago', `$${c.prima_pago}`);
+    safeInject('txt-cobro-pesos', `$${c.cobro_pesos}`);
+    safeInject('txt-dia-cobro', c.dia_cobro);
+    
+    safeInject('txt-aves-cp', c.aves_cp);
+    safeInject('txt-aves-lp', c.aves_lp);
+    safeInject('txt-num-cuenta', c.num_cuenta);
+    safeInject('txt-prima-planeada', c.prima_planeada);
+
+    // Acciones de contacto
     const linkTel = document.getElementById('link-tel');
-    if(linkTel) {
+    if(linkTel && c.telefono) {
         linkTel.href = `tel:${c.telefono}`;
-        linkTel.querySelector('strong').innerText = c.telefono;
+        const strong = linkTel.querySelector('strong');
+        if(strong) strong.innerText = c.telefono;
     }
 
     const linkEmail = document.getElementById('link-email');
-    if(linkEmail) {
+    if(linkEmail && c.email) {
         linkEmail.href = `mailto:${c.email}?subject=Informacion de tu Poliza ${c.poliza}`;
-        linkEmail.querySelector('strong').innerText = c.email;
+        const strong = linkEmail.querySelector('strong');
+        if(strong) strong.innerText = c.email;
     }
 
-    // CASILLERO DE SEGURIDAD 1: Facturación Fiscal
-    try {
-        const rfcEl = document.getElementById('txt-rfc');
-        const regimenEl = document.getElementById('txt-regimen');
-        const cpEl = document.getElementById('txt-cp-postal');
-        const dirEl = document.getElementById('txt-direccion');
+    // Datos fiscales
+    safeInject('txt-rfc', c.rfc);
+    safeInject('txt-regimen', c.regimen);
+    safeInject('txt-cp-postal', c.cp_postal);
+    safeInject('txt-direccion', c.direccion);
 
-        if (rfcEl && regimenEl && cpEl && dirEl) {
-            rfcEl.innerText = c.rfc;
-            regimenEl.innerText = c.regimen;
-            cpEl.innerText = c.cp_postal;
-            dirEl.innerText = c.direccion;
-        }
-    } catch (err) { console.error("Error en bloque facturación:", err); }
+    // Render de Asegurados
+    const wrapperAsegurados = document.getElementById('wrapper-asegurados');
+    if(wrapperAsegurados) {
+        wrapperAsegurados.innerHTML = '';
+        const listaAsegurados = c.asegurados ? c.asegurados.split(',') : [c.contratante];
+        listaAsegurados.forEach(asegurado => {
+            wrapperAsegurados.innerHTML += `<div class="sub-cell font-bold" style="border:none; padding:4px 12px;">👤 ${asegurado.trim()}</div>`;
+        });
+    }
 
-    // CASILLERO DE SEGURIDAD 2: Lista de Asegurados
-    try {
-        const wrapperAsegurados = document.getElementById('wrapper-asegurados');
-        if(wrapperAsegurados) {
-            wrapperAsegurados.innerHTML = '';
-            const listaAsegurados = c.asegurados ? c.asegurados.split(',') : [c.contratante];
-            listaAsegurados.forEach(asegurado => {
-                wrapperAsegurados.innerHTML += `<div class="sub-cell font-bold" style="border:none; padding:4px 12px;">👤 ${asegurado.trim()}</div>`;
-            });
-        }
-    } catch(err) { console.error("Error en asegurados:", err); }
-
-    // CASILLERO DE SEGURIDAD 3: Timeline Anual
-    try {
+    // Render de Timeline Cobranza
+    const timeline = document.getElementById('timeline-cobranza');
+    if(timeline) {
+        timeline.innerHTML = '';
         const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         const trackCobranza = c.cobranza ? c.cobranza.split(',') : [];
-        const timeline = document.getElementById('timeline-cobranza');
-        if(timeline) {
-            timeline.innerHTML = '';
-            meses.forEach((mes, i) => {
-                const val = trackCobranza[i] ? trackCobranza[i].trim() : '-';
-                timeline.innerHTML += `<div class="month-bubble ${val === 'P' ? 'pagado' : 'pendiente'}"><span>${mes}</span><strong>${val}</strong></div>`;
+        meses.forEach((mes, i) => {
+            const val = trackCobranza[i] ? trackCobranza[i].trim() : '-';
+            timeline.innerHTML += `<div class="month-bubble ${val === 'P' ? 'pagado' : 'pendiente'}"><span>${mes}</span><strong>${val}</strong></div>`;
+        });
+    }
+
+    // Render de Beneficiarios
+    const gridBen = document.getElementById('grid-beneficiarios');
+    if(gridBen) {
+        gridBen.innerHTML = `<div class="cell bg-grey font-bold">Beneficiario</div><div class="cell bg-grey font-bold">Motivo</div><div class="cell bg-grey font-bold">Porcentaje</div><div class="cell bg-grey font-bold">Fecha Nacimiento</div>`;
+        if(c.beneficiarios && c.beneficiarios.length > 0) {
+            c.beneficiarios.forEach(b => {
+                gridBen.innerHTML += `<div class="cell">${b.nombre || '-'}</div><div class="cell">${b.motivo || '-'}</div><div class="cell text-center font-bold">${b.pct || '-'}</div><div class="cell text-center">${b.nac || '-'}</div>`;
             });
         }
-    } catch(err) { console.error("Error en timeline:", err); }
-
-    // CASILLERO DE SEGURIDAD 4: Tabla de Beneficiarios Dinámicos
-    try {
-        const gridBen = document.getElementById('grid-beneficiarios');
-        if(gridBen) {
-            gridBen.innerHTML = `<div class="cell bg-grey font-bold">Beneficiario</div><div class="cell bg-grey font-bold">Motivo</div><div class="cell bg-grey font-bold">Porcentaje</div><div class="cell bg-grey font-bold">Fecha Nacimiento</div>`;
-            if(c.beneficiarios && c.beneficiarios.length > 0) {
-                c.beneficiarios.forEach(b => {
-                    gridBen.innerHTML += `<div class="cell">${b.nombre || '-'}</div><div class="cell">${b.motivo || '-'}</div><div class="cell text-center font-bold">${b.pct || '-'}</div><div class="cell text-center">${b.nac || '-'}</div>`;
-                });
-            }
-        }
-    } catch(err) { console.error("Error en beneficiarios:", err); }
+    }
 }
 
 function enviarMensajeWA(tipo) {
