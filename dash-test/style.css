@@ -1,13 +1,23 @@
+/* VARIABLES GLOBALES */
+:root {
+    --navy-dark: #0b2545;
+    --navy-light: #134074;
+    --gold: #daa520;
+    --white: #ffffff;
+    --text-dark: #333333;
+    --bg-light: #f0f4f8;
+}
+
 body {
     font-family: 'Urbanist', sans-serif;
     margin: 0; padding: 0;
-    background-color: #f0f4f8;
-    color: #333;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
 }
 
-/* FILTROS HEADER */
+/* BARRA DE FILTROS SUPERIOR */
 .filter-bar {
-    background-color: #0b2545;
+    background-color: var(--navy-dark);
     padding: 15px 30px;
     display: flex;
     gap: 30px;
@@ -28,16 +38,17 @@ body {
     padding: 8px 15px;
     font-size: 14px;
     border-radius: 6px;
-    border: 1px solid #134074;
-    background-color: #134074;
-    color: white;
+    border: 1px solid var(--navy-light);
+    background-color: var(--navy-light);
+    color: var(--white);
     font-weight: bold;
     outline: none;
+    min-width: 220px;
 }
 
-/* DASHBOARD LAYOUT */
+/* CONTENEDOR GRID PRINCIPAL */
 .dashboard-container {
-    max-width: 1300px;
+    max-width: 1350px;
     margin: 30px auto;
     padding: 0 20px;
     display: flex;
@@ -48,13 +59,13 @@ body {
 @media (min-width: 950px) {
     .dashboard-container {
         display: grid;
-        grid-template-columns: 1fr 300px;
+        grid-template-columns: 1fr 320px;
     }
 }
 
-/* LA TARJETA */
+/* LA SÚPER TARJETA */
 .main-card {
-    background-color: white;
+    background-color: var(--white);
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     border: 1px solid #dcdcdc;
@@ -62,23 +73,23 @@ body {
 }
 
 .card-header-block {
-    background: #134074;
-    color: white;
+    background: var(--navy-light);
+    color: var(--white);
     padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 4px solid #daa520; /* Borde dorado */
+    border-bottom: 4px solid var(--gold);
 }
-.card-header-block h2 { margin: 0; font-size: 22px; text-transform: uppercase; }
+.card-header-block h2 { margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 .plan-selector-box { display: flex; align-items: center; gap: 10px; }
-.plan-selector-box label { font-size: 13px; font-weight: bold; color: #daa520; }
+.plan-selector-box label { font-size: 13px; font-weight: bold; color: var(--gold); }
 .plan-selector-box select {
-    padding: 6px 12px; border-radius: 4px; border: 1px solid #daa520; font-family: 'Urbanist'; font-weight: bold;
+    padding: 6px 12px; border-radius: 4px; border: 1px solid var(--gold); font-family: 'Urbanist'; font-weight: bold; outline: none;
 }
 
-/* MAQUETACIÓN GRID INTERNA */
+/* MATRIZ DE TABLAS */
 .table-grid {
     display: grid;
     width: 100%;
@@ -100,14 +111,14 @@ body {
 }
 .sub-cell:last-child { border-bottom: none; }
 
-/* COLORES ESTILOS */
-.bg-navy { background-color: #134074; }
+/* REGLAS CROMÁTICAS */
+.bg-navy { background-color: var(--navy-light); }
 .bg-grey { background-color: #f7fafc; }
-.font-white { color: white; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px;}
+.font-white { color: var(--white); text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;}
 .font-bold { font-weight: bold; }
 .text-center { text-align: center; }
 .no-padding { padding: 0; }
-.separator-gold { border-top: 4px solid #daa520; }
+.separator-gold { border-top: 4px solid var(--gold); }
 .font-green { color: #28a745; text-transform: uppercase; font-size: 18px; }
 
 .panel-title {
@@ -118,10 +129,10 @@ body {
     letter-spacing: 1px;
 }
 
-/* HISTORIAL COBRANZA */
+/* TIMELINE HISTÓRICO */
 .cobranza-timeline {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     padding: 20px;
     background-color: #fcfcfc;
@@ -131,15 +142,16 @@ body {
 }
 .month-bubble {
     border-radius: 8px;
-    padding: 10px;
+    padding: 10px 5px;
     text-align: center;
     display: flex;
     flex-direction: column;
+    font-size: 13px;
 }
 .month-bubble.pagado { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
 .month-bubble.pendiente { background-color: #edf2f7; color: #718096; border: 1px solid #e2e8f0; }
 
-/* ACCIONES WHATSAPP */
+/* CONTENEDORES DE ENLACES WA */
 .wa-actions-container {
     padding: 15px;
     display: flex;
@@ -155,22 +167,22 @@ body {
     font-weight: bold;
     font-size: 13px;
     cursor: pointer;
-    color: white;
-    transition: transform 0.2s;
+    color: var(--white);
+    transition: transform 0.15s ease;
 }
-.btn-wa:hover { transform: scale(1.02); }
-.btn-wa-cumple { background-color: #25D366; box-shadow: 0 4px 10px rgba(37,211,102,0.2); }
-.btn-wa-pago { background-color: #ff9f1c; box-shadow: 0 4px 10px rgba(255,159,28,0.2); }
+.btn-wa:hover { transform: translateY(-1px); }
+.btn-wa-cumple { background-color: #25D366; box-shadow: 0 4px 10px rgba(37,211,102,0.15); }
+.btn-wa-pago { background-color: #ff9f1c; box-shadow: 0 4px 10px rgba(255,159,28,0.15); }
 
-/* SIDEBAR ALERTAS */
+/* SIDEBAR ALERTERO */
 .alerts-sidebar {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-.alerts-sidebar h3 { margin: 0; font-size: 18px; color: #0b2545; }
+.alerts-sidebar h3 { margin: 0; font-size: 18px; color: var(--navy-dark); text-transform: uppercase; letter-spacing: 0.5px; }
 .alert-card {
-    background: white;
+    background: var(--white);
     border-radius: 8px;
     padding: 15px;
     display: flex;
@@ -178,9 +190,9 @@ body {
     gap: 15px;
     cursor: pointer;
     border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.alert-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+.alert-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
 .alert-card .icon { font-size: 24px; }
-.alert-card h4 { margin: 0; font-size: 16px; color: #0b2545; }
+.alert-card h4 { margin: 0; font-size: 16px; color: var(--navy-dark); }
 .alert-card p { margin: 0; font-size: 13px; color: #718096; }
