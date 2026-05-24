@@ -49,61 +49,70 @@ body {
 
 /* CONTENEDOR PRINCIPAL */
 .container {
+    width: 92%;
     max-width: 950px; 
     margin: -30px auto 50px;
     background: var(--white);
-    padding: 30px;
+    padding: 20px;
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.1);
     box-sizing: border-box;
     position: relative; 
 }
 
-/* ESTRUCTURA GRID - DISEÑO DE UNA COLUMNA POR DEFECTO (MÓVIL PRIMERO) */
+/* CORRECCIÓN: Estructura Móvil Primero (Una sola columna vertical por defecto) */
 .grid-layout {
-    display: grid;
-    grid-template-columns: 1fr; /* Una columna por defecto */
-    gap: 20px; /* Espacio reducido para móviles */
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
-/* ESTRUCTURA GRID - DISEÑO DE DOS COLUMNAS PARA PC (Mínimo 800px) */
-@media (min-width: 800px) {
+/* ESTRUCTURA GRID PARA COMPUTADORA (PC) */
+@media (min-width: 850px) {
+    .container {
+        padding: 30px;
+    }
     .grid-layout {
-        grid-template-columns: 1fr 1fr; /* Dos columnas en pantallas grandes */
-        gap: 40px; /* Espacio mayor para PC */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px; 
+        align-items: start;
     }
 }
 
-/* MODIFICACIÓN: Estilos del Carrusel Fotográfico de Román */
+/* MODIFICACIÓN 1: Estilos del Carrusel Fotográfico de Román */
 .carousel-container {
     position: relative;
     width: 100%;
-    height: 250px;
+    height: 230px;
     overflow: hidden;
-    border-bottom: 3px solid var(--turquesa);
-    /* CORRECCIÓN: Habilita el desplazamiento táctil nativo (swipe) */
-    touch-action: pan-x; 
+    border-radius: 12px 12px 0 0;
+    /* Optimiza la aceleración móvil para gestos táctiles */
+    touch-action: pan-y pin-x;
+}
+
+@media (min-width: 600px) {
+    .carousel-container { height: 280px; }
 }
 
 .carousel-track {
     display: flex;
     width: 100%;
     height: 100%;
-    transition: transform 0.4s ease-in-out;
-    /* CORRECCIÓN: Asegura que el contenido del carrusel sea scrollable horizontalmente en móviles si es necesario */
-    overflow-x: auto; 
-    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
 }
 
-/* MODIFICACIÓN: Asegura que las imágenes ocupen todo el ancho y alto del carrusel */
 .carousel-track img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     flex-shrink: 0;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
+/* Estilos de botones de flechas (Ideales para PC, ocultos o discretos en móvil) */
 .carousel-btn {
     position: absolute;
     top: 50%;
@@ -111,7 +120,7 @@ body {
     background: rgba(0, 0, 0, 0.4);
     color: var(--white);
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     padding: 10px 14px;
     cursor: pointer;
     border-radius: 50%;
@@ -119,15 +128,20 @@ body {
     transition: background 0.3s;
 }
 .carousel-btn:hover { background: var(--turquesa-dark); }
-.carousel-btn.prev { left: 15px; }
-.carousel-btn.next { right: 15px; }
+.carousel-btn.prev { left: 10px; }
+.carousel-btn.next { right: 10px; }
 
-/* MODIFICACIÓN: Alineación y tamaño de los Logos Dinámicos */
+/* Ocultar flechas en pantallas puramente móviles para dejar la interfaz limpia para el swipe */
+@media (max-width: 600px) {
+    .carousel-btn { display: none; }
+}
+
+/* MODIFICACIÓN 2: Alineación y tamaño de los Logos Dinámicos */
 .tour-title-wrapper, .cotizador-header-wrapper {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin: 25px 0 15px 0;
+    gap: 12px;
+    margin: 20px 0 10px 0;
 }
 
 .cotizador-header-wrapper {
@@ -135,8 +149,8 @@ body {
 }
 
 .dynamic-tour-logo {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
 }
 
@@ -144,7 +158,7 @@ body {
 .lang-switch-container {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 #lang-switch {
@@ -161,13 +175,13 @@ body {
 }
 #lang-switch:hover { background-color: var(--turquesa); color: var(--white); }
 
-/* TÍTULOS DE SECCIÓN ESPECTÁCULO */
+/* TÍTULOS DE SECCIÓN */
 .section-title {
     color: var(--turquesa-dark);
     font-size: 16px;
     border-left: 4px solid var(--turquesa);
     padding-left: 10px;
-    margin: 25px 0 15px 0;
+    margin: 15px 0;
     text-transform: uppercase;
     font-weight: bold;
 }
@@ -178,8 +192,8 @@ body #fecha-reserva,
 body .tour-picker,
 body #nombre-cliente {
     width: 100% !important;
-    padding: 15px !important;
-    font-size: 18px !important;
+    padding: 14px !important;
+    font-size: 16px !important;
     font-family: 'Urbanist', sans-serif !important;
     font-weight: bold !important;
     border: 2px solid var(--turquesa) !important;
@@ -217,8 +231,8 @@ body #nombre-cliente:hover, body #nombre-cliente:focus {
     outline: none !important;
 }
 
-.form-group { margin-bottom: 20px; }
-.input-label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--executive-dark); font-size: 14px; }
+.form-group { margin-bottom: 15px; }
+.input-label { display: block; font-weight: bold; margin-bottom: 6px; color: var(--executive-dark); font-size: 14px; }
 .flatpickr-mobile { display: none !important; }
 
 /* TARJETAS DE DETALLES */
@@ -230,19 +244,19 @@ body #nombre-cliente:hover, body #nombre-cliente:focus {
     display: none;
     border: 1px solid #e0f2f2;
     overflow: hidden; 
-    margin-top: 15px;
+    margin-top: 10px;
 }
 .tour-info-card p { padding: 0 20px; margin: 10px 0 0 0; }
 .tour-info-card.active { display: block; }
 
 /* REVIEWS */
 .reviews-section {
-    background-color: #fcfdfd; border: 1px dashed var(--turquesa); padding: 20px; border-radius: 12px; text-align: center; margin-top: 25px;
+    background-color: #fcfdfd; border: 1px dashed var(--turquesa); padding: 15px; border-radius: 12px; text-align: center; margin-top: 20px;
 }
-.reviews-text { font-size: 15px; font-weight: bold; margin: 0 0 12px 0; color: var(--executive-dark); }
+.reviews-text { font-size: 14px; font-weight: bold; margin: 0 0 10px 0; color: var(--executive-dark); }
 .btn-reviews {
-    display: inline-block; color: var(--turquesa-dark); text-decoration: none; font-weight: bold; font-size: 14px;
-    border: 2px solid var(--turquesa-dark); padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease;
+    display: inline-block; color: var(--turquesa-dark); text-decoration: none; font-weight: bold; font-size: 13px;
+    border: 2px solid var(--turquesa-dark); padding: 6px 14px; border-radius: 8px; transition: all 0.3s ease;
 }
 .btn-reviews:hover { background-color: var(--turquesa-dark); color: var(--white); }
 
@@ -256,22 +270,22 @@ body #nombre-cliente:hover, body #nombre-cliente:focus {
 .btn-qty:hover { background-color: var(--turquesa-dark); }
 
 /* RESUMEN DE COMPRA */
-.summary-box { background-color: var(--turquesa); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 25px; }
-.total-price { font-size: 36px; font-weight: bold; }
+.summary-box { background-color: var(--turquesa); color: white; padding: 15px; border-radius: 15px; text-align: center; margin-top: 20px; }
+.total-price { font-size: 32px; font-weight: bold; }
 
 /* WHATSAPP */
 .btn-whatsapp {
-    display: block; background-color: #25D366; color: white; text-align: center; padding: 18px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 18px; margin-top: 20px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    display: block; background-color: #25D366; color: white; text-align: center; padding: 15px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 18px; margin-top: 15px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
 }
 
 /* PIE DE PÁGINA */
-.footer-info { text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 25px; }
+.footer-info { text-align: center; margin-top: 35px; border-top: 1px solid #eee; padding-top: 20px; }
 .social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
-.social-icon-link { display: inline-block; width: 36px; height: 36px; transition: transform 0.3s ease; }
+.social-icon-link { display: inline-block; width: 32px; height: 32px; transition: transform 0.3s ease; }
 .icon-svg { width: 100%; height: 100%; fill: #7F8C8D; transition: fill 0.3s ease; }
 .social-icon-link:hover { transform: translateY(-3px); }
 .social-icon-link:hover .icon-svg { fill: var(--turquesa-dark); }
-.footer-text { font-size: 13px; color: #7F8C8D; }
+.footer-text { font-size: 13px; color: #7F8C8D; padding: 0 10px; }
 .footer-link { color: #7F8C8D; text-decoration: none; font-weight: bold; transition: color 0.3s ease; }
 .footer-link:hover { color: var(--turquesa-dark); }
 
