@@ -281,28 +281,18 @@ function desplegarInformacionPantalla() {
         });
     }
 
-    // INTERVENCION ADAPTATIVA: Inyección mapeada en grupos lógicos independientes
+    // INTERVENCIÓN DEFINITIVA: Render agrupado en un solo bloque unificado por beneficiario para móviles
     const gridBen = document.getElementById('grid-beneficiarios');
     if(gridBen) {
         gridBen.innerHTML = '';
         if(c.beneficiarios && c.beneficiarios.length > 0) {
             c.beneficiarios.forEach(b => {
                 gridBen.innerHTML += `
-                    <div class="grid-column-group">
-                        <div class="cell bg-grey font-bold flex-mobile-title">Beneficiario</div>
-                        <div class="cell">${b.nombre || '-'}</div>
-                    </div>
-                    <div class="grid-column-group">
-                        <div class="cell bg-grey font-bold flex-mobile-title">Motivo</div>
-                        <div class="cell">${b.motivo || '-'}</div>
-                    </div>
-                    <div class="grid-column-group">
-                        <div class="cell bg-grey font-bold flex-mobile-title">Porcentaje</div>
-                        <div class="cell text-center font-bold">${b.pct || '-'}</div>
-                    </div>
-                    <div class="grid-column-group">
-                        <div class="cell bg-grey font-bold flex-mobile-title">Fecha Nacimiento</div>
-                        <div class="cell text-center">${b.nac || '-'}</div>
+                    <div class="beneficiary-card-group">
+                        <div class="sub-cell"><span>Beneficiario:</span> <strong>${b.nombre || '-'}</strong></div>
+                        <div class="sub-cell"><span>Motivo:</span> <strong>${b.motivo || '-'}</strong></div>
+                        <div class="sub-cell"><span>Porcentaje:</span> <strong class="tag-pago" style="background-color: var(--navy-light);">${b.pct || '-'}</strong></div>
+                        <div class="sub-cell"><span>Fecha Nacimiento:</span> <strong>${b.nac || '-'}</strong></div>
                     </div>
                 `;
             });
