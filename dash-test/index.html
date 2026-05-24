@@ -7,7 +7,7 @@
     
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.2">
 </head>
 <body>
 
@@ -116,35 +116,41 @@
         <div class="alerts-sidebar">
             <h3>Alertas Tempranas</h3>
             
-            <div class="alert-card alert-birthday">
-                <span class="icon">🎂</span>
-                <div>
-                    <h4 id="count-cumple">0 Cumpleaños</h4>
-                    <p>En los próximos 7 días</p>
+            <div class="alert-card alert-birthday" onclick="conmutarAcordeon('list-cumple-alert')">
+                <div class="alert-card-header">
+                    <span class="icon">🎂</span>
+                    <div>
+                        <h4 id="count-cumple">0 Cumpleaños</h4>
+                        <p>Próximos 7 días</p>
+                    </div>
                 </div>
-                <div class="alert-names-list" id="list-cumple-alert"></div>
+                <div class="alert-names-list" id="list-cumple-alert" onclick="event.stopPropagation()"></div>
             </div>
             
-            <div class="alert-card alert-upcoming-payment">
-                <span class="icon">⏳</span>
-                <div>
-                    <h4 id="count-proximos">0 Por Vencer</h4>
-                    <p>Cobros en los próximos 7 días</p>
+            <div class="alert-card alert-upcoming-payment" onclick="conmutarAcordeon('list-proximos-alert')">
+                <div class="alert-card-header">
+                    <span class="icon">⏳</span>
+                    <div>
+                        <h4 id="count-proximos">0 Por Vencer</h4>
+                        <p>Cobros en los próximos 7 días</p>
+                    </div>
                 </div>
-                <div class="alert-names-list" id="list-proximos-alert"></div>
+                <div class="alert-names-list" id="list-proximos-alert" onclick="event.stopPropagation()"></div>
             </div>
 
-            <div class="alert-card alert-payment">
-                <span class="icon">🚨</span>
-                <div>
-                    <h4 id="count-vencidas">0 Vencidas</h4>
-                    <p>Pólizas con impagos vigentes</p>
+            <div class="alert-card alert-payment" onclick="conmutarAcordeon('list-vencidas-alert')">
+                <div class="alert-card-header">
+                    <span class="icon">🚨</span>
+                    <div>
+                        <h4 id="count-vencidas">0 Vencidas</h4>
+                        <p>Pólizas con impagos vigentes</p>
+                    </div>
                 </div>
-                <div class="alert-names-list" id="list-vencidas-alert"></div>
+                <div class="alert-names-list" id="list-vencidas-alert" onclick="event.stopPropagation()"></div>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=1.7"></script>
+    <script src="script.js?v=1.8"></script>
 </body>
 </html>
