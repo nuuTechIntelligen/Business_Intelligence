@@ -1,25 +1,15 @@
-// URL de integración oficial vinculada a la pestaña de datos del Excel en SheetDB
 const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di?sheet=Base_Datos'; 
 
-// Repositorios de datos globales de la aplicación en memoria
 let baseDatosCompleta = []; 
 let clienteSeleccionado = null; 
-let udiValorActualGlobal = 8.8437; // Indicador financiero oficial de 2026
+let udiValorActualGlobal = 8.8437; 
 
-/**
- * MOTOR DE INDICADORES: Setea el valor oficial de la UDI de manera local
- */
 async function consultarUDIRealTime() {
     udiValorActualGlobal = 8.8437; 
     const badge = document.getElementById('udi-val-live');
-    if(badge) {
-        badge.innerText = udiValorActualGlobal.toFixed(4);
-    }
+    if(badge) badge.innerText = udiValorActualGlobal.toFixed(4);
 }
 
-/**
- * CONEXIÓN CORE: Descarga la información del Excel vía API SheetDB
- */
 async function cargarBaseDeDatos() {
     await consultarUDIRealTime(); 
     try {
@@ -77,23 +67,103 @@ async function cargarBaseDeDatos() {
     }
 }
 
+/**
+ * CONTROL DE ALERTAS CRUZADAS: Motor predictivo de fechas y plazos comerciales
+ */
 function actualizarContadoresAlertas() {
     const hoy = new Date();
-    const diaHoy = String(hoy.getDate()).padStart(2, '0');
-    const mesHoy = String(hoy.getMonth() + 1).padStart(2, '0');
-    const fechaCortadaHoy = `${diaHoy}/${mesHoy}`; 
+    const diaHoy = hoy.getDate();
+    const mesHoy = hoy.getMonth(); 
+    const añoHoy = hoy.getFullYear();
 
     if (!baseDatosCompleta || baseDatosCompleta.length === 0) return;
 
-    const cumpleaniosHoy = baseDatosCompleta.filter(c => c.nacimiento && c.nacimiento.startsWith(fechaCortadaHoy));
-    const countCumpleEl = document.getElementById('count-cumple');
-    if(countCumpleEl) countCumpleEl.innerText = `${cumpleaniosHoy.length} Cumpleaños`;
+    // Arrays para clasificar perfiles
+    let cumpleaniosSemana = [];
+    let proximosCobros = [];
+    let polizasVencidas = [];
 
-    const pagosVencidos = baseDatosCompleta.filter(c => {
-        return (c.estatus && String(c.estatus).toLowerCase() === "vencido") || (c.cobranza && c.cobranza.includes("V"));
+    baseDatosCompleta.forEach(c => {
+        // --- 1. MATEMÁTICA DE CUMPLEAÑOS DE LA SEMANA ---
+        if (c.nacimiento && c.nacimiento.includes('/')) {
+            const partes = c.nacimiento.split('/');
+            const diaNac = parseInt(partes[0]);
+            const mesNac = parseInt(partes[1]) - 1;
+            
+            // Creamos un objeto fecha simulando que el cumpleaños cae este año
+            let fechaCumpleEsteAño = new Date(añoHoy, mesNac, diaNac);
+            
+            // Calculamos la diferencia en días naturales
+            const diffTiempo = fechaCumpleEsteAño - hoy;
+            const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
+            
+            // Si cae entre hoy (0) y los próximos 7 días, entra a la lista
+            if (diffDias >= 0 && diffDias <= 7) {
+                cumpleaniosSemana.push({ data: c, diasPara: diffDias });
+            }
+        }
+
+        // --- 2. MATEMÁTICA DE ADEUDOS (PROXIMOS VS VENCIDAS) ---
+        const diaCobroNum = parseInt(c.dia_cobro || 0);
+        const esEstatusVencido = c.estatus && String(c.estatus).toLowerCase() === "vencido";
+        const tieneLetraV = c.cobranza && c.cobranza.includes("V");
+
+        if (esEstatusVencido || tieneLetraV) {
+            if (diaCobroNum >= diaHoy && diaCobroNum <= (diaHoy + 7)) {
+                // Caso A: Próximo Vencimiento (Adeudo que cae en los próximos 7 días)
+                const diasFaltantes = diaCobroNum - diaHoy;
+                proximosCobros.push({ data: c, diasRestantes: diasFaltantes });
+            } else if (diaCobroNum < diaHoy || esEstatusVencido) {
+                // Caso B: Ya Vencida (El día de cobro ya pasó en el mes actual)
+                const diasRetraso = diaCobroNum < diaHoy ? (diaHoy - diaCobroNum) : 15; // 15 días default si es estatus macro
+                polizasVencidas.push({ data: c, diasAtraso: diasRetraso });
+            }
+        }
     });
-    const countPagosEl = document.getElementById('count-pagos');
-    if(countPagosEl) countPagosEl.innerText = `${pagosVencidos.length} Vencimientos`;
+
+    // --- RENDERIZADO VISUAL EN EL SIDEBAR ---
+    // Inyección de Cumpleaños
+    const countCumpleEl = document.getElementById('count-cumple');
+    if(countCumpleEl) countCumpleEl.innerText = `${cumpleaniosSemana.length} Cumpleaños`;
+    const listCumpleEl = document.getElementById('list-cumple-alert');
+    if(listCumpleEl) {
+        listCumpleEl.innerHTML = cumpleaniosSemana.length > 0 ? '' : '<div class="alert-empty-msg">Sin cumpleaños esta semana</div>';
+        cumpleaniosSemana.sort((a,b) => a.diasPara - b.diasPara).forEach(item => {
+            const tagDia = item.diasPara === 0 ? "¡HOY!" : `en ${item.diasPara} días`;
+            listCumpleEl.innerHTML += `<div class="alert-name-item" onclick="seleccionarClientePorNombre('${item.data.contratante}')">🎉 ${item.data.contratante} <small>${tagDia}</small></div>`;
+        });
+    }
+
+    // Inyección de Próximos Vencimientos
+    const countProximosEl = document.getElementById('count-proximos');
+    if(countProximosEl) countProximosEl.innerText = `${proximosCobros.length} Por Vencer`;
+    const listProximosEl = document.getElementById('list-proximos-alert');
+    if(listProximosEl) {
+        listProximosEl.innerHTML = proximosCobros.length > 0 ? '' : '<div class="alert-empty-msg">Sin cobros próximos esta semana</div>';
+        proximosCobros.sort((a,b) => a.diasRestantes - b.diasRestantes).forEach(item => {
+            const tagProx = item.diasRestantes === 0 ? "Cobrar HOY" : `Faltan ${item.diasRestantes} días`;
+            listProximosEl.innerHTML += `<div class="alert-name-item alert-item-warn" onclick="seleccionarClientePorNombre('${item.data.contratante}')">⏳ ${item.data.contratante} <small>${tagProx}</small></div>`;
+        });
+    }
+
+    // Inyección de Pólizas Vencidas
+    const countVencidasEl = document.getElementById('count-vencidas');
+    if(countVencidasEl) countVencidasEl.innerText = `${polizasVencidas.length} Vencidas`;
+    const listVencidasEl = document.getElementById('list-vencidas-alert');
+    if(listVencidasEl) {
+        listVencidasEl.innerHTML = polizasVencidas.length > 0 ? '' : '<div class="alert-empty-msg">Felicidades, cartera al día</div>';
+        polizasVencidas.sort((a,b) => b.diasAtraso - a.diasAtraso).forEach(item => {
+            listVencidasEl.innerHTML += `<div class="alert-name-item alert-item-danger" onclick="seleccionarClientePorNombre('${item.data.contratante}')">🚨 ${item.data.contratante} <small>Atraso: ${item.diasAtraso}d</small></div>`;
+        });
+    }
+}
+
+function seleccionarClientePorNombre(nombre) {
+    const selectCliente = document.getElementById('filtro-cliente');
+    if(selectCliente) {
+        selectCliente.value = nombre;
+        cargarDatosCliente();
+    }
 }
 
 function llenarSelectorEmpresas() {
@@ -142,20 +212,15 @@ function actualizarPlanEspecifico() {
     desplegarInformacionPantalla();
 }
 
-/**
- * PINTOR DE INTERFAZ: Renderiza la información usando inyecciones seguras protegidas (Safe Inject)
- */
 function desplegarInformacionPantalla() {
     if(!clienteSeleccionado) return;
     const c = clienteSeleccionado;
     
-    // FUNCIÓN INTERNA DE SEGURIDAD: Inyecta datos solo si el ID existe en el HTML activo
     const safeInject = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.innerText = value;
     };
 
-    // Inyección protegida de datos generales y comerciales
     safeInject('lbl-contratante', c.contratante);
     safeInject('txt-poliza', c.poliza);
     safeInject('txt-nacimiento', c.nacimiento);
@@ -185,7 +250,6 @@ function desplegarInformacionPantalla() {
     safeInject('txt-num-cuenta', c.num_cuenta);
     safeInject('txt-prima-planeada', c.prima_planeada);
 
-    // Acciones de contacto
     const linkTel = document.getElementById('link-tel');
     if(linkTel && c.telefono) {
         linkTel.href = `tel:${c.telefono}`;
@@ -200,13 +264,19 @@ function desplegarInformacionPantalla() {
         if(strong) strong.innerText = c.email;
     }
 
-    // Datos fiscales
-    safeInject('txt-rfc', c.rfc);
-    safeInject('txt-regimen', c.regimen);
-    safeInject('txt-cp-postal', c.cp_postal);
-    safeInject('txt-direccion', c.direccion);
+    try {
+        const rfcEl = document.getElementById('txt-rfc');
+        const regimenEl = document.getElementById('txt-regimen');
+        const cpEl = document.getElementById('txt-cp-postal');
+        const dirEl = document.getElementById('txt-direccion');
+        if (rfcEl && regimenEl && cpEl && dirEl) {
+            rfcEl.innerText = c.rfc;
+            regimenEl.innerText = c.regimen;
+            cpEl.innerText = c.cp_postal;
+            dirEl.innerText = c.direccion;
+        }
+    } catch (err) {}
 
-    // Render de Asegurados
     const wrapperAsegurados = document.getElementById('wrapper-asegurados');
     if(wrapperAsegurados) {
         wrapperAsegurados.innerHTML = '';
@@ -216,7 +286,6 @@ function desplegarInformacionPantalla() {
         });
     }
 
-    // Render de Timeline Cobranza
     const timeline = document.getElementById('timeline-cobranza');
     if(timeline) {
         timeline.innerHTML = '';
@@ -228,7 +297,6 @@ function desplegarInformacionPantalla() {
         });
     }
 
-    // Render de Beneficiarios
     const gridBen = document.getElementById('grid-beneficiarios');
     if(gridBen) {
         gridBen.innerHTML = `<div class="cell bg-grey font-bold">Beneficiario</div><div class="cell bg-grey font-bold">Motivo</div><div class="cell bg-grey font-bold">Porcentaje</div><div class="cell bg-grey font-bold">Fecha Nacimiento</div>`;
