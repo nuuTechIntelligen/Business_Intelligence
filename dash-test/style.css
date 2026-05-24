@@ -47,7 +47,6 @@ body {
     .udi-live-badge { width: auto; margin-left: auto; padding: 8px 15px; }
 }
 
-/* ARQUITECTURA RESPONSIVA: Diseño vertical para móviles por defecto */
 /* ==========================================
    CONEXIÓN RESPONSIVA Y CONTROL DE ORDEN (UXMÓVIL)
    ========================================== */
@@ -60,7 +59,6 @@ body {
     gap: 20px;
 }
 
-/* EN MÓVILES: Forzamos el orden visual con Flexbox sin alterar el archivo HTML */
 .alerts-sidebar {
     order: 1; /* Pasa al primer lugar (arriba) en pantallas chicas */
 }
@@ -78,10 +76,8 @@ body {
 @media (min-width: 950px) {
     .dashboard-container { 
         display: grid; 
-        grid-template-columns: 1fr 320px; /* Regresa a diseño de 2 columnas */
+        grid-template-columns: 1fr 320px; 
     }
-    
-    /* EN ESCRITORIO: Restauramos el orden natural (Tarjeta a la izquierda, Alertas a la derecha) */
     .main-card {
         order: 1; 
     }
@@ -91,7 +87,6 @@ body {
 }
 
 /* COMPONENTES DE LA TARJETA MAESTRA */
-.main-card { background-color: var(--white); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #dcdcdc; overflow: hidden; }
 .card-header-block {
     background: var(--navy-light); color: var(--white); padding: 15px; display: flex; flex-direction: column; gap: 10px; border-bottom: 4px solid var(--gold);
 }
@@ -100,13 +95,28 @@ body {
 }
 .card-header-block h2 { margin: 0; font-size: 18px; text-transform: uppercase; }
 
-/* REGLAS DE REJILLAS RESPONSIVAS */
-.table-grid { display: flex; flex-direction: column; width: 100%; }
+/* REGLA MAESTRA DE RESPONSIVIDAD EN REJILLAS DE COLUMNAS INDEPENDIENTES */
+.table-grid { 
+    display: flex; 
+    flex-direction: column; 
+    width: 100%; 
+}
+
+.grid-column-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
 @media (min-width: 750px) {
     .table-grid { display: grid; }
     .grid-1 { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
     .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    
+    .grid-column-group {
+        display: contents; /* Desintegra el contenedor intermedio para alinearse a la rejilla maestra */
+    }
 }
 
 .cell { border: 1px solid #dcdcdc; padding: 10px; font-size: 14px; box-sizing: border-box; }
@@ -169,7 +179,6 @@ body {
 .alert-card h4 { margin: 0; font-size: 14px; color: var(--navy-dark); }
 .alert-card p { margin: 0; font-size: 12px; color: #718096; }
 
-/* REGLA DEL ACORDEÓN: Oculto por defecto mediante altura cero y opacidad */
 .alert-names-list {
     width: 100%; 
     max-height: 0; 
@@ -182,9 +191,8 @@ body {
     transition: max-height 0.3s ease-out, opacity 0.2s ease, padding 0.2s;
 }
 
-/* CLASE ACTIVA: JavaScript inyectará esta clase al hacer clic para desplegar suavemente */
 .alert-names-list.active {
-    max-height: 250px; /* Altura máxima permitida con scroll automático si se llena mucho */
+    max-height: 250px; 
     opacity: 1;
     overflow-y: auto;
     padding-top: 10px;
