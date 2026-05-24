@@ -281,13 +281,33 @@ function desplegarInformacionPantalla() {
         });
     }
 
+    // INTERVENCION ADAPTATIVA: Inyección mapeada en grupos lógicos independientes
     const gridBen = document.getElementById('grid-beneficiarios');
     if(gridBen) {
-        gridBen.innerHTML = `<div class="cell bg-grey font-bold">Beneficiario</div><div class="cell bg-grey font-bold">Motivo</div><div class="cell bg-grey font-bold">Porcentaje</div><div class="cell bg-grey font-bold">Fecha Nacimiento</div>`;
+        gridBen.innerHTML = '';
         if(c.beneficiarios && c.beneficiarios.length > 0) {
             c.beneficiarios.forEach(b => {
-                gridBen.innerHTML += `<div class="cell">${b.nombre || '-'}</div><div class="cell">${b.motivo || '-'}</div><div class="cell text-center font-bold">${b.pct || '-'}</div><div class="cell text-center">${b.nac || '-'}</div>`;
+                gridBen.innerHTML += `
+                    <div class="grid-column-group">
+                        <div class="cell bg-grey font-bold flex-mobile-title">Beneficiario</div>
+                        <div class="cell">${b.nombre || '-'}</div>
+                    </div>
+                    <div class="grid-column-group">
+                        <div class="cell bg-grey font-bold flex-mobile-title">Motivo</div>
+                        <div class="cell">${b.motivo || '-'}</div>
+                    </div>
+                    <div class="grid-column-group">
+                        <div class="cell bg-grey font-bold flex-mobile-title">Porcentaje</div>
+                        <div class="cell text-center font-bold">${b.pct || '-'}</div>
+                    </div>
+                    <div class="grid-column-group">
+                        <div class="cell bg-grey font-bold flex-mobile-title">Fecha Nacimiento</div>
+                        <div class="cell text-center">${b.nac || '-'}</div>
+                    </div>
+                `;
             });
+        } else {
+            gridBen.innerHTML = `<div class="cell text-center" style="grid-column: span 4; color: #a0aec0; font-style: italic; padding: 15px;">Sin beneficiarios registrados en este plan.</div>`;
         }
     }
 }
@@ -297,7 +317,7 @@ function enviarMensajeWA(tipo) {
     const c = clienteSeleccionado;
     let mensaje = "";
     if(tipo === 'cumple') {
-        value = `¡Hola *${c.contratante}*! 🎉 Te mandamos un fuerte saludo de parte de *Conny* y el equipo. Queremos desearte un muy feliz cumpleaños hoy en tu día, ¡que te la pases excelente! 🎂🎈`;
+        mensaje = `¡Hola *${c.contratante}*! 🎉 Te mandamos un fuerte saludo de parte de *Conny* y el equipo. Queremos desearte un muy feliz cumpleaños hoy en tu día, ¡que te la pases excelente! 🎂🎈`;
     } else if(tipo === 'pago') {
         mensaje = `Estimado(a) *${c.contratante}*, te saludamos para recordarte que la fecha límite de tu pago *${c.forma_pago.toUpperCase()}* para tu póliza de *${c.ramo}* (No. *${c.poliza}*) es el próximo *${c.dia_cobro}* de este mes. El monto correspondiente al periodo es de *$${c.cobro_pesos} MXN*. Quedamos a tus órdenes para procesar el movimiento. 💳✨`;
     }
