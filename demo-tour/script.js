@@ -129,7 +129,12 @@ async function inicializarSistema() {
         cargarBloqueos();
         actualizarLogosDinamicos(); 
         inicializarSoportesTactiles(); 
-        activarAutoplayCarrusel('cenotes'); // NUEVO: Enciende el autoplay para el tour activo por defecto
+        
+        // CORRECCIÓN: Forzamos a la interfaz a activar el autoplay del tour seleccionado por defecto
+        const select = document.getElementById('tour-select');
+        if (select) {
+            activarAutoplayCarrusel(select.value);
+        }
         
         const btnReviews = document.getElementById('btn-reviews');
         if (btnReviews) {
