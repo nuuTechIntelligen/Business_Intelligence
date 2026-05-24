@@ -320,4 +320,29 @@ function enviarMensajeWA(tipo) {
     window.open(`https://wa.me/52${c.telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
+// ... Todo tu código anterior de script.js se mantiene exactamente igual ...
+// (Conserva las funciones consultarUDIRealTime, cargarBaseDeDatos, actualizarContadoresAlertas, etc.)
+
+/**
+ * CONTROL DE ACORDEÓN INTERACTIVO: Abre y cierra las listas de alerta de forma fluida
+ * @param {string} idLista - El contenedor específico que se desea alternar
+ */
+function conmutarAcordeon(idLista) {
+    const listaObjetivo = document.getElementById(idLista);
+    if (!listaObjetivo) return;
+
+    // Evaluamos el estado actual de visibilidad de la lista seleccionada
+    const estaAbierta = listaObjetivo.classList.contains('active');
+
+    // Cierre maestro opcional: Cierra las otras dos listas para mantener orden de acordeón puro
+    document.querySelectorAll('.alert-names-list').forEach(lista => {
+        lista.classList.remove('active');
+    });
+
+    // Si la lista no estaba abierta, la activamos agregándole la clase CSS
+    if (!estaAbierta) {
+        listaObjetivo.classList.add('active');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', cargarBaseDeDatos);
