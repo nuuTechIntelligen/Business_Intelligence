@@ -195,4 +195,25 @@ function enviarMensajeWA(tipo) {
     window.open(`https://wa.me/52${c.telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
+/**
+ * NUEVO: Llena el selector superior con las empresas únicas detectadas en el Excel
+ */
+function llenarSelectorEmpresas() {
+    const selectEmpresa = document.getElementById('filtro-empresa');
+    if (!selectEmpresa) return;
+
+    // Extraemos las empresas únicas de la base de datos limpiando nulos
+    const empresasUnicas = [...new Set(baseDatosCompleta.map(item => item.empresa).filter(e => e))];
+    
+    // Mantenemos la opción inicial de "Todas" y agregamos las demás dinámicamente
+    selectEmpresa.innerHTML = '<option value="ALL">All Companies / Todas</option>';
+    
+    empresasUnicas.forEach(empresa => {
+        const option = document.createElement('option');
+        option.value = empresa;
+        option.text = empresa;
+        selectEmpresa.appendChild(option);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', cargarBaseDeDatos);
