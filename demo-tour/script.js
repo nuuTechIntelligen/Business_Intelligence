@@ -120,7 +120,8 @@ async function inicializarSistema() {
         inicializarCalendario();
         calcular();
         cargarBloqueos();
-        actualizarLogosDinamicos(); // MODIFICACIÓN 2: Carga los logos del tour inicial
+        actualizarLogosDinamicos(); 
+        inicializarSoportesTactiles(); // NUEVO: Activa el soporte de gestos con el dedo
         
         const btnReviews = document.getElementById('btn-reviews');
         if (btnReviews) {
@@ -159,26 +160,20 @@ function inicializarCalendario() {
     });
 }
 
-/**
- * MODIFICACIÓN 1: Lógica nativa para desplazar las fotos profesionales del carrusel
- */
 function moverCarrusel(idTour, direccion) {
     const track = document.getElementById(`track-${idTour}`);
+    if (!track) return;
     const imagenes = track.querySelectorAll('img');
     const totalImagenes = imagenes.length;
     
-    // Calcular nueva posición
     posicionesCarrusel[idTour] += direccion;
     
-    // Ciclar si llega a los extremos
     if (posicionesCarrusel[idTour] >= totalImagenes) posicionesCarrusel[idTour] = 0;
     if (posicionesCarrusel[idTour] < 0) posicionesCarrusel[idTour] = totalImagenes - 1;
     
-    // Aplicar transformación CSS (Mueve el carrusel de forma suave y responsiva)
     const porcentajeMovimiento = posicionesCarrusel[idTour] * -100;
     track.style.transform = `translateX(${porcentajeMovimiento}%)`;
 
-    // [ANALÍTICA]: Mide qué tanto interactúan con el portafolio fotográfico de Román
     gtag('event', 'interaccion_galeria', {
         'id_tour': idTour,
         'imagen_index': posicionesCarrusel[idTour]
@@ -186,14 +181,45 @@ function moverCarrusel(idTour, direccion) {
 }
 
 /**
- * MODIFICACIÓN 2: Cambiar los logos de identidad del tour dinámicamente
+ * NUEVO: Lógica de Interacción Táctil (Swipe) para Móviles
  */
+function inicializarSoportesTactiles() {
+    const contenedores = document.querySelectorAll('.carousel-container');
+    
+    contenedores.forEach(container => {
+        let xInicial = null;
+        // Detectamos el ID del tour analizando el ID del track interno
+        const track = container.querySelector('.carousel-track');
+        if(!track) return;
+        const idTour = track.id.replace('track-', '');
+
+        container.addEventListener('touchstart', (e) => {
+            xInicial = e.touches[0].clientX;
+        }, { passive: true });
+
+        container.addEventListener('touchend', (e) => {
+            if (!xInicial) return;
+            let xFinal = e.changedTouches[0].clientX;
+            let diferenciaX = xInicial - xFinal;
+
+            // Umbral mínimo de 50px de movimiento para considerarlo deslizamiento real
+            if (Math.abs(diferenciaX) > 50) {
+                if (diferenciaX > 0) {
+                    moverCarrusel(idTour, 1); // Deslizó a la izquierda -> Siguiente foto
+                } else {
+                    moverCarrusel(idTour, -1); // Deslizó a la derecha -> Foto anterior
+                }
+            }
+            xInicial = null;
+        }, { passive: true });
+    });
+}
+
 function actualizarLogosDinamicos() {
     const select = document.getElementById('tour-select');
     if (!select) return;
     const urlLogo = select.options[select.selectedIndex].getAttribute('data-logo');
     
-    // Inyectar la URL del logo en la columna 1 y columna 2 simultáneamente
     document.querySelectorAll('.dynamic-tour-logo').forEach(img => {
         img.src = urlLogo;
     });
@@ -271,7 +297,7 @@ function cambiarEntradas() {
 function cambiarCant(tipo, cambio) {
     if (tipo === 'adultos') {
         if (adultos + cambio >= 1) adultos += cambio; 
-        document.getElementById('qty-adultos').innerText = adults = adultos;
+        document.getElementById('qty-adultos').innerText = adultos;
     } else {
         if (ninos + cambio >= 0) ninos += cambio; 
         document.getElementById('qty-ninos').innerText = ninos;
@@ -293,7 +319,7 @@ function actualizarInterfaz() {
     document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active'));
     document.getElementById('info-' + selectedTour).classList.add('active');
     
-    actualizarLogosDinamicos(); // MODIFICACIÓN 2: Sincronizar logos al cambiar de tour
+    actualizarLogosDinamicos(); 
 
     gtag('event', 'ver_tour', {
         'id_tour': selectedTour,
