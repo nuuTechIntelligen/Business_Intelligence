@@ -1,12 +1,14 @@
+/* DESIGN SYSTEM: Definición de la paleta de colores maestros institucionales */
 :root {
-    --navy-dark: #0b2545;
-    --navy-light: #134074;
-    --gold: #daa520;
-    --white: #ffffff;
-    --text-dark: #333333;
-    --bg-light: #f0f4f8;
+    --navy-dark: #0b2545;     /* Azul Marino Profundo (Filtros y Sidebars) */
+    --navy-light: #134074;    /* Azul Corporativo (Cabeceras de celdas) */
+    --gold: #daa520;          /* Oro Ejecutivo (Líneas divisoras de bloques financieros) */
+    --white: #ffffff;         /* Fondos limpios de tarjetas */
+    --text-dark: #333333;     /* Color de texto de alta legibilidad */
+    --bg-light: #f0f4f8;      /* Fondo general grisáceo suave */
 }
 
+/* RESET GENERAL Y TIPOGRAFÍA */
 body {
     font-family: 'Urbanist', sans-serif;
     margin: 0; padding: 0;
@@ -14,7 +16,7 @@ body {
     color: var(--text-dark);
 }
 
-/* FILTROS */
+/* BARRA DE FILTROS SUPERIOR: Distribución flexible que envuelve componentes si reduce la pantalla */
 .filter-bar {
     background-color: var(--navy-dark);
     padding: 15px;
@@ -30,49 +32,56 @@ body {
     padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid var(--navy-light);
     background-color: var(--navy-light); color: var(--white); font-weight: bold; outline: none; min-width: 180px;
 }
+/* Distintivo de la UDI: Empuja el badge hacia el extremo derecho de la barra */
 .udi-live-badge {
     background: #1e3a5f; color: #ff9f1c; padding: 8px 15px; border-radius: 6px; font-size: 13px; margin-left: auto;
 }
 
-/* CONTAINER RESPONSIVO */
+/* ARQUITECTURA RESPONSIVA: Diseño vertical para móviles por defecto (Móvil Primero) */
 .dashboard-container {
     width: 95%; max-width: 1350px; margin: 20px auto; display: flex; flex-direction: column; gap: 20px;
 }
+/* Quiebre de pantalla para Computadoras (PC) -> Convierte el diseño en un Grid de 2 columnas */
 @media (min-width: 950px) {
     .dashboard-container { display: grid; grid-template-columns: 1fr 320px; }
 }
 
+/* COMPONENTES DE LA TARJETA MAESTRA */
 .main-card { background-color: var(--white); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #dcdcdc; overflow: hidden; }
 .card-header-block {
     background: var(--navy-light); color: var(--white); padding: 15px; display: flex; flex-direction: column; gap: 10px; border-bottom: 4px solid var(--gold);
 }
+/* Distribución horizontal exclusiva para el Header en pantallas medianas o grandes */
 @media (min-width: 600px) {
     .card-header-block { flex-direction: row; justify-content: space-between; align-items: center; }
 }
 .card-header-block h2 { margin: 0; font-size: 18px; text-transform: uppercase; }
 
-/* REGLA RESPONSIVA MAESTRA DE TABLAS (Detalle 2) */
+/* REGLA MAESTRA DE RESPONSIVIDAD EN REJILLAS: En móvil se apilan como bloques verticales, en PC abren sus columnas */
 .table-grid { display: flex; flex-direction: column; width: 100%; }
 @media (min-width: 750px) {
     .table-grid { display: grid; }
-    .grid-3 { grid-template-columns: repeat(3, 1fr); }
-    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-1 { grid-template-columns: 1fr; }         /* Rejilla de Facturación */
+    .grid-3 { grid-template-columns: repeat(3, 1fr); } /* Rejillas Financieras Principales */
+    .grid-4 { grid-template-columns: repeat(4, 1fr); } /* Rejilla de Beneficiarios */
 }
 
+/* ESTILIZADO DE CELDAS INTERNAS */
 .cell { border: 1px solid #dcdcdc; padding: 10px; font-size: 14px; box-sizing: border-box; }
 .sub-cell { border-bottom: 1px solid #e2e8f0; padding: 6px 12px; display: flex; justify-content: space-between; font-size: 13px; }
 .sub-cell:last-child { border-bottom: none; }
+/* Caja con scroll dedicada para el contenedor de múltiples asegurados */
 .list-container-cell { background: #f7fafc; padding: 5px 0; max-height: 120px; overflow-y: auto; }
 .border-top-dash { border-top: 1px dashed var(--navy-light); }
 
-/* FACTURACIÓN */
+/* SECCIÓN DE FACTURACIÓN: Manejo de rejilla interna flexible de 3 columnas para datos fiscales */
 .facturacion-wrapper { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 10px; background: #fafafa; }
 @media (min-width: 600px) {
     .facturacion-wrapper { grid-template-columns: repeat(3, 1fr); }
-    .full-width-fact { grid-column: span 3; }
+    .full-width-fact { grid-column: span 3; } /* Fuerza a la dirección fiscal a ocupar todo el ancho */
 }
 
-/* TIMELINE COBRANZA */
+/* HISTORIAL MENSUAL DE COBRANZA: Rejilla adaptativa (3 col en celular, 6 en tablets, 12 en PC) */
 .cobranza-timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 15px; }
 @media (min-width: 600px) { .cobranza-timeline { grid-template-columns: repeat(6, 1fr); } }
 @media (min-width: 900px) { .cobranza-timeline { grid-template-columns: repeat(12, 1fr); } }
@@ -81,6 +90,7 @@ body {
 .month-bubble.pagado { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
 .month-bubble.pendiente { background-color: #edf2f7; color: #718096; border: 1px solid #e2e8f0; }
 
+/* UTILERÍAS GRÁFICAS */
 .bg-navy { background-color: var(--navy-light); }
 .bg-grey { background-color: #f7fafc; }
 .bg-gold-light { background-color: #fffdf0; }
@@ -90,13 +100,13 @@ body {
 .action-link { color: var(--navy-light); text-decoration: underline; }
 .tag-pago { background: #134074; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
 
-/* ACCIONES WA */
+/* COMPONENTES ACCIONABLES DE WHATSAPP CRM */
 .wa-actions-container { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .btn-wa { width: 100%; padding: 10px; border: none; border-radius: 6px; font-family: 'Urbanist'; font-weight: bold; font-size: 12px; cursor: pointer; color: var(--white); }
 .btn-wa-cumple { background-color: #25D366; }
 .btn-wa-pago { background-color: #ff9f1c; }
 
-/* ALERTERO SIDEBAR */
+/* SECCIÓN LATERAL DE ALERTAS MAESTRAS */
 .alerts-sidebar { display: flex; flex-direction: column; gap: 15px; }
 .alerts-sidebar h3 { margin: 0; font-size: 16px; color: var(--navy-dark); text-transform: uppercase; }
 .alert-card { background: var(--white); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #e2e8f0; }
