@@ -1,4 +1,4 @@
-const API_URL = 'https://sheetdb.io/api/v1/pw56k97827k1u?sheet=Base_Datos'; 
+const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di'; 
 
 let baseDatosCompleta = [];
 let clienteSeleccionado = null;
