@@ -251,13 +251,13 @@ function desplegarInformacionPantalla() {
         });
     }
 
-    // TABLA DE BENEFICIARIOS: Limpia e inyecta dinámicamente las filas de herederos legales
+    // TABLA DE BENEFICIARIOS: CORRECCIÓN Y BLINDAJE DE SEGURIDAD DEFENSIVO
     const gridBen = document.getElementById('grid-beneficiarios');
     if(gridBen) {
         gridBen.innerHTML = `<div class="cell bg-grey font-bold">Beneficiario</div><div class="cell bg-grey font-bold">Motivo</div><div class="cell bg-grey font-bold">Porcentaje</div><div class="cell bg-grey font-bold">Fecha Nacimiento</div>`;
-        if(c.beneficiarios) {
+        if(c.beneficiarios && c.beneficiarios.length > 0) {
             c.beneficiarios.forEach(b => {
-                gridBen.innerHTML += `<div class="cell">${b.nombre}</div><div class="cell">${b.motivo}</div><div class="cell text-center font-bold">${b.pct}</div><div class="cell text-center">${b.nac}</div>`;
+                gridBen.innerHTML += `<div class="cell">${b.nombre || '-'}</div><div class="cell">${b.motivo || '-'}</div><div class="cell text-center font-bold">${b.pct || '-'}</div><div class="cell text-center">${b.nac || '-'}</div>`;
             });
         }
     }
