@@ -7,11 +7,18 @@ let fp = null;
 let fechaSeleccionada = "";
 let idiomaActual = "es";
 
-// MODIFICACIÓN 1: Objeto para controlar la posición del carrusel de cada tour de forma independiente
+// Objeto para controlar la posición del carrusel de cada tour de forma independiente
 const posicionesCarrusel = {
     cenotes: 0,
     chichen: 0,
     celestun: 0
+};
+
+// NUEVO: Objeto para almacenar los temporizadores de autoplay de cada carrusel
+const intervalosCarrusel = {
+    cenotes: null,
+    chichen: null,
+    celestun: null
 };
 
 const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos';
@@ -121,7 +128,8 @@ async function inicializarSistema() {
         calcular();
         cargarBloqueos();
         actualizarLogosDinamicos(); 
-        inicializarSoportesTactiles(); // NUEVO: Activa el soporte de gestos con el dedo
+        inicializarSoportesTactiles(); 
+        activarAutoplayCarrusel('cenotes'); // NUEVO: Enciende el autoplay para el tour activo por defecto
         
         const btnReviews = document.getElementById('btn-reviews');
         if (btnReviews) {
@@ -181,19 +189,41 @@ function moverCarrusel(idTour, direccion) {
 }
 
 /**
- * NUEVO: Lógica de Interacción Táctil (Swipe) para Móviles
+ * NUEVO: Función para activar el Autoplay automático (Cambia cada 4 segundos = 4000ms)
  */
+function activarAutoplayCarrusel(idTour) {
+    // Limpiamos cualquier temporizador previo para evitar duplicados en memoria
+    if (intervalosCarrusel[idTour]) {
+        clearInterval(intervalosCarrusel[idTour]);
+    }
+    
+    // Creamos el intervalo automático
+    intervalosCarrusel[idTour] = setInterval(() => {
+        moverCarrusel(idTour, 1);
+    }, 4000); 
+}
+
+/**
+ * NUEVO: Función para detener el Autoplay (Útil cuando el usuario toca la pantalla)
+ */
+function detenerAutoplayCarrusel(idTour) {
+    if (intervalosCarrusel[idTour]) {
+        clearInterval(intervalosCarrusel[idTour]);
+        intervalosCarrusel[idTour] = null;
+    }
+}
+
 function inicializarSoportesTactiles() {
     const contenedores = document.querySelectorAll('.carousel-container');
     
     contenedores.forEach(container => {
         let xInicial = null;
-        // Detectamos el ID del tour analizando el ID del track interno
         const track = container.querySelector('.carousel-track');
         if(!track) return;
         const idTour = track.id.replace('track-', '');
 
         container.addEventListener('touchstart', (e) => {
+            detenerAutoplayCarrusel(idTour); // NUEVO: Si el usuario toca el carrusel, pausamos el autoplay
             xInicial = e.touches[0].clientX;
         }, { passive: true });
 
@@ -202,15 +232,15 @@ function inicializarSoportesTactiles() {
             let xFinal = e.changedTouches[0].clientX;
             let diferenciaX = xInicial - xFinal;
 
-            // Umbral mínimo de 50px de movimiento para considerarlo deslizamiento real
             if (Math.abs(diferenciaX) > 50) {
                 if (diferenciaX > 0) {
-                    moverCarrusel(idTour, 1); // Deslizó a la izquierda -> Siguiente foto
+                    moverCarrusel(idTour, 1); 
                 } else {
-                    moverCarrusel(idTour, -1); // Deslizó a la derecha -> Foto anterior
+                    moverCarrusel(idTour, -1); 
                 }
             }
             xInicial = null;
+            activarAutoplayCarrusel(idTour); // NUEVO: Al soltar el dedo, se reactiva el carrusel solo
         }, { passive: true });
     });
 }
@@ -316,9 +346,15 @@ function actualizarInterfaz() {
     const select = document.getElementById('tour-select');
     const selectedTour = select.value;
     
+    // 1. Apagamos todos los intervalos activos para que los carruseles ocultos no consuman memoria
+    Object.keys(intervalosCarrusel).forEach(tourKey => detenerAutoplayCarrusel(tourKey));
+
     document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active'));
     document.getElementById('info-' + selectedTour).classList.add('active');
     
+    // 2. Encendemos el autoplay exclusivo para el nuevo tour que el usuario acaba de seleccionar
+    activarAutoplayCarrusel(selectedTour);
+
     actualizarLogosDinamicos(); 
 
     gtag('event', 'ver_tour', {
