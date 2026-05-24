@@ -1,62 +1,71 @@
-// URL de prueba simulada o tu endpoint real de SheetDB
-const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly'; 
+// Agrega el parámetro ?sheet=Base_Datos para forzar a la API a leer la pestaña correcta
+const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=Base_Datos'; 
 
 let baseDatosCompleta = [];
 let clienteSeleccionado = null;
 
 async function cargarBaseDeDatos() {
     try {
-        // En producción jalarías la hoja correspondiente: ?sheet=polizas
-        const response = await fetch(`${API_URL}`);
-        baseDatosCompleta = await response.json();
+        const response = await fetch(API_URL);
+        const data = await response.json();
         
-        // Simulación de datos estructurados basados en tu imagen si la API viene vacía
-        if(baseDatosCompleta.length === 0) {
-            baseDatosCompleta = [{
-                id: "1",
-                empresa: "GNP",
-                poliza: "V10002910515",
-                contratante: "ALICIA ANAID ORTEGA GUERRERO",
-                nacimiento: "12/01/1995",
-                plan: "IMAGINA SER 65 PAGOS LIMITADOS 15",
-                ppr: "SI", prox_dotal: "N/A", deducible: "N/A", coaseguro: "N/A",
-                ramo: "VIDA INDIVIDUAL", suma_asegurada: "75,000.00", moneda: "UDI",
-                emision: "09/05/2025", vencimiento: "09/05/2059", tc: "8.843725",
-                estatus: "En Vigor", prima_anual: "3,498.78", prima_pago: "291.51",
-                cobro_pesos: "2,578.03", dia_cobro: "16", email: "anny12_95@hotmail.com", telefono: "4422264286",
-                cobranza: "P,P,P,P,P,V,V,V,V,V,V,V", // Ene a Dic
+        // Mapeamos y estructuramos las filas del Excel al formato JSON del Dashboard
+        baseDatosCompleta = data.map(row => {
+            return {
+                id: row.id,
+                empresa: row.empresa,
+                poliza: row.poliza,
+                contratante: row.contratante,
+                nacimiento: row.nacimiento,
+                plan: row.plan,
+                ppr: row.ppr,
+                prox_dotal: row.prox_dotal,
+                deducible: row.deducible,
+                coaseguro: row.coaseguro,
+                ramo: row.ramo,
+                suma_asegurada: parseFloat(row.suma_asegurada).toLocaleString('es-MX', {minimumFractionDigits: 2}),
+                moneda: row.moneda,
+                emision: row.emision,
+                vencimiento: row.vencimiento,
+                tc: row.tc,
+                estatus: row.estatus,
+                prima_anual: row.prima_anual,
+                prima_pago: row.prima_pago,
+                cobro_pesos: row.cobro_pesos,
+                dia_cobro: row.dia_cobro,
+                email: row.email,
+                telefono: row.telefono,
+                cobranza: row.cobranza, // Lee la cadena "P,P,P..." del Excel
+                // Estructura los beneficiarios desde las columnas horizontales del Excel
                 beneficiarios: [
-                    { nombre: "OBED OREA", motivo: "FALLECIMIENTO", pct: "50%", nac: "01/06/2025" },
-                    { nombre: "LIA REANATA OREA ORTEGA", motivo: "FALLECIMIENTO", pct: "50%", nac: "23/03/2013" }
-                ]
-            }];
-        }
-        
-        calcularAlertasMeteoro();
+                    { nombre: row.b1_nombre, motivo: row.b1_motivo, pct: row.b1_pct, nac: row.b1_nac },
+                    { nombre: row.b2_nombre, motivo: row.b2_motivo, pct: row.b2_pct, nac: row.b2_nac }
+                ].filter(b => b.nombre && b.nombre !== "N/A") // Descarta beneficiarios vacíos
+            };
+        });
+
+        actualizarContadoresAlertas();
+        llenarSelectorEmpresas();
         llenarSelectorClientes(baseDatosCompleta);
     } catch (error) {
-        console.error("Errores leyendo base de datos:", error);
+        console.error("❌ Error sincronizando datos desde SheetDB / Excel:", error);
     }
 }
 
-function calcularAlertasMeteoro() {
-    // Algoritmo predictivo de fechas importantes para Conny
-    document.getElementById('count-cumple').innerText = "1 Cumpleaños";
-    document.getElementById('count-pagos').innerText = "1 Vencimiento";
-}
+// Lógica inteligente para las Alertas Tempranas de Conny
+function actualizarContadoresAlertas() {
+    const hoy = new Date();
+    const diaHoy = String(hoy.getDate()).padStart(2, '0');
+    const mesHoy = String(hoy.getMonth() + 1).padStart(2, '0');
+    const fechaCortadaHoy = `${diaHoy}/${mesHoy}`; // DD/MM
 
-function llenarSelectorClientes(lista) {
-    const select = document.getElementById('filtro-cliente');
-    select.innerHTML = '<option value="">Selecciona un cliente...</option>';
-    
-    // Agrupamos por contratante único
-    const unicos = [...new Set(lista.map(item => item.contratante))];
-    unicos.forEach(nombre => {
-        const option = document.createElement('option');
-        option.value = nombre;
-        option.text = nombre;
-        select.appendChild(option);
-    });
+    // 1. Contador de Cumpleaños
+    const cumpleaniosHoy = baseDatosCompleta.filter(c => c.nacimiento.startsWith(fechaCortadaHoy));
+    document.getElementById('count-cumple').innerText = `${cumpleaniosHoy.length} Cumpleaños`;
+
+    // 2. Contador de Pagos Vencidos (Pólizas con estatus Vencido o cadena con 'V' en el mes actual)
+    const pagosVencidos = baseDatosCompleta.filter(c => c.estatus === "Vencido" || c.cobranza.includes("V"));
+    document.getElementById('count-pagos').innerText = `${pagosVencidos.length} Vencimientos`;
 }
 
 function filtrarClientesPorEmpresa() {
