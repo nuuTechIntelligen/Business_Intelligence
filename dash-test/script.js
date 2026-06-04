@@ -467,6 +467,17 @@ async function guardarObservacionEnSheets() {
             const index = baseDatosCompleta.findIndex(item => item.id === idPoliza);
             if (index !== -1) baseDatosCompleta[index].observaciones = nuevaNota;
 
+            // 1. Aplicamos el destello verde visual en la caja de texto
+            txtArea.style.borderColor = "#25D366";
+            txtArea.style.boxShadow = "0 0 0 3px rgba(37, 211, 102, 0.2)";
+            
+            // Regresa a su estilo normal automáticamente después de 1.5 segundos
+            setTimeout(() => {
+                txtArea.style.borderColor = "";
+                txtArea.style.boxShadow = "";
+            }, 1500);
+
+            // 2. Lanzamos la alerta tradicional para confirmación de Conny
             alert("✅ Nota guardada exitosamente en Google Sheets.");
         } else {
             throw new Error("No se afectaron filas en el servidor.");
