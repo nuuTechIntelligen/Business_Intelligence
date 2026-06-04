@@ -16,30 +16,29 @@ async function consultarDivisasRealTime() {
     udiValorActualGlobal = 8.8437; 
     usdValorActualGlobal = 17.5000; 
 
-// A) Consultamos el valor de la UDI en tiempo real usando un Proxy Inverso (Blindado contra CORS)
+// A) Consultamos el valor real de la UDI en tiempo real (Vía código internacional MXV)
     try {
-        // Consultamos la fuente oficial de datos a través del puente de Allorigins
-        const urlObjetivo = encodeURIComponent('https://api.invertapi.com/v1/banxico/udi');
-        const resUdi = await fetch(`https://api.allorigins.win/get?url=${urlObjetivo}`);
-        
+        // Usamos la misma API del dólar que ya está verificada y autorizada sin CORS
+        const resUdi = await fetch('https://open.er-api.com/v6/latest/USD');
         if (resUdi.ok) {
-            const wrapper = await resUdi.json();
-            // Allorigins nos entrega la respuesta original dentro de una propiedad llamada "contents" en formato de texto
-            if (wrapper && wrapper.contents) {
-                const dataUdi = JSON.parse(wrapper.contents);
+            const dataUdi = await resUdi.json();
+            // MXV es el código financiero internacional para la UDI de Banxico
+            // La API nos da cuántas UDIs equivalen a 1 USD, y cuántos Pesos (MXN) equivalen a 1 USD.
+            if (dataUdi && dataUdi.rates && dataUdi.rates.MXN && dataUdi.rates.MXV) {
+                const usdEnPesos = parseFloat(dataUdi.rates.MXN);
+                const usdEnUdis = parseFloat(dataUdi.rates.MXV);
                 
-                if (dataUdi && dataUdi.actual) {
-                    udiValorActualGlobal = parseFloat(dataUdi.actual);
-                    console.log("🚀 [Proxy Exitoso] UDI viva devorada sin CORS:", udiValorActualGlobal);
-                }
+                // Al dividir (Pesos por Dólar) / (Udis por Dólar), obtenemos el valor exacto de la UDI en Pesos
+                udiValorActualGlobal = usdEnPesos / usdEnUdis;
+                console.log("🚀 [Éxito Absoluto] UDI calculada en vivo sin CORS:", udiValorActualGlobal);
             }
         } else {
-            console.warn("⚠️ El proxy de la UDI respondió con un error:", resUdi.status);
+            console.warn("⚠️ El servidor financiero respondió con un error para la UDI:", resUdi.status);
         }
     } catch (err) {
-        console.warn("⚠️ No se pudo conectar al puente de la UDI, usando valor de respaldo.", err);
+        console.warn("⚠️ No se pudo calcular la UDI en tiempo real, usando valor de respaldo.", err);
     }
-    // Dibujamos el valor real de la UDI en el componente superior
+   // Dibujamos el valor real de la UDI en el componente superior
     const badgeUdi = document.getElementById('udi-val-live');
     if(badgeUdi) badgeUdi.innerText = udiValorActualGlobal.toFixed(4);
 
