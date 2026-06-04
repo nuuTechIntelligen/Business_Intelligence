@@ -16,14 +16,14 @@ async function consultarDivisasRealTime() {
     udiValorActualGlobal = 8.8437; 
     usdValorActualGlobal = 17.5000; 
 
-    // A) Consultamos el valor real de la UDI en tiempo real (Invertapi - Banxico)
+    // A) Consultamos el valor real de la UDI en tiempo real (Dolarapi - Datos Banxico Abiertos)
     try {
-        const resUdi = await fetch('https://api.invertapi.com/v1/banxico/udi');
+        const resUdi = await fetch('https://dolarapi.com/v1/mexico/indicadores/udi');
         if (resUdi.ok) {
             const dataUdi = await resUdi.json();
-            // La API devuelve un objeto con el valor actual de la UDI
-            if (dataUdi && dataUdi.actual) {
-                udiValorActualGlobal = parseFloat(dataUdi.actual);
+            // Esta API devuelve un objeto donde el valor viene en la propiedad "valor"
+            if (dataUdi && dataUdi.valor) {
+                udiValorActualGlobal = parseFloat(dataUdi.valor);
             }
         }
     } catch (err) {
