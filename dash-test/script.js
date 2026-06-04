@@ -471,9 +471,9 @@ async function guardarObservacionEnSheets() {
     btnGuardar.disabled = true;
     btnGuardar.innerText = "Guardando... ⏳";
 
-    try {
-        // Hacemos el disparo PUT directo a la fila correspondiente por ID de plan
-        const response = await fetch(`${API_URL}/${idPoliza}`, {
+   try {
+        // CORRECCIÓN DE URL: Estructura exacta para actualizar por ID en SheetDB
+        const response = await fetch(`${API_URL}/id/${idPoliza}`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
