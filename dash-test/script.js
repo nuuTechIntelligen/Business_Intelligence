@@ -472,8 +472,14 @@ async function guardarObservacionEnSheets() {
     btnGuardar.innerText = "Guardando... ⏳";
 
    try {
-        // CORRECCIÓN DE URL: Estructura exacta para actualizar por ID en SheetDB
-        const response = await fetch(`${API_URL}/id/${idPoliza}`, {
+        // 1. Desarmamos tu API_URL base para obtener la raíz limpia sin el "?sheet=..."
+        const apiRaiz = API_URL.split('?')[0]; 
+        
+        // 2. Construimos la URL perfecta inyectando el ID en el orden correcto antes de la pestaña
+        const urlCorrecta = `${apiRaiz}/id/${idPoliza}?sheet=Base_Datos`;
+
+        // 3. Hacemos el disparo PUT con la URL blindada
+        const response = await fetch(urlCorrecta, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
