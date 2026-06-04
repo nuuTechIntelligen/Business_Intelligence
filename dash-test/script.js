@@ -16,24 +16,28 @@ async function consultarDivisasRealTime() {
     udiValorActualGlobal = 8.8437; 
     usdValorActualGlobal = 17.5000; 
 
- // A) Consultamos el valor real de la UDI en tiempo real (Ajustapi - Banxico Activa)
+// A) Consultamos el valor de la UDI en tiempo real usando un Proxy Inverso (Blindado contra CORS)
     try {
-        const resUdi = await fetch('https://api.ajustapi.com/v1/indicadores/udi');
+        // Consultamos la fuente oficial de datos a través del puente de Allorigins
+        const urlObjetivo = encodeURIComponent('https://api.invertapi.com/v1/banxico/udi');
+        const resUdi = await fetch(`https://api.allorigins.win/get?url=${urlObjetivo}`);
+        
         if (resUdi.ok) {
-            const dataUdi = await resUdi.json();
-            // Esta API devuelve el valor directamente en la propiedad "valor" o "actual"
-            if (dataUdi && dataUdi.valor) {
-                udiValorActualGlobal = parseFloat(dataUdi.valor);
-                console.log("🚀 UDI viva devorada con éxito desde Ajustapi:", udiValorActualGlobal);
-            } else if (dataUdi && dataUdi.actual) {
-                udiValorActualGlobal = parseFloat(dataUdi.actual);
-                console.log("🚀 UDI viva devorada con éxito desde Ajustapi:", udiValorActualGlobal);
+            const wrapper = await resUdi.json();
+            // Allorigins nos entrega la respuesta original dentro de una propiedad llamada "contents" en formato de texto
+            if (wrapper && wrapper.contents) {
+                const dataUdi = JSON.parse(wrapper.contents);
+                
+                if (dataUdi && dataUdi.actual) {
+                    udiValorActualGlobal = parseFloat(dataUdi.actual);
+                    console.log("🚀 [Proxy Exitoso] UDI viva devorada sin CORS:", udiValorActualGlobal);
+                }
             }
         } else {
-            console.warn("⚠️ El servidor de Ajustapi respondió con un error:", resUdi.status);
+            console.warn("⚠️ El proxy de la UDI respondió con un error:", resUdi.status);
         }
     } catch (err) {
-        console.warn("⚠️ No se pudo conectar con la API de Ajustapi, usando valor de respaldo.", err);
+        console.warn("⚠️ No se pudo conectar al puente de la UDI, usando valor de respaldo.", err);
     }
     // Dibujamos el valor real de la UDI en el componente superior
     const badgeUdi = document.getElementById('udi-val-live');
