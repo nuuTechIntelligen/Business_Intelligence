@@ -313,7 +313,6 @@ function desplegarInformacionPantalla() {
     if (txtAreaObs) {
         txtAreaObs.value = c.observaciones || ''; 
     }
-    }
 
     const linkTel = document.getElementById('link-tel');
     if(linkTel && c.telefono) {
