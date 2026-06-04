@@ -18,7 +18,7 @@ async function consultarDivisasRealTime() {
 
     // A) Consultamos el valor real de la UDI en tiempo real (Dolarapi - Datos Banxico Abiertos)
     try {
-        const resUdi = await fetch('https://dolarapi.com/v1/mexico/indicadores/udi');
+        const resUdi = await fetch('https://dolarapi.com/v1/cotizaciones/udi');
         if (resUdi.ok) {
             const dataUdi = await resUdi.json();
             // Esta API devuelve un objeto donde el valor viene en la propiedad "valor"
