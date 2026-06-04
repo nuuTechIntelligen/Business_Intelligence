@@ -308,9 +308,11 @@ function desplegarInformacionPantalla() {
     safeInject('txt-prima-planeada', c.prima_planeada);
 
     // NUEVA INYECCIÓN: Coloca el texto de las observaciones guardadas dentro de la cajita de notas
+    // NUEVA INYECCIÓN BLINDADA: Carga las notas del cliente activo de forma segura
     const txtAreaObs = document.getElementById('txa-observaciones');
     if (txtAreaObs) {
-        txtAreaObs.value = c.observaciones;
+        txtAreaObs.value = c.observaciones || ''; 
+    }
     }
 
     const linkTel = document.getElementById('link-tel');
