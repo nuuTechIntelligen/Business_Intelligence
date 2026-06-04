@@ -7,13 +7,11 @@
     
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap">
-    <link rel="stylesheet" href="style.css?v=1.4">
+    <link rel="stylesheet" href="style.css?v=1.5">
 </head>
 <body>
 
-    <!-- ==========================================
-        BARRA DE FILTROS SUPERIOR (CON UDI Y DÓLAR)
-        ========================================== -->
+    <!-- BARRA DE FILTROS SUPERIOR -->
     <div class="filter-bar">
         <div class="filter-group">
             <label>Empresa</label>
@@ -27,7 +25,6 @@
                 <option value="">Selecciona un cliente...</option>
             </select>
         </div>
-        <!-- Contenedor unificado para los Badges en tiempo real -->
         <div class="badges-container">
             <div class="udi-live-badge">
                 <span>UDI Real-Time:</span>
@@ -90,9 +87,8 @@
                 </div>
             </div>
 
-            <!-- BLOQUE SUPERIOR DE INFORMACIÓN (MODIFICADO) -->
+            <!-- BLOQUE SUPERIOR DE INFORMACIÓN -->
             <div class="table-grid grid-3">
-                <!-- Columna Póliza con sus nuevas Fechas de Vigencia -->
                 <div class="grid-column-group">
                     <div class="cell bg-navy font-white">Póliza y Vigencia</div>
                     <div class="cell no-padding">
@@ -107,6 +103,8 @@
                     <div class="cell no-padding">
                         <div id="wrapper-asegurados" class="list-container-cell"></div>
                         <div class="sub-cell border-top-dash"><span>Cumpleaños Contratante:</span> <strong id="txt-nacimiento">-</strong></div>
+                        <!-- NUEVO CAMPO: Ultima Auditoría de este Producto -->
+                        <div class="sub-cell bg-gold-light"><span>Última Auditoría:</span> <strong id="txt-auditoria">-</strong></div>
                     </div>
                 </div>
 
@@ -180,10 +178,17 @@
 
             <div class="bg-navy font-white panel-title">Estructura de Beneficiarios</div>
             <div class="table-grid grid-4" id="grid-beneficiarios"></div>
+
+            <!-- NUEVA SECCIÓN GLOBAL: BITÁCORA DE OBSERVACIONES INTERACTIVAS -->
+            <div class="bg-navy font-white panel-title">Observaciones / Notas Internas del Cliente</div>
+            <div class="notes-panel-container">
+                <textarea id="txa-observaciones" placeholder="Escribe aquí notas importantes sobre este cliente o póliza..."></textarea>
+                <button id="btn-guardar-nota" onclick="guardarObservacionEnSheets()">Guardar Nota 💾</button>
+            </div>
         </div>
 
     </div>
 
-    <script src="script.js?v=2.3"></script>
+    <script src="script.js?v=2.4"></script>
 </body>
 </html>
