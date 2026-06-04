@@ -1,6 +1,6 @@
 /* =========================================================================
    PROYECTO: AGENDA DE SEGUROS (CONNY CRM)
-   PARTE 1: CONFIGURACIÓN, DIVISAS EN TIEMPO REAL Y MOTOR DE FILTROS
+   PARTE 1: CONFIGURACIÓN, DIVISAS EN TIEMPO REAL Y MOTOR DE FILTROS (V2.4)
    ========================================================================= */
 
 const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di?sheet=Base_Datos'; 
@@ -8,21 +8,18 @@ const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di?sheet=Base_Datos';
 let baseDatosCompleta = []; 
 let clienteSeleccionado = null; 
 let udiValorActualGlobal = 8.8437; 
-let usdValorActualGlobal = 17.5000; // Valor de respaldo por si falla la API externa
+let usdValorActualGlobal = 17.5000; 
 
 // 1. CONSULTA DE DIVISAS EN TIEMPO REAL (UDI Y DÓLAR)
 async function consultarDivisasRealTime() {
-    // A) Fijamos el valor de la UDI acordado
     udiValorActualGlobal = 8.8437; 
     const badgeUdi = document.getElementById('udi-val-live');
     if(badgeUdi) badgeUdi.innerText = udiValorActualGlobal.toFixed(4);
 
-    // B) Consultamos el valor real del Dólar (USD) usando una API abierta de finanzas
     try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
         if (res.ok) {
             const data = await res.json();
-            // Calculamos el inverso de USD a MXN (la API da 1 USD = X monedas mundiales)
             if (data && data.rates && data.rates.MXN) {
                 usdValorActualGlobal = parseFloat(data.rates.MXN);
             }
@@ -31,14 +28,12 @@ async function consultarDivisasRealTime() {
         console.warn("⚠️ No se pudo obtener el dólar en tiempo real, usando valor de respaldo.", err);
     }
 
-    // Dibujamos el valor del dólar en su nuevo componente superior
     const badgeUsd = document.getElementById('usd-val-live');
     if(badgeUsd) badgeUsd.innerText = `$${usdValorActualGlobal.toFixed(2)} MXN`;
 }
 
-// 2. CARGA MAESTRA DE DATOS DESDE GOOGLE SHEETS VIA SHEETDB
+// 2. CARGA MAESTRA DE DATOS DESDE GOOGLE SHEETS
 async function cargarBaseDeDatos() {
-    // Descargamos primero los valores de las monedas para tenerlos listos
     await consultarDivisasRealTime(); 
     
     try {
@@ -61,8 +56,10 @@ async function cargarBaseDeDatos() {
                 ramo: row.ramo,
                 suma_asegurada: parseFloat(row.suma_asegurada || 0).toLocaleString('es-MX', {minimumFractionDigits: 2}),
                 moneda: row.moneda,
-                emision: row.emision || '-',      // Capturamos la nueva fecha solicitada
-                vencimiento: row.vencimiento || '-', // Capturamos la nueva fecha solicitada
+                emision: row.emision || '-',      
+                vencimiento: row.vencimiento || '-', 
+                auditoria: row.auditoria || '-',         // NUEVO MAPEO: Captura fecha de auditoría de la fila
+                observaciones: row.observaciones || '', // NUEVO MAPEO: Captura la nota de observaciones
                 tc: row.tc,
                 estatus: row.estatus,
                 forma_pago: row.forma_pago || 'Anual', 
@@ -81,7 +78,6 @@ async function cargarBaseDeDatos() {
                 aves_lp: row.aves_lp || 'N/A',
                 num_cuenta: row.num_cuenta || '-',
                 prima_planeada: row.prima_planeada || 'NO',
-                // Mapeo detallado de beneficiarios con sus cumpleaños
                 beneficiarios: [
                     { nombre: row.b1_nombre, motivo: row.b1_motivo, pct: row.b1_pct, nac: row.b1_nac },
                     { nombre: row.b2_nombre, motivo: row.b2_motivo, pct: row.b2_pct, nac: row.b2_nac }
@@ -89,7 +85,6 @@ async function cargarBaseDeDatos() {
             };
         });
 
-        // Ejecutamos los componentes visuales iniciales de control
         actualizarContadoresAlertas();
         llenarSelectorEmpresas();
         llenarSelectorClientes(baseDatosCompleta);
@@ -98,7 +93,7 @@ async function cargarBaseDeDatos() {
     }
 }
 
-// 3. CONTROLADORES DE LOS SELECTORES (FILTROS)
+// 3. CONTROLADORES DE FILTROS
 function llenarSelectorEmpresas() {
     const selectEmpresa = document.getElementById('filtro-empresa');
     if (!selectEmpresa) return;
@@ -155,7 +150,7 @@ function seleccionarClientePorNombre(nombre) {
 
 /* --- FIN DE LA PARTE 1 --- */
 /* =========================================================================
-   PARTE 2: ALERTAS MULTI-ROL, RENDERIZADO EN PANTALLA Y ACCIONES DE WHATSAPP
+   PARTE 2.1: ALERTAS MULTI-ROL Y DESPLIEGUE DE INFORMACIÓN EN PANTALLA
    ========================================================================= */
 
 // 1. EVALUACIÓN DE ALERTAS TEMPRANAS (CON DETECCIÓN DE ROLES)
@@ -171,7 +166,6 @@ function actualizarContadoresAlertas() {
     let proximosCobros = [];
     let polizasVencidas = [];
 
-    // Función auxiliar para calcular si un cumpleaños cae en los próximos 7 días
     const evaluarCumple = (fechaTexto, nombrePersona, clienteRaiz, rol) => {
         if (!fechaTexto || !fechaTexto.includes('/')) return;
         const partes = fechaTexto.split('/');
@@ -192,32 +186,25 @@ function actualizarContadoresAlertas() {
         }
     };
 
-    // Escaneamos la base de datos completa
     baseDatosCompleta.forEach(c => {
-        // A) Evaluamos al Contratante
         evaluarCumple(c.nacimiento, c.contratante, c, 'contratante');
 
-        // B) Evaluamos a los Asegurados independientes
         if (c.asegurados && c.asegurados.includes(',')) {
             const listaAsegurados = c.asegurados.split(',');
             listaAsegurados.forEach(aseg => {
                 const nombreLimpio = aseg.trim();
                 if(nombreLimpio !== c.contratante) {
-                    // Nota: Si en tu Excel agregas una columna para el nacimiento de cada asegurado, 
-                    // aquí la mapearíamos; por ahora usa la del plan para alertar al núcleo familiar.
                     evaluarCumple(c.nacimiento, nombreLimpio, c, 'asegurado');
                 }
             });
         }
 
-        // C) Evaluamos a los Beneficiarios
         if (c.beneficiarios && c.beneficiarios.length > 0) {
             c.beneficiarios.forEach(b => {
                 evaluarCumple(b.nac, b.nombre, c, 'beneficiario');
             });
         }
 
-        // D) Filtro y procesamiento de Cobranza/Vencimientos
         const diaCobroNum = parseInt(c.dia_cobro || 0);
         const esEstatusVencido = c.estatus && String(c.estatus).toLowerCase() === "vencido";
         const tieneLetraV = c.cobranza && c.cobranza.includes("V");
@@ -233,18 +220,15 @@ function actualizarContadoresAlertas() {
         }
     });
 
-    // 2. CONSTRUCCIÓN VISUAL DEL ACORDEÓN DE CUMPLEAÑOS (CON ROLES)
     const countCumpleEl = document.getElementById('count-cumple');
     if(countCumpleEl) countCumpleEl.innerText = `${cumpleaniosSemana.length} Cumpleaños`;
     const listCumpleEl = document.getElementById('list-cumple-alert');
     if(listCumpleEl) {
         listCumpleEl.innerHTML = cumpleaniosSemana.length > 0 ? '' : '<div class="alert-empty-msg">Sin birthdays esta semana</div>';
         
-        // Ordenamos por cercanía de días
         cumpleaniosSemana.sort((a,b) => a.diasPara - b.diasPara).forEach(item => {
             const tagDia = item.diasPara === 0 ? "¡HOY!" : `en ${item.diasPara} d`;
             
-            // Definimos el texto y la clase CSS del Rol para Conny
             let claseRol = 'role-contratante';
             let textoRol = 'Contratante';
             if (item.rol === 'asegurado') { claseRol = 'role-asegurado'; textoRol = 'Asegurado'; }
@@ -261,7 +245,6 @@ function actualizarContadoresAlertas() {
         });
     }
 
-    // 3. CONSTRUCCIÓN VISUAL DE ALERTAS DE COBRANZA
     const countProximosEl = document.getElementById('count-proximos');
     if(countProximosEl) countProximosEl.innerText = `${proximosCobros.length} Por Vencer`;
     const listProximosEl = document.getElementById('list-proximos-alert');
@@ -284,7 +267,7 @@ function actualizarContadoresAlertas() {
     }
 }
 
-// 4. DESPLIEGUE COMPLETO DE LA TARJETA DEL CLIENTE EN PANTALLA
+// 2. DESPLIEGUE COMPLETO DE LA TARJETA DEL CLIENTE EN PANTALLA
 function desplegarInformacionPantalla() {
     if(!clienteSeleccionado) return;
     const c = clienteSeleccionado;
@@ -294,12 +277,12 @@ function desplegarInformacionPantalla() {
         if (el) el.innerText = value;
     };
 
-    // Inyección de textos básicos e identificadores nuevos
     safeInject('lbl-contratante', c.contratante);
     safeInject('txt-poliza', c.poliza);
-    safeInject('txt-emision', c.emision);          // Nueva Fecha Emisión colocada en su bloque lógico
-    safeInject('txt-vencimiento', c.vencimiento);  // Nueva Fecha Término colocada en su bloque lógico
+    safeInject('txt-emision', c.emision);          
+    safeInject('txt-vencimiento', c.vencimiento);  
     safeInject('txt-nacimiento', c.nacimiento);
+    safeInject('txt-auditoria', c.auditoria);      // NUEVA INYECCIÓN: Pinta la fecha de auditoría en el bloque central
     safeInject('txt-ppr', c.ppr);
     safeInject('txt-dotal', c.prox_dotal);
     safeInject('txt-deducible', c.deducible);
@@ -309,7 +292,6 @@ function desplegarInformacionPantalla() {
     safeInject('txt-suma', c.suma_asegurada);
     safeInject('txt-moneda', c.moneda);
     
-    // Cálculo inteligente del Tipo de Cambio dinámico
     const tcValue = c.moneda === 'UDI' ? udiValorActualGlobal.toFixed(4) : (c.moneda === 'USD' ? usdValorActualGlobal.toFixed(2) : c.tc);
     safeInject('txt-tc', tcValue);
     
@@ -325,7 +307,12 @@ function desplegarInformacionPantalla() {
     safeInject('txt-num-cuenta', c.num_cuenta);
     safeInject('txt-prima-planeada', c.prima_planeada);
 
-    // Links directos nativos de llamadas y correos
+    // NUEVA INYECCIÓN: Coloca el texto de las observaciones guardadas dentro de la cajita de notas
+    const txtAreaObs = document.getElementById('txa-observaciones');
+    if (txtAreaObs) {
+        txtAreaObs.value = c.observaciones;
+    }
+
     const linkTel = document.getElementById('link-tel');
     if(linkTel && c.telefono) {
         linkTel.href = `tel:${c.telefono}`;
@@ -340,7 +327,6 @@ function desplegarInformacionPantalla() {
         if(strong) strong.innerText = c.email;
     }
 
-    // Datos de Facturación SAT
     try {
         document.getElementById('txt-rfc').innerText = c.rfc;
         document.getElementById('txt-regimen').innerText = c.regimen;
@@ -348,7 +334,6 @@ function desplegarInformacionPantalla() {
         document.getElementById('txt-direccion').innerText = c.direccion;
     } catch (err) {}
 
-    // RENDERIZADO DE ASEGURADOS CON SU PROPIO BOTÓN DE WHATSAPP
     const wrapperAsegurados = document.getElementById('wrapper-asegurados');
     if(wrapperAsegurados) {
         wrapperAsegurados.innerHTML = '';
@@ -363,7 +348,6 @@ function desplegarInformacionPantalla() {
         });
     }
 
-    // Cronograma Anual de Cobranza (Ene - Dic)
     const timeline = document.getElementById('timeline-cobranza');
     if(timeline) {
         timeline.innerHTML = '';
@@ -375,7 +359,6 @@ function desplegarInformacionPantalla() {
         });
     }
 
-    // RENDERIZADO DE BENEFICIARIOS CON COLUMNA DE ACCIÓN INDEPENDIENTE (WA)
     const gridBen = document.getElementById('grid-beneficiarios');
     if(gridBen) {
         gridBen.innerHTML = '';
@@ -393,7 +376,7 @@ function desplegarInformacionPantalla() {
                     </div>`;
             });
         } else {
-            gridBen.innerHTML = `<div class="cell text-center" style="grid-column: span 4; color: #a0aec0; font-style: italic; padding: 15px;">Sin beneficiarios registrados en este plan.</div>`;
+            gridBen.innerHTML = `<div class="cell text-center" style="grid-column: span 4; color: #a0aec0; font-style: italic; padding: 15px;">Sin beneficiarios registrados in este plan.</div>`;
         }
     }
 }
@@ -438,6 +421,62 @@ function conmutarAcordeon(idLista) {
     });
     if (!estaAbierta) {
         listaObjetivo.classList.add('active');
+    }
+}
+
+// 8. NUEVA FUNCIÓN: ACTUALIZAR OBSERVACIONES EN GOOGLE SHEETS EN TIEMPO REAL
+async function guardarObservacionEnSheets() {
+    if (!clienteSeleccionado) {
+        alert("⚠️ Por favor, selecciona primero un cliente.");
+        return;
+    }
+
+    const txtArea = document.getElementById('txa-observaciones');
+    const btnGuardar = document.getElementById('btn-guardar-nota');
+    if (!txtArea || !btnGuardar) return;
+
+    const nuevaNota = txtArea.value.trim();
+    const idPoliza = clienteSeleccionado.id;
+
+    // Efecto visual: Deshabilitamos el botón mientras viaja la información
+    btnGuardar.disabled = true;
+    btnGuardar.innerText = "Guardando... ⏳";
+
+    try {
+        // Hacemos el disparo PUT directo a la fila correspondiente por ID de plan
+        const response = await fetch(`${API_URL}/${idPoliza}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data: {
+                    observaciones: nuevaNota
+                }
+            })
+        });
+
+        const resultado = await response.json();
+
+        if (response.ok && resultado.updated && resultado.updated > 0) {
+            // Actualizamos la nota en nuestra memoria local del navegador
+            clienteSeleccionado.observaciones = nuevaNota;
+            const index = baseDatosCompleta.findIndex(item => item.id === idPoliza);
+            if (index !== -1) baseDatosCompleta[index].observaciones = nuevaNota;
+
+            alert("✅ Nota guardada exitosamente en Google Sheets.");
+        } else {
+            throw new Error("No se afectaron filas en el servidor.");
+        }
+
+    } catch (error) {
+        console.error("❌ Error guardando la nota en SheetDB:", error);
+        alert("🚨 Hubo un problema al conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
+    } finally {
+        // Restauramos el botón a su estado original
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = "Guardar Nota 💾";
     }
 }
 
