@@ -4,7 +4,7 @@
     --navy-light: #134074;    /* Azul Corporativo (Cabeceras de celdas) */
     --gold: #daa520;          /* Oro Ejecutivo (Líneas divisoras de bloques financieros) */
     --white: #ffffff;         /* Fondos limpios de tarjetas */
-    --text-dark: #333333;     /* Color de texto de alta legibilidad */
+    --text-dark: #333333;      /* Color de texto de alta legibilidad */
     --bg-light: #f0f4f8;      /* Fondo general grisáceo suave */
 }
 
@@ -35,16 +35,27 @@ body {
     background-color: var(--navy-light); color: var(--white); font-weight: bold; outline: none; width: 100%; box-sizing: border-box;
 }
 
-/* BADGE DE LA UDI RESPONSIVO */
-.udi-live-badge {
+/* CONTENEDOR UNIFICADO DE BADGES (UDI + USD) */
+.badges-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.udi-live-badge, .usd-live-badge {
     background: #1e3a5f; color: #ff9f1c; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; box-sizing: border-box; width: 100%;
+}
+.usd-live-badge {
+    color: #25D366; /* Color verde amigable para distinguir el dólar */
 }
 
 /* QUIEBRE DE PANTALLA PARA COMPUTADORAS (PC) */
 @media (min-width: 768px) {
     .filter-bar { grid-template-columns: auto auto 1fr; align-items: flex-end; }
     .filter-bar select { min-width: 220px; width: auto; }
-    .udi-live-badge { width: auto; margin-left: auto; padding: 8px 15px; }
+    .badges-container { flex-direction: row; width: auto; margin-left: auto; gap: 15px; }
+    .udi-live-badge, .usd-live-badge { width: auto; padding: 8px 15px; }
 }
 
 /* ==========================================
@@ -72,18 +83,13 @@ body {
     order: 2; /* Pasa al segundo lugar (abajo de las alertas) */
 }
 
-/* QUIEBRE DE PANTALLA PARA COMPUTADORAS (PC) */
 @media (min-width: 950px) {
     .dashboard-container { 
         display: grid; 
-        grid-template-columns: 1fr 320px; 
+        grid-template-columns: 1fr 340px; /* Un poco más ancho para las etiquetas extendidas */
     }
-    .main-card {
-        order: 1; 
-    }
-    .alerts-sidebar {
-        order: 2; 
-    }
+    .main-card { order: 1; }
+    .alerts-sidebar { order: 2; }
 }
 
 /* COMPONENTES DE LA TARJETA MAESTRA */
@@ -108,7 +114,6 @@ body {
     width: 100%;
 }
 
-/* Fichas técnicas individuales de beneficiarios por defecto para móviles */
 .beneficiary-card-group {
     display: flex;
     flex-direction: column;
@@ -125,46 +130,22 @@ body {
     }
     .grid-1 { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
     
-    /* EN PC: Forzamos a la tabla de beneficiarios a comportarse como una grilla plana tradicional */
-    .grid-4 { 
-        grid-template-columns: repeat(4, 1fr); 
-    }
-    
-    /* Desintegramos la tarjeta móvil en PC para alinear las sub-celdas de forma horizontal limpia */
-    .grid-4 .beneficiary-card-group {
-        display: contents !important;
-    }
-    
-    /* Desactivamos las etiquetas de texto sobrantes en PC ya que no se requieren horizontalmente */
-    .grid-4 .beneficiary-card-group .sub-cell span {
-        display: none !important;
-    }
-    
-    /* Forzamos a que en PC vuelvan a lucir con el formato de celda clásico de la tabla */
+    .grid-4 .beneficiary-card-group { display: contents !important; }
+    .grid-4 .beneficiary-card-group .sub-cell span { display: none !important; }
     .grid-4 .beneficiary-card-group .sub-cell {
-        border: 1px solid #dcdcdc;
-        padding: 10px;
-        font-size: 14px;
-        justify-content: center;
-        box-sizing: border-box;
+        border: 1px solid #dcdcdc; padding: 10px; font-size: 14px; justify-content: center; box-sizing: border-box;
     }
 
-    .grid-3 .grid-column-group {
-        display: flex !important;
-        flex-direction: column;
-        height: 100%;
-    }
-    
-    .grid-3 .grid-column-group .cell:last-child {
-        flex-grow: 1;
-    }
+    .grid-3 .grid-column-group { display: flex !important; flex-direction: column; height: 100%; }
+    .grid-3 .grid-column-group .cell:last-child { flex-grow: 1; }
 }
 
 .cell { border: 1px solid #dcdcdc; padding: 10px; font-size: 14px; box-sizing: border-box; }
-.sub-cell { border-bottom: 1px solid #e2e8f0; padding: 6px 12px; display: flex; justify-content: space-between; font-size: 13px; box-sizing: border-box; }
+.sub-cell { border-bottom: 1px solid #e2e8f0; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; box-sizing: border-box; }
 .sub-cell:last-child { border-bottom: none; }
-.list-container-cell { background: #f7fafc; padding: 5px 0; max-height: 120px; overflow-y: auto; }
+.list-container-cell { background: #f7fafc; padding: 5px 0; max-height: 140px; overflow-y: auto; }
 .border-top-dash { border-top: 1px dashed var(--navy-light); }
 
 /* SECCIÓN DE FACTURACIÓN */
@@ -193,14 +174,21 @@ body {
 .action-link { color: var(--navy-light); text-decoration: underline; }
 .tag-pago { background: #134074; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
 
-/* COMPONENTES ACCIONABLES DE WHATSAPP CRM */
+/* ACCIONES DE WHATSAPP */
 .wa-actions-container { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .btn-wa { width: 100%; padding: 10px; border: none; border-radius: 6px; font-family: 'Urbanist'; font-weight: bold; font-size: 12px; cursor: pointer; color: var(--white); }
 .btn-wa-cumple { background-color: #25D366; }
 .btn-wa-pago { background-color: #ff9f1c; }
 
+/* BOTÓN DE WHATSAPP INTEGRADO PARA LISTAS */
+.btn-inline-wa {
+    background: #25D366; color: white; border: none; padding: 2px 6px; border-radius: 4px; 
+    font-size: 11px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 2px;
+}
+.btn-inline-wa:hover { background: #1eb954; }
+
 /* ==========================================
-   ESTILOS AVANZADOS PARA LISTAS DE ALERTAS (CON EFECTO ACORDEÓN)
+   LISTAS DE ALERTAS (ACORDEÓN) Y IDENTIFICADORES
    ========================================== */
 .alerts-sidebar { display: flex; flex-direction: column; gap: 15px; }
 .alerts-sidebar h3 { margin: 0; font-size: 16px; color: var(--navy-dark); text-transform: uppercase; }
@@ -211,35 +199,19 @@ body {
     gap: 0px; border: 1px solid #e2e8f0; cursor: pointer;
     transition: box-shadow 0.2s, background-color 0.2s;
 }
-.alert-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    background-color: #fafafa;
-}
-
+.alert-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); background-color: #fafafa; }
 .alert-card-header { display: flex; align-items: center; gap: 12px; width: 100%; }
 .alert-card .icon { font-size: 20px; }
 .alert-card h4 { margin: 0; font-size: 14px; color: var(--navy-dark); }
 .alert-card p { margin: 0; font-size: 12px; color: #718096; }
 
 .alert-names-list {
-    width: 100%; 
-    max-height: 0; 
-    opacity: 0;
-    overflow: hidden;
-    padding-top: 0;
-    margin-top: 0;
-    border-top: 1px solid transparent;
-    display: flex; flex-direction: column; gap: 5px;
+    width: 100%; max-height: 0; opacity: 0; overflow: hidden; padding-top: 0; margin-top: 0;
+    border-top: 1px solid transparent; display: flex; flex-direction: column; gap: 5px;
     transition: max-height 0.3s ease-out, opacity 0.2s ease, padding 0.2s;
 }
-
 .alert-names-list.active {
-    max-height: 250px; 
-    opacity: 1;
-    overflow-y: auto;
-    padding-top: 10px;
-    margin-top: 8px;
-    border-top: 1px solid #e2e8f0;
+    max-height: 250px; opacity: 1; overflow-y: auto; padding-top: 10px; margin-top: 8px; border-top: 1px solid #e2e8f0;
 }
 
 .alert-name-item {
@@ -248,7 +220,16 @@ body {
     width: 100%; box-sizing: border-box; cursor: pointer; transition: background-color 0.2s;
 }
 .alert-name-item:hover { background-color: #e2e8f0; color: var(--navy-dark); }
-.alert-name-item small { color: #ff9f1c; float: right; font-weight: bold; }
+.alert-name-item .right-tags { float: right; display: flex; align-items: center; gap: 6px; }
+.alert-name-item small { color: #ff9f1c; font-weight: bold; }
 .alert-item-warn small { color: #ff9f1c; }
 .alert-item-danger small { color: #e53e3e; }
 .alert-empty-msg { font-size: 11px; color: #a0aec0; font-style: italic; padding: 2px 5px; }
+
+/* BADGES DE ROLES EN CUMPLEANIOS */
+.role-badge {
+    padding: 1px 5px; border-radius: 3px; font-size: 9px; text-transform: uppercase; font-weight: bold; color: white;
+}
+.role-contratante { background-color: #134074; }
+.role-asegurado { background-color: #0b2545; }
+.role-beneficiario { background-color: #ff9f1c; }
