@@ -12,26 +12,46 @@ let usdValorActualGlobal = 17.5000;
 
 // 1. CONSULTA DE DIVISAS EN TIEMPO REAL (UDI Y DÓLAR)
 async function consultarDivisasRealTime() {
+    // Valores de respaldo por si fallan las APIs externas
     udiValorActualGlobal = 8.8437; 
+    usdValorActualGlobal = 17.5000; 
+
+    // A) Consultamos el valor real de la UDI en tiempo real (Invertapi - Banxico)
+    try {
+        const resUdi = await fetch('https://api.invertapi.com/v1/banxico/udi');
+        if (resUdi.ok) {
+            const dataUdi = await resUdi.json();
+            // La API devuelve un objeto con el valor actual de la UDI
+            if (dataUdi && dataUdi.actual) {
+                udiValorActualGlobal = parseFloat(dataUdi.actual);
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ No se pudo obtener la UDI en tiempo real, usando valor de respaldo.", err);
+    }
+
+    // Dibujamos el valor real de la UDI en el componente superior
     const badgeUdi = document.getElementById('udi-val-live');
     if(badgeUdi) badgeUdi.innerText = udiValorActualGlobal.toFixed(4);
 
+
+    // B) Consultamos el valor real del Dólar (USD)
     try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        if (res.ok) {
-            const data = await res.json();
-            if (data && data.rates && data.rates.MXN) {
-                usdValorActualGlobal = parseFloat(data.rates.MXN);
+        const resUsd = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (resUsd.ok) {
+            const dataUsd = await resUsd.json();
+            if (dataUsd && dataUsd.rates && dataUsd.rates.MXN) {
+                usdValorActualGlobal = parseFloat(dataUsd.rates.MXN);
             }
         }
     } catch (err) {
         console.warn("⚠️ No se pudo obtener el dólar en tiempo real, usando valor de respaldo.", err);
     }
 
+    // Dibujamos el valor del dólar en el componente superior
     const badgeUsd = document.getElementById('usd-val-live');
     if(badgeUsd) badgeUsd.innerText = `$${usdValorActualGlobal.toFixed(2)} MXN`;
 }
-
 // 2. CARGA MAESTRA DE DATOS DESDE GOOGLE SHEETS
 async function cargarBaseDeDatos() {
     await consultarDivisasRealTime(); 
