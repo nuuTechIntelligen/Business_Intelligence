@@ -16,18 +16,21 @@ async function consultarDivisasRealTime() {
     udiValorActualGlobal = 8.8437; 
     usdValorActualGlobal = 17.5000; 
 
-    // A) Consultamos el valor real de la UDI en tiempo real (Dolarapi - Datos Banxico Abiertos)
+  // A) Consultamos el valor real de la UDI en tiempo real (Ruta Alternativa Activa)
     try {
         const resUdi = await fetch('https://dolarapi.com/v1/cotizaciones/udi');
         if (resUdi.ok) {
             const dataUdi = await resUdi.json();
-            // Esta API devuelve un objeto donde el valor viene en la propiedad "valor"
+            // En esta ruta el valor viene dentro de la propiedad "valor"
             if (dataUdi && dataUdi.valor) {
                 udiValorActualGlobal = parseFloat(dataUdi.valor);
+                console.log("🚀 UDI viva devorada con éxito:", udiValorActualGlobal);
             }
+        } else {
+            console.warn("⚠️ El servidor de la UDI respondió con un error:", resUdi.status);
         }
     } catch (err) {
-        console.warn("⚠️ No se pudo obtener la UDI en tiempo real, usando valor de respaldo.", err);
+        console.warn("⚠️ No se pudo conectar con la API de la UDI, usando valor de respaldo.", err);
     }
 
     // Dibujamos el valor real de la UDI en el componente superior
