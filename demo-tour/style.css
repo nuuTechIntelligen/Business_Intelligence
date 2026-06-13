@@ -1,160 +1,305 @@
-/* VARIABLES GLOBALES CON LA PALETA OFICIAL VÍA HÁ */
-:root {
-    --color-tierra: #ECBB90;      /* #ECBB90 [cite: 126] */
-    --color-agua: #BEDFCA;        /* #BEDFCA [cite: 130] */
-    --color-flamingo: #FDB1A3;    /* #FDB1A3 [cite: 133] */
-    --text-neutro: #555554;       /* #555554 [cite: 123] */
-    --bg-neutro: #F9F4EE;         /* #F9F4EE [cite: 128] */
-    --white: #ffffff;
-}
+/* VARIABLES GLOBALES REEMPLAZADAS CON LA PALETA OFICIAL VÍA HÁ */
+:root { 
+    --turquesa: #ECBB90;         /* Color Principal 1 (Arena) */ 
+    --turquesa-dark: #555554;    /* Neutro Textos e Iconos (Gris Oscuro) */ 
+    --white: #ffffff; 
+    --text: #555554;             /* Color de texto base del manual */ 
+    --light-bg: #F9F4EE;         /* Neutro Fondos (Crema Suave) */ 
+    --executive-dark: #BEDFCA;   /* Color Principal 2 (Agua/Menta) */ 
+    --accent-coral: #FDB1A3;     /* Color de Acento (Coral/Flamingo) */
+} 
 
-body {
-    font-family: 'Big Shoulders Text', sans-serif;
-    font-weight: 500;
-    margin: 0; padding: 0;
-    background-color: var(--bg-neutro);
-    color: var(--text-neutro);
-    line-height: 1.4;
-    font-size: 19px;
-}
+/* RESET Y CUERPO */ 
+body { 
+    font-family: 'Big Shoulders Text', sans-serif; /* Reemplazada por la condensada oficial */
+    font-weight: 600;
+    margin: 0; padding: 0; 
+    background-color: var(--light-bg); /* Aplicado el tono crema suave de fondo */
+    color: var(--text); 
+    line-height: 1.5; 
+    font-size: 19px; /* Ajuste leve por la naturaleza condensada de la fuente */
+} 
 
-/* HERO INITIAL */
-.hero {
-    background: linear-gradient(rgba(85, 85, 84, 0.4), rgba(85, 85, 84, 0.6)), 
-                url('https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&w=1200&q=80');
-    background-size: cover;
-    background-position: center;
-    height: 35vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: var(--white);
-    text-align: center;
-}
+/* ENCABEZADO (HERO) */ 
+.hero { 
+    background: linear-gradient(rgba(85,85,84,0.4), rgba(85,85,84,0.6)),  
+                url('https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&w=1200&q=80'); 
+    background-size: cover; 
+    background-position: center; 
+    height: 35vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    color: white; 
+    text-align: center; 
+} 
 
-.hero h1 { 
-    font-family: 'Big Shoulders Display', sans-serif;
-    font-weight: 800; font-size: 56px; margin: 0; 
-    text-transform: uppercase; letter-spacing: 4px; 
-}
+.hero h1 { font-size: 46px; margin: 0; text-transform: uppercase; letter-spacing: 3px; } 
 
-.badge-private {
-    background-color: var(--color-tierra);
-    color: var(--text-neutro);
-    padding: 6px 20px; border-radius: 50px;
-    font-size: 16px; font-weight: 700; margin-top: 10px;
-    letter-spacing: 2px; text-transform: uppercase;
-}
+.badge-private { 
+    background-color: var(--turquesa); 
+    color: var(--text); 
+    padding: 6px 16px; 
+    border-radius: 50px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    margin-top: 12px; 
+    letter-spacing: 1px; 
+    text-transform: uppercase; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+} 
 
-.container {
-    width: 92%; max-width: 950px; margin: -40px auto 50px;
-    background: var(--white); padding: 25px; border-radius: 24px;
-    box-shadow: 0 15px 40px rgba(85, 85, 84, 0.08); box-sizing: border-box;
-}
+/* CONTENEDOR PRINCIPAL */ 
+.container { 
+    width: 92%; 
+    max-width: 950px;  
+    margin: -30px auto 50px; 
+    background: var(--white); 
+    padding: 20px; 
+    border-radius: 20px; 
+    box-shadow: 0 15px 35px rgba(85,85,84,0.08); 
+    box-sizing: border-box; 
+    position: relative;  
+} 
 
-.grid-layout { display: flex; flex-direction: column; gap: 30px; }
+/* CORRECCIÓN: Estructura Móvil Primero */ 
+.grid-layout { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 30px; 
+} 
 
-@media (min-width: 850px) {
-    .grid-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: start; }
-}
+/* ESTRUCTURA GRID PARA COMPUTADORA (PC) */ 
+@media (min-width: 850px) { 
+    .container { 
+        padding: 30px; 
+    } 
+    .grid-layout { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 40px;  
+        align-items: start; 
+    } 
+} 
 
-/* CAROUSEL */
-.carousel-container {
-    position: relative; width: 100%; height: 250px; overflow: hidden; border-radius: 16px;
-}
-.carousel-track { display: flex; width: 100%; height: 100%; transition: transform 0.4s ease; }
-.carousel-track img { width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; }
-.carousel-btn {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(85, 85, 84, 0.6); color: var(--white);
-    border: none; font-size: 20px; padding: 6px 12px; cursor: pointer; border-radius: 50%; z-index: 10;
-}
-.carousel-btn.prev { left: 12px; }
-.carousel-btn.next { right: 12px; }
-@media (max-width: 600px) { .carousel-btn { display: none; } }
+/* MODIFICACIÓN 1: Estilos del Carrusel Fotográfico */ 
+.carousel-container { 
+    position: relative; 
+    width: 100%; 
+    height: 230px; 
+    overflow: hidden; 
+    border-radius: 12px 12px 0 0; 
+    touch-action: pan-y pin-x; 
+} 
 
-/* ELEMENTOS DINÁMICOS CORREGIDOS */
-.tour-title-wrapper, .cotizador-header-wrapper {
-    display: flex; align-items: center; gap: 10px; margin: 15px 0 10px 0;
-}
-.cotizador-header-wrapper { margin: 0 0 15px 0; }
+@media (min-width: 600px) { 
+    .carousel-container { height: 280px; } 
+} 
 
-.dynamic-tour-logo {
-    width: 26px; height: 26px; object-fit: contain;
-    display: inline-block;
-}
+.carousel-track { 
+    display: flex; 
+    width: 100%; 
+    height: 100%; 
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+    will-change: transform; 
+} 
 
-/* TÍTULOS */
-.section-title {
-    font-family: 'Big Shoulders Display', sans-serif;
-    color: var(--text-neutro); font-size: 26px;
-    border-left: 5px solid var(--color-tierra); padding-left: 12px;
-    margin: 15px 0; text-transform: uppercase; font-weight: 700;
-}
+.carousel-track img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    flex-shrink: 0; 
+    user-select: none; 
+    -webkit-user-drag: none; 
+} 
 
-.section-title-inner {
-    font-family: 'Big Shoulders Display', sans-serif;
-    color: var(--text-neutro); font-size: 26px;
-    margin: 0; text-transform: uppercase; font-weight: 700;
-}
+.carousel-btn { 
+    position: absolute; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    background: rgba(85, 85, 84, 0.5); 
+    color: var(--white); 
+    border: none; 
+    font-size: 18px; 
+    padding: 10px 14px; 
+    cursor: pointer; 
+    border-radius: 50%; 
+    z-index: 10; 
+    transition: background 0.3s; 
+} 
+.carousel-btn:hover { background: var(--turquesa); color: var(--text); } 
+.carousel-btn.prev { left: 10px; } 
+.carousel-btn.next { right: 10px; } 
 
-/* INPUTS CORREGIDOS */
-.form-group { margin-bottom: 15px; }
-.input-label { display: block; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; font-size: 15px; }
+@media (max-width: 600px) { 
+    .carousel-btn { display: none; } 
+} 
 
-body .flatpickr-input,
-body #fecha-reserva,
-body .tour-picker,
-body #nombre-cliente {
-    width: 100% !important; padding: 10px 12px !important;
-    font-size: 17px !important; font-family: 'Big Shoulders Text', sans-serif !important;
-    font-weight: 700 !important; border: 2px solid var(--color-agua) !important;
-    border-radius: 10px !important; background-color: var(--bg-neutro) !important;
-    color: var(--text-neutro) !important; box-sizing: border-box !important;
-}
+/* MODIFICACIÓN 2: Alineación y tamaño de los Logos Dinámicos */ 
+.tour-title-wrapper, .cotizador-header-wrapper { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    margin: 20px 0 10px 0; 
+} 
 
-/* RESUMEN Y CONTROLES */
-.counter-container {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg-neutro); padding: 8px 16px; border-radius: 12px;
-    margin-bottom: 10px; border: 1px solid var(--color-agua);
-}
-.btn-qty {
-    width: 32px; height: 32px; border-radius: 50%; border: none;
-    background-color: var(--color-agua); font-size: 18px; font-weight: bold; cursor: pointer;
-}
-.qty-val { font-weight: 700; font-size: 18px; padding: 0 5px; }
+.cotizador-header-wrapper { 
+    margin: 0 0 20px 0; 
+} 
 
-.summary-box {
-    background-color: var(--color-agua); color: var(--text-neutro);
-    padding: 15px; border-radius: 16px; text-align: center; margin-top: 20px;
-}
-.total-price { font-family: 'Big Shoulders Display', sans-serif; font-size: 36px; font-weight: 800; }
+.dynamic-tour-logo { 
+    width: 28px; 
+    height: 28px; 
+    object-fit: contain; 
+} 
 
-/* CORRECCIÓN DE DISEÑO AL BOTÓN WHATSAPP */
-.btn-whatsapp {
-    display: block !important; background-color: var(--color-flamingo) !important;
-    color: var(--text-neutro) !important; text-align: center !important;
-    padding: 12px !important; border-radius: 12px !important; text-decoration: none !important;
-    font-family: 'Big Shoulders Display', sans-serif !important; font-weight: 800 !important;
-    font-size: 22px !important; margin-top: 15px !important; text-transform: uppercase !important;
-    box-shadow: 0 4px 12px rgba(253, 177, 163, 0.3) !important; box-sizing: border-box !important;
-}
+/* SELECTOR DE IDIOMA */ 
+.lang-switch-container { 
+    display: flex; 
+    justify-content: flex-end; 
+    margin-bottom: 15px; 
+} 
 
-.reviews-section {
-    background-color: var(--white); border: 2px dashed var(--color-tierra);
-    padding: 15px; border-radius: 16px; text-align: center; margin-top: 20px;
-}
-.btn-reviews {
-    display: inline-block; color: var(--text-neutro); text-decoration: none;
-    font-weight: 700; font-size: 14px; border: 2px solid var(--color-tierra);
-    padding: 5px 15px; border-radius: 8px;
-}
+#lang-switch { 
+    padding: 8px 12px; 
+    border-radius: 8px; 
+    border: 2px solid var(--turquesa); 
+    background-color: var(--light-bg); 
+    color: var(--text); 
+    font-family: 'Big Shoulders Text', sans-serif; 
+    font-weight: bold; 
+    cursor: pointer; 
+    outline: none; 
+    transition: all 0.3s ease; 
+} 
+#lang-switch:hover { background-color: var(--turquesa); } 
 
-/* LANG */
-.lang-switch-container { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-#lang-switch { padding: 4px 8px; border-radius: 6px; border: 2px solid var(--color-agua); font-family: 'Big Shoulders Text'; font-weight: bold; }
+/* TÍTULOS DE SECCIÓN */ 
+.section-title { 
+    color: var(--text); 
+    font-size: 24px; 
+    border-left: 5px solid var(--turquesa); 
+    padding-left: 10px; 
+    margin: 15px 0; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+} 
 
-.footer-info { text-align: center; margin-top: 30px; border-top: 2px solid var(--bg-neutro); padding-top: 20px; }
-.footer-link { color: var(--text-neutro); text-decoration: none; }
+/* COMPONENTES DE ENTRADA */ 
+body .flatpickr-input, 
+body #fecha-reserva, 
+body .tour-picker, 
+body #nombre-cliente { 
+    width: 100% !important; 
+    padding: 14px !important; 
+    font-size: 18px !important; 
+    font-family: 'Big Shoulders Text', sans-serif !important; 
+    font-weight: bold !important; 
+    border: 2px solid var(--executive-dark) !important; /* Menta */
+    border-radius: 12px !important; 
+    background-color: var(--light-bg) !important; 
+    color: var(--text) !important; 
+    box-sizing: border-box !important; 
+    transition: all 0.3s ease !important; 
+    display: block !important; 
+} 
+
+body .flatpickr-input, 
+body #fecha-reserva, 
+body .tour-picker { 
+    padding-right: 40px !important; 
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555554' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important; 
+    background-repeat: no-repeat !important; 
+    background-position: right 15px center !important; 
+    background-size: 18px !important; 
+    appearance: none !important; 
+    -webkit-appearance: none; 
+    -moz-appearance: none !important; 
+} 
+
+body .flatpickr-input[readonly] { 
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555554' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important; 
+    cursor: pointer !important; 
+} 
+
+body .flatpickr-input:hover, body .flatpickr-input:focus, 
+body .tour-picker:hover, body .tour-picker:focus, 
+body #nombre-cliente:hover, body #nombre-cliente:focus { 
+    border-color: var(--turquesa) !important; 
+    background-color: #ffffff !important; 
+    outline: none !important; 
+} 
+
+.form-group { margin-bottom: 15px; } 
+.input-label { display: block; font-weight: bold; margin-bottom: 6px; color: var(--text); font-size: 16px; text-transform: uppercase;} 
+.flatpickr-mobile { display: none !important; } 
+
+/* TARJETAS DE DETALLES */ 
+.tour-info-card { 
+    background: var(--light-bg); 
+    padding: 0 0 20px 0;  
+    border-radius: 16px; 
+    font-size: 17px; 
+    display: none; 
+    border: 1px solid var(--executive-dark); 
+    overflow: hidden;  
+    margin-top: 10px; 
+} 
+.tour-info-card p { padding: 0 20px; margin: 10px 0 0 0; } 
+.tour-info-card.active { display: block; } 
+
+/* REVIEWS */ 
+.reviews-section { 
+    background-color: #fcfdfd; border: 2px dashed var(--turquesa); 
+    padding: 15px; border-radius: 12px; text-align: center; margin-top: 20px; 
+} 
+.reviews-text { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: var(--text); } 
+.btn-reviews { 
+    display: inline-block; color: var(--text); text-decoration: none; font-weight: bold; font-size: 15px; 
+    border: 2px solid var(--turquesa); padding: 6px 14px; border-radius: 8px; transition: all 0.3s ease; 
+} 
+.btn-reviews:hover { background-color: var(--turquesa); } 
+
+/* CONTROLES NUMÉRICOS */ 
+.counter-container { 
+    display: flex; align-items: center; justify-content: space-between; 
+    background: var(--light-bg); padding: 10px 20px; border-radius: 12px; 
+    margin-bottom: 10px; border: 1px solid var(--executive-dark); 
+} 
+.btn-qty { 
+    width: 35px; height: 35px; border-radius: 50%; border: none; 
+    background-color: var(--executive-dark); color: var(--text); font-size: 20px; 
+    font-weight: bold; cursor: pointer; transition: background 0.3s; 
+} 
+.btn-qty:hover { background-color: var(--turquesa); } 
+.qty-val { font-size: 18px; font-weight: bold; }
+
+/* RESUMEN DE COMPRA */ 
+.summary-box { background-color: var(--executive-dark); color: var(--text); 
+padding: 15px; border-radius: 15px; text-align: center; margin-top: 20px; } 
+.total-price { font-family: 'Big Shoulders Text', sans-serif; font-size: 36px; font-weight: bold; color: var(--text); } 
+
+/* BOTÓN WHATSAPP APUNTANDO AL ACENTO CORAL DEL MANUAL */ 
+.btn-whatsapp { 
+    display: block; background-color: var(--accent-coral); color: var(--text); 
+    text-align: center; padding: 15px; border-radius: 12px; text-decoration: none; 
+    font-family: 'Big Shoulders Text', sans-serif; font-weight: bold; font-size: 22px; 
+    margin-top: 15px; box-shadow: 0 4px 15px rgba(253, 177, 163, 0.3); text-transform: uppercase;
+} 
+.btn-whatsapp:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(253, 177, 163, 0.5); }
+
+/* PIE DE PÁGINA */ 
+.footer-info { text-align: center; margin-top: 35px; border-top: 2px solid var(--light-bg); padding-top: 20px; } 
+.social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; } 
+.social-icon-link { display: inline-block; width: 32px; height: 32px; transition: transform 0.3s ease; } 
+.icon-svg { width: 100%; height: 100%; fill: #7F8C8D; transition: fill 0.3s ease; } 
+.social-icon-link:hover { transform: translateY(-3px); } 
+.social-icon-link:hover .icon-svg { fill: var(--turquesa); } 
+.footer-text { font-size: 15px; color: var(--text); padding: 0 10px; font-weight: bold;} 
+.footer-link { color: var(--text); text-decoration: none; font-weight: bold; transition: color 0.3s ease; } 
+.footer-link:hover { color: var(--turquesa); } 
+
+.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { 
+    background: #eeeeee !important; color: #bbbbbb !important; cursor: not-allowed !important; text-decoration: line-through; 
+}
