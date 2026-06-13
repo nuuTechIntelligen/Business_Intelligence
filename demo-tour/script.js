@@ -1,430 +1,449 @@
-/**
- * VARIABLES GLOBALES Y DICCIONARIO DE IDIOMAS - VÍA HÁ MÉXICO
- */
-let adultos = 1;
-let ninos = 0;
-let fp = null; 
-let fechaSeleccionada = "";
-let idiomaActual = "es";
+/** * VARIABLES GLOBALES Y DICCIONARIO DE IDIOMAS 
+  */ 
+ let adultos = 1; 
+ let ninos = 0; 
+ let fp = null;  
+ let fechaSeleccionada = ""; 
+ let idiomaActual = "es"; 
 
-const posicionesCarrusel = {
-    cenotes: 0,
-    chichen: 0,
-    celestun: 0
-};
+ // Objeto para controlar la posición del carrusel de cada tour de forma independiente 
+ const posicionesCarrusel = { 
+     cenotes: 0, 
+     chichen: 0, 
+     celestun: 0 
+ }; 
 
-const intervalosCarrusel = {
-    cenotes: null,
-    chichen: null,
-    celestun: null
-};
+ // NUEVO: Objeto para almacenar los temporizadores de autoplay de cada carrusel 
+ const intervalosCarrusel = { 
+     cenotes: null, 
+     chichen: null, 
+     celestun: null 
+ }; 
 
-const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos';
+ const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
-const traducciones = {
-    es: {
-        hero_title: "VÍA HA' MÉXICO", [cite: 33]
-        hero_badge: "✨ SUMÉRGETE AL MAYAB", [cite: 34]
-        pregunta_tour: "¿Qué paraíso quieres visitar hoy?",
-        tour_cenotes: "Tour 4 Cenotes (Bici/Tren)",
-        tour_chichen: "Chichén Itzá & Valladolid",
-        tour_celestun: "Celestún (Flamencos & Manglares)",
-        titulo_cenotes: "Detalles del Tour Cenotes",
-        desc_cenotes: "Visita 4 maravillosos cenotes en el Mayab. Incluye bicicletas, chalecos de flotación y regaderas con un enfoque sustentable y de respeto local.", [cite: 7, 34]
-        titulo_chichen: "Maravilla del Mundo Arqueológica", [cite: 92]
-        desc_chichen: "Recorrido histórico guiado por la zona arqueológica, tiempo libre en el pueblo mágico de Valladolid y nado en cenote sagrado. Incluye buffet regional.", [cite: 92]
-        titulo_celestun: "Inmersión en la Naturaleza Viva", [cite: 7, 34]
-        desc_celestun: "Exploración en lancha por la biosfera para admirar la majestuosa parvada de flamencos rosas, navegación en túneles de manglar y tiempo libre de playa.", [cite: 46]
-        reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros",
-        btn_reviews: "Ver opiniones de clientes ↗",
-        titulo_cotizador: "Cotiza tu experiencia a la medida", [cite: 10]
-        label_nombre: "Nombre de quien solicita",
-        ph_nombre: "Escribe tu nombre completo...",
-        label_nacionalidad: "Perfil del Viajero",
-        opt_nacional: "🇲🇽 Viajero Nacional",
-        opt_extranjero: "✈️ Viajero Internacional",
-        label_entradas: "Modalidad de Accesos",
-        opt_sin_entradas: "Experiencia sin entradas incluidas",
-        opt_con_entradas: "Experiencia con entradas incluidas",
-        label_fecha: "Fecha de Inmersión", [cite: 34]
-        ph_fecha: "Selecciona una fecha disponible...",
-        label_adultos: "Adultos",
-        label_ninos: "Niños (-12 años)",
-        total_estimado: "Total Estimado (Viaje Personalizado Privado):", [cite: 4]
-        btn_reservar: "Confirmar Disponibilidad",
-        alert_nombre: "Por favor, ingresa tu nombre para personalizar tu itinerario.",
-        alert_fecha: "Por favor, selecciona una fecha para tu viaje.",
-        wa_saludo: "¡Hola! Me interesa cotizar una *EXPERIENCIA PERSONALIZADA* con *Vía Há México*:\n\n", [cite: 4, 33]
-        wa_nombre: "👤 *Viajero Principal:*",
-        wa_perfil: "🌍 *Origen:*",
-        wa_accesos: "🎟️ *Accesos:*",
-        wa_tour: "🌴 *Itinerario:*",
-        wa_fecha: "📅 *Fecha Solicitada:*",
-        wa_adultos: "👥 *Adultos:*",
-        wa_ninos: "👶 *Niños:*",
-        wa_total: "💰 *Presupuesto Estimado:*",
-        wa_pregunta: "¿Tienen disponibilidad para armar este viaje a la medida?", [cite: 10]
-        wa_txt_ext: "Tarifa Internacional (Entradas no incl.)",
-        wa_txt_con: "Con entradas e impactos locales incluidos", [cite: 18]
-        wa_txt_sin: "Sin entradas incluidas"
-    },
-    en: {
-        hero_title: "VÍA HA' MÉXICO", [cite: 33]
-        hero_badge: "✨ IMMERSE YOURSELF IN THE MAYAB", [cite: 34]
-        pregunta_tour: "What paradise do you want to visit today?",
-        tour_cenotes: "4 Cenotes Tour (Bike/Train)",
-        tour_chichen: "Chichen Itza & Valladolid",
-        tour_celestun: "Celestun (Flamingos & Mangroves)",
-        titulo_cenotes: "Cenotes Tour Details",
-        desc_cenotes: "Explore 4 marvelous cenotes in the Mayab region. Includes bikes, life jackets, and an eco-friendly local immersion.", [cite: 7, 34]
-        titulo_chichen: "Archaeological Wonder of the World", [cite: 92]
-        desc_chichen: "Guided historical tour across the archaeological site, free time in colonial Valladolid, and swimming in a sacred open cenote. Regional buffet included.", [cite: 92]
-        titulo_celestun: "Living Nature Immersion", [cite: 7]
-        desc_celestun: "Boat expedition through the biosphere to spot wild pink flamingos, navigation across mangrove tunnels, and pristine beach time.", [cite: 46]
-        reviews_text: "⭐ Discover why our travelers recommend us",
-        btn_reviews: "See customer reviews ↗",
-        titulo_cotizador: "Quote your tailor-made experience", [cite: 10]
-        label_nombre: "Lead Traveler Name",
-        ph_nombre: "Enter your full name...",
-        label_nacionalidad: "Traveler Profile",
-        opt_nacional: "🇲🇽 Mexican / National Traveler",
-        opt_extranjero: "✈️ International Traveler",
-        label_entradas: "Tickets Modality",
-        opt_sin_entradas: "Tour without tickets included",
-        opt_con_entradas: "Tour with tickets included",
-        label_fecha: "Immersion Date", [cite: 34]
-        ph_fecha: "Select an available date...",
-        label_adultos: "Adults",
-        label_ninos: "Children (Under 12)",
-        total_estimado: "Estimated Total (Private Tailor-made Service):", [cite: 4, 10]
-        btn_reservar: "Check Availability",
-        alert_nombre: "Please enter your name to customize your quote.",
-        alert_fecha: "Please select an available date for your journey.",
-        wa_saludo: "Hello! I am interested in booking a *TAILOR-MADE EXPERIENCE* with *Vía Há México*:\n\n", [cite: 4, 33, 10]
-        wa_nombre: "👤 *Lead Traveler:*",
-        wa_perfil: "🌍 *Profile:*",
-        wa_accesos: "🎟 *Tickets:*",
-        wa_tour: "🌴 *Itinerary:*",
-        wa_fecha: "📅 *Date:*",
-        wa_adultos: "👥 *Adultos:*",
-        wa_ninos: "👶 *Children:*",
-        wa_total: "💰 *Estimated Cost:*",
-        wa_pregunta: "Do you have availability to arrange this custom experience?", [cite: 10]
-        wa_txt_ext: "International Rate (Tickets not incl.)",
-        wa_txt_con: "With admission tickets included",
-        wa_txt_sin: "Without tickets included"
-    }
-};
+ const traducciones = { 
+     es: { 
+         hero_title: "VIAJÁ", 
+         hero_badge: "✨ Experiencias Exclusivas", 
+         pregunta_tour: "¿Qué paraíso quieres visitar hoy?", 
+         tour_cenotes: "Tour 4 Cenotes (Bici/Tren)", 
+         tour_chichen: "Chichén Itzá & Valladolid", 
+         tour_celestun: "Celestún (Flamencos & Manglares)", 
+         titulo_cenotes: "Detalles del Tour Cenotes", 
 
-async function inicializarSistema() {
-    while (typeof flatpickr === 'undefined') {
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
+         desc_cenotes: "Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas con fotografía profesional por Román.", 
+         titulo_chichen: "Maravilla del Mundo", 
 
-    try {
-        inicializarCalendario();
-        calcular();
-        cargarBloqueos();
-        actualizarLogosDinamicos(); 
-        inicializarSoportesTactiles(); 
-        
-        const select = document.getElementById('tour-select');
-        if (select) {
-            activarAutoplayCarrusel(select.value);
-        }
-        
-        const btnReviews = document.getElementById('btn-reviews');
-        if (btnReviews) {
-            btnReviews.addEventListener('click', function() {
-                gtag('event', 'clic_testimonios', { 'destino_red': 'Instagram_Reviews' });
-            });
-        }
-    } catch (error) {
-        console.error("❌ Error en inicialización:", error.message);
-    }
-}
+         desc_chichen: "Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet y cobertura fotográfica profesional.", 
+         titulo_celestun: "Naturaleza Viva", 
 
-function inicializarCalendario() {
-    const campoFecha = document.getElementById('fecha-reserva');
-    if (!campoFecha) return;
+         desc_celestun: "Paseo en lancha para ver flamencos rosas, túneles de manglar y tiempo de playa. Sesión fotográfica de paisaje incluida.", 
+         reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros", 
+         btn_reviews: "Ver opiniones de clientes ↗", 
+         titulo_cotizador: "Cotiza tu grupo", 
+         label_nombre: "Nombre de quien solicita", 
+         ph_nombre: "Escribe tu nombre completo...", 
+         label_nacionalidad: "Nacionalidad", 
+         opt_nacional: "🇲🇽 Mexicano / Nacional", 
+         opt_extranjero: "✈️ Extranjero / International", 
+         label_entradas: "Modalidad de Entradas", 
+         opt_sin_entradas: "Tour sin entradas incluidas", 
+         opt_con_entradas: "Tour con entradas incluidas", 
+         label_fecha: "Fecha del Recorrido", 
+         ph_fecha: "Selecciona una fecha o rango...", 
+         label_adultos: "Adultos", 
+         label_ninos: "Niños (-12 años)", 
+         total_estimado: "Total Estimado (Servicio Privado):", 
+         btn_reservar: "Reservar por WhatsApp", 
+         alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", 
+         alert_fecha: "Por favor, selecciona una fecha disponible.", 
+         wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *Viajá*:\n\n", 
+         wa_nombre: "👤 *Nombre:*", 
+         wa_perfil: "🌍 *Perfil:*", 
+         wa_accesos: "🎟️ *Accesos:*", 
+         wa_tour: "🌴 *Tour:*", 
+         wa_fecha: "📅 *Fecha:*", 
+         wa_adultos: "👥 *Adultos:*", 
+         wa_ninos: "👶 *Niños:*", 
+         wa_total: "💰 *Total estimado:*", 
+         wa_pregunta: "¿Tienen disponibilidad para estas condiciones?", 
+         wa_txt_ext: "Sin entradas (Tarifa Extranjero)", 
+         wa_txt_con: "Con entradas incluidas", 
+         wa_txt_sin: "Sin entradas" 
+     }, 
+     en: { 
+         hero_title: "VIAJÁ", 
+         hero_badge: "✨ Exclusive Experiences", 
+         pregunta_tour: "What paradise do you want to visit today?", 
+         tour_cenotes: "4 Cenotes Tour (Bike/Train)", 
+         tour_chichen: "Chichen Itza & Valladolid", 
+         tour_celestun: "Celestun (Flamingos & Mangroves)", 
+         titulo_cenotes: "Cenotes Tour Details", 
 
-    if (fp) fp.destroy(); 
+         desc_cenotes: "Visit 4 cenotes: Closed, Semi-open, Open, and River type. Includes bikes, life jackets, and showers with professional photo coverage by Roman.", 
+         titulo_chichen: "Wonder of the World", 
 
-    fp = flatpickr(campoFecha, {
-        locale: idiomaActual === 'es' ? "es" : "default", 
-        mode: "range", 
-        minDate: "today", 
-        dateFormat: "Y-m-d",
-        altInput: true, 
-        altFormat: "d/m/Y",
-        altInputClass: "flatpickr-input",
-        disableMobile: true,
-        disable: [], 
-        onChange: function(selectedDates, dateStr) {
-            fechaSeleccionada = dateStr;
-            gtag('event', 'interaccion_cotizador', {
-                'tipo_accion': 'seleccion_fecha',
-                'fecha_viaje': dateStr
-            });
-        }
-    });
-}
+         desc_chichen: "Guided tour, free time in Valladolid, and visit to an open cenote for swimming. Buffet and professional photo coverage included.", 
+         titulo_celestun: "Living Nature", 
+         desc_celestun: "Boat ride to see pink flamingos, mangrove tunnels, and beach time. Landscape photo session included.", 
+         reviews_text: "⭐ Discover why our travelers recommend us", 
+         btn_reviews: "See customer reviews ↗", 
+         titulo_cotizador: "Quote your group", 
+         label_nombre: "Lead Traveler Name", 
+         ph_nombre: "Enter your full name...", 
+         label_nacionalidad: "Nationality", 
+         opt_nacional: "🇲🇽 Mexican / National", 
+         opt_extranjero: "✈️ Foreigner / International", 
+         label_entradas: "Tickets Modality", 
+         opt_sin_entradas: "Tour without tickets included", 
+         opt_con_entradas: "Tour with tickets included", 
+         label_fecha: "Tour Date", 
+         ph_fecha: "Select a date or range...", 
+         label_adultos: "Adults", 
+         label_ninos: "Children (Under 12)", 
+         total_estimado: "Estimated Total (Private Service):", 
+         btn_reservar: "Book via WhatsApp", 
+         alert_nombre: "Please enter your full name to customize your quote.", 
+         alert_fecha: "Please select an available date.", 
+         wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *Viajá*:\n\n", 
+         wa_nombre: "👤 *Name:*", 
+         wa_perfil: "🌍 *Profile:*", 
+         wa_accesos: "🎟️ *Access:*", 
+         wa_tour: "🌴 *Tour:*", 
+         wa_fecha: "📅 *Date:*", 
+         wa_adultos: "👥 *Adults:*", 
+         wa_ninos: "👶 *Children:*", 
+         wa_total: "💰 *Estimated Total:*", 
+         wa_pregunta: "Do you have availability for these conditions?", 
+         wa_txt_ext: "No tickets (Foreigner Rate)", 
+         wa_txt_con: "With tickets included", 
+         wa_txt_sin: "Without tickets" 
+     } 
+ }; 
 
-function moverCarrusel(idTour, direccion) {
-    const track = document.getElementById(`track-${idTour}`);
-    if (!track) return;
-    const imagenes = track.querySelectorAll('img');
-    const totalImagenes = imagenes.length;
-    
-    posicionesCarrusel[idTour] += direccion;
-    
-    if (posicionesCarrusel[idTour] >= totalImagenes) posicionesCarrusel[idTour] = 0;
-    if (posicionesCarrusel[idTour] < 0) posicionesCarrusel[idTour] = totalImagenes - 1;
-    
-    const porcentajeMovimiento = posicionesCarrusel[idTour] * -100;
-    track.style.transform = `translateX(${porcentajeMovimiento}%)`;
+ async function inicializarSistema() { 
+     while (typeof flatpickr === 'undefined') { 
+         await new Promise(resolve => setTimeout(resolve, 100)); 
+     } 
 
-    gtag('event', 'interaccion_galeria', {
-        'id_tour': idTour,
-        'imagen_index': posicionesCarrusel[idTour]
-    });
-}
+     try { 
+         inicializarCalendario(); 
+         calcular(); 
+         cargarBloqueos(); 
+         actualizarLogosDinamicos();  
+         inicializarSoportesTactiles();  
+          
+         // CORRECCIÓN: Forzamos a la interfaz a activar el autoplay del tour seleccionado por defecto 
+         const select = document.getElementById('tour-select'); 
+         if (select) { 
+             activarAutoplayCarrusel(select.value); 
+         } 
+          
+         const btnReviews = document.getElementById('btn-reviews'); 
+         if (btnReviews) { 
+             btnReviews.addEventListener('click', function() { 
+                 gtag('event', 'clic_testimonios', { 'destino_red': 'Instagram_Reviews' }); 
+             }); 
+         } 
+     } catch (error) { 
+         console.error("❌ Error en inicialización:", error.message); 
+     } 
+ } 
 
-function activarAutoplayCarrusel(idTour) {
-    if (intervalosCarrusel[idTour]) {
-        clearInterval(intervalosCarrusel[idTour]);
-    }
-    intervalosCarrusel[idTour] = setInterval(() => {
-        moverCarrusel(idTour, 1);
-    }, 4000); 
-}
+ function inicializarCalendario() { 
+     const campoFecha = document.getElementById('fecha-reserva'); 
+     if (!campoFecha) return; 
 
-function detenerAutoplayCarrusel(idTour) {
-    if (intervalosCarrusel[idTour]) {
-        clearInterval(intervalosCarrusel[idTour]);
-        intervalosCarrusel[idTour] = null;
-    }
-}
+     if (fp) fp.destroy();  
 
-function inicializarSoportesTactiles() {
-    const contenedores = document.querySelectorAll('.carousel-container');
-    
-    contenedores.forEach(container => {
-        let xInicial = null;
-        const track = container.querySelector('.carousel-track');
-        if(!track) return;
-        const idTour = track.id.replace('track-', '');
+     fp = flatpickr(campoFecha, { 
+         locale: idiomaActual === 'es' ? "es" : "default",  
+         mode: "range",  
+         minDate: "today",  
+         dateFormat: "Y-m-d", 
+         altInput: true,  
+         altFormat: "d/m/Y", 
+         altInputClass: "flatpickr-input", 
+         disableMobile: true, 
+         disable: [],  
+         onChange: function(selectedDates, dateStr) { 
+             fechaSeleccionada = dateStr; 
+             gtag('event', 'interaccion_cotizador', { 
+                 'tipo_accion': 'seleccion_fecha', 
+                 'fecha_viaje': dateStr 
+             }); 
+         } 
+     }); 
+ } 
 
-        container.addEventListener('touchstart', (e) => {
-            detenerAutoplayCarrusel(idTour);
-            xInicial = e.touches[0].clientX;
-        }, { passive: true });
+ function moverCarrusel(idTour, direccion) { 
+     const track = document.getElementById(`track-${idTour}`); 
+     if (!track) return; 
+     const imagenes = track.querySelectorAll('img'); 
+     const totalImagenes = imagenes.length; 
+      
+     posicionesCarrusel[idTour] += direccion; 
+      
+     if (posicionesCarrusel[idTour] >= totalImagenes) posicionesCarrusel[idTour] = 0; 
+     if (posicionesCarrusel[idTour] < 0) posicionesCarrusel[idTour] = totalImagenes - 1; 
+      
+     const porcentajeMovimiento = posicionesCarrusel[idTour] * -100; 
+     track.style.transform = `translateX(${porcentajeMovimiento}%)`; 
 
-        container.addEventListener('touchend', (e) => {
-            if (!xInicial) return;
-            let xFinal = e.changedTouches[0].clientX;
-            let diferenciaX = xInicial - xFinal;
+     gtag('event', 'interaccion_galeria', { 
+         'id_tour': idTour, 
+         'imagen_index': posicionesCarrusel[idTour] 
+     }); 
+ } 
 
-            if (Math.abs(diferenciaX) > 50) {
-                if (diferenciaX > 0) {
-                    moverCarrusel(idTour, 1); 
-                } else {
-                    moverCarrusel(idTour, -1); 
-                }
-            }
-            xInicial = null;
-            activarAutoplayCarrusel(idTour);
-        }, { passive: true });
-    });
-}
+ /** * NUEVO: Función para activar el Autoplay automático (Cambia cada 4 segundos = 4000ms) 
+  */ 
+ function activarAutoplayCarrusel(idTour) { 
+     // Limpiamos cualquier temporizador previo para evitar duplicados en memoria 
+     if (intervalosCarrusel[idTour]) { 
+         clearInterval(intervalosCarrusel[idTour]); 
+     } 
+      
+     // Creamos el intervalo automático 
+     intervalosCarrusel[idTour] = setInterval(() => { 
+         moverCarrusel(idTour, 1); 
+     }, 4000);  
+ } 
 
-function actualizarLogosDinamicos() {
-    const select = document.getElementById('tour-select');
-    if (!select) return;
-    const urlLogo = select.options[select.selectedIndex].getAttribute('data-logo');
-    
-    document.querySelectorAll('.dynamic-tour-logo').forEach(img => {
-        img.src = urlLogo;
-    });
-}
+ /** * NUEVO: Función para detener el Autoplay (Útil cuando el usuario toca la pantalla) 
+  */ 
+ function detenerAutoplayCarrusel(idTour) { 
+     if (intervalosCarrusel[idTour]) { 
+         clearInterval(intervalosCarrusel[idTour]); 
+         intervalosCarrusel[idTour] = null; 
+     } 
+ } 
 
-function aplicarTextosDeIdioma() {
-    const t = traducciones[idiomaActual];
+ function inicializarSoportesTactiles() { 
+     const contenedores = document.querySelectorAll('.carousel-container'); 
+      
+     contenedores.forEach(container => { 
+         let xInicial = null; 
+         const track = container.querySelector('.carousel-track'); 
+         if(!track) return; 
+         const idTour = track.id.replace('track-', ''); 
 
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) el.innerText = t[key];
-    });
+         container.addEventListener('touchstart', (e) => { 
+             detenerAutoplayCarrusel(idTour); // NUEVO: Si el usuario toca el carrusel, pausamos el autoplay 
+             xInicial = e.touches[0].clientX; 
+         }, { passive: true }); 
 
-    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-        const key = el.getAttribute('data-i18n-ph');
-        if (t[key]) el.placeholder = t[key];
-    });
+         container.addEventListener('touchend', (e) => { 
+             if (!xInicial) return; 
+             let xFinal = e.changedTouches[0].clientX; 
+             let diferenciaX = xInicial - xFinal; 
 
-    inicializarCalendario();
-    cargarBloqueos(); 
-    actualizarInterfaz();
-    
-    gtag('event', 'cambio_idioma', { 'idioma_seleccionado': idiomaActual });
-}
+             if (Math.abs(diferenciaX) > 50) { 
+                 if (diferenciaX > 0) { 
+                     moverCarrusel(idTour, 1);  
+                 } else { 
+                     moverCarrusel(idTour, -1);  
+                 } 
+             } 
+             xInicial = null; 
+             activarAutoplayCarrusel(idTour); // NUEVO: Al soltar el dedo, se reactiva el carrusel solo 
+         }, { passive: true }); 
+     }); 
+ } 
 
-function cambiarIdioma() {
-    idiomaActual = document.getElementById('lang-switch').value;
-    aplicarTextosDeIdioma();
-}
+ function actualizarLogosDinamicos() { 
+     const select = document.getElementById('tour-select'); 
+     if (!select) return; 
+     const urlLogo = select.options[select.selectedIndex].getAttribute('data-logo'); 
+      
+     document.querySelectorAll('.dynamic-tour-logo').forEach(img => { 
+         img.src = urlLogo; 
+     }); 
+ } 
 
-function cargarBloqueos() {
-    fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-            const fechas = data
-                .filter(row => row.fecha && row.fecha.trim().length > 5)
-                .map(row => row.fecha.trim());
+ function aplicarTextosDeIdioma() { 
+     const t = traducciones[idiomaActual]; 
 
-            if (fp && typeof fp.set === 'function') {
-                fp.set("disable", fechas);
-            }
-        })
-        .catch(err => console.error("❌ Error conectando con SheetDB:", err));
-}
+     document.querySelectorAll('[data-i18n]').forEach(el => { 
+         const key = el.getAttribute('data-i18n'); 
+         if (t[key]) el.innerText = t[key]; 
+     }); 
 
-function cambiarNacionalidad() {
-    const nacionalidad = document.getElementById('nacionalidad-select').value;
-    const wrapperEntradas = document.getElementById('wrapper-entradas');
-    const entradasSelect = document.getElementById('entradas-select');
+     document.querySelectorAll('[data-i18n-ph]').forEach(el => { 
+         const key = el.getAttribute('data-i18n-ph'); 
+         if (t[key]) el.placeholder = t[key]; 
+     }); 
 
-    if (nacionalidad === 'extranjero') {
-        entradasSelect.value = 'sin';
-        wrapperEntradas.style.display = 'none';
-    } else {
-        wrapperEntradas.style.display = 'block';
-    }
+     inicializarCalendario(); 
+     cargarBloqueos();  
+     actualizarInterfaz(); 
+      
+     gtag('event', 'cambio_idioma', { 'idioma_seleccionado': idiomaActual }); 
+ } 
 
-    gtag('event', 'interaccion_cotizador', {
-        'tipo_accion': 'cambio_nacionalidad',
-        'perfil_usuario': nacionalidad
-    });
+ function cambiarIdioma() { 
+     idiomaActual = document.getElementById('lang-switch').value; 
+     aplicarTextosDeIdioma(); 
+ } 
 
-    calcular();
-}
+ function cargarBloqueos() { 
+     fetch(API_URL) 
+         .then(res => res.json()) 
+         .then(data => { 
+             const fechas = data 
+                 .filter(row => row.fecha && row.fecha.trim().length > 5) 
+                 .map(row => row.fecha.trim()); 
 
-function cambiarEntradas() {
-    const modalidadEntradas = document.getElementById('entradas-select').value;
-    gtag('event', 'interaccion_cotizador', {
-        'tipo_accion': 'seleccion_entradas',
-        'modalidad': modalidadEntradas
-    });
-    calcular();
-}
+             if (fp && typeof fp.set === 'function') { 
+                 fp.set("disable", fechas); 
+             } 
+         }) 
+         .catch(err => console.error("❌ Error conectando con SheetDB:", err)); 
+ } 
 
-function cambiarCant(tipo, cambio) {
-    if (tipo === 'adultos') {
-        if (adultos + cambio >= 1) adultos += cambio; 
-        document.getElementById('qty-adultos').innerText = adultos;
-    } else {
-        if (ninos + cambio >= 0) ninos += cambio; 
-        document.getElementById('qty-ninos').innerText = ninos;
-    }
-    
-    gtag('event', 'interaccion_cotizador', {
-        'tipo_accion': 'modificar_pasajeros',
-        'categoria': tipo,
-        'valor_actual': tipo === 'adultos' ? adultos : ninos
-    });
+ function cambiarNacionalidad() { 
+     const nacionalidad = document.getElementById('nacionalidad-select').value; 
+     const wrapperEntradas = document.getElementById('wrapper-entradas'); 
+     const entradasSelect = document.getElementById('entradas-select'); 
 
-    calcular(); 
-}
+     if (nacionalidad === 'extranjero') { 
+         entradasSelect.value = 'sin'; 
+         wrapperEntradas.style.display = 'none'; 
+     } else { 
+         wrapperEntradas.style.display = 'block'; 
+     } 
 
-function actualizarInterfaz() {
-    const select = document.getElementById('tour-select');
-    const selectedTour = select.value;
-    
-    Object.keys(intervalosCarrusel).forEach(tourKey => detenerAutoplayCarrusel(tourKey));
+     gtag('event', 'interaccion_cotizador', { 
+         'tipo_accion': 'cambio_nacionalidad', 
+         'perfil_usuario': nacionalidad 
+     }); 
 
-    document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active'));
-    document.getElementById('info-' + selectedTour).classList.add('active');
-    
-    activarAutoplayCarrusel(selectedTour);
-    actualizarLogosDinamicos(); 
+     calcular(); 
+ } 
 
-    gtag('event', 'ver_tour', {
-        'id_tour': selectedTour,
-        'nombre_tour': select.options[select.selectedIndex].text
-    });
+ function cambiarEntradas() { 
+     const modalidadEntradas = document.getElementById('entradas-select').value; 
+     gtag('event', 'interaccion_cotizador', { 
+         'tipo_accion': 'seleccion_entradas', 
+         'modalidad': modalidadEntradas 
+     }); 
+     calcular(); 
+ } 
 
-    calcular();
-}
+ function cambiarCant(tipo, cambio) { 
+     if (tipo === 'adultos') { 
+         if (adultos + cambio >= 1) adultos += cambio;  
+         document.getElementById('qty-adultos').innerText = adultos; 
+     } else { 
+         if (ninos + cambio >= 0) ninos += cambio;  
+         document.getElementById('qty-ninos').innerText = ninos; 
+     } 
+      
+     gtag('event', 'interaccion_cotizador', { 
+         'tipo_accion': 'modificar_pasajeros', 
+         'categoria': tipo, 
+         'valor_actual': tipo === 'adultos' ? adultos : ninos 
+     }); 
 
-function calcular() {
-    const select = document.getElementById('tour-select');
-    if(!select) return;
+     calcular();  
+ } 
 
-    const option = select.options[select.selectedIndex];
-    const nacionalidad = document.getElementById('nacionalidad-select').value;
-    const modalidadEntradas = document.getElementById('entradas-select').value;
+ function actualizarInterfaz() { 
+     const select = document.getElementById('tour-select'); 
+     const selectedTour = select.value; 
+      
+     // 1. Apagamos todos los intervalos activos para que los carruseles ocultos no consuman memoria 
+     Object.keys(intervalosCarrusel).forEach(tourKey => detenerAutoplayCarrusel(tourKey)); 
 
-    let precioAdulto = parseInt(option.getAttribute('data-adulto'));
-    let precioNino = parseInt(option.getAttribute('data-nino'));
+     document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active')); 
+     document.getElementById('info-' + selectedTour).classList.add('active'); 
+      
+     // 2. Encendemos el autoplay exclusivo para el nuevo tour que el usuario acaba de seleccionar 
+     activarAutoplayCarrusel(selectedTour); 
 
-    if (nacionalidad === 'mexicano' && modalidadEntradas === 'con') {
-        precioAdulto += parseInt(option.getAttribute('data-entrada-adulto')) || 0;
-        precioNino += parseInt(option.getAttribute('data-entrada-nino')) || 0;
-    }
+     actualizarLogosDinamicos();  
 
-    const total = (adultos * precioAdulto) + (ninos * precioNino);
-    document.getElementById('total-display').innerText = `$${total.toLocaleString()} MXN`;
-}
+     gtag('event', 'ver_tour', { 
+         'id_tour': selectedTour, 
+         'nombre_tour': select.options[select.selectedIndex].text 
+     }); 
 
-function enviarWhatsApp() {
-    const t = traducciones[idiomaActual];
-    const nombre = document.getElementById('nombre-cliente').value.trim();
-    
-    if (!nombre) {
-        alert(t.alert_nombre);
-        document.getElementById('nombre-cliente').focus();
-        return;
-    }
+     calcular(); 
+ } 
 
-    if (!fechaSeleccionada) {
-        alert(t.alert_fecha);
-        return;
-    }
+ function calcular() { 
+     const select = document.getElementById('tour-select'); 
+     if(!select) return; 
 
-    const select = document.getElementById('tour-select');
-    const tourName = select.options[select.selectedIndex].text;
-    const idTour = select.value;
-    const total = document.getElementById('total-display').innerText;
-    const nacionalidad = document.getElementById('nacionalidad-select').value;
-    const modalidadEntradas = document.getElementById('entradas-select').value;
+     const option = select.options[select.selectedIndex]; 
+     const nacionalidad = document.getElementById('nacionalidad-select').value; 
+     const modalidadEntradas = document.getElementById('entradas-select').value; 
 
-    let perfilTexto = nacionalidad === 'mexicano' ? t.opt_nacional : t.opt_extranjero;
-    let entradasTexto = nacionalidad === 'extranjero' ? t.wa_txt_ext : (modalidadEntradas === 'con' ? t.wa_txt_con : t.wa_txt_sin);
-    
-    let mensaje = `${t.wa_saludo}`;
-    mensaje += `${t.wa_nombre} ${nombre}\n`;
-    mensaje += `${t.wa_perfil} ${perfilTexto}\n`;
-    mensaje += `${t.wa_accesos} ${entradasTexto}\n`;
-    mensaje += `${t.wa_tour} ${tourName}\n`;
-    mensaje += `${t.wa_fecha} ${fechaSeleccionada}\n`;
-    mensaje += `${t.wa_adultos} ${adultos}\n`;
-    mensaje += `${t.wa_ninos} ${ninos}\n`;
-    mensaje += `${t.wa_total} ${total}\n\n`;
-    mensaje += `${t.wa_pregunta}`;
+     let precioAdulto = parseInt(option.getAttribute('data-adulto')); 
+     let precioNino = parseInt(option.getAttribute('data-nino')); 
 
-    gtag('event', 'click_whatsapp', {
-        'nombre_viajero': nombre,
-        'nombre_tour': tourName,
-        'id_tour': idTour,
-        'fecha_reserva': fechaSeleccionada,
-        'total_cotizado': total,
-        'cantidad_adultos': adultos,
-        'cantidad_ninos': ninos,
-        'perfil_nacionalidad': nacionalidad,
-        'modalidad_entradas': modalidadEntradas,
-        'idioma_reserva': idiomaActual
-    });
+     if (nacionalidad === 'mexicano' && modalidadEntradas === 'con') { 
+         precioAdulto += parseInt(option.getAttribute('data-entrada-adulto')) || 0; 
+         precioNino += parseInt(option.getAttribute('data-entrada-nino')) || 0; 
+     } 
 
-    window.open(`https://wa.me/529992719285?text=${encodeURIComponent(mensaje)}`, '_blank'); [cite: 254]
-}
+     const total = (adultos * precioAdulto) + (ninos * precioNino); 
+     document.getElementById('total-display').innerText = `$${total.toLocaleString()} MXN`; 
+ } 
 
-document.addEventListener("DOMContentLoaded", inicializarSistema);
+ function enviarWhatsApp() { 
+     const t = traducciones[idiomaActual]; 
+     const nombre = document.getElementById('nombre-cliente').value.trim(); 
+      
+     if (!nombre) { 
+         alert(t.alert_nombre); 
+         document.getElementById('nombre-cliente').focus(); 
+         return; 
+     } 
+
+     if (!fechaSeleccionada) { 
+         alert(t.alert_fecha); 
+         return; 
+     } 
+
+     const select = document.getElementById('tour-select'); 
+     const tourName = select.options[select.selectedIndex].text; 
+     const idTour = select.value; 
+     const total = document.getElementById('total-display').innerText; 
+     const nacionalidad = document.getElementById('nacionalidad-select').value; 
+     const modalidadEntradas = document.getElementById('entradas-select').value; 
+
+     let perfilTexto = nacionalidad === 'mexicano' ? t.opt_nacional : t.opt_extranjero; 
+
+     let entradasTexto = nacionalidad === 'extranjero' ? t.wa_txt_ext : 
+ (modalidadEntradas === 'con' ? t.wa_txt_con : t.wa_txt_sin); 
+      
+     let mensaje = `${t.wa_saludo}`; 
+     mensaje += `${t.wa_nombre} ${nombre}\n`; 
+     mensaje += `${t.wa_perfil} ${perfilTexto}\n`; 
+     mensaje += `${t.wa_accesos} ${entradasTexto}\n`; 
+     mensaje += `${t.wa_tour} ${tourName}\n`; 
+     mensaje += `${t.wa_fecha} ${fechaSeleccionada}\n`; 
+     mensaje += `${t.wa_adultos} ${adultos}\n`; 
+     mensaje += `${t.wa_ninos} ${ninos}\n`; 
+     mensaje += `${t.wa_total} ${total}\n\n`; 
+     mensaje += `${t.wa_pregunta}`; 
+
+     gtag('event', 'click_whatsapp', { 
+         'nombre_viajero': nombre, 
+         'nombre_tour': tourName, 
+         'id_tour': idTour, 
+         'fecha_reserva': fechaSeleccionada, 
+         'total_cotizado': total, 
+         'cantidad_adultos': adultos, 
+         'cantidad_ninos': ninos, 
+         'perfil_nacionalidad': nacionalidad, 
+         'modalidad_entradas': modalidadEntradas, 
+         'idioma_reserva': idiomaActual 
+     }); 
+
+     window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank'); 
+ } 
+
+ document.addEventListener("DOMContentLoaded", inicializarSistema);
