@@ -40,11 +40,12 @@ body {
 }
 
 /* ENCUADRE DE LAS IMÁGENES CORREGIDO */
+/* ENCUADRE CORREGIDO PARA LAS NUEVAS IMÁGENES HORIZONTALES */
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;          
-    background-position: center top; /* Ancla la foto arriba para que no se coma el fondo */
+    background-size: cover;          /* Sigue cubriendo todo el contenedor sin deformarse */
+    background-position: center center; /* MODIFICACIÓN: Centra la foto perfectamente en vertical y horizontal */
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
