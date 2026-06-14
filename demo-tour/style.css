@@ -124,14 +124,30 @@ body {
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 .dynamic-tour-logo { width: 28px; height: 28px; object-fit: contain; } 
 
-/* CONTENEDOR SUPERIOR REESTRUCTURADO EN FLEX */ 
+/* BARRA SUPERIOR REESTRUCTURADA PARA EL LOGO CENTRADO (PUNTO 3) */ 
 .lang-switch-container { 
     display: flex; 
-    justify-content: flex-end; 
+    justify-content: space-between; /* Distribuye el botón a la izq, logo al centro y select a la der */
     align-items: center; 
-    gap: 15px;           
-    margin-bottom: 15px; 
+    margin-bottom: 25px; 
+    padding-bottom: 10px;
+    border-bottom: 1px solid #EFEFEF; /* Línea tenue divisoria decorativa */
 } 
+
+/* Contenedor y dimensiones del Logotipo Oficial */
+.brand-logo-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 180px; /* Tamaño institucional sugerido para barra superior */
+    height: auto;
+}
+
+.brand-logo-top img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
 
 #lang-switch { 
     padding: 8px 12px; border-radius: 8px; border: 2px solid var(--turquesa); background-color: var(--light-bg); 
