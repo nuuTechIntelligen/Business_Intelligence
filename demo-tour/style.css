@@ -20,10 +20,10 @@ body {
     font-size: 19px; 
 } 
 
-/* ENCABEZADO (HERO) CON SLIDER DE ALINEACIÓN DE IMÁGENES CORREGIDO */ 
+/* ENCABEZADO (HERO): Ajuste de dimensiones para que las fotos locales luzcan estables */ 
 .hero { 
     position: relative;
-    height: 32vh;            /* Altura estilizada ideal para que las fotos no queden gigantes */
+    height: 55vh;            /* Aumentamos la altura de 32vh a 55vh para dar espacio al encuadre real de tus imágenes */
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -39,12 +39,12 @@ body {
     z-index: 1;
 }
 
-/* REDIMENSIONADO DE IMÁGENES LOCALES */
+/* REDIMENSIONADO Y ENCUADRE DE LAS IMÁGENES DEL SLIDER */
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;          /* Obliga a la foto a cubrir el contenedor sin deformarse */
-    background-position: center 35%; /* Centra el encuadre fotográfico de Román de forma correcta */
+    background-size: cover;          /* Mantiene la proporción de la foto cubriendo todo el espacio */
+    background-position: center center; /* Centra la imagen perfectamente en vertical y horizontal para que no se deforme */
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
@@ -63,34 +63,38 @@ body {
     100% { opacity: 0; }
 }
 
-/* CAPA OSCURA INDEPENDIENTE PARA NO CONTAMINAR EL TEXTO */
+/* CAPA OSCURA INDEPENDIENTE PARA PROTEGER EL COLOR DE LAS LETRAS */
 .hero-overlay-capa {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(rgba(85, 85, 84, 0.35), rgba(85, 85, 84, 0.45));
-    z-index: 2; /* Por encima de las fotos, por debajo de las letras */
+    background: linear-gradient(rgba(85, 85, 84, 0.3), rgba(85, 85, 84, 0.4)); /* Sombra intermedia para dar contraste */
+    z-index: 2; 
     pointer-events: none;
 }
 
-/* Asegura que el título de letras quede por encima de la capa de sombra */
+/* Posicionamiento del título de letras por encima del slider y de la sombra */
 .hero h1, .badge-private { z-index: 10; position: relative; }
 
-/* AJUSTE RESPONSIVO CORRECTO AL TAMAÑO DE LAS LETRAS */
+/* AJUSTE DEL TAMAÑO DE LAS LETRAS PARA MÓVIL Y PC */
 .hero h1 { 
-    font-size: 34px; /* Tamaño optimizado para dispositivos móviles */
+    font-size: 38px; 
     margin: 0; 
     text-transform: uppercase; 
     letter-spacing: 3px; 
     font-family: 'Big Shoulders Text', sans-serif;
     font-weight: 800;
-    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4)); /* Le da total contraste al texto */
+    filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4)); 
 } 
 
 @media (min-width: 850px) {
+    .hero {
+        height: 50vh;        /* En pantallas de PC el header se compacta ligeramente a 50vh para mantener la estética */
+    }
     .hero h1 {
-        font-size: 52px; /* Escalado perfecto para pantallas de PC */
+        font-size: 56px; 
     }
 }
+
 
 .badge-private { 
     background-color: var(--turquesa); 
