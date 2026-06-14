@@ -88,7 +88,7 @@ body {
 
 @media (min-width: 850px) {
     .hero {
-        height: 50vh;        /* En pantallas de PC el header se compacta ligeramente a 50vh para mantener la estética */
+        height: 32vh;        /* En pantallas de PC el header se compacta ligeramente a 50vh para mantener la estética */
     }
     .hero h1 {
         font-size: 56px; 
