@@ -43,8 +43,10 @@ body {
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;
-    background-position: center top; /* O fuerza a un porcentaje exacto como: center 15% */
+    background-size: contain;       /* Muestra la imagen completa sin recortar nada */
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: #555554;      /* Gris oscuro oficial del manual para rellenar los costados */
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
