@@ -20,10 +20,10 @@ body {
     font-size: 19px; 
 } 
 
-/* ENCABEZADO (HERO): Ajuste de dimensiones para que las fotos locales luzcan estables */ 
+/* ENCABEZADO (HERO) CON ALTURA CORRECTA DE 32VH */ 
 .hero { 
     position: relative;
-    height: 32vh;            /* Aumentamos la altura de 32vh a 55vh para dar espacio al encuadre real de tus imágenes */
+    height: 32vh;            /* CORRECCIÓN: Asegúrate de que diga vh y no hv */
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -39,12 +39,12 @@ body {
     z-index: 1;
 }
 
-/* REDIMENSIONADO Y ENCUADRE DE LAS IMÁGENES DEL SLIDER */
+/* ENCUADRE DE LAS IMÁGENES CORREGIDO */
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;
-    background-position: center top; /* O fuerza a un porcentaje exacto como: center 15% */
+    background-size: cover;          
+    background-position: center top; /* Ancla la foto arriba para que no se coma el fondo */
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
