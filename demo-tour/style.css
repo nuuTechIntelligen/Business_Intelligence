@@ -78,16 +78,7 @@ body {
 .badge-private { z-index: 3; position: relative; }
 
 /* CORRECCIÓN EXCLUSIVA: Elevamos el logo por encima de las sombras y efectos del slider */
-.hero-logo-main {
-    z-index: 10;                  /* Capa superior absoluta para evitar contaminación de color */
-    position: relative;
-    isolation: isolate;           /* Aísla el contenedor de mezclas de color del fondo */
-    width: 90%;          
-    max-width: 240px;    
-    height: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35)); /* Sombra más profunda para darle realismo y despegue */
-}
+.hero h1 { font-size: 46px; margin: 0; text-transform: uppercase; letter-spacing: 3px; z-index: 2; }
 
 .badge-private { 
     background-color: var(--turquesa); 
