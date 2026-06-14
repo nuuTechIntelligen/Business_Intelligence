@@ -23,7 +23,7 @@ body {
 /* ENCABEZADO (HERO): Ajuste de dimensiones para que las fotos locales luzcan estables */ 
 .hero { 
     position: relative;
-    height: 55vh;            /* Aumentamos la altura de 32vh a 55vh para dar espacio al encuadre real de tus imágenes */
+    height: 32vh;            /* Aumentamos la altura de 32vh a 55vh para dar espacio al encuadre real de tus imágenes */
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -43,8 +43,8 @@ body {
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;          /* Mantiene la proporción de la foto cubriendo todo el espacio */
-    background-position: center center; /* Centra la imagen perfectamente en vertical y horizontal para que no se deforme */
+    background-size: cover;
+    background-position: center top; /* O fuerza a un porcentaje exacto como: center 15% */
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
