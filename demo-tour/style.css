@@ -62,17 +62,19 @@ body {
     100% { opacity: 0; }
 }
 
-.hero h1, .badge-private { z-index: 3; position: relative; }
-/*.hero h1 { font-size: 46px; margin: 0; text-transform: uppercase; letter-spacing: 3px; z-index: 2; } */
-/* ESTILO DEL LOGOTIPO SUSTITUTO EN EL HERO */
+/* Modificamos el z-index de los elementos fijos sobre el slider */
+.badge-private { z-index: 3; position: relative; }
+
+/* CORRECCIÓN EXCLUSIVA: Elevamos el logo por encima de las sombras y efectos del slider */
 .hero-logo-main {
-    z-index: 3;
+    z-index: 10;                  /* Capa superior absoluta para evitar contaminación de color */
     position: relative;
-    width: 90%;          /* Flexibilidad para pantallas móviles pequeñas */
-    max-width: 240px;    /* Ancho límite institucional en pantallas de PC */
+    isolation: isolate;           /* Aísla el contenedor de mezclas de color del fondo */
+    width: 90%;          
+    max-width: 240px;    
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25)); /* Resalta el logo sobre los paisajes */
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35)); /* Sombra más profunda para darle realismo y despegue */
 }
 
 .badge-private { 
@@ -138,10 +140,10 @@ body {
 .lang-switch-container { 
     display: flex; 
     justify-content: flex-end; 
-    align-items: center; /* Alinea verticalmente el botón con el select */
+    align-items: center; 
     gap: 15px;           
     margin-bottom: 15px; 
-}
+} 
 
 #lang-switch { 
     padding: 8px 12px; border-radius: 8px; border: 2px solid var(--turquesa); background-color: var(--light-bg); 
