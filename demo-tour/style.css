@@ -63,7 +63,17 @@ body {
 }
 
 .hero h1, .badge-private { z-index: 3; position: relative; }
-.hero h1 { font-size: 46px; margin: 0; text-transform: uppercase; letter-spacing: 3px; z-index: 2; } 
+/*.hero h1 { font-size: 46px; margin: 0; text-transform: uppercase; letter-spacing: 3px; z-index: 2; } */
+/* ESTILO DEL LOGOTIPO SUSTITUTO EN EL HERO */
+.hero-logo-main {
+    z-index: 3;
+    position: relative;
+    width: 90%;          /* Flexibilidad para pantallas móviles pequeñas */
+    max-width: 240px;    /* Ancho límite institucional en pantallas de PC */
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25)); /* Resalta el logo sobre los paisajes */
+}
 
 .badge-private { 
     background-color: var(--turquesa); 
