@@ -39,6 +39,18 @@ body {
     z-index: 1;
 }
 
+/* Capa oscura independiente para dar contraste a las fotos de fondo */
+.hero-overlay-capa {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(85, 85, 84, 0.4), rgba(85, 85, 84, 0.5));
+    z-index: 2; /* Se queda por encima de las fotos (z-index: 1) pero por debajo del logo (z-index: 10) */
+    pointer-events: none;
+}
+
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
