@@ -188,13 +188,33 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     font-family: 'Big Shoulders Text', sans-serif; font-weight: bold; font-size: 22px; margin-top: 15px; box-shadow: 0 4px 15px rgba(253, 177, 163, 0.3); text-transform: uppercase; 
 } 
 
-/* NUEVO: Botón de agendado de llamadas personalizadas */
-.btn-agendar-maestro {
-    display: block; width: 100%; border: 2px solid var(--turquesa-dark); background-color: transparent;
-    color: var(--text); text-align: center; padding: 12px; border-radius: 12px; font-family: 'Big Shoulders Text';
-    font-weight: bold; font-size: 18px; margin-top: 12px; cursor: pointer; transition: all 0.3s;
+/* REEMPLAZO DEL ESTILO DEL BOTÓN DE AGENDADO (AHORA ARRIBA) */
+.lang-switch-container { 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; /* Alinea verticalmente el botón con el select */
+    gap: 15px;           /* Deja un espacio elegante entre el botón y el idioma */
+    margin-bottom: 15px; 
+} 
+
+.btn-agendar-top {
+    display: inline-block;
+    background-color: transparent;
+    border: 2px solid var(--turquesa-dark);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: 'Big Shoulders Text', sans-serif;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
-.btn-agendar-maestro:hover { background-color: var(--executive-dark); }
+
+.btn-agendar-top:hover {
+    background-color: var(--executive-dark); /* Iluminación suave al pasar el mouse */
+    border-color: var(--executive-dark);
+}
 
 /* NUEVO: Estilos de la Ventana Modal */
 .modal-agenda-wrapper {
