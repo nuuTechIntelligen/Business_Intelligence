@@ -1,260 +1,449 @@
-// DATA MASTER: RUTAS PRINCIPALES, COMPLEMENTOS EXCLUSIVOS Y TARIFARIO ESCALONADO
-const ESTRUCTURA_TOURS_VIAHA = {
-    chichen: {
-        titulo: "Chichén Itzá",
-        categoria: "cultura",
-        descripcion: "Descubre el esplendor de la capital del imperio maya. Una experiencia privada diseñada para conectar con la majestuosidad arqueológica antes de adentrarte en rincones coloniales o aguas sagradas.",
-        complementos: [
-            { id: "ch_zaci", nombre: "Cenote Zací / Valladolid", icono: "fa-water", precios: { 2: 3759, 3: 1300, 4: 1000 } },
-            { id: "ch_izamal", nombre: "Pueblo Mágico Izamal", icono: "fa-building", precios: { 2: 3402, 3: 1150, 4: 900 } },
-            { id: "ch_lolha", nombre: "Cenote Lol-Há", icono: "fa-droplet", precios: { 2: 3402, 3: 1150, 4: 900 } },
-            { id: "ch_yodzonot", nombre: "Cenote Yodzonot", icono: "fa-water", precios: { 2: 3402, 3: 1150, 4: 900 } }
-        ]
-    },
-    uxmal: {
-        titulo: "Uxmal",
-        categoria: "cultura",
-        descripcion: "Admira la arquitectura del estilo Puuc en una de las ciudades mayas más imponentes y armónicas, complementada con haciendas históricas o talleres tradicionales.",
-        complementos: [
-            { id: "ux_choco", nombre: "Museo Choco-Story", icono: "fa-jar", precios: { 2: 3354.75, 3: 1150, 4: 900 } },
-            { id: "ux_mucuyche", nombre: "Hacienda Mucuyché", icono: "fa-gopuram", precios: { 2: 3354.75, 3: 1150, 4: 900 } },
-            { id: "ux_yaalutzil", nombre: "Cenote Yaal Utzil", icono: "fa-water", precios: { 2: 3354.75, 3: 1150, 4: 900 } }
-        ]
-    },
-    coloradas: {
-        titulo: "Coloradas Tour Day",
-        categoria: "naturaleza",
-        descripcion: "Un viaje visual inolvidable hacia las espectaculares lagunas rosa de Las Coloradas, pasando por la gastronomía de Motul y la naturaleza virgen de Playa Cancunito.",
-        complementos: [
-            { id: "col_principal", nombre: "Motul + Playa Cancunito", icono: "fa-umbrella-beach", precios: { 2: 4042.50, 3: 1350, 4: 1050 } }
-        ]
-    },
-    celestun: {
-        titulo: "Celestún",
-        categoria: "naturaleza",
-        descripcion: "Adéntrate en la reserva de la biosfera para admirar las colonias de flamencos rosas en su hábitat natural, recorriendo túneles de manglares en embarcaciones privadas.",
-        complementos: [
-            { id: "cel_bote", nombre: "Recorrido en Bote Eco", icono: "fa-ship", precios: { 2: 3370.50, 3: 1150, 4: 900 } },
-            { id: "cel_lancha", nombre: "Paseo de Lancha Tradicional", icono: "fa-anchor", precios: { 2: 3370.50, 3: 1150, 4: 900 } }
-        ]
-    },
-    cenotes: {
-        titulo: "Ruta de Cenotes Privados",
-        categoria: "naturaleza",
-        descripcion: "Siente la pureza de las aguas subterráneas del Mayab. Recorridos exclusivos fuera del radar turístico masivo para nadar con absoluta libertad.",
-        complementos: [
-            { id: "cen_pixyah", nombre: "Cenotes Pixyah", icono: "fa-water", precios: { 2: 3087, 3: 1150, 4: 800 } },
-            { id: "cen_tzabnah", nombre: "Grutas y Cenote Tzabnah", icono: "fa-mountain-sun", precios: { 2: 3087, 3: 1150, 4: 800 } },
-            { id: "cen_homun", nombre: "Oasis de Cenotes Homún", icono: "fa-droplet", precios: { 2: 3087, 3: 1150, 4: 800 } }
-        ]
-    }
-};
+/** * VARIABLES GLOBALES Y DICCIONARIO DE IDIOMAS 
+  */ 
+ let adultos = 1; 
+ let ninos = 0; 
+ let fp = null;  
+ let fechaSeleccionada = ""; 
+ let idiomaActual = "es"; 
 
-// DICCIONARIO TRADUCCIÓN BÁSICA PARA SOPORTE DE IDIOMAS GLOBAL
-const DICCIONARIO_IDIOMAS = {
-    es: { hero_title: "VÍA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", nav_agenda: "Agendar Llamada Directa" },
-    en: { hero_title: "VIA HA' MEXICO", hero_badge: "✨ Immerse in the Mayab", nav_agenda: "Book Direct Call" },
-    fr: { hero_title: "VIA HA' MEXICO", hero_badge: "✨ Plongez dans le Mayab", nav_agenda: "Prendre RDV" }
-};
+ // Objeto para controlar la posición del carrusel de cada tour de forma independiente 
+ const posicionesCarrusel = { 
+     cenotes: 0, 
+     chichen: 0, 
+     celestun: 0 
+ }; 
 
-let flatpickrInstancia = null;
+ // NUEVO: Objeto para almacenar los temporizadores de autoplay de cada carrusel 
+ const intervalosCarrusel = { 
+     cenotes: null, 
+     chichen: null, 
+     celestun: null 
+ }; 
 
-// INICIALIZACIÓN AL CARGAR LA PÁGINA
-document.addEventListener("DOMContentLoaded", function() {
-    // Configuración del calendario Flatpickr de soporte interno
-    flatpickrInstancia = flatpickr("#calendario-agenda-inline", {
-        minDate: "today",
-        dateFormat: "Y-m-d"
-    });
-});
+ const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
-// CAMBIAR EL IDIOMA DEL CONTENIDO ESTÁTICO DE LA WEB
-function cambiarIdiomaGlobal(idioma) {
-    const elementos = document.querySelectorAll("[data-i18n]");
-    elementos.forEach(el => {
-        const llave = el.getAttribute("data-i18n");
-        if (DICCIONARIO_IDIOMAS[idioma] && DICCIONARIO_IDIOMAS[idioma][llave]) {
-            el.innerText = DICCIONARIO_IDIOMAS[idioma][llave];
-        }
-    });
-}
+ const traducciones = { 
+     es: { 
+         hero_title: "VIAJÁ", 
+         hero_badge: "✨ Experiencias Exclusivas", 
+         pregunta_tour: "¿Qué paraíso quieres visitar hoy?", 
+         tour_cenotes: "Tour 4 Cenotes (Bici/Tren)", 
+         tour_chichen: "Chichén Itzá & Valladolid", 
+         tour_celestun: "Celestún (Flamencos & Manglares)", 
+         titulo_cenotes: "Detalles del Tour Cenotes", 
 
-// MANEJO DINÁMICO DEL STEPPER DE PASAJEROS
-function modificarPasajeros(valor) {
-    const campo = document.getElementById("campo-pasajeros");
-    let actual = parseInt(campo.value) + valor;
-    if (actual >= 1) {
-        campo.value = actual;
-        calcularPrecioFinal();
-    }
-}
+         desc_cenotes: "Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas con fotografía profesional por Román.", 
+         titulo_chichen: "Maravilla del Mundo", 
 
-// EVALUAR SI SE REQUIERE ESPECIFICAR OTRO IDIOMA PARA EL TOUR
-function evaluarOtroIdioma(valor) {
-    const contenedor = document.getElementById("contenedor-otro-idioma");
-    if (valor === "Otro") {
-        contenedor.classList.remove("oculto");
-    } else {
-        contenedor.classList.add("oculto");
-    }
-}
+         desc_chichen: "Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet y cobertura fotográfica profesional.", 
+         titulo_celestun: "Naturaleza Viva", 
 
-// ACTUALIZACIÓN DE INTERFAZ AL SELECCIONAR UN TOUR
-function actualizarInterfazTour() {
-    const llaveTour = document.getElementById("campo-tour-principal").value;
-    if (!llaveTour) return;
+         desc_celestun: "Paseo en lancha para ver flamencos rosas, túneles de manglar y tiempo de playa. Sesión fotográfica de paisaje incluida.", 
+         reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros", 
+         btn_reviews: "Ver opiniones de clientes ↗", 
+         titulo_cotizador: "Cotiza tu grupo", 
+         label_nombre: "Nombre de quien solicita", 
+         ph_nombre: "Escribe tu nombre completo...", 
+         label_nacionalidad: "Nacionalidad", 
+         opt_nacional: "🇲🇽 Mexicano / Nacional", 
+         opt_extranjero: "✈️ Extranjero / International", 
+         label_entradas: "Modalidad de Entradas", 
+         opt_sin_entradas: "Tour sin entradas incluidas", 
+         opt_con_entradas: "Tour con entradas incluidas", 
+         label_fecha: "Fecha del Recorrido", 
+         ph_fecha: "Selecciona una fecha o rango...", 
+         label_adultos: "Adultos", 
+         label_ninos: "Niños (-12 años)", 
+         total_estimado: "Total Estimado (Servicio Privado):", 
+         btn_reservar: "Reservar por WhatsApp", 
+         alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", 
+         alert_fecha: "Por favor, selecciona una fecha disponible.", 
+         wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *Viajá*:\n\n", 
+         wa_nombre: "👤 *Nombre:*", 
+         wa_perfil: "🌍 *Perfil:*", 
+         wa_accesos: "🎟️ *Accesos:*", 
+         wa_tour: "🌴 *Tour:*", 
+         wa_fecha: "📅 *Fecha:*", 
+         wa_adultos: "👥 *Adultos:*", 
+         wa_ninos: "👶 *Niños:*", 
+         wa_total: "💰 *Total estimado:*", 
+         wa_pregunta: "¿Tienen disponibilidad para estas condiciones?", 
+         wa_txt_ext: "Sin entradas (Tarifa Extranjero)", 
+         wa_txt_con: "Con entradas incluidas", 
+         wa_txt_sin: "Sin entradas" 
+     }, 
+     en: { 
+         hero_title: "VIAJÁ", 
+         hero_badge: "✨ Exclusive Experiences", 
+         pregunta_tour: "What paradise do you want to visit today?", 
+         tour_cenotes: "4 Cenotes Tour (Bike/Train)", 
+         tour_chichen: "Chichen Itza & Valladolid", 
+         tour_celestun: "Celestun (Flamingos & Mangroves)", 
+         titulo_cenotes: "Cenotes Tour Details", 
 
-    const dataTour = ESTRUCTURA_TOURS_VIAHA[llaveTour];
+         desc_cenotes: "Visit 4 cenotes: Closed, Semi-open, Open, and River type. Includes bikes, life jackets, and showers with professional photo coverage by Roman.", 
+         titulo_chichen: "Wonder of the World", 
 
-    // 1. Actualizar Columna de Información e Isologos Temáticos Dinámicos (Punto 9)
-    document.getElementById("info-titulo-tour").innerText = dataTour.titulo;
-    document.getElementById("info-descripcion-tour").innerText = dataTour.descripcion;
+         desc_chichen: "Guided tour, free time in Valladolid, and visit to an open cenote for swimming. Buffet and professional photo coverage included.", 
+         titulo_celestun: "Living Nature", 
+         desc_celestun: "Boat ride to see pink flamingos, mangrove tunnels, and beach time. Landscape photo session included.", 
+         reviews_text: "⭐ Discover why our travelers recommend us", 
+         btn_reviews: "See customer reviews ↗", 
+         titulo_cotizador: "Quote your group", 
+         label_nombre: "Lead Traveler Name", 
+         ph_nombre: "Enter your full name...", 
+         label_nacionalidad: "Nationality", 
+         opt_nacional: "🇲🇽 Mexican / National", 
+         opt_extranjero: "✈️ Foreigner / International", 
+         label_entradas: "Tickets Modality", 
+         opt_sin_entradas: "Tour without tickets included", 
+         opt_con_entradas: "Tour with tickets included", 
+         label_fecha: "Tour Date", 
+         ph_fecha: "Select a date or range...", 
+         label_adultos: "Adults", 
+         label_ninos: "Children (Under 12)", 
+         total_estimado: "Estimated Total (Private Service):", 
+         btn_reservar: "Book via WhatsApp", 
+         alert_nombre: "Please enter your full name to customize your quote.", 
+         alert_fecha: "Please select an available date.", 
+         wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *Viajá*:\n\n", 
+         wa_nombre: "👤 *Name:*", 
+         wa_perfil: "🌍 *Profile:*", 
+         wa_accesos: "🎟️ *Access:*", 
+         wa_tour: "🌴 *Tour:*", 
+         wa_fecha: "📅 *Date:*", 
+         wa_adultos: "👥 *Adults:*", 
+         wa_ninos: "👶 *Children:*", 
+         wa_total: "💰 *Estimated Total:*", 
+         wa_pregunta: "Do you have availability for these conditions?", 
+         wa_txt_ext: "No tickets (Foreigner Rate)", 
+         wa_txt_con: "With tickets included", 
+         wa_txt_sin: "Without tickets" 
+     } 
+ }; 
 
-    const iconoContenedor = document.getElementById("isologo-tematico-contenedor");
-    if (dataTour.categoria === "cultura") {
-        iconoContenedor.innerHTML = '<i class="fa-solid fa-gopuram"></i>'; // Isologo de Cultura/Arqueología
-        iconoContenedor.className = "isologo-dinamico-icono text-arena";
-    } else {
-        iconoContenedor.innerHTML = '<i class="fa-solid fa-water"></i>'; // Isologo de Naturaleza/Agua
-        iconoContenedor.className = "isologo-dinamico-icono text-menta";
-    }
+ async function inicializarSistema() { 
+     while (typeof flatpickr === 'undefined') { 
+         await new Promise(resolve => setTimeout(resolve, 100)); 
+     } 
 
-    // 2. Renderizar Complementos como Radio Buttons Exclusivos (Punto 8)
-    const contenedorGrid = document.getElementById("grid-radio-complementos");
-    contenedorGrid.innerHTML = "";
+     try { 
+         inicializarCalendario(); 
+         calcular(); 
+         cargarBloqueos(); 
+         actualizarLogosDinamicos();  
+         inicializarSoportesTactiles();  
+          
+         // CORRECCIÓN: Forzamos a la interfaz a activar el autoplay del tour seleccionado por defecto 
+         const select = document.getElementById('tour-select'); 
+         if (select) { 
+             activarAutoplayCarrusel(select.value); 
+         } 
+          
+         const btnReviews = document.getElementById('btn-reviews'); 
+         if (btnReviews) { 
+             btnReviews.addEventListener('click', function() { 
+                 gtag('event', 'clic_testimonios', { 'destino_red': 'Instagram_Reviews' }); 
+             }); 
+         } 
+     } catch (error) { 
+         console.error("❌ Error en inicialización:", error.message); 
+     } 
+ } 
 
-    dataTour.complementos.forEach((comp, indice) => {
-        const checked = indice === 0 ? "checked" : "";
-        const htmlTarjeta = `
-            <label class="tarjeta-radio">
-                <input type="radio" name="complemento_exclusivo" value="${comp.id}" ${checked} onchange="calcularPrecioFinal()">
-                <div class="radio-content">
-                    <i class="fa-solid ${comp.icono}"></i>
-                    <span>${comp.nombre}</span>
-                </div>
-            </label>
-        `;
-        contenedorGrid.insertAdjacentHTML("beforeend", htmlTarjeta);
-    });
+ function inicializarCalendario() { 
+     const campoFecha = document.getElementById('fecha-reserva'); 
+     if (!campoFecha) return; 
 
-    // Mostrar secciones ocultas del formulario
-    document.getElementById("contenedor-complementos").classList.remove("oculto");
-    document.getElementById("contenedor-plus").classList.remove("oculto");
+     if (fp) fp.destroy();  
 
-    calcularPrecioFinal();
-}
+     fp = flatpickr(campoFecha, { 
+         locale: idiomaActual === 'es' ? "es" : "default",  
+         mode: "range",  
+         minDate: "today",  
+         dateFormat: "Y-m-d", 
+         altInput: true,  
+         altFormat: "d/m/Y", 
+         altInputClass: "flatpickr-input", 
+         disableMobile: true, 
+         disable: [],  
+         onChange: function(selectedDates, dateStr) { 
+             fechaSeleccionada = dateStr; 
+             gtag('event', 'interaccion_cotizador', { 
+                 'tipo_accion': 'seleccion_fecha', 
+                 'fecha_viaje': dateStr 
+             }); 
+         } 
+     }); 
+ } 
 
-// CÁLCULO ARITMÉTICO BAJO REGLAS ESCALONADAS REALES (Puntos 2, 3 y 4 pasajeros)
-function calcularPrecioFinal() {
-    const llaveTour = document.getElementById("campo-tour-principal").value;
-    if (!llaveTour) return;
+ function moverCarrusel(idTour, direccion) { 
+     const track = document.getElementById(`track-${idTour}`); 
+     if (!track) return; 
+     const imagenes = track.querySelectorAll('img'); 
+     const totalImagenes = imagenes.length; 
+      
+     posicionesCarrusel[idTour] += direccion; 
+      
+     if (posicionesCarrusel[idTour] >= totalImagenes) posicionesCarrusel[idTour] = 0; 
+     if (posicionesCarrusel[idTour] < 0) posicionesCarrusel[idTour] = totalImagenes - 1; 
+      
+     const porcentajeMovimiento = posicionesCarrusel[idTour] * -100; 
+     track.style.transform = `translateX(${porcentajeMovimiento}%)`; 
 
-    const pasajeros = parseInt(document.getElementById("campo-pasajeros").value);
-    const idCompSeleccionado = document.querySelector('input[name="complemento_exclusivo"]:checked')?.value;
+     gtag('event', 'interaccion_galeria', { 
+         'id_tour': idTour, 
+         'imagen_index': posicionesCarrusel[idTour] 
+     }); 
+ } 
 
-    const dataTour = ESTRUCTURA_TOURS_VIAHA[llaveTour];
-    const complementoObj = dataTour.complementos.find(c => c.id === idCompSeleccionado);
+ /** * NUEVO: Función para activar el Autoplay automático (Cambia cada 4 segundos = 4000ms) 
+  */ 
+ function activarAutoplayCarrusel(idTour) { 
+     // Limpiamos cualquier temporizador previo para evitar duplicados en memoria 
+     if (intervalosCarrusel[idTour]) { 
+         clearInterval(intervalosCarrusel[idTour]); 
+     } 
+      
+     // Creamos el intervalo automático 
+     intervalosCarrusel[idTour] = setInterval(() => { 
+         moverCarrusel(idTour, 1); 
+     }, 4000);  
+ } 
 
-    if (!complementoObj) return;
+ /** * NUEVO: Función para detener el Autoplay (Útil cuando el usuario toca la pantalla) 
+  */ 
+ function detenerAutoplayCarrusel(idTour) { 
+     if (intervalosCarrusel[idTour]) { 
+         clearInterval(intervalosCarrusel[idTour]); 
+         intervalosCarrusel[idTour] = null; 
+     } 
+ } 
 
-    let costoTotal = 0;
+ function inicializarSoportesTactiles() { 
+     const contenedores = document.querySelectorAll('.carousel-container'); 
+      
+     contenedores.forEach(container => { 
+         let xInicial = null; 
+         const track = container.querySelector('.carousel-track'); 
+         if(!track) return; 
+         const idTour = track.id.replace('track-', ''); 
 
-    // Regla de negocio escalonada:
-    if (pasajeros === 1 || pasajeros === 2) {
-        costoTotal = complementoObj.precios[2]; // Tarifa corrida base para 2 personas
-    } else if (pasajeros === 3) {
-        costoTotal = complementoObj.precios[3] * 3;
-    } else {
-        costoTotal = complementoObj.precios[4] * pasajeros; // Precio congelado de 4 en adelante
-    }
+         container.addEventListener('touchstart', (e) => { 
+             detenerAutoplayCarrusel(idTour); // NUEVO: Si el usuario toca el carrusel, pausamos el autoplay 
+             xInicial = e.touches[0].clientX; 
+         }, { passive: true }); 
 
-    // Formatear precio para el usuario
-    document.getElementById("display-precio-total").innerText = new Intl.NumberFormat('es-MX', {
-        style: 'currency',
-        currency: 'MXN'
-    }).format(costoTotal) + " MXN";
-}
+         container.addEventListener('touchend', (e) => { 
+             if (!xInicial) return; 
+             let xFinal = e.changedTouches[0].clientX; 
+             let diferenciaX = xInicial - xFinal; 
 
-// CONSTRUCCIÓN E INYECCIÓN DE TEXTO DIRECTO PARA MENSAJE COMERCIAL DE WHATSAPP
-// CONSTRUCCIÓN E INYECCIÓN DE TEXTO CON ICONOS / EMOJIS PARA EL MENSAJE DE WHATSAPP
-function enviarCotizacionWhatsApp() {
-    const nombre = document.getElementById("campo-nombre").value.trim();
-    const llaveTour = document.getElementById("campo-tour-principal").value;
+             if (Math.abs(diferenciaX) > 50) { 
+                 if (diferenciaX > 0) { 
+                     moverCarrusel(idTour, 1);  
+                 } else { 
+                     moverCarrusel(idTour, -1);  
+                 } 
+             } 
+             xInicial = null; 
+             activarAutoplayCarrusel(idTour); // NUEVO: Al soltar el dedo, se reactiva el carrusel solo 
+         }, { passive: true }); 
+     }); 
+ } 
 
-    if (!llaveTour || !nombre) {
-        alert("Por favor ingresa tu nombre y selecciona una ruta antes de reservar.");
-        return;
-    }
+ function actualizarLogosDinamicos() { 
+     const select = document.getElementById('tour-select'); 
+     if (!select) return; 
+     const urlLogo = select.options[select.selectedIndex].getAttribute('data-logo'); 
+      
+     document.querySelectorAll('.dynamic-tour-logo').forEach(img => { 
+         img.src = urlLogo; 
+     }); 
+ } 
 
-    const pasajeros = document.getElementById("campo-pasajeros").value;
-    let idiomaSeleccionado = document.getElementById("campo-idioma-tour").value;
-    if (idiomaSeleccionado === "Otro") {
-        idiomaSeleccionado = document.getElementById("campo-otro-idioma").value || "Otro idioma";
-    }
+ function aplicarTextosDeIdioma() { 
+     const t = traducciones[idiomaActual]; 
 
-    const dataTour = ESTRUCTURA_TOURS_VIAHA[llaveTour];
-    const idCompSeleccionado = document.querySelector('input[name="complemento_exclusivo"]:checked')?.value;
-    const complementoObj = dataTour.complementos.find(c => c.id === idCompSeleccionado);
+     document.querySelectorAll('[data-i18n]').forEach(el => { 
+         const key = el.getAttribute('data-i18n'); 
+         if (t[key]) el.innerText = t[key]; 
+     }); 
 
-    // Capturar Actividades Plus elegidas
-    let extrasElegidos = [];
-    document.querySelectorAll('input[name="actividad_plus"]:checked').forEach(cb => {
-        extrasElegidos.push(cb.value);
-    });
-    const stringExtras = extrasElegidos.length > 0 ? extrasElegidos.join(", ") : "Ninguno";
+     document.querySelectorAll('[data-i18n-ph]').forEach(el => { 
+         const key = el.getAttribute('data-i18n-ph'); 
+         if (t[key]) el.placeholder = t[key]; 
+     }); 
 
-    const precioFinalString = document.getElementById("display-precio-total").innerText;
+     inicializarCalendario(); 
+     cargarBloqueos();  
+     actualizarInterfaz(); 
+      
+     gtag('event', 'cambio_idioma', { 'idioma_seleccionado': idiomaActual }); 
+ } 
 
-    // Asignación de emoji principal según la categoría del tour
-    const emojiCategoria = dataTour.categoria === "cultura" ? "🏛️" : "🌊";
+ function cambiarIdioma() { 
+     idiomaActual = document.getElementById('lang-switch').value; 
+     aplicarTextosDeIdioma(); 
+ } 
 
-    // Estructuración del mensaje comercial con emojis y formato enriquecido
-    let mensajeTexto = `✨ *¡Hola VÍA HA' MÉXICO!* ✨\n\n`;
-    mensajeTexto += `Me interesa diseñar una experiencia privada a la medida. Aquí están mis detalles:\n\n`;
-    mensajeTexto += `👤 *Viajero Principal:* ${nombre}\n`;
-    mensajeTexto += `${emojiCategoria} *Ruta Base:* ${dataTour.titulo}\n`;
-    mensajeTexto += `🗺️ *Personalización:* ${complementoObj.nombre}\n`;
-    mensajeTexto += `➕ *Actividades Plus:* ${stringExtras}\n`;
-    mensajeTexto += `👥 *Pasajeros:* ${pasajeros} persona(s)\n`;
-    mensajeTexto += `🗣️ *Idioma del Tour:* ${idiomaSeleccionado}\n`;
-    mensajeTexto += `💰 *Costo Total Estimado:* ${precioFinalString}\n\n`;
-    mensajeTexto += `🌿 _Al contratar este tour, sé que contribuyo al desarrollo sustentable de las comunidades del Mayab._\n\n`;
-    mensajeTexto += `¿Tienen disponibilidad para coordinar los detalles de este itinerario?`;
+ function cargarBloqueos() { 
+     fetch(API_URL) 
+         .then(res => res.json()) 
+         .then(data => { 
+             const fechas = data 
+                 .filter(row => row.fecha && row.fecha.trim().length > 5) 
+                 .map(row => row.fecha.trim()); 
 
-    const numeroComercialViaHa = "525560040025"; // Número central de la empresa
-    const urlFinalWA = `https://api.whatsapp.com/send?phone=${numeroComercialViaHa}&text=${encodeURIComponent(mensajeTexto)}`;
-    
-    window.open(urlFinalWA, "_blank");
-}
+             if (fp && typeof fp.set === 'function') { 
+                 fp.set("disable", fechas); 
+             } 
+         }) 
+         .catch(err => console.error("❌ Error conectando con SheetDB:", err)); 
+ } 
 
-// CONTROLADORES DE MODAL INTERACTIVA DE AGENDA
-function abrirModalAgenda() {
-    document.getElementById("modal-agenda-control").classList.remove("oculto");
-}
+ function cambiarNacionalidad() { 
+     const nacionalidad = document.getElementById('nacionalidad-select').value; 
+     const wrapperEntradas = document.getElementById('wrapper-entradas'); 
+     const entradasSelect = document.getElementById('entradas-select'); 
 
-fn_cerrarModalAgenda = function() {
-    document.getElementById("modal-agenda-control").classList.add("oculto");
-}
-window.cerrarModalAgenda = fn_cerrarModalAgenda;
+     if (nacionalidad === 'extranjero') { 
+         entradasSelect.value = 'sin'; 
+         wrapperEntradas.style.display = 'none'; 
+     } else { 
+         wrapperEntradas.style.display = 'block'; 
+     } 
 
-function confirmarLlamadaWhatsApp() {
-    const fecha = document.getElementById("calendario-agenda-inline").value;
-    const bloque = document.getElementById("campo-bloque-horario").value;
+     gtag('event', 'interaccion_cotizador', { 
+         'tipo_accion': 'cambio_nacionalidad', 
+         'perfil_usuario': nacionalidad 
+     }); 
 
-    if (!fecha) {
-        alert("Por favor selecciona una fecha para la llamada.");
-        return;
-    }
+     calcular(); 
+ } 
 
-    const mensajeAgenda = `¡Hola VÍA HA' MÉXICO! Me gustaría agendar una *Llamada Directa de Diseño* para planificar mi viaje:
-• *Fecha Solicitada:* ${fecha}
-• *Bloque de Horario:* ${bloque}
+ function cambiarEntradas() { 
+     const modalidadEntradas = document.getElementById('entradas-select').value; 
+     gtag('event', 'interaccion_cotizador', { 
+         'tipo_accion': 'seleccion_entradas', 
+         'modalidad': modalidadEntradas 
+     }); 
+     calcular(); 
+ } 
 
-Agradezco su confirmación.`;
+ function cambiarCant(tipo, cambio) { 
+     if (tipo === 'adultos') { 
+         if (adultos + cambio >= 1) adultos += cambio;  
+         document.getElementById('qty-adultos').innerText = adultos; 
+     } else { 
+         if (ninos + cambio >= 0) ninos += cambio;  
+         document.getElementById('qty-ninos').innerText = ninos; 
+     } 
+      
+     gtag('event', 'interaccion_cotizador', { 
+         'tipo_accion': 'modificar_pasajeros', 
+         'categoria': tipo, 
+         'valor_actual': tipo === 'adultos' ? adultos : ninos 
+     }); 
 
-    const numeroComercialViaHa = "525560040025";
-    const urlFinalAgenda = `https://api.whatsapp.com/send?phone=${numeroComercialViaHa}&text=${encodeURIComponent(mensajeAgenda)}`;
-    
-    window.open(urlFinalAgenda, "_blank");
-    cerrarModalAgenda();
-}
+     calcular();  
+ } 
+
+ function actualizarInterfaz() { 
+     const select = document.getElementById('tour-select'); 
+     const selectedTour = select.value; 
+      
+     // 1. Apagamos todos los intervalos activos para que los carruseles ocultos no consuman memoria 
+     Object.keys(intervalosCarrusel).forEach(tourKey => detenerAutoplayCarrusel(tourKey)); 
+
+     document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active')); 
+     document.getElementById('info-' + selectedTour).classList.add('active'); 
+      
+     // 2. Encendemos el autoplay exclusivo para el nuevo tour que el usuario acaba de seleccionar 
+     activarAutoplayCarrusel(selectedTour); 
+
+     actualizarLogosDinamicos();  
+
+     gtag('event', 'ver_tour', { 
+         'id_tour': selectedTour, 
+         'nombre_tour': select.options[select.selectedIndex].text 
+     }); 
+
+     calcular(); 
+ } 
+
+ function calcular() { 
+     const select = document.getElementById('tour-select'); 
+     if(!select) return; 
+
+     const option = select.options[select.selectedIndex]; 
+     const nacionalidad = document.getElementById('nacionalidad-select').value; 
+     const modalidadEntradas = document.getElementById('entradas-select').value; 
+
+     let precioAdulto = parseInt(option.getAttribute('data-adulto')); 
+     let precioNino = parseInt(option.getAttribute('data-nino')); 
+
+     if (nacionalidad === 'mexicano' && modalidadEntradas === 'con') { 
+         precioAdulto += parseInt(option.getAttribute('data-entrada-adulto')) || 0; 
+         precioNino += parseInt(option.getAttribute('data-entrada-nino')) || 0; 
+     } 
+
+     const total = (adultos * precioAdulto) + (ninos * precioNino); 
+     document.getElementById('total-display').innerText = `$${total.toLocaleString()} MXN`; 
+ } 
+
+ function enviarWhatsApp() { 
+     const t = traducciones[idiomaActual]; 
+     const nombre = document.getElementById('nombre-cliente').value.trim(); 
+      
+     if (!nombre) { 
+         alert(t.alert_nombre); 
+         document.getElementById('nombre-cliente').focus(); 
+         return; 
+     } 
+
+     if (!fechaSeleccionada) { 
+         alert(t.alert_fecha); 
+         return; 
+     } 
+
+     const select = document.getElementById('tour-select'); 
+     const tourName = select.options[select.selectedIndex].text; 
+     const idTour = select.value; 
+     const total = document.getElementById('total-display').innerText; 
+     const nacionalidad = document.getElementById('nacionalidad-select').value; 
+     const modalidadEntradas = document.getElementById('entradas-select').value; 
+
+     let perfilTexto = nacionalidad === 'mexicano' ? t.opt_nacional : t.opt_extranjero; 
+
+     let entradasTexto = nacionalidad === 'extranjero' ? t.wa_txt_ext : 
+ (modalidadEntradas === 'con' ? t.wa_txt_con : t.wa_txt_sin); 
+      
+     let mensaje = `${t.wa_saludo}`; 
+     mensaje += `${t.wa_nombre} ${nombre}\n`; 
+     mensaje += `${t.wa_perfil} ${perfilTexto}\n`; 
+     mensaje += `${t.wa_accesos} ${entradasTexto}\n`; 
+     mensaje += `${t.wa_tour} ${tourName}\n`; 
+     mensaje += `${t.wa_fecha} ${fechaSeleccionada}\n`; 
+     mensaje += `${t.wa_adultos} ${adultos}\n`; 
+     mensaje += `${t.wa_ninos} ${ninos}\n`; 
+     mensaje += `${t.wa_total} ${total}\n\n`; 
+     mensaje += `${t.wa_pregunta}`; 
+
+     gtag('event', 'click_whatsapp', { 
+         'nombre_viajero': nombre, 
+         'nombre_tour': tourName, 
+         'id_tour': idTour, 
+         'fecha_reserva': fechaSeleccionada, 
+         'total_cotizado': total, 
+         'cantidad_adultos': adultos, 
+         'cantidad_ninos': ninos, 
+         'perfil_nacionalidad': nacionalidad, 
+         'modalidad_entradas': modalidadEntradas, 
+         'idioma_reserva': idiomaActual 
+     }); 
+
+     window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank'); 
+ } 
+
+ document.addEventListener("DOMContentLoaded", inicializarSistema);
