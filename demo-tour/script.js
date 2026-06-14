@@ -42,198 +42,106 @@
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
 
- const traducciones = { 
-
+ // DICCIONARIO DE IDIOMAS SINCRONIZADO CON NOMBRE Y SLOGAN OFICIAL
+const traducciones = { 
      es: { 
-
-         hero_title: "VIAJÁ", 
-
-         hero_badge: "✨ Experiencias Exclusivas", 
-
+         hero_title: "VÍA HA' MÉXICO", 
+         hero_badge: "✨ Sumérgete al Mayab", 
          pregunta_tour: "¿Qué paraíso quieres visitar hoy?", 
-
          tour_cenotes: "Tour 4 Cenotes (Bici/Tren)", 
-
          tour_chichen: "Chichén Itzá & Valladolid", 
-
          tour_celestun: "Celestún (Flamencos & Manglares)", 
-
          titulo_cenotes: "Detalles del Tour Cenotes", 
 
-
          desc_cenotes: "Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas con fotografía profesional por Román.", 
-
          titulo_chichen: "Maravilla del Mundo", 
 
-
          desc_chichen: "Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet y cobertura fotográfica profesional.", 
-
          titulo_celestun: "Naturaleza Viva", 
 
-
          desc_celestun: "Paseo en lancha para ver flamencos rosas, túneles de manglar y tiempo de playa. Sesión fotográfica de paisaje incluida.", 
-
          reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros", 
-
          btn_reviews: "Ver opiniones de clientes ↗", 
-
          titulo_cotizador: "Cotiza tu grupo", 
-
          label_nombre: "Nombre de quien solicita", 
-
          ph_nombre: "Escribe tu nombre completo...", 
-
          label_nacionalidad: "Nacionalidad", 
-
          opt_nacional: "🇲🇽 Mexicano / Nacional", 
-
          opt_extranjero: "✈️ Extranjero / International", 
-
          label_entradas: "Modalidad de Entradas", 
-
          opt_sin_entradas: "Tour sin entradas incluidas", 
-
          opt_con_entradas: "Tour con entradas incluidas", 
-
          label_fecha: "Fecha del Recorrido", 
-
          ph_fecha: "Selecciona una fecha o rango...", 
-
          label_adultos: "Adultos", 
-
          label_ninos: "Niños (-12 años)", 
-
          total_estimado: "Total Estimado (Servicio Privado):", 
-
          btn_reservar: "Reservar por WhatsApp", 
-
          alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", 
-
          alert_fecha: "Por favor, selecciona una fecha disponible.", 
-
-         wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *Viajá*:\n\n", 
-
+         wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n", 
          wa_nombre: "👤 *Nombre:*", 
-
          wa_perfil: "🌍 *Perfil:*", 
-
          wa_accesos: "🎟️ *Accesos:*", 
-
          wa_tour: "🌴 *Tour:*", 
-
          wa_fecha: "📅 *Fecha:*", 
-
          wa_adultos: "👥 *Adultos:*", 
-
          wa_ninos: "👶 *Niños:*", 
-
          wa_total: "💰 *Total estimado:*", 
-
          wa_pregunta: "¿Tienen disponibilidad para estas condiciones?", 
-
          wa_txt_ext: "Sin entradas (Tarifa Extranjero)", 
-
          wa_txt_con: "Con entradas incluidas", 
-
          wa_txt_sin: "Sin entradas" 
-
      }, 
-
      en: { 
-
-         hero_title: "VIAJÁ", 
-
-         hero_badge: "✨ Exclusive Experiences", 
-
+         hero_title: "VÍA HA' MÉXICO", 
+         hero_badge: "✨ Immerse yourself in the Mayab", 
          pregunta_tour: "What paradise do you want to visit today?", 
-
          tour_cenotes: "4 Cenotes Tour (Bike/Train)", 
-
          tour_chichen: "Chichen Itza & Valladolid", 
-
          tour_celestun: "Celestun (Flamingos & Mangroves)", 
-
          titulo_cenotes: "Cenotes Tour Details", 
 
-
          desc_cenotes: "Visit 4 cenotes: Closed, Semi-open, Open, and River type. Includes bikes, life jackets, and showers with professional photo coverage by Roman.", 
-
          titulo_chichen: "Wonder of the World", 
 
-
          desc_chichen: "Guided tour, free time in Valladolid, and visit to an open cenote for swimming. Buffet and professional photo coverage included.", 
-
          titulo_celestun: "Living Nature", 
-
          desc_celestun: "Boat ride to see pink flamingos, mangrove tunnels, and beach time. Landscape photo session included.", 
-
          reviews_text: "⭐ Discover why our travelers recommend us", 
-
          btn_reviews: "See customer reviews ↗", 
-
          titulo_cotizador: "Quote your group", 
-
          label_nombre: "Lead Traveler Name", 
-
          ph_nombre: "Enter your full name...", 
-
          label_nacionalidad: "Nationality", 
-
          opt_nacional: "🇲🇽 Mexican / National", 
-
          opt_extranjero: "✈️ Foreigner / International", 
-
          label_entradas: "Tickets Modality", 
-
          opt_sin_entradas: "Tour without tickets included", 
-
          opt_con_entradas: "Tour with tickets included", 
-
          label_fecha: "Tour Date", 
-
          ph_fecha: "Select a date or range...", 
-
          label_adultos: "Adults", 
-
          label_ninos: "Children (Under 12)", 
-
          total_estimado: "Estimated Total (Private Service):", 
-
          btn_reservar: "Book via WhatsApp", 
-
          alert_nombre: "Please enter your full name to customize your quote.", 
-
          alert_fecha: "Please select an available date.", 
-
-         wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *Viajá*:\n\n", 
-
+         wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *VÍA HA' MÉXICO*:\n\n", 
          wa_nombre: "👤 *Name:*", 
-
          wa_perfil: "🌍 *Profile:*", 
-
          wa_accesos: "🎟️ *Access:*", 
-
          wa_tour: "🌴 *Tour:*", 
-
          wa_fecha: "📅 *Date:*", 
-
          wa_adultos: "👥 *Adults:*", 
-
          wa_ninos: "👶 *Children:*", 
-
          wa_total: "💰 *Estimated Total:*", 
-
          wa_pregunta: "Do you have availability for these conditions?", 
-
          wa_txt_ext: "No tickets (Foreigner Rate)", 
-
          wa_txt_con: "With tickets included", 
-
          wa_txt_sin: "Without tickets" 
-
      } 
-
- }; 
+};
 
 
  async function inicializarSistema() { 
