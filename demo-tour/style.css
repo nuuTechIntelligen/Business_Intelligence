@@ -20,10 +20,10 @@ body {
     font-size: 19px; 
 } 
 
-/* ENCABEZADO (HERO) CON SLIDER DE OPACIDAD FLUDA CRUZADA */ 
+/* ENCABEZADO (HERO) CON SLIDER DE ALINEACIÓN DE IMÁGENES CORREGIDO */ 
 .hero { 
     position: relative;
-    height: 35vh; 
+    height: 32vh;            /* Altura estilizada ideal para que las fotos no queden gigantes */
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -39,23 +39,12 @@ body {
     z-index: 1;
 }
 
-/* Capa oscura independiente para dar contraste a las fotos de fondo */
-.hero-overlay-capa {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(rgba(85, 85, 84, 0.4), rgba(85, 85, 84, 0.5));
-    z-index: 2; /* Se queda por encima de las fotos (z-index: 1) pero por debajo del logo (z-index: 10) */
-    pointer-events: none;
-}
-
+/* REDIMENSIONADO DE IMÁGENES LOCALES */
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;
-    background-position: center;
+    background-size: cover;          /* Obliga a la foto a cubrir el contenedor sin deformarse */
+    background-position: center 35%; /* Centra el encuadre fotográfico de Román de forma correcta */
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
@@ -74,24 +63,46 @@ body {
     100% { opacity: 0; }
 }
 
-/* Modificamos el z-index de los elementos fijos sobre el slider */
-.badge-private { z-index: 3; position: relative; }
+/* CAPA OSCURA INDEPENDIENTE PARA NO CONTAMINAR EL TEXTO */
+.hero-overlay-capa {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(85, 85, 84, 0.35), rgba(85, 85, 84, 0.45));
+    z-index: 2; /* Por encima de las fotos, por debajo de las letras */
+    pointer-events: none;
+}
 
-/* CORRECCIÓN EXCLUSIVA: Elevamos el logo por encima de las sombras y efectos del slider */
-.hero h1 { font-size: 46px; margin: 0; text-transform: uppercase; letter-spacing: 3px; z-index: 2; }
+/* Asegura que el título de letras quede por encima de la capa de sombra */
+.hero h1, .badge-private { z-index: 10; position: relative; }
+
+/* AJUSTE RESPONSIVO CORRECTO AL TAMAÑO DE LAS LETRAS */
+.hero h1 { 
+    font-size: 34px; /* Tamaño optimizado para dispositivos móviles */
+    margin: 0; 
+    text-transform: uppercase; 
+    letter-spacing: 3px; 
+    font-family: 'Big Shoulders Text', sans-serif;
+    font-weight: 800;
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4)); /* Le da total contraste al texto */
+} 
+
+@media (min-width: 850px) {
+    .hero h1 {
+        font-size: 52px; /* Escalado perfecto para pantallas de PC */
+    }
+}
 
 .badge-private { 
     background-color: var(--turquesa); 
     color: var(--text); 
     padding: 6px 16px; 
     border-radius: 50px; 
-    font-size: 16px; 
+    font-size: 15px; 
     font-weight: bold; 
-    margin-top: 12px; 
+    margin-top: 8px; 
     letter-spacing: 1px; 
     text-transform: uppercase; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-    z-index: 2;
 } 
 
 /* CONTENEDOR PRINCIPAL */ 
