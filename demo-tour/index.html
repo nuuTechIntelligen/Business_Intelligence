@@ -1,225 +1,221 @@
-<!DOCTYPE html> 
-<html lang="es"> 
-<head> 
-     <meta charset="UTF-8"> 
-     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-      
-     <title>Viajá | Reservas y Cotizaciones Online</title> 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VÍA HA' MÉXICO | Diseñador de Experiencias Privadas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
 
-     <meta name="description" content="Descubre México con Viajá. Cotiza y reserva tus tours privados con fotografía profesional incluida. Experiencias exclusivas."> 
-     <meta name="keywords" content="viaja tours, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza"> 
-     <meta name="author" content="Nuu Tech-Art"> 
-     <meta name="robots" content="index, follow"> 
+    <nav class="navbar-superior">
+        <div class="nav-left">
+            <button class="btn-agenda-top" onclick="abrirModalAgenda()">
+                <i class="fa-regular fa-calendar-check"></i> <span data-i18n="nav_agenda">Agendar Llamada Directa</span>
+            </button>
+        </div>
+        <div class="nav-center">
+            <div class="brand-logo-container">
+                <span class="brand-text-fallback">VÍA HA' MÉXICO</span>
+            </div>
+        </div>
+        <div class="nav-right">
+            <select id="selector-idioma-global" onchange="cambiarIdiomaGlobal(this.value)">
+                <option value="es">🇲🇽 Español</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="fr">🇫🇷 Français</option>
+            </select>
+        </div>
+    </nav>
 
-     <meta property="og:type" content="website"> 
-     <meta property="og:title" content="Viajá | Experiencias Privadas Exclusivas"> 
-     <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva con fotografía profesional incluida."> 
-     <meta property="og:image" content="https://yucatan.travel/wp-content/uploads/2019/11/Portada-1.jpg"> 
-     <meta property="og:url" content="https://viaja.com">  
-     <meta property="og:site_name" content="Viajá"> 
+    <header class="hero"> 
+        <div class="hero-slider-wrapper">
+            <div class="slide-foto" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)), url('tour_chichenitza.jpg');"></div>
+            <div class="slide-foto" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)), url('tour_cenotes.jpg');"></div>
+            <div class="slide-foto" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)), url('coloradas_tour_day.jpg');"></div>
+            <div class="slide-foto" style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)), url('viaha.jpg');"></div>
+        </div>
+        <div class="hero-content">
+            <h1 data-i18n="hero_title">VÍA HA' MÉXICO</h1> 
+            <div class="badge-private" data-i18n="hero_badge">✨ Sumérgete al Mayab</div> 
+        </div>
+    </header> 
 
-     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@600;800&family=Urbanist:wght@400;700&display=swap" rel="stylesheet"> 
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
-     <link rel="stylesheet" href="style.css"> 
+    <main class="contenedor-principal">
+        <div class="grid-layout">
+            
+            <section class="columna-info">
+                <div class="tarjeta-info-tour">
+                    <div class="encabezado-info">
+                        <div id="isologo-tematico-contenedor" class="isologo-dinamico-icono text-arena">
+                            <i class="fa-solid fa-gopuram"></i>
+                        </div>
+                        <h2 id="info-titulo-tour" data-i18n="info_placeholder_titulo">Selecciona tu Ruta</h2>
+                    </div>
+                    <p id="info-descripcion-tour" data-i18n="info_placeholder_desc">Elige una de nuestras rutas personalizadas en el panel derecho para comenzar a diseñar tu experiencia privada en la Península de Yucatán.</p>
+                </div>
+            </section>
 
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZDZ31TPV"></script> 
-     <script> 
-       window.dataLayer = window.dataLayer || []; 
-       function gtag(){dataLayer.push(arguments);} 
-       gtag('js', new Date()); 
-       gtag('config', 'G-9JZDZ31TPV'); 
-     </script> 
-</head> 
-<body> 
+            <section class="columna-cotizador">
+                <form id="form-cotizador" onsubmit="event.preventDefault();">
+                    
+                    <div class="grupo-formulario">
+                        <label for="campo-tour-principal" data-i18n="label_tour">1. ¿Qué paraíso quieres visitar hoy?</label>
+                        <select id="campo-tour-principal" onchange="actualizarInterfazTour()">
+                            <option value="" disabled selected data-i18n="opt_selecciona">-- Selecciona una ruta --</option>
+                            <option value="chichen">Chichén Itzá</option>
+                            <option value="uxmal">Uxmal</option>
+                            <option value="coloradas">Coloradas Tour Day</option>
+                            <option value="celestun">Celestún</option>
+                            <option value="cenotes">Ruta de Cenotes Privados</option>
+                        </select>
+                    </div>
 
-     <div class="hero"> 
-         <div class="hero-slider-wrapper">
-             <div class="slide-foto" style="background-image: linear-gradient(rgba(85,85,84,0.4), rgba(85,85,84,0.5)), url('https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&w=1200&q=80');"></div>
-             <div class="slide-foto" style="background-image: linear-gradient(rgba(85,85,84,0.4), rgba(85,85,84,0.5)), url('https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=1200&q=80');"></div>
-             <div class="slide-foto" style="background-image: linear-gradient(rgba(85,85,84,0.4), rgba(85,85,84,0.5)), url('https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80');"></div>
-             <div class="slide-foto" style="background-image: linear-gradient(rgba(85,85,84,0.4), rgba(85,85,84,0.5)), url('https://yucatan.travel/wp-content/uploads/2019/11/Portada-1.jpg');"></div>
-         </div>
-         <h1 data-i18n="hero_title">VIAJÁ</h1> 
-         <div class="badge-private" data-i18n="hero_badge">✨ Experiencias Exclusivas</div> 
-     </div>
+                    <div id="contenedor-complementos" class="grupo-formulario oculto animate-fade">
+                        <label data-i18n="label_complemento">2. Personaliza tu día (Elige un complemento)</label>
+                        <div id="grid-radio-complementos" class="grid-opciones-exclusivas">
+                            </div>
+                    </div>
 
-     <div class="decoracion-flotante fondo-isologos">
-         <div class="isologo-izq"></div>
-         <div class="isologo-der"></div>
-     </div>
-     <div class="decoracion-flotante fondo-mixto"></div>
+                    <div id="contenedor-plus" class="grupo-formulario oculto animate-fade">
+                        <label data-i18n="label_plus">3. ¿Quieres un plus? (Opcional - Sin costo extra)</label>
+                        <div class="grid-opciones-plus">
+                            <label class="tarjeta-checkbox">
+                                <input type="checkbox" name="actividad_plus" value="Avistamiento de aves" onchange="calcularPrecioFinal()">
+                                <div class="checkbox-content">
+                                    <i class="fa-solid fa-dove"></i>
+                                    <span data-i18n="plus_aves">Avistamiento de aves</span>
+                                </div>
+                            </label>
+                            <label class="tarjeta-checkbox">
+                                <input type="checkbox" name="actividad_plus" value="Dinámica de observación" onchange="calcularPrecioFinal()">
+                                <div class="checkbox-content">
+                                    <i class="fa-solid fa-binoculars"></i>
+                                    <span data-i18n="plus_obs">Dinámica de observación</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
 
-    <div class="container"> 
-         <div class="lang-switch-container" id="lang-lista"> 
-             <select id="lang-switch" onchange="cambiarIdioma()"> 
-                 <option value="es">🇪🇸 Español</option> 
-                 <option value="en">🇺🇸 English</option> 
-             </select> 
-         </div>  
+                    <div class="grupo-formulario row-datos">
+                        <div class="control-pasajeros">
+                            <label data-i18n="label_pasajeros">Pasajeros</label>
+                            <div class="stepper-pasajeros">
+                                <button type="button" onclick="modificarPasajeros(-1)">-</button>
+                                <input type="number" id="campo-pasajeros" value="2" min="1" readonly>
+                                <button type="button" onclick="modificarPasajeros(1)">+</button>
+                            </div>
+                        </div>
+                        <div class="control-idioma">
+                            <label for="campo-idioma-tour" data-i18n="label_idioma_tour">Idioma del Tour</label>
+                            <select id="campo-idioma-tour" onchange="evaluarOtroIdioma(this.value)">
+                                <option value="Español">Español</option>
+                                <option value="Inglés">Inglés</option>
+                                <option value="Francés">Francés</option>
+                                <option value="Otro">Otro (Especificar)</option>
+                            </select>
+                        </div>
+                    </div>
 
-         <div class="grid-layout"> 
-              
-             <div class="grid-col-1"> 
-                 <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
-                  
-                 <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
-                     <option value="cenotes" data-adulto="650" data-nino="440" data-entrada-adulto="350" data-entrada-nino="250" data-logo="https://cdn-icons-png.flaticon.com/512/3206/3206010.png" data-i18n="tour_cenotes">Tour 4 Cenotes (Bici/Tren)</option> 
-                     <option value="chichen" data-adulto="1200" data-nino="850" data-entrada-adulto="650" data-entrada-nino="450" data-logo="https://cdn-icons-png.flaticon.com/512/2664/2664633.png" data-i18n="tour_chichen">Chichén Itzá & Valladolid</option> 
-                     <option value="celestun" data-adulto="950" data-nino="700" data-entrada-adulto="200" data-entrada-nino="150" data-logo="https://cdn-icons-png.flaticon.com/512/7613/7613941.png" data-i18n="tour_celestun">Celestún (Flamencos & Manglares)</option> 
-                 </select> 
+                    <div id="contenedor-otro-idioma" class="grupo-formulario oculto animate-fade">
+                        <input type="text" id="campo-otro-idioma" placeholder="¿Qué idioma necesitas?">
+                    </div>
 
-                 <div id="info-cenotes" class="tour-info-card active"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('cenotes', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-cenotes"> 
-                             <img src="https://isla.merida.gob.mx/serviciosinternet/VisitMeridaMX/archivos/imagenes/17309088377229.jpg" alt="Fotografía profesional de cenote cerrado en Yucatán" class="tour-card-img"> 
-                             <img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80" alt="Turistas disfrutando de aguas cristalinas en cenote abierto" class="tour-card-img"> 
-                             <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=600&q=80" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
-                         </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('cenotes', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
-                         <h3 class="section-title" data-i18n="titulo_cenotes" style="margin:0; border:none; padding:0;">Detalles del Tour Cenotes</h3> 
-                     </div> 
-                     <p data-i18n="desc_cenotes">Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas.</p> 
-                 </div> 
+                    <div class="grupo-formulario">
+                        <label for="campo-nombre" data-i18n="label_nombre">Tu Nombre</label>
+                        <input type="text" id="campo-nombre" required placeholder="Ej. Luis Delgado">
+                    </div>
 
-                 <div id="info-chichen" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-chichen"> 
-                             <img src="https://yucatan.travel/wp-content/uploads/2019/11/Portada-1.jpg" alt="Pirámide de Kukulcán en Chichén Itzá arqueología" class="tour-card-img"> 
-                             <img src="https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?auto=format&fit=crop&w=600&q=80" alt="Calles coloniales y letras de Valladolid Yucatán" class="tour-card-img"> 
-                         </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
-                         <h3 class="section-title" data-i18n="titulo_chichen" style="margin:0; border:none; padding:0;">Maravilla del Mundo</h3> 
-                     </div> 
-                     <p data-i18n="desc_chichen">Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet.</p> 
-                 </div> 
+                    <div class="tarjeta-precio-final">
+                        <span class="label-precio" data-i18n="label_total">Costo Total Estimado</span>
+                        <div id="display-precio-total" class="monto-precio">$0.00 MXN</div>
+                        <span class="leyenda-privado" data-i18n="leyenda_servicio">✨ Servicio Privado Exclusivo</span>
+                    </div>
 
-                 <div id="info-celestun" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-celestun"> 
-                             <img src="https://cdn.akunmexico.com/blog/cenotes-cerca-de-merida-yucatan-que-debes-visitar-en-2024/cenote-suytun.webp" alt="Lancha navegando en la reserva de la biosfera Celestún" class="tour-card-img"> 
-                             <img src="https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=600&q=80" alt=" parvada de flamencos rosas silvestres en el manglar" class="tour-card-img"> 
-                         </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('celestun', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
-                         <h3 class="section-title" data-i18n="titulo_celestun" style="margin:0; border:none; padding:0;">Naturaleza Viva</h3> 
-                     </div> 
-                     <p data-i18n="desc_celestun">Paseo en lancha para ver flamencos rosas, túneles de manglar y tiempo de playa.</p> 
-                 </div> 
+                    <button type="button" class="btn-enviar-wa" onclick="enviarCotizacionWhatsApp()">
+                        <i class="fa-brands fa-whatsapp"></i> <span data-i18n="btn_cotizar">Reservar Experiencia Privada</span>
+                    </button>
+                </form>
+            </section>
 
-                 <div class="reviews-section"> 
-                     <p class="reviews-text" data-i18n="reviews_text">⭐ Descubre por qué nos recomiendan nuestros viajeros</p> 
-                     <a href="https://www.facebook.com/unamigoenMerida/reels/" target="_blank" id="btn-reviews" class="btn-reviews" data-i18n="btn_reviews"> 
-                         Ver opiniones de clientes ↗ 
-                     </a> 
-                 </div> 
-             </div>  
+        </div>
+    </main>
 
-             <div class="grid-col-2"> 
-                 <div class="cotizador-header-wrapper"> 
-                     <img src="" alt="Icono Identidad" class="dynamic-tour-logo logo-c2"> 
-                     <h3 class="section-title" data-i18n="titulo_cotizador" style="margin: 0; border:none; padding:0;">Cotiza tu grupo</h3> 
-                 </div> 
+    <footer class="footer-institucional">
+        <div class="footer-grid">
+            
+            <div class="footer-seccion-especificaciones">
+                <div class="col-tabla-inc">
+                    <h4 class="titulo-inc"><i class="fa-solid fa-circle-check text-menta"></i> El Tour Incluye:</h4>
+                    <ul>
+                        <li data-i18n="inc_1">Transportación Privada desde su hospedaje.</li>
+                        <li data-i18n="inc_2">Guía federal certificado a su disposición.</li>
+                        <li data-i18n="inc_3">Hielera equipada con agua fresca.</li>
+                        <li data-i18n="inc_4">Costos de estacionamientos y peajes incluidos.</li>
+                    </ul>
+                </div>
+                <div class="col-tabla-no-inc">
+                    <h4 class="titulo-no-inc"><i class="fa-solid fa-circle-xmark text-alerta"></i> No Incluye:</h4>
+                    <ul>
+                        <li data-i18n="no_inc_1">Entradas a zonas arqueológicas o cenotes.</li>
+                        <li data-i18n="no_inc_2">Alimentos o bebidas no especificados en la ruta.</li>
+                    </ul>
+                </div>
+            </div>
 
-                 <div class="form-group"> 
-                     <label class="input-label" data-i18n="label_nombre">Nombre de quien solicita</label> 
-                     <input type="text" id="nombre-cliente" placeholder="Escribe tu nombre completo..." data-i18n-ph="ph_nombre"> 
-                 </div> 
+            <div class="footer-seccion-sustentable">
+                <div class="tarjeta-impacto-social">
+                    <div class="icono-impacto"><i class="fa-solid fa-leaf"></i></div>
+                    <div class="contenido-impacto">
+                        <h4>Garantía Mexcellent & Sustentabilidad</h4>
+                        <p>Al contratar una experiencia con <strong>VÍA HA' MÉXICO</strong>, un porcentaje de tu pago se destina de forma directa al desarrollo sustentable de las comunidades mayas y a la preservación activa de su patrimonio biocultural.</p>
+                    </div>
+                </div>
+            </div>
 
-                 <div class="form-group"> 
-                     <label class="input-label" data-i18n="label_nacionalidad">Nacionalidad</label> 
-                     <select id="nacionalidad-select" class="tour-picker" onchange="cambiarNacionalidad()"> 
-                         <option value="mexicano" data-i18n="opt_nacional">🇲🇽 Mexicano / Nacional</option> 
-                         <option value="extranjero" data-i18n="opt_extranjero">✈️ Extranjero / International</option> 
-                     </select> 
-                 </div> 
+            <div class="footer-seccion-reviews">
+                <h4 data-i18n="footer_reviews_title">Descubre por qué nuestros clientes nos recomiendan</h4>
+                <div class="review-carousel-placeholder">
+                    <p class="review-texto">"Una inmersión cultural absoluta. Viajar con ellos superó cualquier expectativa de privacidad y comodidad en Yucatán."</p>
+                    <span class="review-autor">- Familia Delgado Peralta (Junio 2026)</span>
+                </div>
+            </div>
 
-                 <div class="form-group" id="wrapper-entradas"> 
-                     <label class="input-label" data-i18n="label_entradas">Modalidad de Entradas</label> 
-                     <select id="entradas-select" class="tour-picker" onchange="cambiarEntradas()"> 
-                         <option value="sin" data-i18n="opt_sin_entradas">Tour sin entradas incluidas</option> 
-                         <option value="con" data-i18n="opt_con_entradas">Tour con entradas incluidas</option> 
-                     </select> 
-                 </div> 
-                   
-                 <div class="form-group counter-container"> 
-                     <label data-i18n="label_fecha">Fecha del Recorrido</label> 
-                     <input type="text" id="fecha-reserva" placeholder="Selecciona una fecha o rango..." data-i18n-ph="ph_fecha"> 
-                 </div> 
+        </div>
+        <div class="footer-derechos">
+            <p>&copy; 2026 VÍA HA' MÉXICO. Todos los derechos reservados. | Diseñado por Nuu Tech-Art</p>
+        </div>
+    </footer>
 
-                 <div class="counter-container"> 
-                     <span class="counter-label" data-i18n="label_adultos">Adultos</span> 
-                     <div class="counter-controls"> 
-                         <button class="btn-qty" onclick="cambiarCant('adultos', -1)">-</button> 
-                         <span id="qty-adultos" class="qty-val">1</span> 
-                         <button class="btn-qty" onclick="cambiarCant('adultos', 1)">+</button> 
-                     </div> 
-                 </div> 
+    <div id="modal-agenda-control" class="modal-agenda-wrapper oculto">
+        <div class="modal-agenda-cuerpo animate-pop">
+            <button class="btn-cerrar-modal" onclick="cerrarModalAgenda()">&times;</button>
+            <h3 data-i18n="modal_titulo">Agendar Llamada de Diseño</h3>
+            <p data-i18n="modal_desc">Selecciona el día y bloque horario preferido. Roberto o Román se comunicarán contigo de forma directa.</p>
+            
+            <div class="grupo-formulario">
+                <label data-i18n="modal_label_fecha">1. Selecciona la Fecha:</label>
+                <input type="text" id="calendario-agenda-inline" placeholder="Clic para elegir fecha...">
+            </div>
 
-                 <div class="counter-container"> 
-                     <span class="counter-label" data-i18n="label_ninos">Niños (-12 años)</span> 
-                     <div class="counter-controls"> 
-                         <button class="btn-qty" onclick="cambiarCant('ninos', -1)">-</button> 
-                         <span id="qty-ninos" class="qty-val">0</span> 
-                         <button class="btn-qty" onclick="cambiarCant('ninos', 1)">+</button> 
-                     </div> 
-                 </div> 
+            <div class="grupo-formulario">
+                <label data-i18n="modal_label_bloque">2. Bloque Horario:</label>
+                <select id="campo-bloque-horario">
+                    <option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option>
+                    <option value="Tarde (1:00 PM - 5:00 PM)">Tarde (1:00 PM - 5:00 PM)</option>
+                    <option value="Noche (6:00 PM - 8:00 PM)">Noche (6:00 PM - 8:00 PM)</option>
+                </select>
+            </div>
 
-                 <div class="summary-box"> 
-                     <div style="font-size: 14px; opacity: 0.9;" data-i18n="total_estimado">Total Estimado (Servicio Privado):</div> 
-                     <div class="total-price" id="total-display">$0 MXN</div> 
-                 </div> 
+            <button type="button" class="btn-confirmar-llamada" onclick="confirmarLlamadaWhatsApp()">
+                <i class="fa-regular fa-paper-plane"></i> <span data-i18n="modal_btn">Confirmar por WhatsApp</span>
+            </button>
+        </div>
+    </div>
 
-                 <a href="javascript:void(0)" id="wa-link" onclick="enviarWhatsApp()" class="btn-whatsapp" data-i18n="btn_reservar"> 
-                     Reservar por WhatsApp 
-                 </a> 
-
-                 <button type="button" id="btn-agendar-llamada" class="btn-agendar-maestro" onclick="dispararAgendado()">
-                     📞 Agendar Llamada Personalizada
-                 </button>
-             </div>  
-         </div>  
-
-         <div class="footer-info"> 
-             <div class="social-links"> 
-                 <a href="https://facebook.com" target="_blank" class="social-icon-link" title="Facebook"> 
-                     <svg viewBox="0 0 24 24" class="icon-svg"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1V12h3l-.5 3h-2.5v6.8c4.56-.93 8-4.96 8-9.8z"/></svg> 
-                 </a> 
-                 <a href="https://instagram.com" target="_blank" class="social-icon-link" title="Instagram"> 
-                     <svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> 
-                 </a> 
-                 <a href="https://tiktok.com" target="_blank" class="social-icon-link" title="TikTok"> 
-                     <svg viewBox="0 0 24 24" class="icon-svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> 
-                 </a> 
-             </div> 
-              
-             <div class="footer-text"> 
-                 📍 México |  
-                 📞 <a href="tel:+525560040025" class="footer-link" onclick="gtag('event', 'click_contacto_directo', {'medio': 'telefono'});">5560040025</a> |  
-                 📧 <a href="mailto:contacto@viaja.com" class="footer-link" onclick="gtag('event', 'click_contacto_directo', {'medio': 'correo'});">contacto@viaja.com</a> 
-             </div> 
-         </div> 
-     </div> 
-
-     <div id="modal-agenda" class="modal-agenda-wrapper">
-         <div class="modal-agenda-contenido">
-             <button type="button" class="btn-cerrar-modal" onclick="cerrarModal()">&times;</button>
-             <div id="contenedor-render-agenda"></div>
-         </div>
-     </div>
-
-     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
-     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script> 
-     <script src="script.js"></script> 
- </body> 
- </html>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="script.js"></script>
+</body>
+</html>
