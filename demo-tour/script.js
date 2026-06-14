@@ -22,10 +22,13 @@
 
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
- const traducciones = { 
+ /* [TODO TU JAVASCRIPT ORIGINAL DE VARIABLES Y FUNCIONES CONTINÚA ARRIBA AL 100%] */
+
+// ACTUALIZACIÓN DE TEXTOS EN EL DICT DE IDIOMAS PARA REFORZAR LA IDENTIDAD
+const traducciones = { 
      es: { 
-         hero_title: "VIAJÁ", 
-         hero_badge: "✨ Experiencias Exclusivas", 
+         hero_title: "VÍA HA' MÉXICO", /* Ajuste oficial */ [cite: 33]
+         hero_badge: "✨ Sumérgete al Mayab", /* Ajuste oficial */ [cite: 34]
          pregunta_tour: "¿Qué paraíso quieres visitar hoy?", 
          tour_cenotes: "Tour 4 Cenotes (Bici/Tren)", 
          tour_chichen: "Chichén Itzá & Valladolid", 
@@ -58,7 +61,7 @@
          btn_reservar: "Reservar por WhatsApp", 
          alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", 
          alert_fecha: "Por favor, selecciona una fecha disponible.", 
-         wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *Viajá*:\n\n", 
+         wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n", [cite: 33]
          wa_nombre: "👤 *Nombre:*", 
          wa_perfil: "🌍 *Perfil:*", 
          wa_accesos: "🎟️ *Accesos:*", 
@@ -73,8 +76,8 @@
          wa_txt_sin: "Sin entradas" 
      }, 
      en: { 
-         hero_title: "VIAJÁ", 
-         hero_badge: "✨ Exclusive Experiences", 
+         hero_title: "VÍA HA' MÉXICO", [cite: 33]
+         hero_badge: "✨ Immerse yourself in the Mayab", [cite: 34]
          pregunta_tour: "What paradise do you want to visit today?", 
          tour_cenotes: "4 Cenotes Tour (Bike/Train)", 
          tour_chichen: "Chichen Itza & Valladolid", 
@@ -106,7 +109,7 @@
          btn_reservar: "Book via WhatsApp", 
          alert_nombre: "Please enter your full name to customize your quote.", 
          alert_fecha: "Please select an available date.", 
-         wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *Viajá*:\n\n", 
+         wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *VÍA HA' MÉXICO*:\n\n", [cite: 33]
          wa_nombre: "👤 *Name:*", 
          wa_perfil: "🌍 *Profile:*", 
          wa_accesos: "🎟️ *Access:*", 
@@ -120,7 +123,9 @@
          wa_txt_con: "With tickets included", 
          wa_txt_sin: "Without tickets" 
      } 
- }; 
+};
+
+/* [EL RESTO DE TU LOGICA DE CALCULOS, SELECCIONES Y EL MODULO DE AGENDA DE ABAJO SE QUEDAN EXACTAMENTE IGUAL] */
 
  async function inicializarSistema() { 
      while (typeof flatpickr === 'undefined') { 
