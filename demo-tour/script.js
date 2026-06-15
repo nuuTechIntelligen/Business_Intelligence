@@ -20,7 +20,6 @@
 
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
- // Estructura de contenido obtenida de los flayers de Vía Há México
  const catalogoEstructuraTours = {
      cenotes: {
          complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"],
@@ -36,7 +35,6 @@
      }
  };
 
- // NUEVA MATRIZ DE PRECIOS: Almacena el costo unitario por persona indexado por la combinación exacta de Ruta + Pasajeros
  const matrizTarifasEscaladas = {
      cenotes: {
          "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 },
@@ -44,10 +42,10 @@
          "Homún":             { 2: 1700, 3: 2300, 4: 3500 }
      },
      chichen: {
-         "Cenote Zací / Valladolid":       { 2: 1880, 3: 1300, 4: 1000 },
-         "Izamal":                         { 2: 1700, 3: 1150, 4: 900 },
-         "Cenote Lol-Ha / Taller con Chef": { 2: 1700, 3: 1150, 4: 900 },
-         "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 1700, 3: 1150, 4: 900 }
+         "Cenote Zací / Valladolid":       { 2: 1880, 3: 2600, 4: 4000 },
+         "Izamal":                         { 2: 1950, 3: 2650, 4: 4100 },
+         "Cenote Lol-Ha / Taller con Chef": { 2: 2250, 3: 3000, 4: 4700 },
+         "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 2150, 3: 2850, 4: 4500 }
      },
      coloradas: {
          "Ruta Fija Corrida": { 2: 1650, 3: 2300, 4: 3500 }
@@ -371,35 +369,35 @@
       calcular();  
  }  
 
- // CORRECCIÓN HISTÓRICA: Algoritmo de cálculo escalado unitario por volumen de pasajeros (Adulto + Niño)
+ // CORRECCIÓN DEFINITIVA: Lógica de rango congelado para 1 o 2 Pax sin duplicar la tarifa base
  function calcular() {  
       const select = document.getElementById('tour-select');  
       if(!select) return;  
 
       const idTour = select.value;  
-      const totalPasajeros = adultos + ninos; // Los niños valen como pasajeros completos
+      const totalPasajeros = adultos + ninos; 
 
-      // Capturamos el complemento que esté checked en la interfaz
       const r_complemento = document.querySelector('input[name="viaha-complemento"]:checked');
       const complementoSeleccionado = r_complemento ? r_complemento.value : "Ruta Fija Corrida";
 
-      // Buscamos los tramos en la matriz indexada
       const bloqueTour = matrizTarifasEscaladas[idTour];
       if (!bloqueTour) return;
       
       const rangosDeCombinacion = bloqueTour[complementoSeleccionado];
       if (!rangosDeCombinacion) return;
 
-      // Definimos la llave del escalón (1 y 2 van a la tarifa de '2', 3 a la de '3', y 4 o más van a la de '4')
-      let llaveRango = 4;
-      if (totalPasajeros <= 2) llaveRango = 2;
-      else if (totalPasajeros === 3) llaveRango = 3;
+      let totalGlobal = 0;
 
-      // Obtenemos el precio unitario por persona establecido para ese volumen de grupo
-      const precioPorPersona = rangosDeCombinacion[llaveRango];
-
-      // Multiplicamos de forma lineal el precio escalado por el total de cabezas
-      const totalGlobal = totalPasajeros * precioPorPersona;  
+      // Aplicamos la regla de negocio de forma quirúrgica según las condiciones de la tabla
+      if (totalPasajeros <= 2) {
+          // Para 1 o 2 personas, el costo total del grupo es exactamente el valor base de la columna '2'
+          totalGlobal = rangosDeCombinacion[2];
+      } else {
+          // Para 3 o más personas, se jala el precio individual y se multiplica por la cantidad de cabezas
+          let llaveRango = (totalPasajeros === 3) ? 3 : 4;
+          const precioPorPersona = rangosDeCombinacion[llaveRango];
+          totalGlobal = totalPasajeros * precioPorPersona;  
+      }
 
       document.getElementById('total-display').innerText = `$${totalGlobal.toLocaleString()} MXN`;  
  }  
