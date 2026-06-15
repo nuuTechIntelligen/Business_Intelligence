@@ -10,7 +10,6 @@
  const posicionesCarrusel = { 
       cenotes: 0, 
       chichen: 0, 
-      celestun: 0,
       coloradas: 0 // NUEVO: Soporte para el carrusel de Coloradas
  }; 
 
@@ -18,7 +17,6 @@
  const intervalosCarrusel = { 
       cenotes: null, 
       chichen: null, 
-      celestun: null,
       coloradas: null // NUEVO: Soporte para el autoplay de Coloradas
  }; 
 
@@ -48,14 +46,11 @@
           pregunta_tour: "¿Qué paraíso quieres visitar hoy?", 
           tour_cenotes: "Tour 4 Cenotes (Bici/Tren)", 
           tour_chichen: "Chichén Itzá & Valladolid", 
-          tour_celestun: "Celestún (Flamencos & Manglares)", 
           tour_coloradas: "Coloradas Tour Day",
           titulo_cenotes: "Detalles del Tour Cenotes", 
           desc_cenotes: "Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas con fotografía profesional por Román.", 
           titulo_chichen: "Maravilla del Mundo", 
           desc_chichen: "Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet y cobertura fotográfica profesional.", 
-          titulo_celestun: "Naturaleza Viva", 
-          desc_celestun: "Paseo en lancha para ver flamencos rosas, túneles de manglar y tiempo de playa. Sesión fotográfica de paisaje incluida.", 
           titulo_coloradas: "Coloradas Tour Day",
           desc_coloradas: "Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.",
           reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros", 
@@ -97,14 +92,11 @@
           pregunta_tour: "What paradise do you want to visit today?", 
           tour_cenotes: "4 Cenotes Tour (Bike/Train)", 
           tour_chichen: "Chichen Itza & Valladolid", 
-          tour_celestun: "Celestun (Flamingos & Mangroves)", 
           tour_coloradas: "Coloradas Tour Day",
           titulo_cenotes: "Cenotes Tour Details", 
           desc_cenotes: "Visit 4 cenotes: Closed, Semi-open, Open, and River type. Includes bikes, life jackets, and showers with professional photo coverage by Roman.", 
           titulo_chichen: "Wonder of the World", 
           desc_chichen: "Guided tour, free time in Valladolid, and visit to an open cenote for swimming. Buffet and professional photo coverage included.", 
-          titulo_celestun: "Living Nature", 
-          desc_celestun: "Boat ride to see pink flamingos, mangrove tunnels, and beach time. Landscape photo session included.", 
           titulo_coloradas: "Coloradas Tour Day",
           desc_coloradas: "Immerse yourself in the Mexican pink of the peninsula. Feel the vastness of the flamingo habitat.",
           reviews_text: "⭐ Discover why our travelers recommend us", 
