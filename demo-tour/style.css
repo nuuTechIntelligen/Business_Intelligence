@@ -144,7 +144,6 @@ body {
 .tour-title-wrapper, .cotizador-header-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px 0; } 
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 
-/* MODIFICACIÓN: Contenedor genérico escalable para inyectar los SVG del manual */
 .dynamic-tour-logo-container { 
     width: 32px; 
     height: 32px; 
@@ -341,11 +340,12 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     padding-top: 15px;
 }
 
+/* CORRECCIÓN: Quitamos el comportamiento de grilla a 2 columnas en pantallas grandes para que siempre se apilen en bloque vertical */
 @media (min-width: 500px) {
     .inc-no-inc-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 }
 
