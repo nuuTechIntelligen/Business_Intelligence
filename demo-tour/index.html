@@ -69,9 +69,9 @@
                  <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
                   
                  <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
-                     <option value="cenotes" data-adulto="650" data-nino="440" data-entrada-adulto="350" data-entrada-nino="250" data-logo="https://cdn-icons-png.flaticon.com/512/3206/3206010.png" data-i18n="tour_cenotes">Tour Cenotes</option> 
-                     <option value="chichen" data-adulto="1200" data-nino="850" data-entrada-adulto="650" data-entrada-nino="450" data-logo="https://cdn-icons-png.flaticon.com/512/2664/2664633.png" data-i18n="tour_chichen">Chichén Itzá</option> 
-                     <option value="coloradas" data-adulto="0" data-nino="0" data-entrada-adulto="0" data-entrada-nino="0" data-logo="https://cdn-icons-png.flaticon.com/512/2965/2965851.png" data-i18n="tour_coloradas">Coloradas Tour Day</option> 
+                     <option value="cenotes" data-adulto="650" data-nino="440" data-logo="https://cdn-icons-png.flaticon.com/512/3206/3206010.png" data-i18n="tour_cenotes">Tour Cenotes</option> 
+                     <option value="chichen" data-adulto="1200" data-nino="850" data-logo="https://cdn-icons-png.flaticon.com/512/2664/2664633.png" data-i18n="tour_chichen">Chichén Itzá</option> 
+                     <option value="coloradas" data-adulto="0" data-nino="0" data-logo="https://cdn-icons-png.flaticon.com/512/2965/2965851.png" data-i18n="tour_coloradas">Coloradas Tour Day</option> 
                  </select> 
 
                  <div id="info-cenotes" class="tour-info-card active"> 
@@ -123,13 +123,6 @@
                  </div>
 
                  <div id="seccion-personalizacion-tour" style="margin-top: 20px;"></div>
-
-                 <div class="reviews-section"> 
-                     <p class="reviews-text" data-i18n="reviews_text">⭐ Descubre por qué nos recomiendan nuestros viajeros</p> 
-                     <a href="https://www.facebook.com/unamigoenMerida/reels/" target="_blank" id="btn-reviews" class="btn-reviews" data-i18n="btn_reviews"> 
-                         Ver opiniones de clientes ↗ 
-                     </a> 
-                 </div> 
              </div>  
 
              <div class="grid-col-2"> 
@@ -143,23 +136,9 @@
                      <input type="text" id="nombre-cliente" placeholder="Escribe tu nombre completo..." data-i18n-ph="ph_nombre"> 
                  </div> 
 
-                 <div class="form-group"> 
-                     <label class="input-label" data-i18n="label_nacionalidad">Nacionalidad</label> 
-                     <select id="nacionalidad-select" class="tour-picker" onchange="cambiarNacionalidad()"> 
-                         <option value="mexicano" data-i18n="opt_nacional">🇲🇽 Mexicano / Nacional</option> 
-                         <option value="extranjero" data-i18n="opt_extranjero">✈️ Extranjero / International</option> 
-                     </select> 
-                 </div> 
-
-                 <div class="form-group" id="wrapper-entradas"> 
-                     <label class="input-label" data-i18n="label_entradas">Modalidad de Entradas</label> 
-                     <select id="entradas-select" class="tour-picker" onchange="cambiarEntradas()"> 
-                         <option value="sin" data-i18n="opt_sin_entradas">Tour sin entradas incluidas</option> 
-                         <option value="con" data-i18n="opt_con_entradas">Tour con entradas incluidas</option> 
-                     </select> 
-                 </div> 
+                 <div id="seccion-idioma-tour"></div>
                     
-                 <div class="form-group" class="counter-container"> 
+                 <div class="form-group counter-container"> 
                      <label data-i18n="label_fecha">Fecha del Recorrido</label> 
                      <input type="text" id="fecha-reserva" placeholder="Selecciona una fecha o rango..." data-i18n-ph="ph_fecha"> 
                  </div> 
@@ -194,8 +173,10 @@
          </div>  
 
          <div class="footer-info"> 
+             <p class="reviews-footer-text" data-i18n="reviews_text">⭐ Descubre por qué nos recomiendan nuestros viajeros</p>
+
              <div class="social-links"> 
-                 <a href="https://facebook.com" target="_blank" class="social-icon-link" title="Facebook"> 
+                 <a href="https://facebook.com/unamigoenMerida/reels/" target="_blank" class="social-icon-link" title="Facebook"> 
                      <svg viewBox="0 0 24 24" class="icon-svg"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1V12h3l-.5 3h-2.5v6.8c4.56-.93 8-4.96 8-9.8z"/></svg> 
                  </a> 
                  <a href="https://instagram.com" target="_blank" class="social-icon-link" title="Instagram"> 
