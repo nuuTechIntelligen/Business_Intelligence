@@ -71,7 +71,16 @@
           wa_adultos: "👥 *Adultos:*", 
           wa_ninos: "👶 *Niños:*", 
           wa_total: "💰 *Total estimado:*", 
-          wa_pregunta: "¿Tienen disponibilidad para estas condiciones?"
+          wa_pregunta: "¿Tienen disponibilidad para estas condiciones?",
+          // MODIFICACIÓN: Textos agregados para soportar traducciones de los bloques Incluye/No incluye
+          inc_title: "🟢 Incluye",
+          no_inc_title: "🔴 No Incluye",
+          inc_cenotes_list: "<li>Transporte privado de lujo</li><li>Guía local especializado</li><li>Bicicletas, chalecos y regaderas</li><li>Agua mineral y snacks locales</li>",
+          no_inc_cenotes_list: "<li>Entradas a paradores turísticos</li><li>Alimentos no especificados</li><li>Propinas para el equipo local</li>",
+          inc_chichen_list: "<li>Vehículo privado con chofer</li><li>Guía arqueológico bilingüe</li><li>Almuerzo Buffet Regional</li><li>Tiempo libre en Valladolid</li>",
+          no_inc_chichen_list: "<li>Boletos de acceso a la zona</li><li>Bebidas durante el buffet</li><li>Souvenirs o gastos personales</li>",
+          inc_coloradas_list: "<li>Logística y traslado privado</li><li>Parada gastronómica en Motul</li><li>Visita a Playa Cancunito</li><li>Seguro de viajero a bordo</li>",
+          no_inc_coloradas_list: "<li>Tarifas de entrada al parque</li><li>Comidas en zona de playa</li><li>Propinas del servicio</li>"
       }, 
       en: { 
           hero_title: "VÍA HA' MÉXICO", 
@@ -105,7 +114,15 @@
           wa_adultos: "👥 *Adults:*", 
           wa_ninos: "👶 *Children:*", 
           wa_total: "💰 *Estimated Total:*", 
-          wa_pregunta: "Do you have availability for these conditions?"
+          wa_pregunta: "Do you have availability for these conditions?",
+          inc_title: "🟢 Includes",
+          no_inc_title: "🔴 Not Includes",
+          inc_cenotes_list: "<li>Luxury private transport</li><li>Specialized local guide</li><li>Bicycles, life jackets and showers</li><li>Mineral water and local snacks</li>",
+          no_inc_cenotes_list: "<li>Tickets to tourist spots</li><li>Unspecified food or drinks</li><li>Tips for the local team</li>",
+          inc_chichen_list: "<li>Private vehicle with driver</li><li>Bilingual archaeological guide</li><li>Regional Buffet Lunch</li><li>Free time in Valladolid</li>",
+          no_inc_chichen_list: "<li>Archaeological site access tickets</li><li>Drinks during the buffet</li><li>Souvenirs or personal expenses</li>",
+          inc_coloradas_list: "<li>Private logistics and transfers</li><li>Gastronomic stop in Motul</li><li>Visit to Cancunito Beach</li><li>Travel insurance on board</li>",
+          no_inc_coloradas_list: "<li>Park entrance fees</li><li>Meals at beach area</li><li>Service tips</li>"
       } 
  }; 
 
@@ -121,7 +138,6 @@
           actualizarLogosDinamicos();   
           inicializarSoportesTactiles();   
           
-          // Renderizadores dinámicos iniciales de campos
           renderizarCamposPersonalizados();
 
           const select = document.getElementById('tour-select');  
@@ -243,7 +259,14 @@
 
       document.querySelectorAll('[data-i18n]').forEach(el => {  
           const key = el.getAttribute('data-i18n');  
-          if (t[key]) el.innerText = t[key];  
+          if (t[key]) {
+              // MODIFICACIÓN: Si la clave inyecta código HTML de listas, usamos innerHTML en lugar de innerText
+              if(key.includes('_list')) {
+                  el.innerHTML = t[key];
+              } else {
+                  el.innerText = t[key];
+              }
+          }  
       });  
 
       document.querySelectorAll('[data-i18n-ph]').forEach(el => {  
@@ -308,8 +331,7 @@
       activarAutoplayCarrusel(selectedTour);  
       actualizarLogosDinamicos();   
       
-      // Renderizado dinámico de secciones
-      renderizarCamposPersonalizados();
+      renderizarCamposPersonalizados();  
 
       gtag('event', 'ver_tour', {  
           'id_tour': selectedTour,  
@@ -319,7 +341,6 @@
       calcular();  
  }  
 
- // CORRECCIÓN: Matemática de cotización directa pura, sin entradas ni nacionalidades
  function calcular() {  
       const select = document.getElementById('tour-select');  
       if(!select) return;  
@@ -333,7 +354,6 @@
       document.getElementById('total-display').innerText = `$${total.toLocaleString()} MXN`;  
  }  
 
- // MODIFICACIÓN: Inyección separada. Complementos/Plus a la izquierda; Idioma a la derecha (Opción A)
  function renderizarCamposPersonalizados() {
      const tourSeleccionado = document.getElementById('tour-select').value;
      const datos = catalogoEstructuraTours[tourSeleccionado];
