@@ -69,9 +69,9 @@
                  <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
                   
                  <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
-                     <option value="cenotes" data-adulto="650" data-nino="440" data-logo="https://cdn-icons-png.flaticon.com/512/3206/3206010.png" data-i18n="tour_cenotes">Tour Cenotes</option> 
-                     <option value="chichen" data-adulto="1200" data-nino="850" data-logo="https://cdn-icons-png.flaticon.com/512/2664/2664633.png" data-i18n="tour_chichen">Chichén Itzá</option> 
-                     <option value="coloradas" data-adulto="0" data-nino="0" data-logo="https://cdn-icons-png.flaticon.com/512/2965/2965851.png" data-i18n="tour_coloradas">Coloradas Tour Day</option> 
+                     <option value="cenotes" data-categoria="naturaleza" data-adulto="650" data-nino="440" data-i18n="tour_cenotes">Tour Cenotes</option> 
+                     <option value="chichen" data-categoria="cultura" data-adulto="1200" data-nino="850" data-i18n="tour_chichen">Chichén Itzá</option> 
+                     <option value="coloradas" data-categoria="naturaleza" data-adulto="0" data-nino="0" data-i18n="tour_coloradas">Coloradas Tour Day</option> 
                  </select> 
 
                  <div id="info-cenotes" class="tour-info-card active"> 
@@ -85,7 +85,7 @@
                          <button class="carousel-btn next" onclick="moverCarrusel('cenotes', 1)">&#10095;</button> 
                      </div> 
                      <div class="tour-title-wrapper"> 
-                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
                          <h3 class="section-title" data-i18n="titulo_cenotes" style="margin:0; border:none; padding:0;">Detalles del Tour Cenotes</h3> 
                      </div> 
                      <p data-i18n="desc_cenotes">Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas.</p> 
@@ -121,7 +121,7 @@
                          <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
                      </div> 
                      <div class="tour-title-wrapper"> 
-                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
                          <h3 class="section-title" data-i18n="titulo_chichen" style="margin:0; border:none; padding:0;">Maravilla del Mundo</h3> 
                      </div> 
                      <p data-i18n="desc_chichen">Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet.</p> 
@@ -156,7 +156,7 @@
                          <button class="carousel-btn next" onclick="moverCarrusel('coloradas', 1)">&#10095;</button> 
                      </div> 
                      <div class="tour-title-wrapper"> 
-                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
                          <h3 class="section-title" data-i18n="titulo_coloradas" style="margin:0; border:none; padding:0;">Coloradas Tour Day</h3> 
                      </div> 
                      <p data-i18n="desc_coloradas">Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.</p> 
@@ -187,7 +187,7 @@
 
              <div class="grid-col-2"> 
                  <div class="cotizador-header-wrapper"> 
-                     <img src="" alt="Icono Identidad" class="dynamic-tour-logo logo-c2"> 
+                     <div class="dynamic-tour-logo-container logo-c2"></div> 
                      <h3 class="section-title" data-i18n="titulo_cotizador" style="margin: 0; border:none; padding:0;">Cotiza tu grupo</h3> 
                  </div> 
 
