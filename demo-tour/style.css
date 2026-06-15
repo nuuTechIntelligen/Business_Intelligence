@@ -143,7 +143,19 @@ body {
 
 .tour-title-wrapper, .cotizador-header-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px 0; } 
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
-.dynamic-tour-logo { width: 28px; height: 28px; object-fit: contain; } 
+
+/* MODIFICACIÓN: Contenedor genérico escalable para inyectar los SVG del manual */
+.dynamic-tour-logo-container { 
+    width: 32px; 
+    height: 32px; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+} 
+.dynamic-tour-logo-container svg {
+    width: 100%;
+    height: 100%;
+}
 
 .lang-switch-container { 
     display: flex; 
@@ -365,15 +377,12 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     line-height: 1.3;
 }
 
-/* ==========================================================================
-   NUEVO: HOJA DE ESTILOS PARA EL SELLO DE RESPONSABILIDAD SUSTENTABLE
-   ========================================================================== */
 .sello-sustentable-box {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    background-color: #FFFbf7; /* Tono arena súper suave derivado de tu paleta */
-    border: 2px dashed var(--turquesa); /* Bordes discontinuos usando tu color Arena oficial */
+    background-color: #FFFbf7; 
+    border: 2px dashed var(--turquesa); 
     border-radius: 12px;
     padding: 12px 15px;
     margin: 15px 0;
