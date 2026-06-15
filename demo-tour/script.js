@@ -136,8 +136,6 @@
           inicializarSoportesTactiles();   
           
           renderizarCamposPersonalizados();
-          
-          // MODIFICACIÓN: Actualizamos el Isologo oficial en la carga inicial de la página
           actualizarLogosDinamicos();
 
           const select = document.getElementById('tour-select');  
@@ -244,32 +242,26 @@
       });  
  }  
 
- // MODIFICACIÓN CRÍTICA: Inyecta los vectores SVG nativos de páginas 19 y 20 del manual
  function actualizarLogosDinamicos() {  
       const select = document.getElementById('tour-select');  
       if (!select) return;  
       
-      // Leemos la categoría (naturaleza o cultura) desde el atributo data
       const categoria = select.options[select.selectedIndex].getAttribute('data-categoria');  
       
-      // Vector 1: Isologo de Naturaleza (Cenotes, Flamingos, Aviturismo) en color Arena
       const svgNaturaleza = `
           <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z"/>
           </svg>
       `;
 
-      // Vector 2: Isologo de Cultura (Arco Maya, Historia, Arqueología) en color Menta
       const svgCultura = `
           <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 21h18M5 21V10l7-6 7 7v11M9 21v-4a3 3 0 0 1 6 0v4"/>
           </svg>
       `;
 
-      // Decidimos cuál vector inyectar según la naturaleza de la ruta
       const svgFinal = (categoria === "cultura") ? svgCultura : svgNaturaleza;
 
-      // Pintamos el isologo oficial en todos los contenedores destinados para ello
       document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => {  
           container.innerHTML = svgFinal;  
       });  
@@ -324,7 +316,7 @@
  function cambiarCant(tipo, cambio) {  
       if (tipo === 'adultos') {  
           if (adultos + cambio >= 1) adultos += cambio;   
-          document.getElementById('qty-adultos').innerText = adults;  
+          document.getElementById('qty-adultos').innerText = adultos; // CORRECCIÓN: Cambiado 'adults' por 'adultos'
       } else {  
           if (ninos + cambio >= 0) ninos += cambio;   
           document.getElementById('qty-ninos').innerText = ninos;  
@@ -349,10 +341,7 @@
       document.getElementById('info-' + selectedTour).classList.add('active');  
        
       activarAutoplayCarrusel(selectedTour);  
-      
-      // MODIFICACIÓN: Disparamos la actualización de los isologos al cambiar de ruta
       actualizarLogosDinamicos();   
-      
       renderizarCamposPersonalizados();  
 
       gtag('event', 'ver_tour', {  
