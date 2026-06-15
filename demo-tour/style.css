@@ -340,7 +340,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     padding-top: 15px;
 }
 
-/* CORRECCIÓN: Quitamos el comportamiento de grilla a 2 columnas en pantallas grandes para que siempre se apilen en bloque vertical */
 @media (min-width: 500px) {
     .inc-no-inc-container {
         display: flex;
