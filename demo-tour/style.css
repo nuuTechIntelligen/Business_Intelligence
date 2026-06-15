@@ -23,7 +23,7 @@ body {
 /* ENCABEZADO (HERO) CON ALTURA CORRECTA DE 32VH */ 
 .hero { 
     position: relative;
-    height: 32vh;            /* CORRECCIÓN: Asegúrate de que diga vh y no hv */
+    height: 32vh;            
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -39,13 +39,11 @@ body {
     z-index: 1;
 }
 
-/* ENCUADRE DE LAS IMÁGENES CORREGIDO */
-/* ENCUADRE CORREGIDO PARA LAS NUEVAS IMÁGENES HORIZONTALES */
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-size: cover;          /* Sigue cubriendo todo el contenedor sin deformarse */
-    background-position: center center; /* MODIFICACIÓN: Centra la foto perfectamente en vertical y horizontal */
+    background-size: cover;          
+    background-position: center center; 
     opacity: 0;
     z-index: 1;
     animation: desvanecerCrossfade 20s infinite ease-in-out;
@@ -64,19 +62,16 @@ body {
     100% { opacity: 0; }
 }
 
-/* CAPA OSCURA INDEPENDIENTE PARA PROTEGER EL COLOR DE LAS LETRAS */
 .hero-overlay-capa {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(rgba(85, 85, 84, 0.3), rgba(85, 85, 84, 0.4)); /* Sombra intermedia para dar contraste */
+    background: linear-gradient(rgba(85, 85, 84, 0.3), rgba(85, 85, 84, 0.4)); 
     z-index: 2; 
     pointer-events: none;
 }
 
-/* Posicionamiento del título de letras por encima del slider y de la sombra */
 .hero h1, .badge-private { z-index: 10; position: relative; }
 
-/* AJUSTE DEL TAMAÑO DE LAS LETRAS PARA MÓVIL Y PC */
 .hero h1 { 
     font-size: 38px; 
     margin: 0; 
@@ -89,13 +84,12 @@ body {
 
 @media (min-width: 850px) {
     .hero {
-        height: 32vh;        /* En pantallas de PC el header se compacta ligeramente a 50vh para mantener la estética */
+        height: 32vh;        
     }
     .hero h1 {
         font-size: 56px; 
     }
 }
-
 
 .badge-private { 
     background-color: var(--turquesa); 
@@ -155,7 +149,6 @@ body {
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 .dynamic-tour-logo { width: 28px; height: 28px; object-fit: contain; } 
 
-/* SELECTOR DE IDIOMA Y BOTÓN SUPERIOR ALINEADOS EN CAJA FLEX */ 
 .lang-switch-container { 
     display: flex; 
     justify-content: flex-end; 
@@ -169,7 +162,6 @@ body {
     color: var(--text); font-family: 'Big Shoulders Text', sans-serif; font-weight: bold; cursor: pointer; 
 } 
 
-/* ESTILOS DEL BOTÓN REUBICADO ARRIBA EN LA BARRA DE CONTROL */
 .btn-agendar-top {
     display: inline-block;
     background-color: transparent;
@@ -216,14 +208,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .tour-info-card p { padding: 0 20px; margin: 10px 0 0 0; } 
 .tour-info-card.active { display: block; } 
 
-.reviews-section { background-color: #fcfdfd; border: 2px dashed var(--turquesa); padding: 15px; border-radius: 12px; text-align: center; margin-top: 20px; } 
-.reviews-text { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: var(--text); } 
-.btn-reviews { 
-    display: inline-block; color: var(--text); text-decoration: none; font-weight: bold; font-size: 15px; 
-    border: 2px solid var(--turquesa); padding: 6px 14px; border-radius: 8px; transition: all 0.3s ease; 
-} 
-.btn-reviews:hover { background-color: var(--turquesa); } 
-
 .counter-container { 
     display: flex; align-items: center; justify-content: space-between; background: var(--light-bg); padding: 10px 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--executive-dark); 
 } 
@@ -239,7 +223,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     font-family: 'Big Shoulders Text', sans-serif; font-weight: bold; font-size: 22px; margin-top: 15px; box-shadow: 0 4px 15px rgba(253, 177, 163, 0.3); text-transform: uppercase; 
 } 
 
-/* VESTILOS DE LA MODAL AGENDA */
 .modal-agenda-wrapper {
     position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(85,85,84,0.6);
     z-index: 1000; display: none; align-items: center; justify-content: center;
@@ -252,7 +235,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 30px; cursor: pointer; color: var(--text);
 }
 
-/* ELEMENTOS FLOTANTES EN PC (PANTALLAS > 850px) */
+/* DECORACIONES DE FONDO */
 .decoracion-flotante { display: none; }
 
 @media (min-width: 1200px) {
@@ -271,9 +254,19 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     }
 }
 
+/* NUEVA SECCIÓN DE REVIEWS DIRECTA EN EL FOOTER (OPCIÓN 1) */
+.reviews-footer-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text);
+    margin: 0 auto 12px auto;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .footer-info { text-align: center; margin-top: 35px; border-top: 2px solid var(--light-bg); padding-top: 20px; } 
-.social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; } 
-.social-icon-link { display: inline-block; width: 32px; height: 32px; transition: transform 0.3s ease; } 
+.social-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 15px; } 
+.social-icon-link { display: inline-block; width: 36px; height: 32px; transition: transform 0.3s ease; } 
 .icon-svg { width: 100%; height: 100%; fill: #7F8C8D; transition: fill 0.3s ease; } 
 .social-icon-link:hover { transform: translateY(-3px); }
 .social-icon-link:hover .icon-svg { fill: var(--turquesa); }
@@ -285,7 +278,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     background: #eeeeee !important; color: #bbbbbb !important; cursor: not-allowed !important; text-decoration: line-through; 
 }
 
-/* CLASES EXCLUSIVAS PARA LA SECCIÓN DE PERSONALIZACIÓN INTEGRADA */
+/* SECCIÓN DE CONTROLES DINÁMICOS */
 .box-personalizacion {
     background: #ffffff;
     border: 2px solid var(--executive-dark);
