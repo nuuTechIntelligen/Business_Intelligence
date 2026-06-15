@@ -748,272 +748,81 @@ const traducciones = {
 
 
 /* ==========================================================================
-
-   MÓDULO DE AGENDADO DE LLAMADAS PERSONALIZADAS (OPCIONES A, B Y C)
-
+   MÓDULO DE AGENDADO DE LLAMADAS PERSONALIZADAS (OPCIÓN C - HORARIOS FIJOS)
    ========================================================================== */
 
-
 /**
-
- * CONTROLADOR MAESTRO: Ejecuta la opción activa elegida por Luis.
-
- * Solo debes comentar o descomentar la función interna que desees probar.
-
+ * CONTROLADOR MAESTRO: Abre el modal e inyecta la interfaz de bloques de horarios fijos.
  */
-
 function dispararAgendado() {
-
     // Abrimos el contenedor visual de la ventana modal
-
     document.getElementById('modal-agenda').style.display = 'flex';
 
-
-    // EJECUCIÓN OPCIÓN A: Google Sheets + Bloques de Horarios (Opción C)
-
-    ejecutarOpcionA_Sheets();
-
-
-    // EJECUCIÓN OPCIÓN B: Calendly Embebido + Bloques de Horarios (Opción C)
-
-    // Para probar la opción B, comenta la línea de arriba y descomenta la de abajo:
-
-    // ejecutarOpcionB_Calendly();
-
+    // Ejecutamos directamente la Opción C (Bloques de Horarios Fijos Manuales)
+    ejecutarOpcionC_HorariosFijos();
 }
 
-
+/**
+ * Cierra la ventana modal y limpia el contenedor interno.
+ */
 function cerrarModal() {
-
     document.getElementById('modal-agenda').style.display = 'none';
-
     document.getElementById('contenedor-render-agenda').innerHTML = '';
-
 }
 
-
-
 /**
-
- * 📊 OPCIÓN A: Lógica conectada a Google Sheets (Vía SheetDB)
-
+ * 📊 OPCIÓN C: Lógica de bloques de horarios predefinidos con envío directo a WhatsApp
  */
-
-function ejecutarOpcionA_Sheets() {
-
+function ejecutarOpcionC_HorariosFijos() {
     const contenedor = document.getElementById('contenedor-render-agenda');
-
     
-
-    // Inyectamos el título explicativo de la llamada
-
+    // Inyectamos la interfaz limpia con el selector de bloques fijos
     contenedor.innerHTML = `
-
         <h3 class="section-title" style="margin-top:0;">Agendar Sesión de Diseño</h3>
-
-        <p style="font-size:15px; margin-bottom:15px;">Selecciona el día de tu preferencia. Nuestro sistema mostrará solo los horarios que Román y Roberto tengan libres en su Google Sheets.</p>
-
+        <p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada personalizada con el equipo.</p>
+        
         <div class="form-group">
-
             <label class="input-label">1. Elige la Fecha</label>
-
-            <input type="text" id="fecha-llamada-sheets" placeholder="Haga clic para abrir el calendario...">
-
+            <input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly>
         </div>
-
-        <div id="wrapper-horarios-sheets" class="form-group" style="display:none;">
-
+        
+        <div id="wrapper-horarios-fijos" class="form-group" style="display:none;">
             <label class="input-label">2. Horarios Disponibles</label>
-
-            <select id="select-hora-sheets" class="tour-picker"></select>
-
-        </div>
-
-        <button type="button" id="btn-confirmar-sheets" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">
-
-            Confirmar e ir a WhatsApp ↗
-
-        </button>
-
-    `;
-
-
-    // Inicializamos un Flatpickr exclusivo para la llamada
-
-    flatpickr("#fecha-llamada-sheets", {
-
-        locale: "es",
-
-        minDate: "today",
-
-        dateFormat: "Y-m-d",
-
-        onChange: function(selectedDates, dateStr) {
-
-            // Simulamos la consulta a la pestaña de horarios de SheetDB
-
-            // En producción aquí harías un fetch(API_URL + '?sheet=horarios_disponibles')
-
-            const wrapperHoras = document.getElementById('wrapper-horarios-sheets');
-
-            const selectHora = document.getElementById('select-hora-sheets');
-
-            const btnConfirmar = document.getElementById('btn-confirmar-sheets');
-
-
-            selectHora.innerHTML = '';
-
-            wrapperHoras.style.display = 'block';
-
-
-            // ----------------------------------------------------------------======
-
-            // CASILLA COMENTADA: ACTIVACIÓN DE LA OPCIÓN C (BLOQUES FIJOS MANUALES)
-
-            // Si Roberto y Román no quieren llenar el Sheets y prefieren bloques predefinidos,
-
-            // deja este bloque activo y borrará las llamadas dinámicas.
-
-            // ----------------------------------------------------------------======
-
-            /*
-
-            selectHora.innerHTML = `
-
-                <option value="Bloque Mañana">Mañana (9:00 AM - 12:00 PM)</option>
-
-                <option value="Bloque Tarde">Tarde (2:00 PM - 5:00 PM)</option>
-
-                <option value="Bloque Sabatino">Sabatino (10:00 AM - 1:00 PM)</option>
-
-            `;
-
-            btnConfirmar.style.display = 'block';
-
-            btnConfirmar.onclick = () => {
-
-                const bloque = selectHora.value;
-
-                const mensaje = encodeURIComponent(`¡Hola! Solicito una llamada personalizada con Vía Há México para el día ${dateStr} en el horario de la ${bloque}. ¿Tienen espacio disponible?`);
-
-                window.open(`https://wa.me/529992719285?text=${mensaje}`, '_blank');
-
-            };
-
-            return; // Detiene la ejecución aquí para no cargar lo de abajo
-
-            */
-
-
-            // Flujo normal Opción A: Simula la carga de horas libres leídas del Sheets
-
-            const horasFicticiasLibres = ["10:00 AM", "11:30 AM", "4:00 PM"];
-
-            horasFicticiasLibres.forEach(hora => {
-
-                let opt = document.createElement('option');
-
-                opt.value = hora; opt.innerText = hora;
-
-                selectHora.appendChild(opt);
-
-            });
-
-
-            btnConfirmar.style.display = 'block';
-
-            btnConfirmar.onclick = () => {
-
-                const horaFinal = selectHora.value;
-
-                const mensajeText = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Hora seleccionada:* ${horaFinal}\n\n¿Me confirman si el espacio sigue libre en su agenda?`;
-
-                window.open(`https://wa.me/529992719285?text=${encodeURIComponent(mensajeText)}`, '_blank');
-
-            };
-
-        }
-
-    });
-
-}
-
-
-
-/**
-
- * 📅 OPCIÓN B: Lógica de integración con Calendly
-
- */
-
-function ejecutarOpcionB_Calendly() {
-
-    const contenedor = document.getElementById('contenedor-render-agenda');
-
-
-    // Renderizamos el cascarón del Widget embebido de Calendly
-
-    contenedor.innerHTML = `
-
-        <h3 class="section-title" style="margin-top:0;">Agenda tu asesoría en vivo</h3>
-
-        <p style="font-size:14px; margin-bottom:10px;">Elige el espacio que mejor se acomode a tu día. El calendario se sincroniza con los teléfonos de Roberto y Román en tiempo real.</p>
-
-        <div id="calendly-inline-widget" style="min-width:320px; height:360px;" data-url="https://calendly.com/viahamexico/asesoria"></div>
-
-    `;
-
-
-    // Cargamos dinámicamente el script nativo de Calendly para levantar la interfaz
-
-    const scriptCalendly = document.createElement('script');
-
-    scriptCalendly.src = "https://assets.calendly.com/assets/external/widget.js";
-
-    scriptCalendly.async = true;
-
-    document.head.appendChild(scriptCalendly);
-
-
-    // ----------------------------------------------------------------======
-
-    // CASILLA COMENTADA: RESPALDO DE OPCIÓN C DENTRO DE CALENDLY
-
-    // Si Calendly falla o prefieren meter el formulario de opciones de horario abajo como plan B,
-
-    // puedes descomentar este bloque para inyectar el selector manual abajo del calendario.
-
-    // ----------------------------------------------------------------======
-
-    /*
-
-    const deptoRespaldo = document.createElement('div');
-
-    deptoRespaldo.innerHTML = `
-
-        <div style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
-
-            <label class="input-label">¿No encontraste horario? Propón un bloque:</label>
-
-            <select id="respaldo-bloque-b" class="tour-picker" style="margin-bottom:10px;">
-
-                <option value="Mañana">Mañana (9:00 AM - 12:00 PM)</option>
-
-                <option value="Tarde">Tarde (2:00 PM - 5:00 PM)</option>
-
+            <select id="select-hora-fija" class="tour-picker">
+                <option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option>
+                <option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option>
+                <option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option>
             </select>
-
-            <button type="button" class="btn-whatsapp" style="width:100%; border:none;" onclick="alert('Enviando bloque por WhatsApp...')">Proponer por WhatsApp</button>
-
         </div>
-
+        
+        <button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">
+            Confirmar e ir a WhatsApp ↗
+        </button>
     `;
 
-    contenedor.appendChild(deptoRespaldo);
+    // Inicializamos Flatpickr para capturar la fecha seleccionada
+    flatpickr("#fecha-llamada-fija", {
+        locale: "es",
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        onChange: function(selectedDates, dateStr) {
+            const wrapperHoras = document.getElementById('wrapper-horarios-fijos');
+            const selectHora = document.getElementById('select-hora-fija');
+            const btnConfirmar = document.getElementById('btn-confirmar-fijo');
 
-    */
+            // Mostramos el selector de horas y el botón de confirmar
+            wrapperHoras.style.display = 'block';
+            btnConfirmar.style.display = 'block';
 
+            // Programamos el evento de clic para armar el mensaje de WhatsApp directo a tu número
+            btnConfirmar.onclick = () => {
+                const bloqueSeleccionado = selectHora.value;
+                const mensajeText = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloqueSeleccionado}\n\n¿Me confirman si Roberto y Román tienen espacio disponible?`;
+                
+                window.open(`https://wa.me/529992719285?text=${encodeURIComponent(mensajeText)}`, '_blank');
+            };
+        }
+    });
 }
-
 
  document.addEventListener("DOMContentLoaded", inicializarSistema); 
