@@ -77,7 +77,6 @@
           no_inc_chichen_list: "<li>Boletos de acceso a la zona</li><li>Bebidas durante el buffet</li><li>Souvenirs o gastos personales</li>",
           inc_coloradas_list: "<li>Logística y traslado privado</li><li>Parada gastronómica en Motul</li><li>Visita a Playa Cancunito</li><li>Seguro de viajero a bordo</li>",
           no_inc_coloradas_list: "<li>Tarifas de entrada al parque</li><li>Comidas en zona de playa</li><li>Propinas del servicio</li>",
-          // NUEVO: Llave de traducción para el Sello Social en Español
           sello_sustentable_texto: "<strong>Garantía Mexcellent:</strong> Al contratar tu experiencia con Vía Há México, un porcentaje de tu pago se destina directamente al desarrollo sustentable de las comunidades mayas y la preservación de su entorno natural."
       }, 
       en: { 
@@ -121,7 +120,6 @@
           no_inc_chichen_list: "<li>Archaeological site access tickets</li><li>Drinks during the buffet</li><li>Souvenirs or personal expenses</li>",
           inc_coloradas_list: "<li>Private logistics and transfers</li><li>Gastronomic stop in Motul</li><li>Visit to Cancunito Beach</li><li>Travel insurance on board</li>",
           no_inc_coloradas_list: "<li>Park entrance fees</li><li>Meals at beach area</li><li>Service tips</li>",
-          // NUEVO: Llave de traducción para el Sello Social en Inglés
           sello_sustentable_texto: "<strong>Mexcellent Guarantee:</strong> When booking your experience with Vía Há México, a percentage of your payment goes directly to the sustainable development of Mayan communities and the preservation of their natural environment."
       } 
  }; 
@@ -135,10 +133,12 @@
           inicializarCalendario();  
           calcular();  
           cargarBloqueos();  
-          actualizarLogosDinamicos();   
           inicializarSoportesTactiles();   
           
           renderizarCamposPersonalizados();
+          
+          // MODIFICACIÓN: Actualizamos el Isologo oficial en la carga inicial de la página
+          actualizarLogosDinamicos();
 
           const select = document.getElementById('tour-select');  
           if (select) {  
@@ -244,13 +244,34 @@
       });  
  }  
 
+ // MODIFICACIÓN CRÍTICA: Inyecta los vectores SVG nativos de páginas 19 y 20 del manual
  function actualizarLogosDinamicos() {  
       const select = document.getElementById('tour-select');  
       if (!select) return;  
-      const urlLogo = select.options[select.selectedIndex].getAttribute('data-logo');  
-       
-      document.querySelectorAll('.dynamic-tour-logo').forEach(img => {  
-          img.src = urlLogo;  
+      
+      // Leemos la categoría (naturaleza o cultura) desde el atributo data
+      const categoria = select.options[select.selectedIndex].getAttribute('data-categoria');  
+      
+      // Vector 1: Isologo de Naturaleza (Cenotes, Flamingos, Aviturismo) en color Arena
+      const svgNaturaleza = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z"/>
+          </svg>
+      `;
+
+      // Vector 2: Isologo de Cultura (Arco Maya, Historia, Arqueología) en color Menta
+      const svgCultura = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18M5 21V10l7-6 7 7v11M9 21v-4a3 3 0 0 1 6 0v4"/>
+          </svg>
+      `;
+
+      // Decidimos cuál vector inyectar según la naturaleza de la ruta
+      const svgFinal = (categoria === "cultura") ? svgCultura : svgNaturaleza;
+
+      // Pintamos el isologo oficial en todos los contenedores destinados para ello
+      document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => {  
+          container.innerHTML = svgFinal;  
       });  
  }  
 
@@ -260,7 +281,6 @@
       document.querySelectorAll('[data-i18n]').forEach(el => {  
           const key = el.getAttribute('data-i18n');  
           if (t[key]) {
-              // Si la clave inyecta código HTML o es la del Sello Sustentable, usamos innerHTML
               if(key.includes('_list') || key.includes('sello_')) {
                   el.innerHTML = t[key];
               } else {
@@ -304,7 +324,7 @@
  function cambiarCant(tipo, cambio) {  
       if (tipo === 'adultos') {  
           if (adultos + cambio >= 1) adultos += cambio;   
-          document.getElementById('qty-adultos').innerText = adultos;  
+          document.getElementById('qty-adultos').innerText = adults;  
       } else {  
           if (ninos + cambio >= 0) ninos += cambio;   
           document.getElementById('qty-ninos').innerText = ninos;  
@@ -329,6 +349,8 @@
       document.getElementById('info-' + selectedTour).classList.add('active');  
        
       activarAutoplayCarrusel(selectedTour);  
+      
+      // MODIFICACIÓN: Disparamos la actualización de los isologos al cambiar de ruta
       actualizarLogosDinamicos();   
       
       renderizarCamposPersonalizados();  
@@ -364,7 +386,6 @@
 
      let htmlIzquierdo = "";
 
-     // A. COMPLEMENTOS EN COLUMNA IZQUIERDA
      if (datos.complementos.length > 0) {
          htmlIzquierdo += `
              <div class="box-personalizacion">
@@ -388,7 +409,6 @@
          `;
      }
 
-     // B. PLUS EN COLUMNA IZQUIERDA
      if (datos.plus.length > 0) {
          htmlIzquierdo += `
              <div class="box-personalizacion">
@@ -406,7 +426,6 @@
      }
      contenedorIzquierdo.innerHTML = htmlIzquierdo;
 
-     // C. IDIOMA EN COLUMNA DERECHA
      let htmlDerecho = `
          <div class="box-personalizacion">
              <div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
