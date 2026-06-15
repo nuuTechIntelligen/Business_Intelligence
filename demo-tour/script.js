@@ -6,14 +6,12 @@
  let fechaSeleccionada = ""; 
  let idiomaActual = "es"; 
 
- // Control de carruseles de fotos individuales
  const posicionesCarrusel = { 
       cenotes: 0, 
       chichen: 0, 
       coloradas: 0 
  }; 
 
- // Intervalos para la automatización del carrusel
  const intervalosCarrusel = { 
       cenotes: null, 
       chichen: null, 
@@ -22,7 +20,6 @@
 
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
- // Estructura de contenido obtenida de los flayers de Vía Há México
  const catalogoEstructuraTours = {
      cenotes: {
          complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"],
@@ -72,7 +69,6 @@
           wa_ninos: "👶 *Niños:*", 
           wa_total: "💰 *Total estimado:*", 
           wa_pregunta: "¿Tienen disponibilidad para estas condiciones?",
-          // MODIFICACIÓN: Textos agregados para soportar traducciones de los bloques Incluye/No incluye
           inc_title: "🟢 Incluye",
           no_inc_title: "🔴 No Incluye",
           inc_cenotes_list: "<li>Transporte privado de lujo</li><li>Guía local especializado</li><li>Bicicletas, chalecos y regaderas</li><li>Agua mineral y snacks locales</li>",
@@ -80,7 +76,9 @@
           inc_chichen_list: "<li>Vehículo privado con chofer</li><li>Guía arqueológico bilingüe</li><li>Almuerzo Buffet Regional</li><li>Tiempo libre en Valladolid</li>",
           no_inc_chichen_list: "<li>Boletos de acceso a la zona</li><li>Bebidas durante el buffet</li><li>Souvenirs o gastos personales</li>",
           inc_coloradas_list: "<li>Logística y traslado privado</li><li>Parada gastronómica en Motul</li><li>Visita a Playa Cancunito</li><li>Seguro de viajero a bordo</li>",
-          no_inc_coloradas_list: "<li>Tarifas de entrada al parque</li><li>Comidas en zona de playa</li><li>Propinas del servicio</li>"
+          no_inc_coloradas_list: "<li>Tarifas de entrada al parque</li><li>Comidas en zona de playa</li><li>Propinas del servicio</li>",
+          // NUEVO: Llave de traducción para el Sello Social en Español
+          sello_sustentable_texto: "<strong>Garantía Mexcellent:</strong> Al contratar tu experiencia con Vía Há México, un porcentaje de tu pago se destina directamente al desarrollo sustentable de las comunidades mayas y la preservación de su entorno natural."
       }, 
       en: { 
           hero_title: "VÍA HA' MÉXICO", 
@@ -122,7 +120,9 @@
           inc_chichen_list: "<li>Private vehicle with driver</li><li>Bilingual archaeological guide</li><li>Regional Buffet Lunch</li><li>Free time in Valladolid</li>",
           no_inc_chichen_list: "<li>Archaeological site access tickets</li><li>Drinks during the buffet</li><li>Souvenirs or personal expenses</li>",
           inc_coloradas_list: "<li>Private logistics and transfers</li><li>Gastronomic stop in Motul</li><li>Visit to Cancunito Beach</li><li>Travel insurance on board</li>",
-          no_inc_coloradas_list: "<li>Park entrance fees</li><li>Meals at beach area</li><li>Service tips</li>"
+          no_inc_coloradas_list: "<li>Park entrance fees</li><li>Meals at beach area</li><li>Service tips</li>",
+          // NUEVO: Llave de traducción para el Sello Social en Inglés
+          sello_sustentable_texto: "<strong>Mexcellent Guarantee:</strong> When booking your experience with Vía Há México, a percentage of your payment goes directly to the sustainable development of Mayan communities and the preservation of their natural environment."
       } 
  }; 
 
@@ -260,8 +260,8 @@
       document.querySelectorAll('[data-i18n]').forEach(el => {  
           const key = el.getAttribute('data-i18n');  
           if (t[key]) {
-              // MODIFICACIÓN: Si la clave inyecta código HTML de listas, usamos innerHTML en lugar de innerText
-              if(key.includes('_list')) {
+              // Si la clave inyecta código HTML o es la del Sello Sustentable, usamos innerHTML
+              if(key.includes('_list') || key.includes('sello_')) {
                   el.innerHTML = t[key];
               } else {
                   el.innerText = t[key];
@@ -382,7 +382,7 @@
      } else {
          htmlIzquierdo += `
              <div class="box-personalizacion" style="background-color: var(--light-bg); border-style: dashed;">
-                 <div class="titulo-interactivo" style="color:#777;">📋 Ruta Integrada Completa</div>
+                 <div class="titulo-interactivo">📋 Ruta Integrada Completa</div>
                  <p style="font-size:15px; margin:0; font-family:'Urbanist', sans-serif;">Este itinerario incluye visitas corridas sin exclusiones a: *Motul*, *Las Coloradas* y *Playa Cancunito*.</p>
              </div>
          `;
@@ -406,7 +406,7 @@
      }
      contenedorIzquierdo.innerHTML = htmlIzquierdo;
 
-     // C. IDIOMA EN COLUMNA DERECHA (Opción A - Después del Nombre)
+     // C. IDIOMA EN COLUMNA DERECHA
      let htmlDerecho = `
          <div class="box-personalizacion">
              <div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
@@ -486,10 +486,6 @@
 
       window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
  }  
-
-/* ==========================================================================
-   MÓDULO DE AGENDADO DE LLAMADAS PERSONALIZADAS (OPCIÓN C - HORARIOS FIJOS)
-   ========================================================================== */
 
  function dispararAgendado() {
      document.getElementById('modal-agenda').style.display = 'flex';
