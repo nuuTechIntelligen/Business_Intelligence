@@ -72,6 +72,7 @@
                      <option value="cenotes" data-adulto="650" data-nino="440" data-entrada-adulto="350" data-entrada-nino="250" data-logo="https://cdn-icons-png.flaticon.com/512/3206/3206010.png" data-i18n="tour_cenotes">Tour 4 Cenotes (Bici/Tren)</option> 
                      <option value="chichen" data-adulto="1200" data-nino="850" data-entrada-adulto="650" data-entrada-nino="450" data-logo="https://cdn-icons-png.flaticon.com/512/2664/2664633.png" data-i18n="tour_chichen">Chichén Itzá & Valladolid</option> 
                      <option value="celestun" data-adulto="950" data-nino="700" data-entrada-adulto="200" data-entrada-nino="150" data-logo="https://cdn-icons-png.flaticon.com/512/7613/7613941.png" data-i18n="tour_celestun">Celestún (Flamencos & Manglares)</option> 
+                     <option value="coloradas" data-adulto="0" data-nino="0" data-entrada-adulto="0" data-entrada-nino="0" data-logo="https://cdn-icons-png.flaticon.com/512/2965/2965851.png" data-i18n="tour_coloradas">Coloradas Tour Day</option> 
                  </select> 
 
                  <div id="info-cenotes" class="tour-info-card active"> 
@@ -123,6 +124,23 @@
                      <p data-i18n="desc_celestun">Paseo en lancha para ver flamencos rosas, túneles de manglar y tiempo de playa.</p> 
                  </div> 
 
+                 <div id="info-coloradas" class="tour-info-card"> 
+                     <div class="carousel-container"> 
+                         <button class="carousel-btn prev" onclick="moverCarrusel('coloradas', -1)">&#10094;</button> 
+                         <div class="carousel-track" id="track-coloradas"> 
+                             <img src="https://yucatan.travel/wp-content/uploads/2019/11/Portada-1.jpg" alt="Las Coloradas aguas rosadas" class="tour-card-img"> 
+                         </div> 
+                         <button class="carousel-btn next" onclick="moverCarrusel('coloradas', 1)">&#10095;</button> 
+                     </div> 
+                     <div class="tour-title-wrapper"> 
+                         <img src="" alt="Icono Tour" class="dynamic-tour-logo logo-c1"> 
+                         <h3 class="section-title" data-i18n="titulo_coloradas" style="margin:0; border:none; padding:0;">Coloradas Tour Day</h3> 
+                     </div> 
+                     <p data-i18n="desc_coloradas">Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.</p> 
+                 </div>
+
+                 <div id="seccion-personalizacion-tour" style="margin-top: 20px;"></div>
+
                  <div class="reviews-section"> 
                      <p class="reviews-text" data-i18n="reviews_text">⭐ Descubre por qué nos recomiendan nuestros viajeros</p> 
                      <a href="https://www.facebook.com/unamigoenMerida/reels/" target="_blank" id="btn-reviews" class="btn-reviews" data-i18n="btn_reviews"> 
@@ -157,8 +175,8 @@
                          <option value="con" data-i18n="opt_con_entradas">Tour con entradas incluidas</option> 
                      </select> 
                  </div> 
-                   
-                 <div class="form-group counter-container"> 
+                    
+                 <div class="form-group" class="counter-container"> 
                      <label data-i18n="label_fecha">Fecha del Recorrido</label> 
                      <input type="text" id="fecha-reserva" placeholder="Selecciona una fecha o rango..." data-i18n-ph="ph_fecha"> 
                  </div> 
@@ -223,5 +241,5 @@
      <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
      <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script> 
      <script src="script.js"></script> 
- </body> 
- </html>
+</body> 
+</html>
