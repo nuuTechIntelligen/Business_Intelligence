@@ -6,23 +6,23 @@
  let fechaSeleccionada = ""; 
  let idiomaActual = "es"; 
 
- // Objeto para controlar la posición del carrusel de cada tour de forma independiente 
+ // Control de carruseles de fotos individuales
  const posicionesCarrusel = { 
       cenotes: 0, 
       chichen: 0, 
-      coloradas: 0 // NUEVO: Soporte para el carrusel de Coloradas
+      coloradas: 0 
  }; 
 
- // NUEVO: Objeto para almacenar los temporizadores de autoplay de cada carrusel 
+ // Intervalos para la automatización del carrusel
  const intervalosCarrusel = { 
       cenotes: null, 
       chichen: null, 
-      coloradas: null // NUEVO: Soporte para el autoplay de Coloradas
+      coloradas: null 
  }; 
 
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
- // NUEVO: Estructura del mapa de contenidos oficiales basado en los flayers de Vía Há México
+ // Estructura de contenido obtenida de los flayers de Vía Há México
  const catalogoEstructuraTours = {
      cenotes: {
          complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"],
@@ -33,19 +33,18 @@
          plus: ["Avistamiento de aves", "Dinámica de observación"]
      },
      coloradas: {
-         complementos: [], // Ruta fija corrida (Motul, Coloradas, Cancunito)
+         complementos: [], 
          plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"]
      }
  };
 
- // DICCIONARIO DE IDIOMAS SINCRONIZADO CON NOMBRE Y SLOGAN OFICIAL
  const traducciones = { 
       es: { 
           hero_title: "VÍA HA' MÉXICO", 
           hero_badge: "✨ Sumérgete al Mayab", 
           pregunta_tour: "¿Qué paraíso quieres visitar hoy?", 
-          tour_cenotes: "Tour 4 Cenotes (Bici/Tren)", 
-          tour_chichen: "Chichén Itzá & Valladolid", 
+          tour_cenotes: "Tour Cenotes", 
+          tour_chichen: "Chichén Itzá", 
           tour_coloradas: "Coloradas Tour Day",
           titulo_cenotes: "Detalles del Tour Cenotes", 
           desc_cenotes: "Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas con fotografía profesional por Román.", 
@@ -54,16 +53,9 @@
           titulo_coloradas: "Coloradas Tour Day",
           desc_coloradas: "Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.",
           reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros", 
-          btn_reviews: "Ver opiniones de clientes ↗", 
           titulo_cotizador: "Cotiza tu grupo", 
           label_nombre: "Nombre de quien solicita", 
           ph_nombre: "Escribe tu nombre completo...", 
-          label_nacionalidad: "Nacionalidad", 
-          opt_nacional: "🇲🇽 Mexicano / Nacional", 
-          opt_extranjero: "✈️ Extranjero / International", 
-          label_entradas: "Modalidad de Entradas", 
-          opt_sin_entradas: "Tour sin entradas incluidas", 
-          opt_con_entradas: "Tour con entradas incluidas", 
           label_fecha: "Fecha del Recorrido", 
           ph_fecha: "Selecciona una fecha o rango...", 
           label_adultos: "Adultos", 
@@ -74,24 +66,19 @@
           alert_fecha: "Por favor, selecciona una fecha disponible.", 
           wa_saludo: "¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n", 
           wa_nombre: "👤 *Nombre:*", 
-          wa_perfil: "🌍 *Perfil:*", 
-          wa_accesos: "🎟️ *Accesos:*", 
           wa_tour: "🌴 *Tour:*", 
           wa_fecha: "📅 *Fecha:*", 
           wa_adultos: "👥 *Adultos:*", 
           wa_ninos: "👶 *Niños:*", 
           wa_total: "💰 *Total estimado:*", 
-          wa_pregunta: "¿Tienen disponibilidad para estas condiciones?", 
-          wa_txt_ext: "Sin entradas (Tarifa Extranjero)", 
-          wa_txt_con: "Con entradas incluidas", 
-          wa_txt_sin: "Sin entradas" 
+          wa_pregunta: "¿Tienen disponibilidad para estas condiciones?"
       }, 
       en: { 
           hero_title: "VÍA HA' MÉXICO", 
           hero_badge: "✨ Immerse yourself in the Mayab", 
           pregunta_tour: "What paradise do you want to visit today?", 
-          tour_cenotes: "4 Cenotes Tour (Bike/Train)", 
-          tour_chichen: "Chichen Itza & Valladolid", 
+          tour_cenotes: "Cenotes Tour", 
+          tour_chichen: "Chichen Itza", 
           tour_coloradas: "Coloradas Tour Day",
           titulo_cenotes: "Cenotes Tour Details", 
           desc_cenotes: "Visit 4 cenotes: Closed, Semi-open, Open, and River type. Includes bikes, life jackets, and showers with professional photo coverage by Roman.", 
@@ -100,16 +87,9 @@
           titulo_coloradas: "Coloradas Tour Day",
           desc_coloradas: "Immerse yourself in the Mexican pink of the peninsula. Feel the vastness of the flamingo habitat.",
           reviews_text: "⭐ Discover why our travelers recommend us", 
-          btn_reviews: "See customer reviews ↗", 
           titulo_cotizador: "Quote your group", 
           label_nombre: "Lead Traveler Name", 
           ph_nombre: "Enter your full name...", 
-          label_nacionalidad: "Nationality", 
-          opt_nacional: "🇲🇽 Mexican / National", 
-          opt_extranjero: "✈️ Foreigner / International", 
-          label_entradas: "Tickets Modality", 
-          opt_sin_entradas: "Tour without tickets included", 
-          opt_con_entradas: "Tour with tickets included", 
           label_fecha: "Tour Date", 
           ph_fecha: "Select a date or range...", 
           label_adultos: "Adultos", 
@@ -120,17 +100,12 @@
           alert_fecha: "Please select an available date.", 
           wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *VÍA HA' MÉXICO*:\n\n", 
           wa_nombre: "👤 *Name:*", 
-          wa_perfil: "🌍 *Profile:*", 
-          wa_accesos: "🎟️ *Access:*", 
           wa_tour: "🌴 *Tour:*", 
           wa_fecha: "📅 *Date:*", 
           wa_adultos: "👥 *Adults:*", 
           wa_ninos: "👶 *Children:*", 
           wa_total: "💰 *Estimated Total:*", 
-          wa_pregunta: "Do you have availability for these conditions?", 
-          wa_txt_ext: "No tickets (Foreigner Rate)", 
-          wa_txt_con: "With tickets included", 
-          wa_txt_sin: "Without tickets" 
+          wa_pregunta: "Do you have availability for these conditions?"
       } 
  }; 
 
@@ -146,19 +121,12 @@
           actualizarLogosDinamicos();   
           inicializarSoportesTactiles();   
           
-          // NUEVO: Renderiza los complementos en la carga inicial de la página
+          // Renderizadores dinámicos iniciales de campos
           renderizarCamposPersonalizados();
 
           const select = document.getElementById('tour-select');  
           if (select) {  
               activarAutoplayCarrusel(select.value);  
-          }  
-           
-          const btnReviews = document.getElementById('btn-reviews');  
-          if (btnReviews) {  
-              btnReviews.addEventListener('click', function() {  
-                  gtag('event', 'clic_testimonios', { 'destino_red': 'Instagram_Reviews' });  
-              });  
           }  
       } catch (error) {  
           console.error("❌ Error en inicialización:", error.message);  
@@ -310,35 +278,6 @@
           .catch(err => console.error("❌ Error conectando con SheetDB:", err));  
  }  
 
- function cambiarNacionalidad() {  
-      const nacionalidad = document.getElementById('nacionalidad-select').value;  
-      const wrapperEntradas = document.getElementById('wrapper-entradas');  
-      const entradasSelect = document.getElementById('entradas-select');  
-
-      if (nacionalidad === 'extranjero') {  
-          entradasSelect.value = 'sin';  
-          wrapperEntradas.style.display = 'none';  
-      } else {  
-          wrapperEntradas.style.display = 'block';  
-      }  
-
-      gtag('event', 'interaccion_cotizador', {  
-          'tipo_accion': 'cambio_nacionalidad',  
-          'perfil_usuario': nacionalidad  
-      });  
-
-      calcular();  
- }  
-
- function cambiarEntradas() {  
-      const modalidadEntradas = document.getElementById('entradas-select').value;  
-      gtag('event', 'interaccion_cotizador', {  
-          'tipo_accion': 'seleccion_entradas',  
-          'modalidad': modalidadEntradas  
-      });  
-      calcular();  
- }  
-
  function cambiarCant(tipo, cambio) {  
       if (tipo === 'adultos') {  
           if (adultos + cambio >= 1) adultos += cambio;   
@@ -369,7 +308,7 @@
       activarAutoplayCarrusel(selectedTour);  
       actualizarLogosDinamicos();   
       
-      // NUEVO: Ejecuta la inyección dinámico en cascada al cambiar el selector
+      // Renderizado dinámico de secciones
       renderizarCamposPersonalizados();
 
       gtag('event', 'ver_tour', {  
@@ -380,54 +319,48 @@
       calcular();  
  }  
 
+ // CORRECCIÓN: Matemática de cotización directa pura, sin entradas ni nacionalidades
  function calcular() {  
       const select = document.getElementById('tour-select');  
       if(!select) return;  
 
       const option = select.options[select.selectedIndex];  
-      const nacionalidad = document.getElementById('nacionalidad-select').value;  
-      const modalidadEntradas = document.getElementById('entradas-select').value;  
 
       let precioAdulto = parseInt(option.getAttribute('data-adulto')) || 0;  
       let precioNino = parseInt(option.getAttribute('data-nino')) || 0;  
-
-      if (nacionalidad === 'mexicano' && modalidadEntradas === 'con') {  
-          precioAdulto += parseInt(option.getAttribute('data-entrada-adulto')) || 0;  
-          precioNino += parseInt(option.getAttribute('data-entrada-nino')) || 0;  
-      }  
 
       const total = (adultos * precioAdulto) + (ninos * precioNino);  
       document.getElementById('total-display').innerText = `$${total.toLocaleString()} MXN`;  
  }  
 
- // NUEVO: Función para inyectar de forma reactiva los complementos, pluses e idiomas en la columna izquierda
+ // MODIFICACIÓN: Inyección separada. Complementos/Plus a la izquierda; Idioma a la derecha (Opción A)
  function renderizarCamposPersonalizados() {
      const tourSeleccionado = document.getElementById('tour-select').value;
      const datos = catalogoEstructuraTours[tourSeleccionado];
-     const contenedor = document.getElementById('seccion-personalizacion-tour');
+     const contenedorIzquierdo = document.getElementById('seccion-personalizacion-tour');
+     const contenedorDerecho = document.getElementById('seccion-idioma-tour');
      
-     if (!datos || !contenedor) return;
+     if (!datos || !contenedorIzquierdo || !contenedorDerecho) return;
 
-     let htmlInyeccion = "";
+     let htmlIzquierdo = "";
 
-     // A. COMPLEMENTOS (Selección única mediante Radios)
+     // A. COMPLEMENTOS EN COLUMNA IZQUIERDA
      if (datos.complementos.length > 0) {
-         htmlInyeccion += `
+         htmlIzquierdo += `
              <div class="box-personalizacion">
                  <div class="titulo-interactivo">📍 Personaliza tu Ruta (Elige 1)</div>
          `;
          datos.complementos.forEach((comp, index) => {
-             htmlInyeccion += `
+             htmlIzquierdo += `
                  <label class="opcion-item">
                      <input type="radio" name="viaha-complemento" value="${comp}" ${index === 0 ? 'checked' : ''}>
                      <span>${comp}</span>
                  </label>
              `;
          });
-         htmlInyeccion += `</div>`;
+         htmlIzquierdo += `</div>`;
      } else {
-         // Leyenda adaptada para Coloradas (Ruta corrida)
-         htmlInyeccion += `
+         htmlIzquierdo += `
              <div class="box-personalizacion" style="background-color: var(--light-bg); border-style: dashed;">
                  <div class="titulo-interactivo" style="color:#777;">📋 Ruta Integrada Completa</div>
                  <p style="font-size:15px; margin:0; font-family:'Urbanist', sans-serif;">Este itinerario incluye visitas corridas sin exclusiones a: *Motul*, *Las Coloradas* y *Playa Cancunito*.</p>
@@ -435,25 +368,26 @@
          `;
      }
 
-     // B. PLUS (Múltiple elección mediante Checkboxes)
+     // B. PLUS EN COLUMNA IZQUIERDA
      if (datos.plus.length > 0) {
-         htmlInyeccion += `
+         htmlIzquierdo += `
              <div class="box-personalizacion">
                  <div class="titulo-interactivo">✨ ¿Quieres agregar un Plus? (Sin costo extra)</div>
          `;
          datos.plus.forEach(pl => {
-             htmlInyeccion += `
+             htmlIzquierdo += `
                  <label class="opcion-item">
                      <input type="checkbox" name="viaha-plus" value="${pl}">
                      <span>${pl}</span>
                  </label>
              `;
          });
-         htmlInyeccion += `</div>`;
+         htmlIzquierdo += `</div>`;
      }
+     contenedorIzquierdo.innerHTML = htmlIzquierdo;
 
-     // C. IDIOMA DEL TOUR (Radio interactivo con caja de entrada para la opción "Otro")
-     htmlInyeccion += `
+     // C. IDIOMA EN COLUMNA DERECHA (Opción A - Después del Nombre)
+     let htmlDerecho = `
          <div class="box-personalizacion">
              <div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Español" checked onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Español</span></label>
@@ -466,8 +400,7 @@
              </div>
          </div>
      `;
-
-     contenedor.innerHTML = htmlInyeccion;
+     contenedorDerecho.innerHTML = htmlDerecho;
  }
 
  function enviarWhatsApp() {  
@@ -489,10 +422,7 @@
       const tourName = select.options[select.selectedIndex].text;  
       const idTour = select.value;  
       const total = document.getElementById('total-display').innerText;  
-      const nacionalidad = document.getElementById('nacionalidad-select').value;  
-      const modalidadEntradas = document.getElementById('entradas-select').value;  
 
-      // NUEVO: Captura de datos dinámicos agregados por el usuario
       const r_complemento = document.querySelector('input[name="viaha-complemento"]:checked');
       const complementoTexto = r_complemento ? r_complemento.value : "Ruta Fija Corrida";
 
@@ -506,18 +436,11 @@
       if (idiomaTexto === "Otro") {
           const inputOtro = document.getElementById('input-otro-idioma').value.trim();
           idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No especificado)";
-      }
-
-      let perfilTexto = nacionalidad === 'mexicano' ? t.opt_nacional : t.opt_extranjero;  
-      let entradasTexto = nacionalidad === 'extranjero' ? t.wa_txt_ext :  
-                        (modalidadEntradas === 'con' ? t.wa_txt_con : t.wa_txt_sin);  
+       }
        
       let mensaje = `${t.wa_saludo}`;  
       mensaje += `${t.wa_nombre} ${nombre}\n`;  
-      mensaje += `${t.wa_perfil} ${perfilTexto}\n`;  
-      mensaje += `${t.wa_accesos} ${entradasTexto}\n`;  
       mensaje += `${t.wa_tour} ${tourName}\n`;  
-      // NUEVAS ADICIONES AL MENSAJE DE WHATSAPP
       mensaje += `📍 *Ruta/Complemento:* ${complementoTexto}\n`;
       mensaje += `✨ *Plus Elegidos:* ${plusTexto}\n`;
       mensaje += `🗣️ *Idioma Requerido:* ${idiomaTexto}\n`;
@@ -535,8 +458,6 @@
           'total_cotizado': total,  
           'cantidad_adultos': adultos,  
           'cantidad_ninos': ninos,  
-          'perfil_nacionalidad': nacionalidad,  
-          'modalidad_entradas': modalidadEntradas,  
           'idioma_reserva': idiomaActual,
           'complemento_ruta': complementoTexto,
           'plus_agregado': plusTexto,
