@@ -44,10 +44,10 @@
          "Homún":             { 2: 1700, 3: 2300, 4: 3500 }
      },
      chichen: {
-         "Cenote Zací / Valladolid":       { 2: 1880, 3: 2600, 4: 4000 },
-         "Izamal":                         { 2: 1950, 3: 2650, 4: 4100 },
-         "Cenote Lol-Ha / Taller con Chef": { 2: 2250, 3: 3000, 4: 4700 },
-         "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 2150, 3: 2850, 4: 4500 }
+         "Cenote Zací / Valladolid":       { 2: 1880, 3: 1300, 4: 1000 },
+         "Izamal":                         { 2: 1700, 3: 1150, 4: 900 },
+         "Cenote Lol-Ha / Taller con Chef": { 2: 1700, 3: 1150, 4: 900 },
+         "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 1700, 3: 1150, 4: 900 }
      },
      coloradas: {
          "Ruta Fija Corrida": { 2: 1650, 3: 2300, 4: 3500 }
