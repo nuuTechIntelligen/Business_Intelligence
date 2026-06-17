@@ -23,7 +23,7 @@
  const catalogoEstructuraTours = {
      cenotes: {
          complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"],
-         plus: ["Avistamiento de aves", "Dinámica de observación"]
+         plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"]
      },
      chichen: {
          complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"],
