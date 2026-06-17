@@ -68,9 +68,27 @@ body {
     pointer-events: none;
 }
 
-.hero h1, .badge-private { z-index: 10; position: relative; }
+/* MODIFICACIÓN: Contenedor adaptativo de marca en la cabecera */
+.brand-wrapper {
+    z-index: 10;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
 
-.hero h1 { 
+/* MODIFICACIÓN: Comportamiento del Logo en Móviles (Visible por defecto, oculto en PC) */
+.hero-logo-movil {
+    display: block;
+    max-width: 180px;
+    height: auto;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+}
+
+/* MODIFICACIÓN: Comportamiento del Título en PC (Oculto por defecto en celulares) */
+.hero-title-pc {
+    display: none;
     font-size: 38px; 
     margin: 0; 
     text-transform: uppercase; 
@@ -78,18 +96,11 @@ body {
     font-family: 'Big Shoulders Text', sans-serif;
     font-weight: 800;
     filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4)); 
-} 
-
-@media (min-width: 850px) {
-    .hero {
-        height: 32vh;        
-    }
-    .hero h1 {
-        font-size: 56px; 
-    }
 }
 
 .badge-private { 
+    z-index: 10;
+    position: relative;
     background-color: var(--turquesa); 
     color: var(--text); 
     padding: 6px 16px; 
@@ -101,6 +112,20 @@ body {
     text-transform: uppercase; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
 } 
+
+/* MODIFICACIÓN: Gatillo de cambio responsivo al romper la barrera de los 850px (Modo PC) */
+@media (min-width: 850px) {
+    .hero {
+        height: 32vh;        
+    }
+    .hero-logo-movil {
+        display: none; /* Oculta el logo en PC */
+    }
+    .hero-title-pc {
+        display: block; /* Muestra el texto monumental en PC */
+        font-size: 56px; 
+    }
+}
 
 .container { 
     width: 92%; 
