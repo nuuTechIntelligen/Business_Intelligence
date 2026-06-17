@@ -171,16 +171,20 @@ body {
 .tour-title-wrapper, .cotizador-header-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px 0; } 
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 
+/* ACTUALIZACIÓN: Escalado premium para tus logotipos SVG oficiales */
 .dynamic-tour-logo-container { 
-    width: 32px !important; 
-    height: 32px !important; 
+    width: 45px !important;       /* Subimos de 32px a 45px el ancho */
+    height: 45px !important;      /* Subimos de 32px a 45px el alto */
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    flex-shrink: 0 !important;     /* Evita que la caja se comprima en pantallas chicas */
 } 
-.dynamic-tour-logo-container svg {
+
+.dynamic-tour-logo-container img {
     width: 100% !important;
     height: 100% !important;
+    object-fit: contain !important; /* Asegura que el logo se adapte sin deformarse */
 }
 
 .lang-switch-container { 
