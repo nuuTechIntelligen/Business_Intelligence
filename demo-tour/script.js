@@ -508,11 +508,7 @@
              if(pl === "Paseo ecoturístico") {
                  htmlIzquierdo += `
                      <ul class="sub-detalles-plus">
-                         <li>Playa Virgen</li>
-                         <li>Laguna Azul</li>
-                         <li>Pecesitos</li>
-                         <li>Baño Maya</li>
-                         <li>Tortugario</li>
+                         <li>Playa Virgen, Laguna Azul, Pecesitos, Baño Maya, Tortugario</li>
                      </ul>
                  `;
              }
