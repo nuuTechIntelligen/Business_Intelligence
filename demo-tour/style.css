@@ -83,7 +83,7 @@ body {
 #hero-logo-img.hero-logo-movil {
     display: block;
     max-width: 150px !important;       
-    max-height: 16vh !important;       
+    max-height: 18vh !important;       
     width: auto !important;
     height: auto !important;
     object-fit: contain !important;    
