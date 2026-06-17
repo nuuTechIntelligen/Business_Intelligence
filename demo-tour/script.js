@@ -44,7 +44,7 @@
          plus: ["Avistamiento de aves", "Dinámica de observación"]
      },
      celestun: {
-         complementos: ["Bote", "Lancha"],
+         complementos: ["Recorrido en Bote Guardianes de Dzinintún", "Recorrido en Lancha Motorizada"],
          plus: ["Avistamiento de aves", "Dinámica de observación"]
      },
      campeche: {
