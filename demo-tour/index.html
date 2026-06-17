@@ -7,7 +7,7 @@
      <title>VÍA HA' MÉXICO | Reservas y Cotizaciones Online</title> 
 
      <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados con fotografía profesional incluida. Experiencias exclusivas."> 
-     <meta name="keywords" content="viaja tours, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza"> 
+     <meta name="keywords" content="viaja tours, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche"> 
      <meta name="author" content="Nuu Tech-Art"> 
      <meta name="robots" content="index, follow"> 
 
@@ -72,6 +72,9 @@
                      <option value="cenotes" data-categoria="naturaleza" data-i18n="tour_cenotes">TOUR CENOTES</option> 
                      <option value="chichen" data-categoria="cultura" data-i18n="tour_chichen">CHICHÉN ITZÁ</option> 
                      <option value="coloradas" data-categoria="naturaleza" data-i18n="tour_coloradas">COLORADAS TOUR DAY</option> 
+                     <option value="uxmal" data-categoria="cultura" data-i18n="tour_uxmal">UXMAL</option> 
+                     <option value="celestun" data-categoria="naturaleza" data-i18n="tour_celestun">CELESTÚN</option> 
+                     <option value="campeche" data-categoria="cultura" data-i18n="tour_campeche">CAMPECHE</option> 
                  </select> 
 
                  <div id="info-cenotes" class="tour-info-card active"> 
@@ -186,6 +189,108 @@
                          </div>
                      </div>
                  </div> 
+
+                 <div id="info-uxmal" class="tour-info-card"> 
+                     <div class="carousel-container"> 
+                         <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
+                         <div class="carousel-track" id="track-uxmal"> 
+                             <img src="https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?auto=format&fit=crop&w=600&q=80" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
+                         </div> 
+                         <button class="carousel-btn next" onclick="moverCarrusel('uxmal', 1)">&#10095;</button> 
+                     </div> 
+                     <div class="tour-title-wrapper"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
+                         <h3 class="section-title" data-i18n="titulo_uxmal" style="margin:0; border:none; padding:0;">Uxmal</h3> 
+                     </div> 
+                     <p data-i18n="desc_uxmal">Descubre la majestuosidad de la arquitectura puuc, explora su historia y déjate maravillar por sus leyendas ancestrales.</p> 
+                     
+                     <div class="inc-no-inc-container">
+                         <div class="inc-col">
+                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
+                             <ul class="inc-list" data-i18n="inc_uxmal_list">
+                                 <li>Transporte desde tu lugar de Hospedaje.</li>
+                                 <li>Guía Federal Certificado.</li>
+                                 <li>Hielera con agua.</li>
+                                 <li>Estacionamientos y Peajes.</li>
+                             </ul>
+                         </div>
+                         <div class="no-inc-col">
+                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
+                             <ul class="no-inc-list" data-i18n="no_inc_uxmal_list">
+                                <li>Entradas.</li>
+                                 <li>Alimentos.</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+
+                 <div id="info-celestun" class="tour-info-card"> 
+                     <div class="carousel-container"> 
+                         <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
+                         <div class="carousel-track" id="track-celestun"> 
+                             <img src="https://cdn.akunmexico.com/blog/cenotes-cerca-de-merida-yucatan-que-debes-visitar-en-2024/cenote-suytun.webp" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
+                         </div> 
+                         <button class="carousel-btn next" onclick="moverCarrusel('celestun', 1)">&#10095;</button> 
+                     </div> 
+                     <div class="tour-title-wrapper"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
+                         <h3 class="section-title" data-i18n="titulo_celestun" style="margin:0; border:none; padding:0;">Celestún</h3> 
+                     </div> 
+                     <p data-i18n="desc_celestun">Siente la naturaleza viva explorando los manglares y avistando las colonias de flamencos rosas en su hábitat natural.</p> 
+                     
+                     <div class="inc-no-inc-container">
+                         <div class="inc-col">
+                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
+                             <ul class="inc-list" data-i18n="inc_celestun_list">
+                                 <li>Transporte desde tu lugar de Hospedaje.</li>
+                                 <li>Guía Federal Certificado.</li>
+                                 <li>Hielera con agua.</li>
+                                 <li>Estacionamientos y Peajes.</li>
+                             </ul>
+                         </div>
+                         <div class="no-inc-col">
+                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
+                             <ul class="no-inc-list" data-i18n="no_inc_celestun_list">
+                                <li>Entradas.</li>
+                                 <li>Alimentos.</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+
+                 <div id="info-campeche" class="tour-info-card"> 
+                     <div class="carousel-container"> 
+                         <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
+                         <div class="carousel-track" id="track-campeche"> 
+                             <img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
+                         </div> 
+                         <button class="carousel-btn next" onclick="moverCarrusel('campeche', 1)">&#10095;</button> 
+                     </div> 
+                     <div class="tour-title-wrapper"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
+                         <h3 class="section-title" data-i18n="titulo_campeche" style="margin:0; border:none; padding:0;">Campeche</h3> 
+                     </div> 
+                     <p data-i18n="desc_campeche">Camina por los baluartes de una histórica ciudad fortificada frente al mar y revive historias de piratas del Caribe.</p> 
+                     
+                     <div class="inc-no-inc-container">
+                         <div class="inc-col">
+                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
+                             <ul class="inc-list" data-i18n="inc_campeche_list">
+                                 <li>Transporte desde tu lugar de Hospedaje.</li>
+                                 <li>Guía Federal Certificado.</li>
+                                 <li>Hielera con agua.</li>
+                                 <li>Estacionamientos y Peajes.</li>
+                             </ul>
+                         </div>
+                         <div class="no-inc-col">
+                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
+                             <ul class="no-inc-list" data-i18n="no_inc_campeche_list">
+                                <li>Entradas.</li>
+                                 <li>Alimentos.</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
 
                  <div id="seccion-personalizacion-tour" style="margin-top: 20px;"></div>
              </div>  
