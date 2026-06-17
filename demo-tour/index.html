@@ -6,17 +6,19 @@
       
      <title>VÍA HA' MÉXICO | Reservas y Cotizaciones Online</title> 
 
-     <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados con fotografía profesional incluida. Experiencias exclusivas."> 
-     <meta name="keywords" content="viaja tours, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche"> 
+     <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados premium con fotografía profesional incluida. Experiencias exclusivas en el Mayab."> 
+     <meta name="keywords" content="viaha mexico, via ha, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche, cotizador de viajes yucatan"> 
      <meta name="author" content="Nuu Tech-Art"> 
      <meta name="robots" content="index, follow"> 
+     <link rel="canonical" href="https://viaha.com">
 
      <meta property="og:type" content="website"> 
      <meta property="og:title" content="VÍA HA' MÉXICO | Experiencias Privadas Exclusivas"> 
-     <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva con fotografía profesional incluida."> 
+     <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva tu experiencia privada con fotografía profesional incluida."> 
      <meta property="og:image" content="https://yucatan.travel/wp-content/uploads/2019/11/Portada-1.jpg"> 
      <meta property="og:url" content="https://viaja.com">   
      <meta property="og:site_name" content="VÍA HA' MÉXICO"> 
+     <meta property="og:locale" content="es_MX">
 
      <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@600;800&family=Urbanist:wght@400;700&display=swap" rel="stylesheet"> 
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
@@ -27,7 +29,8 @@
        window.dataLayer = window.dataLayer || []; 
        function gtag(){dataLayer.push(arguments);} 
        gtag('js', new Date()); 
-       gtag('config', 'G-9JZDZ31TPV'); 
+       // Configuración inicial de analítica
+       gtag('config', 'G-9JZDZ31TPV', { 'anonymize_ip': true }); 
      </script> 
 </head> 
 <body> 
@@ -56,7 +59,7 @@
      </div>
      <div class="decoracion-flotante fondo-mixto"></div>
 
-    <div class="container"> 
+     <div class="container"> 
          <div class="lang-switch-container" id="lang-lista"> 
              <button type="button" id="btn-agendar-llamada" class="btn-agendar-top" onclick="dispararAgendado()">
                  📞 Agendar Llamada
@@ -66,6 +69,7 @@
                  <option value="en">English</option> 
              </select> 
          </div>
+         
          <div class="grid-layout"> 
               
              <div class="grid-col-1"> 
@@ -87,8 +91,8 @@
                              <img src="img/cenotes/Homun.jpg" alt="Fotografía profesional de cenote cerrado en Yucatán" class="tour-card-img"> 
                              <img src="img/cenotes/Nah_Yah.jpg" alt="Turistas disfrutando de aguas cristalinas en cenote abierto" class="tour-card-img"> 
                              <img src="img/cenotes/Nah_Yah_.jpg" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
-                             <img src="img/cenotes/Su_Hem.jpg" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
-                             <img src="img/cenotes/Grutas_Tzabnah.jpg" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
+                             <img src="img/cenotes/Su_Hem.jpg" alt="Cenote Su-hem aguas cristalinas" class="tour-card-img"> 
+                             <img src="img/cenotes/Grutas_Tzabnah.jpg" alt="Exploración de grutas en Yucatán" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('cenotes', 1)">&#10095;</button> 
                      </div> 
@@ -122,11 +126,11 @@
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-chichen"> 
-                             <img src="img/chichen/Chichen.jpg" alt="Fotografía profesional de cenote cerrado en Yucatán" class="tour-card-img"> 
-                             <img src="img/chichen/Izamal.png" alt="Turistas disfrutando de aguas cristalinas en cenote abierto" class="tour-card-img"> 
-                             <img src="img/chichen/Lol-ha.jpg" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
-                             <img src="img/chichen/Valladolid.jpg" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
-                             <img src="img/chichen/Zaci.jpg" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
+                             <img src="img/chichen/Chichen.jpg" alt="Fotografía profesional de la pirámide de Chichén Itzá" class="tour-card-img"> 
+                             <img src="img/chichen/Izamal.png" alt="Convento de Izamal pueblo mágico" class="tour-card-img"> 
+                             <img src="img/chichen/Lol-ha.jpg" alt="Cenote Lol-Ha Yucatán" class="tour-card-img"> 
+                             <img src="img/chichen/Valladolid.jpg" alt="Centro histórico de Valladolid" class="tour-card-img"> 
+                             <img src="img/chichen/Zaci.jpg" alt="Cenote abierto Zací en Valladolid" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
                      </div> 
@@ -134,7 +138,7 @@
                          <div class="dynamic-tour-logo-container logo-c1"></div> 
                          <h3 class="section-title" data-i18n="titulo_chichen" style="margin:0; border:none; padding:0;">Maravilla del Mundo</h3> 
                      </div> 
-                     <p data-i18n="desc_chichen">Sumérgete al maravilloso mundo de los Itzaes. Toma el power de una ciudad icónica y déjate envolver en su grandeza.</p> 
+                     <p data-i18n="desc_chichen">Sumérgete al maravilloso mundo de los Itzaes. Toma el poder de una ciudad icónica y déjate envolver en su grandeza.</p> 
                      
                      <div class="inc-no-inc-container">
                          <div class="inc-col">
@@ -163,7 +167,7 @@
                              <img src="img/coloradas/Coloradas.jpg" alt="Gastronomía tradicional en Motul Yucatán" class="tour-card-img"> 
                              <img src="img/coloradas/Playa_Cancunito.jpg" alt="Aguas rosadas de las charcas de las Coloradas" class="tour-card-img"> 
                              <img src="img/coloradas/Las-coloradas.jpg" alt="Inmensidad de Playa Cancunito" class="tour-card-img"> 
-                             <img src="img/coloradas/Motul.jpg" alt="Inmensidad de Playa Cancunito" class="tour-card-img"> 
+                             <img src="img/coloradas/Motul.jpg" alt="Centro de Motul Yucatán" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('coloradas', 1)">&#10095;</button> 
                      </div> 
@@ -197,10 +201,10 @@
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-uxmal"> 
-                             <img src="img/uxmal/Hacienda_Mucuyche.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
-                             <img src="img/uxmal/Museo_chocolate.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
-                             <img src="img/uxmal/Uxmal.JPG" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
-                             <img src="img/uxmal/Yaal_Utzil.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Hacienda_Mucuyche.jpg" alt="Cenotes de la Hacienda Mucuyché en Yucatán" class="tour-card-img"> 
+                             <img src="img/uxmal/Museo_chocolate.jpg" alt="Museo del chocolate Choco-Story Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Uxmal.JPG" alt="Pirámide del Adivino en la zona arqueológica de Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Yaal_Utzil.jpg" alt="Cenote Yaal Utzil en Yucatán" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('uxmal', 1)">&#10095;</button> 
                      </div> 
@@ -234,9 +238,9 @@
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-celestun"> 
-                             <img src="img/celestun/Celestun.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
-                             <img src="img/celestun/Bote.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
-                             <img src="img/celestun/Lancha.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
+                             <img src="img/celestun/Celestun.jpg" alt="Reserva de la biosfera de Celestún ría de flamencos" class="tour-card-img"> 
+                             <img src="img/celestun/Bote.jpg" alt="Recorrido en bote por los manglares de Celestún" class="tour-card-img"> 
+                             <img src="img/celestun/Lancha.jpg" alt="Lancha turística en Celestún" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('celestun', 1)">&#10095;</button> 
                      </div> 
@@ -270,11 +274,11 @@
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-campeche"> 
-                             <img src="img/campeche/Centro_campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Oxkintok.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Fuerte_San_Miguel_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Malecon_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Museo_Arqueologia_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Centro_campeche.jpg" alt="Centro histórico de la ciudad amurallada de Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Oxkintok.jpg" alt="Zona arqueológica de Oxkintok en Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Fuerte_San_Miguel_Campeche.jpg" alt="Fuerte de San Miguel en Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Malecon_Campeche.jpg" alt="Malecón de Campeche frente al mar" class="tour-card-img"> 
+                             <img src="img/campeche/Museo_Arqueologia_Campeche.jpg" alt="Museo de arquitectura maya en Campeche" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('campeche', 1)">&#10095;</button> 
                      </div> 
