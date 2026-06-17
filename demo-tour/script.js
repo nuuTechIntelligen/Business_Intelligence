@@ -430,7 +430,7 @@
          htmlIzquierdo += `
              <div class="box-personalizacion" style="background-color: var(--light-bg); border-style: dashed;">
                  <div class="titulo-interactivo">📋 Ruta Integrada Completa</div>
-                 <p style="font-size:15px; margin:0; font-family:'Urbanist', sans-serif;">Este itinerario incluye visitas corridas sin exclusiones a: *Motul*, *Las Coloradas* y *Playa Cancunito*.</p>
+                 <p style="font-size:15px; margin:0; font-family:'Urbanist', sans-serif;">Este itinerario incluye: *Motul*, *Las Coloradas* y *Playa Cancunito*.</p>
              </div>
          `;
      }
