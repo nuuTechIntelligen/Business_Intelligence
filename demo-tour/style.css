@@ -168,19 +168,22 @@ body {
 .carousel-btn.next { right: 10px; } 
 @media (max-width: 600px) { .carousel-btn { display: none; } } 
 
-/* CORRECCIÓN: Optimizamos la alineación flexbox y bajamos la separación (gap) de 12px a 6px */
-.tour-title-wrapper, .cotizador-header-wrapper { 
-    display: flex; 
-    align-items: center; 
-    gap: 6px !important; 
-    margin: 20px 0 10px 0; 
+/* CORRECCIÓN EXCLUSIVA: Declaración unificada de wrappers para acortar distancia lateral (gap) con el logo */
+.tour-title-wrapper, 
+.cotizador-header-wrapper { 
+    display: inline-flex !important; 
+    align-items: center !important; 
+    justify-content: flex-start !important;
+    gap: 10px !important;            /* Pegamos el título al logo de forma elegante */
+    margin: 20px 0 15px 0 !important; 
+    width: 100%;
 } 
-.cotizador-header-wrapper { margin: 0 0 20px 0; } 
+.cotizador-header-wrapper { margin: 0 0 20px 0 !important; } 
 
-/* CORRECCIÓN: Escalado premium y balanceado para tus logotipos SVG oficiales en formato imagen */
+/* CORRECCIÓN FUNDAMENTAL: Cambiamos a formato vertical rectangular (44px ancho x 68px alto) */
 .dynamic-tour-logo-container { 
-    width: 48px !important;        /* Escalamos a un tamaño más prominente de 48px */
-    height: 48px !important;       
+    width: 44px !important;        
+    height: 68px !important;       /* Le damos rienda suelta a la altura para que el logo crezca libre */
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -189,12 +192,10 @@ body {
     padding: 0 !important;
 } 
 
-/* Forzamos a la imagen SVG adaptativa a heredar el 100% de la caja contenedora */
-.img-isologo-dinamico {
+.dynamic-tour-logo-container img {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important; 
-    display: block !important;
 }
 
 .lang-switch-container { 
@@ -229,7 +230,7 @@ body {
 }
 
 .section-title { 
-    color: var(--text); font-size: 24px; border-left: 5px solid var(--turquesa); padding-left: 10px; margin: 15px 0; text-transform: uppercase; font-weight: bold; 
+    color: var(--text); font-size: 24px; border-left: 5px solid var(--turquesa); padding-left: 10px; margin: 0 !important; text-transform: uppercase; font-weight: bold; 
 } 
 
 body .flatpickr-input, 
