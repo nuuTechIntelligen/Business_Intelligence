@@ -615,7 +615,7 @@
      const contenedor = document.getElementById('contenedor-render-agenda');
       
      contenedor.innerHTML = `
-         <h3 class="section-title" style="margin-top:0;">Agendar Sesión de Diseño</h3>
+         <h3 class="section-title" style="margin-top:0;">Agendar Llamada/Videollamada/h3>
          <p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada personalizada con el equipo.</p>
           
          <div class="form-group">
