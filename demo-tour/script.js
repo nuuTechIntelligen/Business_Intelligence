@@ -315,23 +315,21 @@
                   }  
               }  
               xInicial = null;  
-              activarAutoplayCarrusel(idTour); // CORRECCIÓN: Fix al typo de función táctil
+              activarAutoplayCarrusel(idTour); 
           }, { passive: true });  
       });  
  }  
 
- // MODIFICACIÓN QUIRÚRGICA: Inyección adaptativa limpia de archivos .SVG externos ya coloreados
+ // CORRECCIÓN: Añadimos la clase 'img-isologo-dinamico' para el control rígido de visualización por CSS
  function actualizarLogosDinamicos() {  
       const select = document.getElementById('tour-select');  
       if (!select) return;  
       
       const categoria = select.options[select.selectedIndex].getAttribute('data-categoria');  
       
-      // Construimos la ruta dinámica hacia tu carpeta de imágenes usando la categoría exacta en minúsculas
       const rutaSvg = `img/isologos/${categoria}.svg`;
-      const htmlImg = `<img src="${rutaSvg}" alt="Icono ${categoria}" object-fit:contain; opacity:1 !important;">`;
+      const htmlImg = `<img src="${rutaSvg}" alt="Icono ${categoria}" class="img-isologo-dinamico">`;
 
-      // Inyectamos el archivo de forma simultánea en las tarjetas de detalle y de cotización
       document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => {  
           container.innerHTML = htmlImg;  
       });  
@@ -432,10 +430,10 @@
       const r_complemento = document.querySelector('input[name="viaha-complemento"]:checked');
       const complementoSeleccionado = r_complemento ? r_complemento.value : "Ruta Fija Corrida";
 
-      const bloqueTour = matrizTarifasEscaladas[idTour];
-      if (!bloqueTour) return;
+      const bloquesTour = matrizTarifasEscaladas[idTour];
+      if (!bloquesTour) return;
       
-      const rangosDeCombinacion = bloqueTour[complementoSeleccionado];
+      const rangosDeCombinacion = bloquesTour[complementoSeleccionado];
       if (!rangosDeCombinacion) return;
 
       let totalGlobal = 0;
@@ -578,7 +576,7 @@
           'id_tour': idTour,  
           'fecha_reserva': fechaSeleccionada,  
           'total_cotizado': total,  
-          'cantidad_adultos': adults,  
+          'cantidad_adultos': adultos,  
           'cantidad_ninos': ninos,  
           'idioma_reserva': idiomaActual,
           'complemento_ruta': complementoTexto,
