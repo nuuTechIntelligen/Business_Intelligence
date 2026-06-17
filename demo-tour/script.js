@@ -40,7 +40,7 @@
          plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"]
      },
      uxmal: {
-         complementos: ["Chocostory", "Hda Mucuyché", "Yaal Utzil"],
+         complementos: ["Museo del Chocolate", "Hacienda Mucuyché", "Cenote Yaal Utzil"],
          plus: ["Avistamiento de aves", "Dinámica de observación"]
      },
      celestun: {
