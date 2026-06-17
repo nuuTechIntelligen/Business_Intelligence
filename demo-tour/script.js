@@ -6,7 +6,6 @@
  let fechaSeleccionada = ""; 
  let idiomaActual = "es"; 
 
- // MODIFICACIÓN: Expandimos los objetos controladores de carruseles para soportar los 6 tours estables
  const posicionesCarrusel = { 
       cenotes: 0, 
       chichen: 0, 
@@ -27,7 +26,6 @@
 
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
- // MODIFICACIÓN CRÍTICA: Base de datos expandida de 3 a 6 tours oficiales mapeando complementos y pluses
  const catalogoEstructuraTours = {
      cenotes: {
          complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"],
@@ -55,7 +53,6 @@
      }
  };
 
- // MODIFICACIÓN CRÍTICA: Clonación temporal y estable de tarifas de Chichén para las rutas 4, 5 y 6
  const matrizTarifasEscaladas = {
      cenotes: {
          "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 },
@@ -511,7 +508,11 @@
              if(pl === "Paseo ecoturístico") {
                  htmlIzquierdo += `
                      <ul class="sub-detalles-plus">
-                         <li>Playa Virgen, Laguna Azul, Pecesitos, Baño Maya, Tortugario</li>
+                         <li>Playa Virgen</li>
+                         <li>Laguna Azul</li>
+                         <li>Pecesitos</li>
+                         <li>Baño Maya</li>
+                         <li>Tortugario</li>
                      </ul>
                  `;
              }
