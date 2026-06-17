@@ -320,7 +320,6 @@
       });  
  }  
 
- // CORRECCIÓN: Añadimos la clase 'img-isologo-dinamico' para el control rígido de visualización por CSS
  function actualizarLogosDinamicos() {  
       const select = document.getElementById('tour-select');  
       if (!select) return;  
