@@ -6,20 +6,28 @@
  let fechaSeleccionada = ""; 
  let idiomaActual = "es"; 
 
+ // MODIFICACIÓN: Expandimos los objetos controladores de carruseles para soportar los 6 tours estables
  const posicionesCarrusel = { 
       cenotes: 0, 
       chichen: 0, 
-      coloradas: 0 
+      coloradas: 0,
+      uxmal: 0,
+      celestun: 0,
+      campeche: 0
  }; 
 
  const intervalosCarrusel = { 
       cenotes: null, 
       chichen: null, 
-      coloradas: null 
+      coloradas: null,
+      uxmal: null,
+      celestun: null,
+      campeche: null
  }; 
 
  const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
+ // MODIFICACIÓN CRÍTICA: Base de datos expandida de 3 a 6 tours oficiales mapeando complementos y pluses
  const catalogoEstructuraTours = {
      cenotes: {
          complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"],
@@ -32,9 +40,22 @@
      coloradas: {
          complementos: [], 
          plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"]
+     },
+     uxmal: {
+         complementos: ["Chocostory", "Hda Mucuyché", "Yaal Utzil"],
+         plus: ["Avistamiento de aves", "Dinámica de observación"]
+     },
+     celestun: {
+         complementos: ["Bote", "Lancha"],
+         plus: ["Avistamiento de aves", "Dinámica de observación"]
+     },
+     campeche: {
+         complementos: ["Tour de 1 dia", "Tour de 2 dias"],
+         plus: ["Avistamiento de aves", "Dinámica de observación"]
      }
  };
 
+ // MODIFICACIÓN CRÍTICA: Clonación temporal y estable de tarifas de Chichén para las rutas 4, 5 y 6
  const matrizTarifasEscaladas = {
      cenotes: {
          "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 },
@@ -49,6 +70,19 @@
      },
      coloradas: {
          "Ruta Fija Corrida": { 2: 1650, 3: 2300, 4: 3500 }
+     },
+     uxmal: {
+         "Chocostory":   { 2: 1880, 3: 1300, 4: 1000 },
+         "Hda Mucuyché": { 2: 1700, 3: 1150, 4: 900 },
+         "Yaal Utzil":   { 2: 1700, 3: 1150, 4: 900 }
+     },
+     celestun: {
+         "Bote":   { 2: 1880, 3: 1300, 4: 1000 },
+         "Lancha": { 2: 1700, 3: 1150, 4: 900 }
+     },
+     campeche: {
+         "Tour de 1 dia":  { 2: 1880, 3: 1300, 4: 1000 },
+         "Tour de 2 dias": { 2: 1700, 3: 1150, 4: 900 }
      }
  };
 
@@ -60,12 +94,21 @@
           tour_cenotes: "Tour Cenotes", 
           tour_chichen: "Chichén Itzá", 
           tour_coloradas: "Coloradas Tour Day",
+          tour_uxmal: "Uxmal",
+          tour_celestun: "Celestún",
+          tour_campeche: "Campeche",
           titulo_cenotes: "Detalles del Tour Cenotes", 
           desc_cenotes: "Visita 4 cenotes: Cerrado, Semiabierto, Abierto y tipo Río. Incluye bicicletas, chalecos y regaderas con fotografía profesional por Román.", 
           titulo_chichen: "Maravilla del Mundo", 
           desc_chichen: "Recorrido guiado, tiempo libre en Valladolid y visita a un cenote abierto para nadar. Incluye buffet y cobertura fotográfica profesional.", 
           titulo_coloradas: "Coloradas Tour Day",
           desc_coloradas: "Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.",
+          titulo_uxmal: "Detalles Tour Uxmal",
+          desc_uxmal: "Descubre la majestuosidad de la arquitectura puuc, explora su historia y déjate maravillar por sus leyendas ancestrales.",
+          titulo_celestun: "Detalles Tour Celestún",
+          desc_celestun: "Siente la naturaleza viva explorando los manglares y avistando las colonias de flamencos rosas en su hábitat natural.",
+          titulo_campeche: "Detalles Tour Campeche",
+          desc_campeche: "Camina por los baluartes de una histórica ciudad fortificada frente al mar y revive historias de piratas del Caribe.",
           reviews_text: "⭐ Descubre por qué nos recomiendan nuestros viajeros", 
           titulo_cotizador: "Cotiza tu grupo", 
           label_nombre: "Nombre de quien solicita", 
@@ -88,12 +131,18 @@
           wa_pregunta: "¿Tienen disponibilidad para estas condiciones?",
           inc_title: "🟢 Incluye",
           no_inc_title: "🔴 No Incluye",
-          inc_cenotes_list: "<li>Transporte privado de lujo</li><li>Guía local especializado</li><li>Bicicletas, chalecos y regaderas</li><li>Agua mineral y snacks locales</li>",
-          no_inc_cenotes_list: "<li>Entradas a paradores turísticos</li><li>Alimentos no especificados</li><li>Propinas para el equipo local</li>",
-          inc_chichen_list: "<li>Vehículo privado con chofer</li><li>Guía arqueológico bilingüe</li><li>Almuerzo Buffet Regional</li><li>Tiempo libre en Valladolid</li>",
-          no_inc_chichen_list: "<li>Boletos de acceso a la zona</li><li>Bebidas durante el buffet</li><li>Souvenirs o gastos personales</li>",
-          inc_coloradas_list: "<li>Logística y traslado privado</li><li>Parada gastronómica en Motul</li><li>Visita a Playa Cancunito</li><li>Seguro de viajero a bordo</li>",
-          no_inc_coloradas_list: "<li>Tarifas de entrada al parque</li><li>Comidas en zona de playa</li><li>Propinas del servicio</li>",
+          inc_cenotes_list: "<li>Transporte desde tu lugar de Hospedaje.</li><li>Guía Federal Certificado.</li><li>Hielera con agua.</li><li>Estacionamientos y Peajes.</li>",
+          no_inc_cenotes_list: "<li>Entradas.</li><li>Alimentos.</li>",
+          inc_chichen_list: "<li>Transporte desde tu lugar de Hospedaje.</li><li>Guía Federal Certificado.</li><li>Hielera con agua.</li><li>Estacionamientos y Peajes.</li>",
+          no_inc_chichen_list: "<li>Entradas.</li><li>Alimentos.</li>",
+          inc_coloradas_list: "<li>Transporte desde tu lugar de Hospedaje.</li><li>Guía Federal Certificado.</li><li>Hielera con agua.</li><li>Estacionamientos y Peajes.</li>",
+          no_inc_coloradas_list: "<li>Entradas.</li><li>Alimentos.</li>",
+          inc_uxmal_list: "<li>Transporte desde tu lugar de Hospedaje.</li><li>Guía Federal Certificado.</li><li>Hielera con agua.</li><li>Estacionamientos y Peajes.</li>",
+          no_inc_uxmal_list: "<li>Entradas.</li><li>Alimentos.</li>",
+          inc_celestun_list: "<li>Transporte desde tu lugar de Hospedaje.</li><li>Guía Federal Certificado.</li><li>Hielera con agua.</li><li>Estacionamientos y Peajes.</li>",
+          no_inc_celestun_list: "<li>Entradas.</li><li>Alimentos.</li>",
+          inc_campeche_list: "<li>Transporte desde tu lugar de Hospedaje.</li><li>Guía Federal Certificado.</li><li>Hielera con agua.</li><li>Estacionamientos y Peajes.</li>",
+          no_inc_campeche_list: "<li>Entradas.</li><li>Alimentos.</li>",
           sello_sustentable_texto: "<strong>Garantía Mexcellent:</strong> Al contratar tu experiencia con Vía Há México, un porcentaje de tu pago se destina directamente al desarrollo sustentable de las comunidades mayas y la preservación de su entorno natural."
       }, 
       en: { 
@@ -103,12 +152,21 @@
           tour_cenotes: "Cenotes Tour", 
           tour_chichen: "Chichen Itza", 
           tour_coloradas: "Coloradas Tour Day",
+          tour_uxmal: "Uxmal",
+          tour_celestun: "Celestun",
+          tour_campeche: "Campeche",
           titulo_cenotes: "Cenotes Tour Details", 
           desc_cenotes: "Visit 4 cenotes: Closed, Semi-open, Open, and River type. Includes bikes, life jackets, and showers with professional photo coverage by Roman.", 
           titulo_chichen: "Wonder of the World", 
           desc_chichen: "Guided tour, free time in Valladolid, and visit to an open cenote for swimming. Buffet and professional photo coverage included.", 
           titulo_coloradas: "Coloradas Tour Day",
           desc_coloradas: "Immerse yourself in the Mexican pink of the peninsula. Feel the vastness of the flamingo habitat.",
+          titulo_uxmal: "Uxmal Tour Details",
+          desc_uxmal: "Discover the majesty of puuc architecture, explore its history, and let yourself be amazed by its ancestral legends.",
+          titulo_celestun: "Celestun Tour Details",
+          desc_celestun: "Feel living nature exploring mangroves and spotting pink flamingo colonies in their natural habitat.",
+          titulo_campeche: "Campeche Tour Details",
+          desc_campeche: "Walk along the bastions of a historical fortified city facing the sea and relive stories of Caribbean pirates.",
           reviews_text: "⭐ Discover why our travelers recommend us", 
           titulo_cotizador: "Quote your group", 
           label_nombre: "Lead Traveler Name", 
@@ -131,12 +189,18 @@
           wa_pregunta: "Do you have availability for these conditions?",
           inc_title: "🟢 Includes",
           no_inc_title: "🔴 Not Includes",
-          inc_cenotes_list: "<li>Luxury private transport</li><li>Specialized local guide</li><li>Bicycles, life jackets and showers</li><li>Mineral water and local snacks</li>",
-          no_inc_cenotes_list: "<li>Tickets to tourist spots</li><li>Unspecified food or drinks</li><li>Tips for the local team</li>",
-          inc_chichen_list: "<li>Private vehicle with driver</li><li>Bilingual archaeological guide</li><li>Regional Buffet Lunch</li><li>Free time in Valladolid</li>",
-          no_inc_chichen_list: "<li>Archaeological site access tickets</li><li>Drinks during the buffet</li><li>Souvenirs or personal expenses</li>",
-          inc_coloradas_list: "<li>Private logistics and transfers</li><li>Gastronomic stop in Motul</li><li>Visit to Cancunito Beach</li><li>Travel insurance on board</li>",
-          no_inc_coloradas_list: "<li>Park entrance fees</li><li>Meals at beach area</li><li>Service tips</li>",
+          inc_cenotes_list: "<li>Pick-up from your lodging location.</li><li>Certified Federal Guide.</li><li>Cooler with water.</li><li>Parking fees and tolls.</li>",
+          no_inc_cenotes_list: "<li>Tickets.</li><li>Meals.</li>",
+          inc_chichen_list: "<li>Pick-up from your lodging location.</li><li>Certified Federal Guide.</li><li>Cooler with water.</li><li>Parking fees and tolls.</li>",
+          no_inc_chichen_list: "<li>Tickets.</li><li>Meals.</li>",
+          inc_coloradas_list: "<li>Pick-up from your lodging location.</li><li>Certified Federal Guide.</li><li>Cooler with water.</li><li>Parking fees and tolls.</li>",
+          no_inc_coloradas_list: "<li>Tickets.</li><li>Meals.</li>",
+          inc_uxmal_list: "<li>Pick-up from your lodging location.</li><li>Certified Federal Guide.</li><li>Cooler with water.</li><li>Parking fees and tolls.</li>",
+          no_inc_uxmal_list: "<li>Tickets.</li><li>Meals.</li>",
+          inc_celestun_list: "<li>Pick-up from your lodging location.</li><li>Certified Federal Guide.</li><li>Cooler with water.</li><li>Parking fees and tolls.</li>",
+          no_inc_celestun_list: "<li>Tickets.</li><li>Meals.</li>",
+          inc_campeche_list: "<li>Pick-up from your lodging location.</li><li>Certified Federal Guide.</li><li>Cooler with water.</li><li>Parking fees and tolls.</li>",
+          no_inc_campeche_list: "<li>Tickets.</li><li>Meals.</li>",
           sello_sustentable_texto: "<strong>Mexcellent Guarantee:</strong> When booking your experience with Vía Há México, a percentage of your payment goes directly to the sustainable development of Mayan communities and the preservation of their natural environment."
       } 
  }; 
@@ -398,7 +462,6 @@
       document.getElementById('total-display').innerText = `$${totalGlobal.toLocaleString()} MXN`;  
  }  
 
- // MODIFICACIÓN CRÍTICA: Renderiza sub-detalles con viñetas al detectar Paseo Ecoturístico
  function renderizarCamposPersonalizados() {
      const tourSeleccionado = document.getElementById('tour-select').value;
      const datos = catalogoEstructuraTours[tourSeleccionado];
@@ -445,7 +508,6 @@
                  </label>
              `;
              
-             // GATILLO DINÁMICO: Inyecta la sub-lista formateada si coincide con la opción ecoturística
              if(pl === "Paseo ecoturístico") {
                  htmlIzquierdo += `
                      <ul class="sub-detalles-plus">
