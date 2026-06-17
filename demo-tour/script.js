@@ -31,7 +31,7 @@
      },
      coloradas: {
          complementos: [], 
-         plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico (Playa Virgen, laguna azul, pecesitos, baño maya, tortugario)"]
+         plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"]
      }
  };
 
