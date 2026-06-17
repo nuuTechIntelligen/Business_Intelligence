@@ -401,7 +401,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     text-align: left;
 }
 
-/* NUEVO: Estilo sutil para sub-detalles anidados en el Plus de Paseo Ecoturístico */
 .sub-detalles-plus {
     margin: 4px 0 8px 30px;
     padding: 0;
