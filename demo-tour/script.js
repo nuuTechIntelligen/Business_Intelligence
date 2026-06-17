@@ -315,30 +315,62 @@
                   }  
               }  
               xInicial = null;  
-              activarAutoplayCarrusel(idTour);  
+              aligningAutoplayCarrusel(idTour);  
           }, { passive: true });  
       });  
  }  
 
+ // MODIFICACIÓN OPERATIVA INTEGRAL: Diccionario centralizado para las 8 categorías del manual de marca
  function actualizarLogosDinamicos() {  
       const select = document.getElementById('tour-select');  
       if (!select) return;  
       
       const categoria = select.options[select.selectedIndex].getAttribute('data-categoria');  
       
-      const svgNaturaleza = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z"/>
-          </svg>
-      `;
+      const vectoresCategoriasMayas = {
+          playas: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 20a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v2H2v-2zM12 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/>
+              </svg>
+          `,
+          cenotes: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z"/>
+              </svg>
+          `,
+          aviturismo: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2c1.5 0 3 .5 4 1.5L20 7l-4 4c-1 1-2.5 1.5-4 1.5H4v-4l4-4c1-1 2.5-1.5 4-1.5zM16 14v6M8 14v6"/>
+              </svg>
+          `,
+          astroturismo: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+          `,
+          arqueologia: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 21h18M5 21V10l7-6 7 7v11M9 21v-4a3 3 0 0 1 6 0v4"/>
+              </svg>
+          `,
+          urbano: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 21h18M5 21V3h14v18M9 7h2v2H9V7zm0 4h2v2H9v-2zm4-4h2v2h-2V7zm0 4h2v2h-2v-2z"/>
+              </svg>
+          `,
+          religioso: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M7 7h10"/>
+              </svg>
+          `,
+          textiles: `
+              <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+          `
+      };
 
-      const svgCultura = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="#BEDFCA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 21h18M5 21V10l7-6 7 7v11M9 21v-4a3 3 0 0 1 6 0v4"/>
-          </svg>
-      `;
-
-      const svgFinal = (categoria === "cultura") ? svgCultura : svgNaturaleza;
+      const svgFinal = vectoresCategoriasMayas[categoria] || vectoresCategoriasMayas["cenotes"];
 
       document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => {  
           container.innerHTML = svgFinal;  
