@@ -329,7 +329,7 @@
       
       // Construimos la ruta dinámica hacia tu carpeta de imágenes usando la categoría exacta en minúsculas
       const rutaSvg = `img/isologos/${categoria}.svg`;
-      const htmlImg = `<img src="${rutaSvg}" alt="Icono ${categoria}" style="width:100%; height:100%; object-fit:contain; opacity:1 !important;">`;
+      const htmlImg = `<img src="${rutaSvg}" alt="Icono ${categoria}" object-fit:contain; opacity:1 !important;">`;
 
       // Inyectamos el archivo de forma simultánea en las tarjetas de detalle y de cotización
       document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => {  
