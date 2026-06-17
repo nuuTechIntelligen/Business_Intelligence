@@ -72,12 +72,12 @@
                  <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
                   
                  <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
-                     <option value="cenotes" data-categoria="naturaleza" data-i18n="tour_cenotes">TOUR CENOTES</option> 
-                     <option value="chichen" data-categoria="cultura" data-i18n="tour_chichen">CHICHÉN ITZÁ</option> 
-                     <option value="coloradas" data-categoria="naturaleza" data-i18n="tour_coloradas">COLORADAS TOUR DAY</option> 
-                     <option value="uxmal" data-categoria="cultura" data-i18n="tour_uxmal">UXMAL</option> 
-                     <option value="celestun" data-categoria="naturaleza" data-i18n="tour_celestun">CELESTÚN</option> 
-                     <option value="campeche" data-categoria="cultura" data-i18n="tour_campeche">CAMPECHE</option> 
+                     <option value="cenotes" data-categoria="cenotes" data-i18n="tour_cenotes">TOUR CENOTES</option> 
+                     <option value="chichen" data-categoria="arqueologia" data-i18n="tour_chichen">CHICHÉN ITZÁ</option> 
+                     <option value="coloradas" data-categoria="aviturismo" data-i18n="tour_coloradas">COLORADAS TOUR DAY</option> 
+                     <option value="uxmal" data-categoria="arqueologia" data-i18n="tour_uxmal">UXMAL</option> 
+                     <option value="celestun" data-categoria="aviturismo" data-i18n="tour_celestun">CELESTÚN</option> 
+                     <option value="campeche" data-categoria="urbano" data-i18n="tour_campeche">CAMPECHE</option> 
                  </select> 
 
                  <div id="info-cenotes" class="tour-info-card active"> 
@@ -197,10 +197,10 @@
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-uxmal"> 
-                             <img src="img/uxmal/Hacienda_Mucuyche.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img">
-                              <img src="img/uxmal/Museo_chocolate.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
-                              <img src="img/uxmal/Uxmal.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
-                              <img src="img/uxmal/Yaal_Utzil.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Hacienda_Mucuyche.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Museo_chocolate.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Uxmal.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
+                             <img src="img/uxmal/Yaal_Utzil.jpg" alt="Pirámide del Adivino en Uxmal" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('uxmal', 1)">&#10095;</button> 
                      </div> 
@@ -235,8 +235,8 @@
                          <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-celestun"> 
                              <img src="img/celestun/Celestun.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
-                              <img src="img/celestun/Bote.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
-                              <img src="img/celestun/Lancha.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
+                             <img src="img/celestun/Bote.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
+                             <img src="img/celestun/Lancha.jpg" alt="Reserva de Celestún flamingos" class="tour-card-img"> 
                          </div> 
                          <button class="carousel-btn next" onclick="moverCarrusel('celestun', 1)">&#10095;</button> 
                      </div> 
@@ -271,16 +271,16 @@
                          <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-campeche"> 
                              <img src="img/campeche/Centro_campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                              <img src="img/campeche/Oxkintok.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                              <img src="img/campeche/Fuerte_San_Miguel_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                              <img src="img/campeche/Malecon_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
-                              <img src="img/campeche/Museo_Arqueologia_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Oxkintok.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Fuerte_San_Miguel_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Malecon_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
+                             <img src="img/campeche/Museo_Arqueologia_Campeche.jpg" alt="Ciudad amurallada de Campeche" class="tour-card-img"> 
                          </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('campeche', 1)">&#10095;</button>
+                         <button class="carousel-btn next" onclick="moverCarrusel('campeche', 1)">&#10095;</button> 
                      </div> 
                      <div class="tour-title-wrapper"> 
                          <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_campeche" style="margin:0; border:none; padding:0;">Campenche</h3> 
+                         <h3 class="section-title" data-i18n="titulo_campeche" style="margin:0; border:none; padding:0;">Campeche</h3> 
                      </div> 
                      <p data-i18n="desc_campeche">Camina por los baluartes de una histórica ciudad fortificada frente al mar y revive historias de piratas del Caribe.</p> 
                      
