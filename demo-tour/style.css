@@ -19,7 +19,6 @@ body {
     font-size: 19px; 
 } 
 
-/* ENCABEZADO (HERO) CON CORRECCIÓN DE FLUJO */ 
 .hero { 
     position: relative;
     height: 32vh;            
@@ -30,7 +29,6 @@ body {
     color: white; 
     text-align: center; 
     overflow: hidden;
-    padding: 10px 0; /* Espaciado interno de seguridad */
 } 
 
 .hero-slider-wrapper {
@@ -70,28 +68,27 @@ body {
     pointer-events: none;
 }
 
-/* CONTENEDOR DE MARCA ADAPTATIVO */
-.brand-wrapper {
+/* CONTENEDOR DE MARCA ADAPTATIVO CON FILTRO PROTECTOR */
+#hero-brand-container.brand-wrapper {
     z-index: 10;
     position: relative;
     display: flex;
-    flex-direction: column; /* Forzamos a que el logo/letras controlen su propio bloque */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-height: 14vh; /* Evita que este bloque consuma más espacio del debido */
 }
 
-/* CORRECCIÓN ACUTALIZADA: Tamaño específico y controlado para el Logo en Móviles */
-.hero-logo-movil {
+/* FIJACIÓN QUIRÚRGICA: Control absoluto del logo en móviles sin afectar pluses ni footer */
+#hero-logo-img.hero-logo-movil {
     display: block;
-    max-width: 150px;       /* Límite de ancho para que no se desborde */
-    max-height: 10vh;       /* Límite de alto basado en la proporción del Header */
-    width: auto;
-    height: auto;
-    object-fit: contain;    /* Asegura que el logo no se deforme al escalar */
+    max-width: 150px !important;       
+    max-height: 12vh !important;       
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;    
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
-    margin-bottom: 5px;     /* Separación quirúrgica controlada con el Slogan */
+    margin: 0 auto 5px auto;
 }
 
 .hero-title-pc {
@@ -105,17 +102,16 @@ body {
     filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4)); 
 }
 
-/* CORRECCIÓN ACTUALIZADA: Slogan flotante controlado */
 .badge-private { 
     z-index: 10;
     position: relative;
     background-color: var(--turquesa); 
     color: var(--text); 
-    padding: 5px 14px; 
+    padding: 6px 16px; 
     border-radius: 50px; 
-    font-size: 13px;        /* Un toque más compacto en móvil para cuidar el espacio */
+    font-size: 15px; 
     font-weight: bold; 
-    margin-top: 5px;        /* Ajuste de espacio superior */
+    margin-top: 8px; 
     letter-spacing: 1px; 
     text-transform: uppercase; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
@@ -125,20 +121,16 @@ body {
     .hero {
         height: 32vh;        
     }
-    .hero-logo-movil {
-        display: none; 
+    #hero-logo-img.hero-logo-movil {
+        display: none !important; 
     }
     .hero-title-pc {
         display: block; 
         font-size: 56px; 
     }
-    .badge-private {
-        font-size: 15px;    /* Recupera su tamaño monumental original en PC */
-        margin-top: 8px;
-    }
 }
 
-/* CONTENEDOR PRINCIPAL */ 
+/* CONTENEDOR PRINCIPAL RESTAURADO */ 
 .container { 
     width: 92%; 
     max-width: 950px;  
@@ -181,16 +173,17 @@ body {
 .tour-title-wrapper, .cotizador-header-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px 0; } 
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 
+/* RESTAURACIÓN CRÍTICA: Control escalable de Isologos Dinámicos */
 .dynamic-tour-logo-container { 
-    width: 32px; 
-    height: 32px; 
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    width: 32px !important; 
+    height: 32px !important; 
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 } 
 .dynamic-tour-logo-container svg {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .lang-switch-container { 
@@ -277,6 +270,53 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 }
 .btn-cerrar-modal {
     position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 30px; cursor: pointer; color: var(--text);
+}
+
+.box-personalizacion {
+    background: #ffffff;
+    border: 2px solid var(--executive-dark);
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+.titulo-interactivo {
+    font-size: 16px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #555554;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--light-bg);
+    padding-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+.opcion-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    color: var(--text);
+}
+.opcion-item input[type="radio"], 
+.opcion-item input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #555554;
+    cursor: pointer;
+    margin: 0;
+}
+.input-otro-idioma {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 16px;
+    font-family: 'Urbanist', sans-serif;
+    border: 1px solid var(--executive-dark);
+    border-radius: 8px;
+    margin-top: 8px;
+    box-sizing: border-box;
+    background-color: var(--light-bg);
 }
 
 .inc-no-inc-container {
@@ -369,3 +409,22 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     left: 0;
     color: var(--turquesa);
 }
+
+/* RESTAURACIÓN HISTÓRICA: Control exacto de redes sociales fijas del footer */
+.reviews-footer-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text);
+    margin: 0 auto 12px auto;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.footer-info { text-align: center; margin-top: 35px; border-top: 2px solid var(--light-bg); padding-top: 20px; } 
+.social-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 15px; } 
+.social-icon-link { display: inline-block; width: 36px !important; height: 32px !important; transition: transform 0.3s ease; } 
+.icon-svg { width: 100% !important; height: 100% !important; fill: #7F8C8D; transition: fill 0.3s ease; } 
+.social-icon-link:hover { transform: translateY(-3px); }
+.social-icon-link:hover .icon-svg { fill: var(--turquesa); }
+.footer-text { font-size: 15px; color: var(--text); padding: 0 10px; font-weight: bold;} 
+.footer-link { color: var(--text); text-decoration: none; font-weight: bold; } 
+.footer-link:hover { color: var(--turquesa); }
