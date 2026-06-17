@@ -68,7 +68,6 @@ body {
     pointer-events: none;
 }
 
-/* CONTENEDOR DE MARCA ADAPTATIVO CON FILTRO PROTECTOR */
 #hero-brand-container.brand-wrapper {
     z-index: 10;
     position: relative;
@@ -79,7 +78,6 @@ body {
     width: 100%;
 }
 
-/* FIJACIÓN QUIRÚRGICA: Control absoluto del logo en móviles sin afectar pluses ni footer */
 #hero-logo-img.hero-logo-movil {
     display: block;
     max-width: 150px !important;       
@@ -131,7 +129,6 @@ body {
     }
 }
 
-/* CONTENEDOR PRINCIPAL RESTAURADO */ 
 .container { 
     width: 92%; 
     max-width: 950px;  
@@ -174,7 +171,6 @@ body {
 .tour-title-wrapper, .cotizador-header-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px 0; } 
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 
-/* RESTAURACIÓN CRÍTICA: Control escalable de Isologos Dinámicos */
 .dynamic-tour-logo-container { 
     width: 32px !important; 
     height: 32px !important; 
@@ -411,7 +407,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     color: var(--turquesa);
 }
 
-/* RESTAURACIÓN HISTÓRICA: Control exacto de redes sociales fijas del footer */
 .reviews-footer-text {
     font-size: 16px;
     font-weight: bold;
