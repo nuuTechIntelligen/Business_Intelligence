@@ -168,23 +168,33 @@ body {
 .carousel-btn.next { right: 10px; } 
 @media (max-width: 600px) { .carousel-btn { display: none; } } 
 
-.tour-title-wrapper, .cotizador-header-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px 0; } 
+/* CORRECCIÓN: Optimizamos la alineación flexbox y bajamos la separación (gap) de 12px a 6px */
+.tour-title-wrapper, .cotizador-header-wrapper { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px !important; 
+    margin: 20px 0 10px 0; 
+} 
 .cotizador-header-wrapper { margin: 0 0 20px 0; } 
 
-/* ACTUALIZACIÓN: Escalado premium para tus logotipos SVG oficiales */
+/* CORRECCIÓN: Escalado premium y balanceado para tus logotipos SVG oficiales en formato imagen */
 .dynamic-tour-logo-container { 
-    width: 45px !important;       /* Subimos de 32px a 45px el ancho */
-    height: 45px !important;      /* Subimos de 32px a 45px el alto */
+    width: 48px !important;        /* Escalamos a un tamaño más prominente de 48px */
+    height: 48px !important;       
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    flex-shrink: 0 !important;     /* Evita que la caja se comprima en pantallas chicas */
+    flex-shrink: 0 !important;     
+    margin: 0 !important;
+    padding: 0 !important;
 } 
 
-.dynamic-tour-logo-container img {
+/* Forzamos a la imagen SVG adaptativa a heredar el 100% de la caja contenedora */
+.img-isologo-dinamico {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important; /* Asegura que el logo se adapte sin deformarse */
+    object-fit: contain !important; 
+    display: block !important;
 }
 
 .lang-switch-container { 
