@@ -1,6 +1,6 @@
 /* =========================================================================
    PROYECTO: AGENDA DE SEGUROS (CONNY CRM)
-   PARTE 1: CONFIGURACIÓN, DIVISAS EN TIEMPO REAL Y MOTOR DE FILTROS (V2.4)
+   PARTE 1: CONFIGURACIÓN, DIVISAS EN TIEMPO REAL Y MOTOR DE FILTROS (V2.5)
    ========================================================================= */
 
 const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di?sheet=Base_Datos'; 
@@ -10,25 +10,35 @@ let clienteSeleccionado = null;
 let udiValorActualGlobal = 8.8437; 
 let usdValorActualGlobal = 17.5000; 
 
+// FUNCIÓN AUXILIAR DE UX: Formateador estandarizado de moneda financiera
+function formatearAmonedaLocal(valor) {
+    if (valor === undefined || valor === null || valor === '-') return "$0.00 MXN";
+    // Limpiamos caracteres extraños por si viene ya pre-formateado
+    const numero = parseFloat(String(valor).replace(/[^0-9.-]+/g, ""));
+    if (isNaN(numero)) return "$0.00 MXN";
+    
+    return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 2
+    }).format(numero) + ' MXN';
+}
+
 // 1. CONSULTA DE DIVISAS EN TIEMPO REAL (UDI Y DÓLAR)
 async function consultarDivisasRealTime() {
     // Valores de respaldo por si fallan las APIs externas
     udiValorActualGlobal = 8.8437; 
     usdValorActualGlobal = 17.5000; 
 
-// A) Consultamos el valor real de la UDI en tiempo real (Vía código internacional MXV)
+    // A) Consultamos el valor real de la UDI en tiempo real (Vía código internacional MXV)
     try {
-        // Usamos la misma API del dólar que ya está verificada y autorizada sin CORS
         const resUdi = await fetch('https://open.er-api.com/v6/latest/USD');
         if (resUdi.ok) {
             const dataUdi = await resUdi.json();
-            // MXV es el código financiero internacional para la UDI de Banxico
-            // La API nos da cuántas UDIs equivalen a 1 USD, y cuántos Pesos (MXN) equivalen a 1 USD.
             if (dataUdi && dataUdi.rates && dataUdi.rates.MXN && dataUdi.rates.MXV) {
                 const usdEnPesos = parseFloat(dataUdi.rates.MXN);
                 const usdEnUdis = parseFloat(dataUdi.rates.MXV);
                 
-                // Al dividir (Pesos por Dólar) / (Udis por Dólar), obtenemos el valor exacto de la UDI en Pesos
                 udiValorActualGlobal = usdEnPesos / usdEnUdis;
                 console.log("🚀 [Éxito Absoluto] UDI calculada en vivo sin CORS:", udiValorActualGlobal);
             }
@@ -38,10 +48,9 @@ async function consultarDivisasRealTime() {
     } catch (err) {
         console.warn("⚠️ No se pudo calcular la UDI en tiempo real, usando valor de respaldo.", err);
     }
-   // Dibujamos el valor real de la UDI en el componente superior
+    
     const badgeUdi = document.getElementById('udi-val-live');
     if(badgeUdi) badgeUdi.innerText = udiValorActualGlobal.toFixed(4);
-
 
     // B) Consultamos el valor real del Dólar (USD)
     try {
@@ -56,10 +65,10 @@ async function consultarDivisasRealTime() {
         console.warn("⚠️ No se pudo obtener el dólar en tiempo real, usando valor de respaldo.", err);
     }
 
-    // Dibujamos el valor del dólar en el componente superior
     const badgeUsd = document.getElementById('usd-val-live');
     if(badgeUsd) badgeUsd.innerText = `$${usdValorActualGlobal.toFixed(2)} MXN`;
 }
+
 // 2. CARGA MAESTRA DE DATOS DESDE GOOGLE SHEETS
 async function cargarBaseDeDatos() {
     await consultarDivisasRealTime(); 
@@ -86,8 +95,8 @@ async function cargarBaseDeDatos() {
                 moneda: row.moneda,
                 emision: row.emision || '-',      
                 vencimiento: row.vencimiento || '-', 
-                auditoria: row.auditoria || '-',         // NUEVO MAPEO: Captura fecha de auditoría de la fila
-                observaciones: row.observaciones || '', // NUEVO MAPEO: Captura la nota de observaciones
+                auditoria: row.auditoria || '-',         
+                observaciones: row.observaciones || '', 
                 tc: row.tc,
                 estatus: row.estatus,
                 forma_pago: row.forma_pago || 'Anual', 
@@ -135,7 +144,7 @@ function llenarSelectorEmpresas() {
 function llenarSelectorClientes(lista) {
     const select = document.getElementById('filtro-cliente');
     if (!select) return;
-    select.innerHTML = '<option value="">Selecciona un cliente...</option>';
+    select.innerHTML = '<option value="...指定">Selecciona un cliente...</option>';
     const unicos = [...new Set(lista.map(item => item.contratante).filter(n => n))];
     unicos.forEach(nombre => {
         select.innerHTML += `<option value="${nombre}">${nombre}</option>`;
@@ -178,7 +187,7 @@ function seleccionarClientePorNombre(nombre) {
 
 /* --- FIN DE LA PARTE 1 --- */
 /* =========================================================================
-   PARTE 2.1: ALERTAS MULTI-ROL Y DESPLIEGUE DE INFORMACIÓN EN PANTALLA
+   PARTE 2.2: ALERTAS MULTI-ROL Y DESPLIEGUE DE INFORMACIÓN EN PANTALLA
    ========================================================================= */
 
 // 1. EVALUACIÓN DE ALERTAS TEMPRANAS (CON DETECCIÓN DE ROLES)
@@ -310,7 +319,7 @@ function desplegarInformacionPantalla() {
     safeInject('txt-emision', c.emision);          
     safeInject('txt-vencimiento', c.vencimiento);  
     safeInject('txt-nacimiento', c.nacimiento);
-    safeInject('txt-auditoria', c.auditoria);      // NUEVA INYECCIÓN: Pinta la fecha de auditoría en el bloque central
+    safeInject('txt-auditoria', c.auditoria);      
     safeInject('txt-ppr', c.ppr);
     safeInject('txt-dotal', c.prox_dotal);
     safeInject('txt-deducible', c.deducible);
@@ -325,18 +334,18 @@ function desplegarInformacionPantalla() {
     
     safeInject('txt-estatus', c.estatus);
     safeInject('txt-forma-pago', c.forma_pago);
-    safeInject('txt-prima-anual', `$${c.prima_anual}`);
-    safeInject('txt-prima-pago', `$${c.prima_pago}`);
-    safeInject('txt-cobro-pesos', `$${c.cobro_pesos}`);
-    safeInject('txt-dia-cobro', c.dia_cobro);
     
+    // UX 1: Aplicación del formateo dinámico monetario de salida ($60,000.00 MXN)
+    safeInject('txt-prima-anual', formatearAmonedaLocal(c.prima_anual));
+    safeInject('txt-prima-pago', formatearAmonedaLocal(c.prima_pago));
+    safeInject('txt-cobro-pesos', formatearAmonedaLocal(c.cobro_pesos));
+    
+    safeInject('txt-dia-cobro', c.dia_cobro);
     safeInject('txt-aves-cp', c.aves_cp);
     safeInject('txt-aves-lp', c.aves_lp);
     safeInject('txt-num-cuenta', c.num_cuenta);
     safeInject('txt-prima-planeada', c.prima_planeada);
 
-    // NUEVA INYECCIÓN: Coloca el texto de las observaciones guardadas dentro de la cajita de notas
-    // NUEVA INYECCIÓN BLINDADA: Carga las notas del cliente activo de forma segura
     const txtAreaObs = document.getElementById('txa-observaciones');
     if (txtAreaObs) {
         txtAreaObs.value = c.observaciones || ''; 
@@ -405,7 +414,7 @@ function desplegarInformacionPantalla() {
                     </div>`;
             });
         } else {
-            gridBen.innerHTML = `<div class="cell text-center" style="grid-column: span 4; color: #a0aec0; font-style: italic; padding: 15px;">Sin beneficiarios registrados in este plan.</div>`;
+            gridBen.innerHTML = `<div class="cell text-center" style="grid-column: span 4; color: #a0aec0; font-style: italic; padding: 15px;">Sin beneficiarios registrados en este plan.</div>`;
         }
     }
 }
@@ -415,12 +424,23 @@ function enviarMensajeWA(tipo) {
     if(!clienteSeleccionado) return;
     const c = clienteSeleccionado;
     let mensaje = "";
+    
     if(tipo === 'cumple') {
         mensaje = `¡Hola *${c.contratante}*! 🎉 Te mandamos un fuerte saludo de parte de *Conny* y el equipo. Queremos desearte un muy feliz cumpleaños hoy en tu día, ¡que te la pases excelente! 🎂🎈`;
-    } else if(tipo === 'pago') {
-        mensaje = `Estimado(a) *${c.contratante}*, te saludamos para recordarte que la fecha límite de tu pago *${c.forma_pago.toUpperCase()}* para tu póliza de *${c.ramo}* (No. *${c.poliza}*) es el próximo *${c.dia_cobro}* de este mes. El monto correspondiente al periodo es de *$${c.cobro_pesos} MXN*. Quedamos a tus órdenes para procesar el movimiento. 💳✨`;
+    } 
+    // UX 2: Optimización completa del disparador de cobranza por WhatsApp con monto formateado profesionalmente
+    else if(tipo === 'pago') {
+        const montoFormateadoPerfecto = formatearAmonedaLocal(c.cobro_pesos);
+        const fechaLimiteFormato = c.dia_cobro && c.dia_cobro !== '-' ? `el próximo *${c.dia_cobro}* de este mes` : 'en los próximos días';
+
+        mensaje = `Estimado(a) *${c.contratante}*, te saludamos con gusto para recordarte que la fecha límite de tu pago *${c.forma_pago.toUpperCase()}* para tu póliza de *${c.ramo}* (No. *${c.poliza}*) es ${fechaLimiteFormato}.%0A%0A` +
+                  `*Monto correspondiente al periodo:* ${montoFormateadoPerfecto}%0A%0A` +
+                  `Quedamos a tus completas órdenes para apoyarte a procesar tu movimiento de manera segura. ¡Excelente día! 💳✨`;
     }
-    window.open(`https://wa.me/52${c.telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    
+    // Si el tipo es 'pago', ya metimos los saltos de línea con %0A directamente en el string para preservar la estructura visual del chat
+    const textoFinalURL = tipo === 'pago' ? mensaje : encodeURIComponent(mensaje);
+    window.open(`https://wa.me/52${c.telefono}?text=${textoFinalURL}`, '_blank');
 }
 
 // 6. NUEVA FUNCIÓN: MENSAJES PERSONALIZADOS A ASEGURADOS Y BENEFICIARIOS
@@ -435,7 +455,6 @@ function enviarMensajeTerceros(rol, nombrePersona) {
         mensaje = `¡Hola *${nombrePersona}*! 🌟 Te mando un afectuoso saludo de parte de *Conny*. Aprovechamos este día tan especial para desearte un muy feliz cumpleaños, esperando que pases un día lleno de alegría junto a tus seres queridos. ¡Muchas felicidades! 🎂🎈`;
     }
     
-    // Al ser familiares o dependientes, por seguridad abrimos el chat directo a tu número base de contacto para que Conny lo asigne o use el teléfono registrado.
     window.open(`https://wa.me/52${c.telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
 }
 
@@ -445,7 +464,6 @@ function conmutarAcordeon(idLista) {
     if (!listaObjetivo) return;
     const estaAbierta = listaObjetivo.classList.contains('active');
     document.querySelectorAll('.alert-names-list').forEach(lista => {
-        
         lista.classList.remove('active');
     });
     if (!estaAbierta) {
@@ -453,7 +471,7 @@ function conmutarAcordeon(idLista) {
     }
 }
 
-// 8. NUEVA FUNCIÓN: ACTUALIZAR OBSERVACIONES EN GOOGLE SHEETS EN TIEMPO REAL
+// 8. ACTUALIZAR OBSERVACIONES EN GOOGLE SHEETS EN TIEMPO REAL
 async function guardarObservacionEnSheets() {
     if (!clienteSeleccionado) {
         alert("⚠️ Por favor, selecciona primero un cliente.");
@@ -467,18 +485,14 @@ async function guardarObservacionEnSheets() {
     const nuevaNota = txtArea.value.trim();
     const idPoliza = clienteSeleccionado.id;
 
-    // Efecto visual: Deshabilitamos el botón mientras viaja la información
+    // UX 3: Bloqueo de doble clic dinámico evitando cargas dobles accidentales ("Enviando... ⏳")
     btnGuardar.disabled = true;
-    btnGuardar.innerText = "Guardando... ⏳";
+    btnGuardar.innerText = "Enviando... ⏳";
 
-   try {
-        // 1. Desarmamos tu API_URL base para obtener la raíz limpia sin el "?sheet=..."
+    try {
         const apiRaiz = API_URL.split('?')[0]; 
-        
-        // 2. Construimos la URL perfecta inyectando el ID en el orden correcto antes de la pestaña
         const urlCorrecta = `${apiRaiz}/id/${idPoliza}?sheet=Base_Datos`;
 
-        // 3. Hacemos el disparo PUT con la URL blindada
         const response = await fetch(urlCorrecta, {
             method: 'PUT',
             headers: {
@@ -495,22 +509,18 @@ async function guardarObservacionEnSheets() {
         const resultado = await response.json();
 
         if (response.ok && resultado.updated && resultado.updated > 0) {
-            // Actualizamos la nota en nuestra memoria local del navegador
             clienteSeleccionado.observaciones = nuevaNota;
             const index = baseDatosCompleta.findIndex(item => item.id === idPoliza);
             if (index !== -1) baseDatosCompleta[index].observaciones = nuevaNota;
 
-            // 1. Aplicamos el destello verde visual en la caja de texto
             txtArea.style.borderColor = "#25D366";
             txtArea.style.boxShadow = "0 0 0 3px rgba(37, 211, 102, 0.2)";
             
-            // Regresa a su estilo normal automáticamente después de 1.5 segundos
             setTimeout(() => {
                 txtArea.style.borderColor = "";
                 txtArea.style.boxShadow = "";
             }, 1500);
 
-            // 2. Lanzamos la alerta tradicional para confirmación de Conny
             alert("✅ Nota guardada exitosamente en Google Sheets.");
         } else {
             throw new Error("No se afectaron filas en el servidor.");
@@ -520,7 +530,7 @@ async function guardarObservacionEnSheets() {
         console.error("❌ Error guardando la nota en SheetDB:", error);
         alert("🚨 Hubo un problema al conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
     } finally {
-        // Restauramos el botón a su estado original
+        // Al terminar el ciclo, liberamos el botón a su estado normal de guardado
         btnGuardar.disabled = false;
         btnGuardar.innerText = "Guardar Nota 💾";
     }
