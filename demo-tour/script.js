@@ -49,7 +49,7 @@
      },
      campeche: {
          complementos: ["Tour de 1 dia", "Tour de 2 dias"],
-         plus: ["Avistamiento de aves", "Dinámica de observación"]
+         plus: ["Temporada de Avistamiento de Flamencos (Noviembre- Febrero)"]
      }
  };
 
