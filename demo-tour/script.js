@@ -38,8 +38,8 @@
  const matrizTarifasEscaladas = {
      cenotes: {
          "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 },
-         "Grutas de Tzabnah": { 2: 1550, 3: 1150, 4: 800 },
-         "Homún":             { 2: 1550, 3: 1150, 4: 800 }
+         "Grutas de Tzabnah": { 2: 1600, 3: 2200, 4: 3300 },
+         "Homún":             { 2: 1700, 3: 2300, 4: 3500 }
      },
      chichen: {
          "Cenote Zací / Valladolid":       { 2: 1880, 3: 1300, 4: 1000 },
@@ -48,7 +48,7 @@
          "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 1700, 3: 1150, 4: 900 }
      },
      coloradas: {
-         "Ruta Fija Corrida": { 2: 2025, 3: 1350, 4: 1050 }
+         "Ruta Fija Corrida": { 2: 1650, 3: 2300, 4: 3500 }
      }
  };
 
@@ -369,7 +369,6 @@
       calcular();  
  }  
 
- // CORRECCIÓN DEFINITIVA: Lógica de rango congelado para 1 o 2 Pax sin duplicar la tarifa base
  function calcular() {  
       const select = document.getElementById('tour-select');  
       if(!select) return;  
@@ -388,12 +387,9 @@
 
       let totalGlobal = 0;
 
-      // Aplicamos la regla de negocio de forma quirúrgica según las condiciones de la tabla
       if (totalPasajeros <= 2) {
-          // Para 1 o 2 personas, el costo total del grupo es exactamente el valor base de la columna '2'
           totalGlobal = rangosDeCombinacion[2];
       } else {
-          // Para 3 o más personas, se jala el precio individual y se multiplica por la cantidad de cabezas
           let llaveRango = (totalPasajeros === 3) ? 3 : 4;
           const precioPorPersona = rangosDeCombinacion[llaveRango];
           totalGlobal = totalPasajeros * precioPorPersona;  
@@ -402,6 +398,7 @@
       document.getElementById('total-display').innerText = `$${totalGlobal.toLocaleString()} MXN`;  
  }  
 
+ // MODIFICACIÓN CRÍTICA: Renderiza sub-detalles con viñetas al detectar Paseo Ecoturístico
  function renderizarCamposPersonalizados() {
      const tourSeleccionado = document.getElementById('tour-select').value;
      const datos = catalogoEstructuraTours[tourSeleccionado];
@@ -447,6 +444,19 @@
                      <span>${pl}</span>
                  </label>
              `;
+             
+             // GATILLO DINÁMICO: Inyecta la sub-lista formateada si coincide con la opción ecoturística
+             if(pl === "Paseo ecoturístico") {
+                 htmlIzquierdo += `
+                     <ul class="sub-detalles-plus">
+                         <li>Playa Virgen</li>
+                         <li>Laguna Azul</li>
+                         <li>Pecesitos</li>
+                         <li>Baño Maya</li>
+                         <li>Tortugario</li>
+                     </ul>
+                 `;
+             }
          });
          htmlIzquierdo += `</div>`;
      }
