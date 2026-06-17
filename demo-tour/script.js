@@ -438,7 +438,7 @@
      if (datos.plus.length > 0) {
          htmlIzquierdo += `
              <div class="box-personalizacion">
-                 <div class="titulo-interactivo">✨ ¿Quieres agregar un Plus? (Sin costo extra)</div>
+                 <div class="titulo-interactivo">✨ ¿Quieres agregar un Plus?</div>
          `;
          datos.plus.forEach(pl => {
              htmlIzquierdo += `
