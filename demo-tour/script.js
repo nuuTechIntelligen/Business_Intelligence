@@ -334,7 +334,7 @@
               </svg>
           `,
           cenotes: `
-             <svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/" version="1.1" viewBox="0 0 225 435.03">
+             <svg  fill="none" stroke="#ECBB90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/" version="1.1" viewBox="0 0 225 435.03">
   <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
   <defs>
     <style>
