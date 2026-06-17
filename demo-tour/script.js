@@ -38,8 +38,8 @@
  const matrizTarifasEscaladas = {
      cenotes: {
          "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 },
-         "Grutas de Tzabnah": { 2: 1600, 3: 2200, 4: 3300 },
-         "Homún":             { 2: 1700, 3: 2300, 4: 3500 }
+         "Grutas de Tzabnah": { 2: 1550, 3: 1150, 4: 800 },
+         "Homún":             { 2: 1550, 3: 1150, 4: 800 }
      },
      chichen: {
          "Cenote Zací / Valladolid":       { 2: 1880, 3: 1300, 4: 1000 },
@@ -48,7 +48,7 @@
          "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 1700, 3: 1150, 4: 900 }
      },
      coloradas: {
-         "Ruta Fija Corrida": { 2: 1650, 3: 2300, 4: 3500 }
+         "Ruta Fija Corrida": { 2: 2025, 3: 1350, 4: 1050 }
      }
  };
 
