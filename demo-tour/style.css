@@ -88,7 +88,7 @@ body {
     height: auto !important;
     object-fit: contain !important;    
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
-    margin: 0 auto 5px auto;
+    margin: 0 auto 0px auto;
 }
 
 .hero-title-pc {
