@@ -3,7 +3,8 @@
    PARTE 1: CONFIGURACIÓN, DIVISAS EN TIEMPO REAL Y MOTOR DE FILTROS (V2.5)
    ========================================================================= */
 
-const API_URL = 'https://sheetdb.io/api/v1/v3rg9i21440di?sheet=Base_Datos'; 
+const API_URL = 'https://sheetdb.io/api/v1/o6q7vkecjanvw?sheet=Base_Datos'; 
+//https://sheetdb.io/api/v1/o6q7vkecjanvw
 
 let baseDatosCompleta = []; 
 let clienteSeleccionado = null; 
