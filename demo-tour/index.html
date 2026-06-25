@@ -1,17 +1,26 @@
 <!DOCTYPE html> 
 <html lang="es"> 
 <head> 
+     <!-- ==========================================================================
+        METADATOS DE CONFIGURACIÓN Y RENDIMIENTO BASE
+        ========================================================================== -->
      <meta charset="UTF-8"> 
      <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
       
      <title>VÍA HA' MÉXICO | Reservas y Cotizaciones Online</title> 
 
+     <!-- ==========================================================================
+        INFRAESTRUCTURA SEO AVANZADA (Estrategia Nuu Tech-Art)
+        ========================================================================== -->
      <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados premium con fotografía profesional incluida. Experiencias exclusivas en el Mayab."> 
      <meta name="keywords" content="viaha mexico, via ha, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche, cotizador de viajes yucatan"> 
      <meta name="author" content="Nuu Tech-Art"> 
      <meta name="robots" content="index, follow"> 
      <link rel="canonical" href="https://viaha.com">
 
+     <!-- ==========================================================================
+        PROTOCOLO OPEN GRAPH (Optimización para Redes Sociales: WhatsApp, FB)
+        ========================================================================== -->
      <meta property="og:type" content="website"> 
      <meta property="og:title" content="VÍA HA' MÉXICO | Experiencias Privadas Exclusivas"> 
      <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva tu experiencia privada con fotografía profesional incluida."> 
@@ -20,21 +29,29 @@
      <meta property="og:site_name" content="VÍA HA' MÉXICO"> 
      <meta property="og:locale" content="es_MX">
 
+     <!-- ==========================================================================
+        FUENTES TIPOGRÁFICAS Y RECURSOS ESTILÍSTICOS (Flatpickr CDN)
+        ========================================================================== -->
      <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@600;800&family=Urbanist:wght@400;700&display=swap" rel="stylesheet"> 
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
      <link rel="stylesheet" href="style.css"> 
 
+     <!-- ==========================================================================
+        NÚCLEO ANALÍTICO CENTRAL: Google Analytics (G-9JZDZ31TPV)
+        ========================================================================== -->
      <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZDZ31TPV"></script> 
      <script> 
        window.dataLayer = window.dataLayer || []; 
        function gtag(){dataLayer.push(arguments);} 
        gtag('js', new Date()); 
-       // Configuración inicial de analítica
        gtag('config', 'G-9JZDZ31TPV', { 'anonymize_ip': true }); 
      </script> 
 </head> 
 <body> 
 
+     <!-- ==========================================================================
+        SECCIÓN HERO: Slider Crossfade de Portadas del Destino
+        ========================================================================== -->
      <div class="hero"> 
          <div class="hero-slider-wrapper">
              <div class="slide-foto" style="background-image: url('img/Portada1.jpg');"></div>
@@ -59,7 +76,10 @@
      </div>
      <div class="decoracion-flotante fondo-mixto"></div>
 
-     <div class="container"> 
+     <!-- ==========================================================================
+        CONTENEDOR PRINCIPAL DE INTERFAZ DE RESERVAS
+        ========================================================================== -->
+    <div class="container"> 
          <div class="lang-switch-container" id="lang-lista"> 
              <button type="button" id="btn-agendar-llamada" class="btn-agendar-top" onclick="dispararAgendado()">
                  📞 Agendar Llamada
@@ -72,19 +92,63 @@
          
          <div class="grid-layout"> 
               
+             <!-- ==========================================================================
+                BLOQUE IZQUIERDO: Selector de Destino, Galerías e Inclusiones
+                ========================================================================== -->
              <div class="grid-col-1"> 
                  <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
                   
+                 <!-- MODIFICACIÓN: Chichén Itzá pasa al primer lugar del selector por orden estratégico -->
                  <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
-                     <option value="cenotes" data-categoria="cenotes" data-i18n="tour_cenotes">TOUR CENOTES</option> 
                      <option value="chichen" data-categoria="arqueologia" data-i18n="tour_chichen">CHICHÉN ITZÁ</option> 
+                     <option value="cenotes" data-categoria="cenotes" data-i18n="tour_cenotes">TOUR CENOTES</option> 
                      <option value="coloradas" data-categoria="aviturismo" data-i18n="tour_coloradas">COLORADAS TOUR DAY</option> 
                      <option value="uxmal" data-categoria="arqueologia" data-i18n="tour_uxmal">UXMAL</option> 
                      <option value="celestun" data-categoria="aviturismo" data-i18n="tour_celestun">CELESTÚN</option> 
                      <option value="campeche" data-categoria="urbano" data-i18n="tour_campeche">CAMPECHE</option> 
                  </select> 
 
-                 <div id="info-cenotes" class="tour-info-card active"> 
+                 <!-- Experiencia: Chichén Itzá (MODIFICACIÓN: Ahora activa por defecto al inicio) -->
+                 <div id="info-chichen" class="tour-info-card active"> 
+                     <div class="carousel-container"> 
+                         <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
+                         <div class="carousel-track" id="track-chichen"> 
+                             <img src="img/chichen/Chichen.jpg" alt="Fotografía profesional de la pirámide de Chichén Itzá" class="tour-card-img"> 
+                             <img src="img/chichen/Izamal.png" alt="Convento de Izamal pueblo mágico" class="tour-card-img"> 
+                             <img src="img/chichen/Lol-ha.jpg" alt="Cenote Lol-Ha Yucatán" class="tour-card-img"> 
+                             <img src="img/chichen/Valladolid.jpg" alt="Centro histórico de Valladolid" class="tour-card-img"> 
+                             <img src="img/chichen/Zaci.jpg" alt="Cenote abierto Zací en Valladolid" class="tour-card-img"> 
+                         </div> 
+                         <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
+                     </div> 
+                     <div class="tour-title-wrapper"> 
+                         <div class="dynamic-tour-logo-container logo-c1"></div> 
+                         <h3 class="section-title" data-i18n="titulo_chichen" style="margin:0; border:none; padding:0;">Maravilla del Mundo</h3> 
+                     </div> 
+                     <p data-i18n="desc_chichen">Sumérgete al maravilloso mundo de los Itzaes. Toma el power de una ciudad icónica y déjate envolver en su grandeza.</p> 
+                     
+                     <div class="inc-no-inc-container">
+                         <div class="inc-col">
+                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
+                             <ul class="inc-list" data-i18n="inc_chichen_list">
+                                 <li>Transporte desde tu lugar de Hospedaje.</li>
+                                 <li>Guía Federal Certificado.</li>
+                                 <li>Hielera con agua.</li>
+                                 <li>Estacionamientos y Peajes.</li>
+                             </ul>
+                         </div>
+                         <div class="no-inc-col">
+                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
+                             <ul class="no-inc-list" data-i18n="no_inc_chichen_list">
+                                <li>Entradas.</li>
+                                 <li>Alimentos.</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div> 
+
+                 <!-- Experiencia: Cenotes (MODIFICACIÓN: Se le retira la clase active por defecto) -->
+                 <div id="info-cenotes" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('cenotes', -1)">&#10094;</button> 
                          <div class="carousel-track" id="track-cenotes"> 
@@ -122,44 +186,7 @@
                      </div>
                  </div> 
 
-                 <div id="info-chichen" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-chichen"> 
-                             <img src="img/chichen/Chichen.jpg" alt="Fotografía profesional de la pirámide de Chichén Itzá" class="tour-card-img"> 
-                             <img src="img/chichen/Izamal.png" alt="Convento de Izamal pueblo mágico" class="tour-card-img"> 
-                             <img src="img/chichen/Lol-ha.jpg" alt="Cenote Lol-Ha Yucatán" class="tour-card-img"> 
-                             <img src="img/chichen/Valladolid.jpg" alt="Centro histórico de Valladolid" class="tour-card-img"> 
-                             <img src="img/chichen/Zaci.jpg" alt="Cenote abierto Zací en Valladolid" class="tour-card-img"> 
-                         </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_chichen" style="margin:0; border:none; padding:0;">Maravilla del Mundo</h3> 
-                     </div> 
-                     <p data-i18n="desc_chichen">Sumérgete al maravilloso mundo de los Itzaes. Toma el poder de una ciudad icónica y déjate envolver en su grandeza.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_chichen_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
-                             </ul>
-                         </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_chichen_list">
-                                <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
-                         </div>
-                     </div>
-                 </div> 
-
+                 <!-- Experiencia: Coloradas -->
                  <div id="info-coloradas" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('coloradas', -1)">&#10094;</button> 
@@ -197,6 +224,7 @@
                      </div>
                  </div> 
 
+                 <!-- Experiencia: Uxmal -->
                  <div id="info-uxmal" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
@@ -234,6 +262,7 @@
                      </div>
                  </div>
 
+                 <!-- Experiencia: Celestún -->
                  <div id="info-celestun" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
@@ -270,6 +299,7 @@
                      </div>
                  </div>
 
+                 <!-- Experiencia: Campeche -->
                  <div id="info-campeche" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
@@ -311,6 +341,9 @@
                  <div id="seccion-personalizacion-tour" style="margin-top: 20px;"></div>
              </div>  
 
+             <!-- ==========================================================================
+                BLOQUE DERECHO: Motor del Cotizador Dinámico en Tiempo Real
+                ========================================================================== -->
              <div class="grid-col-2"> 
                  <div class="cotizador-header-wrapper"> 
                      <div class="dynamic-tour-logo-container logo-c2"></div> 
