@@ -1,19 +1,14 @@
-/* ==========================================================================
-   SISTEMA DE VARIABLES: Paleta de Colores Corporativa Oficial Vía Há
-   ========================================================================== */
+/* VARIABLES GLOBALES REEMPLAZADAS CON LA PALETA OFICIAL VÍA HÁ */
 :root { 
-    --turquesa: #ECBB90;         /* Color Arena de la Marca */ 
+    --turquesa: #ECBB90;         /* Color Principal 1 (Arena) */ 
     --turquesa-dark: #555554;    /* Neutro Textos e Iconos (Gris Oscuro) */ 
     --white: #ffffff; 
     --text: #555554;             /* Color de texto base del manual */ 
     --light-bg: #F9F4EE;         /* Neutro Fondos (Crema Suave) */ 
-    --executive-dark: #BEDFCA;   /* Color Menta de la Marca */ 
-    --accent-coral: #FDB1A3;     /* Color Flamingo / Coral */
+    --executive-dark: #BEDFCA;   /* Color Principal 2 (Agua/Menta) */ 
+    --accent-coral: #FDB1A3;     /* Color de Acento (Coral/Flamingo) */
 } 
 
-/* ==========================================================================
-   REGLAS COMENTADAS DE MAQUETACIÓN BASE
-   ========================================================================== */
 body { 
     font-family: 'Big Shoulders Text', sans-serif; 
     font-weight: 600;
@@ -24,7 +19,6 @@ body {
     font-size: 19px; 
 } 
 
-/* Contenedor monumental superior de portadas de destino */
 .hero { 
     position: relative;
     height: 32vh;            
@@ -43,7 +37,6 @@ body {
     z-index: 1;
 }
 
-/* Animación crossfade asíncrona de desvanecimiento de banners */
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -75,7 +68,6 @@ body {
     pointer-events: none;
 }
 
-/* Contenedor adaptativo de marca superior */
 #hero-brand-container.brand-wrapper {
     z-index: 10;
     position: relative;
@@ -130,9 +122,6 @@ body {
     .hero-title-pc { display: block; font-size: 56px; }
 }
 
-/* ==========================================================================
-   ESTILOS COMENTADOS DEL CONTENEDOR DE CONTENIDO PRINCIPAL
-   ========================================================================== */
 .container { 
     width: 92%; max-width: 950px; margin: -30px auto 50px; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
@@ -145,7 +134,6 @@ body {
     .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; } 
 } 
 
-/* Control de carruseles de fotos e interacciones táctiles móviles */
 .carousel-container { position: relative; width: 100%; height: 230px; overflow: hidden; border-radius: 12px 12px 0 0; touch-action: pan-y pin-x; } 
 @media (min-width: 600px) { .carousel-container { height: 280px; } } 
 .carousel-track { display: flex; width: 100%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; } 
@@ -156,14 +144,11 @@ body {
 .carousel-btn.next { right: 10px; } 
 @media (max-width: 600px) { .carousel-btn { display: none; } } 
 
-/* Alineación de wrappers para acortar distancia lateral (gap) con los isologos verticales */
-.tour-title-wrapper, 
-.cotizador-header-wrapper { 
+.tour-title-wrapper, .cotizador-header-wrapper { 
     display: inline-flex !important; align-items: center !important; justify-content: flex-start !important; gap: 10px !important; margin: 20px 0 15px 0 !important; width: 100%;
 } 
 .cotizador-header-wrapper { margin: 0 0 20px 0 !important; } 
 
-/* Formato rectangular vertical exclusivo para tus isologos de marca del manual (44px ancho x 68px alto) */
 .dynamic-tour-logo-container { 
     width: 44px !important; height: 68px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; margin: 0 !important; padding: 0 !important;
 } 
@@ -177,9 +162,6 @@ body {
 
 .section-title { color: var(--text); font-size: 24px; border-left: 5px solid var(--turquesa); padding-left: 10px; margin: 0 !important; text-transform: uppercase; font-weight: bold; } 
 
-/* ==========================================================================
-   ESTILOS COMENTADOS DE FORMULARIOS Y CONTROLES INTERACTIVOS
-   ========================================================================== */
 body .flatpickr-input, body #fecha-reserva, body .tour-picker, body #nombre-cliente { width: 100% !important; padding: 14px !important; font-size: 18px !important; font-family: 'Big Shoulders Text', sans-serif !important; font-weight: bold !important; border: 2px solid var(--executive-dark) !important; border-radius: 12px !important; background-color: var(--light-bg) !important; color: var(--text) !important; box-sizing: border-box !important; display: block !important; } 
 body .flatpickr-input, body #fecha-reserva, body .tour-picker { padding-right: 40px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555554' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: right 15px center !important; background-size: 18px !important; appearance: none !important; } 
 body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover { border-color: var(--turquesa) !important; background-color: #ffffff !important; } 
@@ -200,18 +182,13 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .summary-box { background-color: var(--executive-dark); color: var(--text); padding: 15px; border-radius: 15px; text-align: center; margin-top: 20px; } 
 .total-price { font-family: 'Big Shoulders Text', sans-serif; font-size: 36px; font-weight: bold; color: var(--text); } 
 
-/* Micro-interacción premium de hover para el botón transaccional de conversión */
 .btn-whatsapp { display: block; background-color: var(--accent-coral); color: var(--text); text-align: center; padding: 15px; border-radius: 12px; text-decoration: none; font-family: 'Big Shoulders Text', sans-serif; font-weight: bold; font-size: 22px; margin-top: 15px; box-shadow: 0 4px 15px rgba(253, 177, 163, 0.3); text-transform: uppercase; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; } 
 .btn-whatsapp:hover { background-color: var(--turquesa) !important; box-shadow: 0 6px 20px rgba(85, 85, 84, 0.15) !important; transform: translateY(-2px) !important; color: var(--text) !important; }
 
-/* Controles de ventanas emergentes (Modal Agenda) */
 .modal-agenda-wrapper { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(85,85,84,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; }
 .modal-agenda-contenido { background: var(--white); padding: 25px; border-radius: 20px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 .btn-cerrar-modal { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 30px; cursor: pointer; color: var(--text); }
 
-/* ==========================================================================
-   ELEMENTOS DE PERSONALIZACIÓN DINÁMICA E INCLUSIONES
-   ========================================================================== */
 .box-personalizacion { background: #ffffff; border: 2px solid var(--executive-dark); border-radius: 14px; padding: 15px; margin-bottom: 15px; text-align: left; }
 .titulo-interactivo { font-size: 16px; text-transform: uppercase; font-weight: bold; color: #555554; margin-bottom: 10px; border-bottom: 1px solid var(--light-bg); padding-bottom: 4px; letter-spacing: 0.5px; }
 .opcion-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 17px; cursor: pointer; color: var(--text); }
@@ -233,9 +210,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .sub-detalles-plus li { position: relative; margin-bottom: 2px; padding-left: 12px; }
 .sub-detalles-plus li::before { content: "•"; position: absolute; left: 0; color: var(--turquesa); }
 
-/* ==========================================================================
-   REDES SOCIALES E INFORMACIÓN DE PIE DE PÁGINA
-   ========================================================================== */
 .reviews-footer-text { font-size: 16px; font-weight: bold; color: var(--text); margin: 0 auto 12px auto; text-transform: uppercase; letter-spacing: 0.5px; }
 .footer-info { text-align: center; margin-top: 35px; border-top: 2px solid var(--light-bg); padding-top: 20px; } 
 .social-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 15px; } 
