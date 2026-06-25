@@ -4,11 +4,11 @@
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
-let adultos = 1; 
+let adultos = 2;                // MODIFICACIÓN: El contador arranca nativamente en 2 adultos
 let ninos = 0; 
 let fp = null;                  // Instancia controladora del calendario Flatpickr
 let fechaSeleccionada = ""; 
-let idiomaActual = "es";        // MODIFICACIÓN: Español fijado firmemente como idioma principal de carga
+let idiomaActual = "es";        // Español fijado firmemente como idioma principal de carga
 
 // Registro de coordenadas de desplazamiento para los tracks de carruseles de fotos
 const posicionesCarrusel = { cenotes: 0, chichen: 0, coloradas: 0, uxmal: 0, celestun: 0, campeche: 0 }; 
@@ -17,13 +17,13 @@ const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxma
 // Endpoint analítico de bloqueos de calendario sincronizado con Google Sheets
 const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
-// Catálogo maestro estructurado de rutas opcionales y pluses por destino
+// Catálogo maestro estructurado de rutas opcionales y pluses por destino (CORRECCIÓN: Llaves homologadas con la matriz)
 const catalogoEstructuraTours = {
      cenotes: { complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"], plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"] },
      chichen: { complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
      coloradas: { complementos: [], plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"] },
-     uxmal: { complementos: ["Museo del Chocolate", "Hacienda Mucuyché", "Cenote Yaal Utzil"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
-     celestun: { complementos: ["Recorrido en Bote Guardianes de Dzinintún", "Recorrido en Lancha Motorizada"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
+     uxmal: { complementos: ["Chocostory", "Hda Mucuyché", "Yaal Utzil"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
+     celestun: { complementos: ["Bote", "Lancha"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
      campeche: { complementos: ["Tour de 1 dia", "Tour de 2 dias"], plus: ["Temporada de Avistamiento de Flamencos (Noviembre- Febrero)"] }
 };
 
@@ -189,7 +189,8 @@ function cargarBloqueos() {
  */
 function cambiarCant(tipo, cambio) {  
       if (tipo === 'adultos') {  
-          if (adultos + cambio >= 1) adultos += cambio;   
+          // MODIFICACIÓN: Congelamos el límite mínimo en 2 adultos para respetar el tramo base comercial
+          if (adultos + cambio >= 2) adultos += cambio;   
           document.getElementById('qty-adultos').innerText = adultos; 
       } else {  
           if (ninos + cambio >= 0) ninos += cambio;   
@@ -320,7 +321,7 @@ function enviarWhatsApp() {
       });  
 
       let mensaje = `${t.wa_saludo}${t.wa_nombre} ${nombre}\n${t.wa_tour} ${tourName}\n📍 *Ruta:* ${complementoTexto}\n✨ *Plus:* ${plusTexto}\n🗣️ *Idioma:* ${idiomaTexto}\n${t.wa_fecha} ${fechaSeleccionada}\n${t.wa_adultos} ${adultos}\n${t.wa_ninos} ${ninos}\n${t.wa_total} ${total}\n\n${t.wa_pregunta}`;  
-      window.open(`https://wa.me/529618150804?text=${encodeURIComponent(mensaje)}`, '_blank');  
+      window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
 
 function dispararAgendado() { document.getElementById('modal-agenda').style.display = 'flex'; ejecutarOpcionC_HorariosFijos(); }
