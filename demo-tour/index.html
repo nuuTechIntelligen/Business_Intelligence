@@ -1,26 +1,17 @@
 <!DOCTYPE html> 
 <html lang="es"> 
 <head> 
-     <!-- ==========================================================================
-        METADATOS DE CONFIGURACIÓN Y RENDIMIENTO BASE
-        ========================================================================== -->
      <meta charset="UTF-8"> 
      <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
       
      <title>VÍA HA' MÉXICO | Reservas y Cotizaciones Online</title> 
 
-     <!-- ==========================================================================
-        INFRAESTRUCTURA SEO AVANZADA (Estrategia Nuu Tech-Art)
-        ========================================================================== -->
      <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados premium con fotografía profesional incluida. Experiencias exclusivas en el Mayab."> 
      <meta name="keywords" content="viaha mexico, via ha, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche, cotizador de viajes yucatan"> 
      <meta name="author" content="Nuu Tech-Art"> 
      <meta name="robots" content="index, follow"> 
      <link rel="canonical" href="https://viaha.com">
 
-     <!-- ==========================================================================
-        PROTOCOLO OPEN GRAPH (Optimización para Redes Sociales: WhatsApp, FB)
-        ========================================================================== -->
      <meta property="og:type" content="website"> 
      <meta property="og:title" content="VÍA HA' MÉXICO | Experiencias Privadas Exclusivas"> 
      <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva tu experiencia privada con fotografía profesional incluida."> 
@@ -29,16 +20,10 @@
      <meta property="og:site_name" content="VÍA HA' MÉXICO"> 
      <meta property="og:locale" content="es_MX">
 
-     <!-- ==========================================================================
-        FUENTES TIPOGRÁFICAS Y RECURSOS ESTILÍSTICOS (Flatpickr CDN)
-        ========================================================================== -->
      <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@600;800&family=Urbanist:wght@400;700&display=swap" rel="stylesheet"> 
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
      <link rel="stylesheet" href="style.css"> 
 
-     <!-- ==========================================================================
-        NÚCLEO ANALÍTICO CENTRAL: Google Analytics (G-9JZDZ31TPV)
-        ========================================================================== -->
      <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZDZ31TPV"></script> 
      <script> 
        window.dataLayer = window.dataLayer || []; 
@@ -49,9 +34,6 @@
 </head> 
 <body> 
 
-     <!-- ==========================================================================
-        SECCIÓN HERO: Slider Crossfade de Portadas del Destino
-        ========================================================================== -->
      <div class="hero"> 
          <div class="hero-slider-wrapper">
              <div class="slide-foto" style="background-image: url('img/Portada1.jpg');"></div>
@@ -76,10 +58,7 @@
      </div>
      <div class="decoracion-flotante fondo-mixto"></div>
 
-     <!-- ==========================================================================
-        CONTENEDOR PRINCIPAL DE INTERFAZ DE RESERVAS
-        ========================================================================== -->
-    <div class="container"> 
+     <div class="container"> 
          <div class="lang-switch-container" id="lang-lista"> 
              <button type="button" id="btn-agendar-llamada" class="btn-agendar-top" onclick="dispararAgendado()">
                  📞 Agendar Llamada
@@ -92,13 +71,9 @@
          
          <div class="grid-layout"> 
               
-             <!-- ==========================================================================
-                BLOQUE IZQUIERDO: Selector de Destino, Galerías e Inclusiones
-                ========================================================================== -->
              <div class="grid-col-1"> 
                  <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
                   
-                 <!-- MODIFICACIÓN: Chichén Itzá pasa al primer lugar del selector por orden estratégico -->
                  <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
                      <option value="chichen" data-categoria="arqueologia" data-i18n="tour_chichen">CHICHÉN ITZÁ</option> 
                      <option value="cenotes" data-categoria="cenotes" data-i18n="tour_cenotes">TOUR CENOTES</option> 
@@ -108,7 +83,6 @@
                      <option value="campeche" data-categoria="urbano" data-i18n="tour_campeche">CAMPECHE</option> 
                  </select> 
 
-                 <!-- Experiencia: Chichén Itzá (MODIFICACIÓN: Ahora activa por defecto al inicio) -->
                  <div id="info-chichen" class="tour-info-card active"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
@@ -147,7 +121,6 @@
                      </div>
                  </div> 
 
-                 <!-- Experiencia: Cenotes (MODIFICACIÓN: Se le retira la clase active por defecto) -->
                  <div id="info-cenotes" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('cenotes', -1)">&#10094;</button> 
@@ -186,7 +159,6 @@
                      </div>
                  </div> 
 
-                 <!-- Experiencia: Coloradas -->
                  <div id="info-coloradas" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('coloradas', -1)">&#10094;</button> 
@@ -224,7 +196,6 @@
                      </div>
                  </div> 
 
-                 <!-- Experiencia: Uxmal -->
                  <div id="info-uxmal" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
@@ -249,7 +220,7 @@
                                  <li>Transporte desde tu lugar de Hospedaje.</li>
                                  <li>Guía Federal Certificado.</li>
                                  <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
+                                 <li>Estacionamientos and Peajes.</li>
                              </ul>
                          </div>
                          <div class="no-inc-col">
@@ -262,7 +233,6 @@
                      </div>
                  </div>
 
-                 <!-- Experiencia: Celestún -->
                  <div id="info-celestun" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
@@ -299,7 +269,6 @@
                      </div>
                  </div>
 
-                 <!-- Experiencia: Campeche -->
                  <div id="info-campeche" class="tour-info-card"> 
                      <div class="carousel-container"> 
                          <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
@@ -341,9 +310,6 @@
                  <div id="seccion-personalizacion-tour" style="margin-top: 20px;"></div>
              </div>  
 
-             <!-- ==========================================================================
-                BLOQUE DERECHO: Motor del Cotizador Dinámico en Tiempo Real
-                ========================================================================== -->
              <div class="grid-col-2"> 
                  <div class="cotizador-header-wrapper"> 
                      <div class="dynamic-tour-logo-container logo-c2"></div> 
@@ -366,7 +332,7 @@
                      <span class="counter-label" data-i18n="label_adultos">Adultos</span> 
                      <div class="counter-controls"> 
                          <button class="btn-qty" onclick="cambiarCant('adultos', -1)">-</button> 
-                         <span id="qty-adultos" class="qty-val">1</span> 
+                         <span id="qty-adultos" class="qty-val">2</span> 
                          <button class="btn-qty" onclick="cambiarCant('adultos', 1)">+</button> 
                      </div> 
                  </div> 
