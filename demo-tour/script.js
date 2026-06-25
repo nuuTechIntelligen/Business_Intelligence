@@ -1,14 +1,14 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Core Core Engine desarrollado bajo estándares premium.
+ * Código fuente optimizado, depurado y con trazabilidad analítica GA4.
  */
 
-// VARIABLES DE ESTADO LOCAL GLOBAL (Pugadas de datos huérfanos)
+// VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
 let adultos = 1; 
 let ninos = 0; 
 let fp = null;                  // Instancia controladora del calendario Flatpickr
 let fechaSeleccionada = ""; 
-let idiomaActual = "es"; 
+let idiomaActual = "es";        // MODIFICACIÓN: Español fijado firmemente como idioma principal de carga
 
 // Registro de coordenadas de desplazamiento para los tracks de carruseles de fotos
 const posicionesCarrusel = { cenotes: 0, chichen: 0, coloradas: 0, uxmal: 0, celestun: 0, campeche: 0 }; 
@@ -27,7 +27,7 @@ const catalogoEstructuraTours = {
      campeche: { complementos: ["Tour de 1 dia", "Tour de 2 dias"], plus: ["Temporada de Avistamiento de Flamencos (Noviembre- Febrero)"] }
 };
 
-// Matriz de tarificación escalada por persona (Bloques corregidos y optimizados)
+// Matriz de tarificación escalada por persona
 const matrizTarifasEscaladas = {
      cenotes: { "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 }, "Grutas de Tzabnah": { 2: 1600, 3: 2200, 4: 3300 }, "Homún": { 2: 1700, 3: 2300, 4: 3500 } },
      chichen: { "Cenote Zací / Valladolid": { 2: 1880, 3: 1300, 4: 1000 }, "Izamal": { 2: 1700, 3: 1150, 4: 900 }, "Cenote Lol-Ha / Taller con Chef": { 2: 1700, 3: 1150, 4: 900 }, "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 1700, 3: 1150, 4: 900 } },
@@ -37,7 +37,7 @@ const matrizTarifasEscaladas = {
      campeche: { "Tour de 1 dia": { 2: 1880, 3: 1300, 4: 1000 }, "Tour de 2 dias": { 2: 1700, 3: 1150, 4: 900 } }
 };
 
-// Diccionario de internacionalización (Limpio y purgado de nodos inactivos)
+// Diccionario de internacionalización (Limpio y purgado de variables huérfanas)
 const traducciones = { 
       es: { 
           hero_title: "VÍA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "¿Qué paraíso quieres visitar hoy?", tour_cenotes: "Tour Cenotes", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
@@ -46,7 +46,7 @@ const traducciones = {
       }, 
       en: { 
           hero_title: "VÍA HA' MÉXICO", hero_badge: "✨ Immerse yourself in the Mayab", pregunta_tour: "What paradise do you want to visit today?", tour_cenotes: "Cenotes Tour", tour_chichen: "Chichen Itza", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestun", tour_campeche: "Campeche",
-          titulo_cotizador: "Quote your group", label_nombre: "Lead Traveler Name", ph_nombre: "Enter your full name...", label_fecha: "Tour Date", ph_fecha: "Select a date or range...", label_adultos: "Adults", label_ninos: "Children (Under 12)", total_estimado: "Estimated Total (Private Service):", btn_reservar: "Book via WhatsApp", alert_nombre: "Please enter your full name to customize your quote.", alert_fecha: "Please select an available date.", 
+          titulo_cotizador: "Quote your group", label_nombre: "Lead Traveler Name", ph_nombre: "Enter your full name...", label_fecha: "Tour Date", ph_fecha: "Select a date or range...", label_adultos: "Adultos", label_ninos: "Children (Under 12)", total_estimado: "Estimated Total (Private Service):", btn_reservar: "Book via WhatsApp", alert_nombre: "Please enter your full name to customize your quote.", alert_fecha: "Please select an available date.", 
           wa_saludo: "Hello! I am interested in booking a *PRIVATE* tour with *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Name:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Date:*", wa_adultos: "👥 *Adults:*", wa_ninos: "👶 *Children:*", wa_total: "💰 *Estimated Total:*", wa_pregunta: "Do you have availability for these conditions?"
       } 
 }; 
@@ -82,12 +82,10 @@ function inicializarCalendario() {
       if (fp) fp.destroy();   
 
       fp = flatpickr(campoFecha, {  
-          locale: idiomaActual === 'es' ? "es" : "default",   
+          locale: "es", // Forzado nativo al español por defecto
           mode: "range", minDate: "today", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", altInputClass: "flatpickr-input", disableMobile: true, disable: [],   
           onChange: function(selectedDates, dateStr) {  
               fechaSeleccionada = dateStr;  
-              
-              // META ETIQUETA ANALÍTICA: Evento de selección de rango de fechas para conversión
               gtag('event', 'seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'idioma_interfaz': idiomaActual });  
           }  
       });  
@@ -106,8 +104,6 @@ function moverCarrusel(idTour, direccion) {
       if (posicionesCarrusel[idTour] < 0) posicionesCarrusel[idTour] = imagenes.length - 1;  
        
       track.style.transform = `translateX(${posicionesCarrusel[idTour] * -100}%)`;  
-
-      // META ETIQUETA ANALÍTICA: Monitoreo de interacción con la galería del producto
       gtag('event', 'desplazamiento_galeria', { 'id_destino': idTour, 'imagen_index': posicionesCarrusel[idTour] }); 
 }  
 
@@ -164,7 +160,7 @@ function cambiarIdioma() {
 
       document.querySelectorAll('[data-i18n]').forEach(el => {  
           const key = el.getAttribute('data-i18n');  
-          if (t[key]) el.innerHTML = (key.includes('_list') || key.includes('sello_')) ? t[key] : t[key];  
+          if (t[key]) el.innerHTML = t[key];  
       });  
       document.querySelectorAll('[data-i18n-ph]').forEach(el => {  
           const key = el.getAttribute('data-i18n-ph');  
@@ -175,7 +171,6 @@ function cambiarIdioma() {
       cargarBloqueos();   
       actualizarInterfaz();  
        
-      // META ETIQUETA ANALÍTICA: Evento de cambio global de idioma de conversión
       gtag('event', 'cambio_idioma_plataforma', { 'idioma_activo': idiomaActual });  
 }  
 
@@ -215,13 +210,12 @@ function actualizarInterfaz() {
       actualizarLogosDinamicos();   
       renderizarCamposPersonalizados();  
 
-      // META ETIQUETA ANALÍTICA: Evento de visualización detallada del producto turístico
       gtag('event', 'visualizacion_producto_tour', { 'id_destino': selectedTour, 'nombre_destino': select.options[select.selectedIndex].text });  
       calcular();  
 }  
 
 /**
- * ALGORITMO CORE: Algoritmo de rango base congelado para 1 y 2 Pax sin duplicidad lineal
+ * ALGORITMO CORE: Rango base congelado para 1 y 2 Pax sin duplicidad lineal
  */
 function calcular() {  
       const select = document.getElementById('tour-select');  
@@ -239,7 +233,7 @@ function calcular() {
 
       let totalGlobal = 0;
       if (totalPasajeros <= 2) {
-          totalGlobal = rangosDeCombinacion[2]; // Tramo base congelado
+          totalGlobal = rangosDeCombinacion[2];
       } else {
           let llaveRango = (totalPasajeros === 3) ? 3 : 4;
           totalGlobal = totalPasajeros * rangosDeCombinacion[llaveRango];  
@@ -283,7 +277,6 @@ function renderizarCamposPersonalizados() {
          <div class="box-personalizacion"><div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Español" checked onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Español</span></label>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Inglés" onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Inglés</span></label>
-             <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Francés" onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Francés</span></label>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Otro" onclick="document.getElementById('wrapper-otro-idioma').style.display='block'"> <span>Otro idioma</span></label>
              <div id="wrapper-otro-idioma" style="display:none;"><input type="text" id="input-otro-idioma" class="input-otro-idioma" placeholder="Especificar idioma..."></div>
          </div>`;
@@ -320,21 +313,12 @@ function enviarWhatsApp() {
           idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No especificado)";
       }
        
-      // META ETIQUETA ANALÍTICA CRÍTICA: Captura de conversión total con todas las variables requeridas
       gtag('event', 'conversion_reserva_click', {  
-          'lead_traveler_name': nombre,  
-          'destination_selected': tourName,  
-          'route_complement': complementoTexto,  
-          'plus_addons': plusTexto,  
-          'tour_language_required': idiomaTexto,  
-          'date_range_booked': fechaSeleccionada,  
-          'quantity_adults': adultos,  
-          'quantity_children': ninos,  
-          'estimated_total_quoted': total,  
-          'locale_user': idiomaActual  
+          'lead_traveler_name': nombre, 'destination_selected': tourName, 'route_complement': complementoTexto, 'plus_addons': plusTexto,  
+          'tour_language_required': idiomaTexto, 'date_range_booked': fechaSeleccionada, 'quantity_adults': adultos, 'quantity_children': ninos,  
+          'estimated_total_quoted': total, 'locale_user': idiomaActual  
       });  
 
-      // Construcción e inyección del string final hacia el API de WhatsApp Business
       let mensaje = `${t.wa_saludo}${t.wa_nombre} ${nombre}\n${t.wa_tour} ${tourName}\n📍 *Ruta:* ${complementoTexto}\n✨ *Plus:* ${plusTexto}\n🗣️ *Idioma:* ${idiomaTexto}\n${t.wa_fecha} ${fechaSeleccionada}\n${t.wa_adultos} ${adultos}\n${t.wa_ninos} ${ninos}\n${t.wa_total} ${total}\n\n${t.wa_pregunta}`;  
       window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
@@ -344,7 +328,7 @@ function cerrarModal() { document.getElementById('modal-agenda').style.display =
 
 function ejecutarOpcionC_HorariosFijos() {
      const contenedor = document.getElementById('contenedor-render-agenda');
-     contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Sesión de Diseño</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;"><label class="input-label">2. Horarios Disponibles</label><select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
+     contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Sesión de Diseño</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Reflejo de horarios disponibles de Vía Há<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
 
      flatpickr("#fecha-llamada-fija", {
          locale: "es", minDate: "today", dateFormat: "Y-m-d",  
@@ -354,10 +338,7 @@ function ejecutarOpcionC_HorariosFijos() {
              btn.style.display = 'block';
              btn.onclick = () => {
                  const bloque = document.getElementById('select-hora-fija').value;
-                 
-                 // META ETIQUETA ANALÍTICA: Captura de conversión secundaria (Llamada agendada)
                  gtag('event', 'lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloque });
-                 
                  let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloque}\n\n¿Me confirman si Roberto y Román tienen espacio disponible?`;
                  window.open(`https://wa.me/529992719285?text=${encodeURIComponent(txt)}`, '_blank');
              };
