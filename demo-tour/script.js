@@ -96,9 +96,6 @@ function inicializarCalendario() {
       });  
 }  
 
-/**
- * MODIFICACIÓN MAESTRA: Control de inyección de clases CSS dinámicas para activar las 3 Columnas en PC
- */
 function cambiarModalidad(tipo) {
     modalidadActiva = tipo;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -108,11 +105,11 @@ function cambiarModalidad(tipo) {
     if (tipo === 'single') {
         document.getElementById('tab-single').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Fecha del Recorrido";
-        if(mainContainer) mainContainer.classList.remove('modo-circuito-activo'); // Regresa a 2 columnas
+        if(mainContainer) mainContainer.classList.remove('modo-circuito-activo'); 
     } else {
         document.getElementById('tab-circuit').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Período del Circuito (Fechas)";
-        if(mainContainer) mainContainer.classList.add('modo-circuito-activo');    // Dispara las 3 columnas
+        if(mainContainer) mainContainer.classList.add('modo-circuito-activo');    
     }
     
     renderizarEstructuraSegunModalidad();
@@ -126,15 +123,20 @@ function renderizarEstructuraSegunModalidad() {
     if (!contenedorSuperiorSelector || !contenedorInferiorDinamico) return;
 
     if (modalidadActiva === 'single') {
+        // CORRECCIÓN EXACTA: El selector superior regresa a ser un bloque visible estático al tope de Col 1
         contenedorSuperiorSelector.style.display = 'block';
+        
+        // Los complementos y pluses se pintan abajo del catálogo de información (Fiel a tu captura)
         contenedorInferiorDinamico.innerHTML = `<div id="wrapper-personalizacion-single"></div>`;
         renderizarCamposSingle();
         
         const select = document.getElementById('tour-select');
         if(select) mostrarTarjetaCatalogo(select.value);
     } else {
+        // En circuito escondemos el selector superior líder para evitar distorsiones de jerarquía
         contenedorSuperiorSelector.style.display = 'none';
         
+        // Inyectamos el tablero de acordeones de circuito multidías
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
         for (let i = 1; i <= diasCircuitoContador; i++) {
