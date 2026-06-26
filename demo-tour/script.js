@@ -322,7 +322,7 @@ function enviarWhatsApp() {
       });  
 
       let mensaje = `${t.wa_saludo}${t.wa_nombre} ${nombre}\n${t.wa_tour} ${tourName}\n📍 *Ruta:* ${complementoTexto}\n✨ *Plus:* ${plusTexto}\n🗣️ *Idioma:* ${idiomaTexto}\n${t.wa_fecha} ${fechaSeleccionada}\n${t.wa_adultos} ${adultos}\n${t.wa_ninos} ${ninos}\n${t.wa_total} ${total}\n\n${t.wa_pregunta}`;  
-      window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
+      window.open(`https://wa.me/529618150804?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
 
 function dispararAgendado() { document.getElementById('modal-agenda').style.display = 'flex'; ejecutarOpcionC_HorariosFijos(); }
