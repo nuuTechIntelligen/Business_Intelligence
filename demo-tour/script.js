@@ -29,12 +29,12 @@ const catalogoEstructuraTours = {
 
 // Matriz de tarificación escalada por persona
 const matrizTarifasEscaladas = {
-     cenotes: { "Nah-Yah / Su-hem": { 2: 1550, 3: 2150, 4: 3200 }, "Grutas de Tzabnah": { 2: 1550, 3: 1150, 4: 800 }, "Homún": { 2: 1550, 3: 1150, 4: 800 } },
-     chichen: { "Cenote Zací / Valladolid": { 2: 1880, 3: 1300, 4: 1000 }, "Izamal": { 2: 1700, 3: 1150, 4: 900 }, "Cenote Lol-Ha / Taller con Chef": { 2: 1700, 3: 1150, 4: 900 }, "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 1700, 3: 1150, 4: 900 } },
-     coloradas: { "Ruta Fija Corrida": { 2: 2025, 3: 1350, 4: 1050 } },
-     uxmal: { "Chocostory": { 2: 1680, 3: 1150, 4: 900 }, "Hda Mucuyché": { 2: 1680, 3: 1150, 4: 900 }, "Yaal Utzil": { 2: 1680, 3: 1150, 4: 900 } },
-     celestun: { "Bote": { 2: 1690, 3: 1150, 4: 900 }, "Lancha": { 2: 1690, 3: 1150, 4: 900 } },
-     campeche: { "Tour de 1 dia": { 2: 1700, 3: 1150, 4: 850 }, "Tour de 2 dias": { 2: 3400, 3: 2250, 4: 1700 } }
+     cenotes: { "Nah-Yah / Su-hem": { 2: 3100, 3: 2150, 4: 3200 }, "Grutas de Tzabnah": { 2: 3100, 3: 1150, 4: 800 }, "Homún": { 2: 3100, 3: 1150, 4: 800 } },
+     chichen: { "Cenote Zací / Valladolid": { 2: 3760, 3: 1300, 4: 1000 }, "Izamal": { 2: 3400, 3: 1150, 4: 900 }, "Cenote Lol-Ha / Taller con Chef": { 2: 3400, 3: 1150, 4: 900 }, "Chichén Itzá Viejo / Cenote Yodzonot": { 2: 3400, 3: 1150, 4: 900 } },
+     coloradas: { "Ruta Fija Corrida": { 2: 4050, 3: 1350, 4: 1050 } },
+     uxmal: { "Chocostory": { 2: 3360, 3: 1150, 4: 900 }, "Hda Mucuyché": { 2: 3360, 3: 1150, 4: 900 }, "Yaal Utzil": { 2: 3360, 3: 1150, 4: 900 } },
+     celestun: { "Bote": { 2: 3380, 3: 1150, 4: 900 }, "Lancha": { 2: 3380, 3: 1150, 4: 900 } },
+     campeche: { "Tour de 1 dia": { 2: 3400, 3: 1150, 4: 850 }, "Tour de 2 dias": { 2: 6800, 3: 2250, 4: 1700 } }
 };
 
 // Diccionario de internacionalización (Limpio y purgado de variables huérfanas)
