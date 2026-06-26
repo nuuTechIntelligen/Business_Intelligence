@@ -247,11 +247,32 @@ function cambiarDestinoDiaCircuito(dia, tour) {
 function toggleAccordion(dia) {
     const item = document.getElementById(`accordion-dia-${dia}`);
     if (!item) return;
+    
+    const isOpen = item.classList.contains('open');
+    
+    // Cierra todos
+    document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
+    
+    if (!isOpen) {
+        item.classList.add('open');
+        
+        // Pequeño scroll para centrar el acordeón abierto en móvil
+        if (window.innerWidth < 850) {
+            setTimeout(() => {
+                item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+    }
+}
+
+/*function toggleAccordion(dia) {
+    const item = document.getElementById(`accordion-dia-${dia}`);
+    if (!item) return;
     const isOpen = item.classList.contains('open');
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     if (!isOpen) item.classList.add('open');
 }
-
+*/
 function agregarDiaCircuito() {
     diasCircuitoContador++;
     renderizarEstructuraSegunModalidad();
