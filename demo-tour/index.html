@@ -18,6 +18,9 @@
      <meta name="robots" content="index, follow"> 
      <link rel="canonical" href="https://viaha.com">
 
+     <!-- ==========================================================================
+        PROTOCOLO OPEN GRAPH (Optimización para Redes Sociales: WhatsApp, FB)
+        ========================================================================== -->
      <meta property="og:type" content="website"> 
      <meta property="og:title" content="VÍA HA' MÉXICO | Experiencias Privadas Exclusivas"> 
      <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva tu experiencia privada con fotografía profesional incluida."> 
@@ -35,7 +38,7 @@
 
      <!-- ==========================================================================
         NÚCLEO ANALÍTICO CENTRAL: Google Analytics (G-9JZDZ31TPV)
-        ========================================================================== -->
+        ========================================================================= -->
      <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZDZ31TPV"></script> 
      <script> 
        window.dataLayer = window.dataLayer || []; 
@@ -95,9 +98,9 @@
              </select> 
          </div>
          
-         <!-- Switcher de Modalidad Nacio desde HTML -->
+         <!-- CORRECCIÓN EXTRA-ESTRICTA: Se enlazó la función exacta cambiarModalidad('single') para desbloquear la UI -->
          <div class="modalidad-switcher-wrapper">
-             <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModality('single')">🌅 Tour de 1 Día</button>
+             <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModalidad('single')">🌅 Tour de 1 Día</button>
              <button type="button" id="tab-circuit" class="tab-btn" onclick="cambiarModalidad('circuit')">🗺️ Circuito Vía Há (Multi-Días)</button>
          </div>
          
@@ -108,7 +111,7 @@
                 ========================================================================== -->
              <div class="grid-col-1" id="viaha-col-info"> 
                  
-                 <!-- CORRECCIÓN ULTRA-ESTRICTA: El selector superior queda limpio fuera de cajas (Igual a imagen_4.png) -->
+                 <!-- Selector Principal Fijo (Al tope de Col 1) -->
                  <div id="wrapper-selector-single-fijo" style="margin-bottom: 20px;">
                      <label class="section-title" style="margin-bottom: 12px !important; display: block;">¿Qué paraíso quieres visitar hoy?</label>
                      <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
@@ -348,7 +351,7 @@
                      </div>
                  </div>
 
-                 <!-- Complementos y Pluses en modo 1 día (Al fondo de la Columna 1, idéntico a imagen_3.png) -->
+                 <!-- Complementos y Pluses en modo 1 día (Al fondo de la Columna 1, como en imagen_3.png) -->
                  <div id="wrapper-personalizacion-single" style="margin-top: 20px;"></div>
              </div>  
 
