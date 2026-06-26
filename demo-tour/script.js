@@ -17,7 +17,7 @@ const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxma
 // Endpoint analítico de bloqueos de calendario sincronizado con Google Sheets
 const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
-// Catálogo maestro de rutas opcionales y pluses por destino (CORRECCIÓN: Llaves perfectamente homologadas)
+// Catálogo maestro de rutas opcionales y pluses por destino
 const catalogoEstructuraTours = {
      cenotes: { complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"], plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"] },
      chichen: { complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
@@ -107,6 +107,9 @@ function moverCarrusel(idTour, direccion) {
       gtag('event', 'desplazamiento_galeria', { 'id_destino': idTour, 'imagen_index': posicionesCarrusel[idTour] }); 
 }  
 
+/**
+ * Controladores automatizados de transición cíclica de imágenes
+ */
 function activarAutoplayCarrusel(idTour) {  
       if (intervalosCarrusel[idTour]) clearInterval(intervalosCarrusel[idTour]);  
       intervalosCarrusel[idTour] = setInterval(() => { moverCarrusel(idTour, 1); }, 4000);   
@@ -191,7 +194,7 @@ function cambiarCant(tipo, cambio) {
       if (tipo === 'adultos') {  
           // Congelamos el límite mínimo en 2 adultos para respetar el tramo base comercial
           if (adultos + cambio >= 2) adultos += cambio;   
-          document.getElementById('qty-adultos').innerText = adultos; 
+          document.getElementById('qty-adultos').innerText = adults; 
       } else {  
           if (ninos + cambio >= 0) ninos += cambio;   
           document.getElementById('qty-ninos').innerText = ninos;  
@@ -322,7 +325,7 @@ function enviarWhatsApp() {
       });  
 
       let mensaje = `${t.wa_saludo}${t.wa_nombre} ${nombre}\n${t.wa_tour} ${tourName}\n📍 *Ruta:* ${complementoTexto}\n✨ *Plus:* ${plusTexto}\n🗣️ *Idioma:* ${idiomaTexto}\n${t.wa_fecha} ${fechaSeleccionada}\n${t.wa_adultos} ${adultos}\n${t.wa_ninos} ${ninos}\n${t.wa_total} ${total}\n\n${t.wa_pregunta}`;  
-      window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
+      window.open://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
 
 function dispararAgendado() { document.getElementById('modal-agenda').style.display = 'flex'; ejecutarOpcionC_HorariosFijos(); }
@@ -330,7 +333,7 @@ function cerrarModal() { document.getElementById('modal-agenda').style.display =
 
 function ejecutarOpcionC_HorariosFijos() {
      const contenedor = document.getElementById('contenedor-render-agenda');
-     contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Call</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
+     contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Llamada</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
 
      flatpickr("#fecha-llamada-fija", {
          locale: "es", minDate: "today", dateFormat: "Y-m-d",  
