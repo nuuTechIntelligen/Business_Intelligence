@@ -10,7 +10,7 @@ let fp = null;
 let fechaSeleccionada = ""; 
 let idiomaActual = "es";        
 
-// Control de modalid activa ('single' para 1 día, 'circuit' para multidías)
+// Control de modalidad activa ('single' para 1 día, 'circuit' para multidías)
 let modalidadActiva = 'single';
 let diasCircuitoContador = 2; // El circuito arranca por defecto con 2 días mínimos
 
@@ -39,7 +39,7 @@ const matrizTarifasEscaladas = {
 
 const traducciones = { 
       es: { 
-          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "Configura tu Paraíso", tour_cenotes: "SUMERGETE A CENOTES", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
+          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "¿Qué paraíso quieres visitar hoy?", tour_cenotes: "SUMERGETE A CENOTES", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
           titulo_cotizador: "Cotiza tu grupo", label_nombre: "Nombre", ph_nombre: "Escribe tu nombre completo...", label_fecha: "Fecha del Recorrido", ph_fecha: "Selecciona una fecha o rango...", label_adultos: "Adultos", label_ninos: "Niños (-12 años)", total_estimado: "Total Estimado (Servicio Privado):", btn_reservar: "Reservar por WhatsApp", alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", alert_fecha: "Por favor, selecciona una fecha disponible.", 
           wa_saludo: "¡Hola! Me interesa reservar con *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Nombre:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Fecha o Período:*", wa_adultos: "👥 *Adultos:*", wa_ninos: "👶 *Niños:*", wa_total: "💰 *Total estimado:*", wa_pregunta: "¿Tienen disponibilidad para estas condiciones?"
       }, 
@@ -118,7 +118,7 @@ function cambiarModalidad(tipo) {
 }
 
 /**
- * CORRECCIÓN ABSOLUTA: Desacoplamiento total de renders para respetar imagen_3.png al pie de la letra
+ * CORRECCIÓN VISUAL EXACTA: Se eliminó el wrapper con fondo que causaba el error de actual.png
  */
 function renderizarEstructuraSegunModalidad() {
     const contenedorSuperiorSelector = document.getElementById('wrapper-selector-single-fijo');
@@ -126,25 +126,19 @@ function renderizarEstructuraSegunModalidad() {
     const contenedorSingleInterno = document.getElementById('wrapper-personalizacion-single');
 
     if (modalidadActiva === 'single') {
-        // 1. Activamos el selector superior de Columna 1
+        // Regresa el selector superior limpio y estilizado tal como en imagen_4.png
         if(contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'block';
-        
-        // 2. Limpiamos el contenedor central de circuito para que no estorbe en PC
         if(contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = '';
         
-        // 3. Forzamos el renderizado de complementos y pluses ABAJO de las inclusiones en Col 1
         renderizarCamposSingle();
         
         const select = document.getElementById('tour-select');
         if(select) mostrarTarjetaCatalogo(select.value);
     } else {
-        // 1. Escondemos el selector superior clásico
         if(contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'none';
-        
-        // 2. Limpiamos el sótano de la columna 1
         if(contenedorSingleInterno) contenedorSingleInterno.innerHTML = '';
         
-        // 3. Construimos el tablero monumental de acordeones en la columna central exclusiva (Col 2)
+        // Inyectamos el tablero de acordeones de circuito multidías en la Columna Central
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
         for (let i = 1; i <= diasCircuitoContador; i++) {
@@ -300,6 +294,9 @@ function mostrarTarjetaCatalogo(idTour) {
     gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoEstructuraTours[idTour].txt });
 }
 
+/**
+ * Corrección de Isologos dinámica basada en la modalidad
+ */
 function actualizarLogosDinamicos() {  
       let categoria = "arqueologia";
       if (modalidadActiva === 'single') {
