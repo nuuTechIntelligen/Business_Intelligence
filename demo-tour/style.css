@@ -299,7 +299,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link:hover { color: var(--turquesa); } 
 
 /* ==========================================================================
-   MEDIA QUERY: Reglas para PC (Escritorio) 
+   MEDIA QUERY: Reglas para PC (Escritorio)
    ========================================================================== */
 @media (min-width: 850px) {
     .hero { height: 45vh !important; }
@@ -312,34 +312,34 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     
     #viaha-col-configurador { display: none !important; }
     
-    /* MODALIDAD CIRCUITO: Se activa el layout de 3 columnas */
-    .container.modo-circuito-activo { max-width: 1380px !important; }
+    .container.modo-circuito-activo { max-width: 1400px !important; }
     .container.modo-circuito-activo .grid-layout { 
         grid-template-columns: 1fr 1.1fr 0.9fr !important; 
         gap: 30px !important; 
     }
+    
     .container.modo-circuito-activo #viaha-col-info { grid-column: 1 !important; }
     .container.modo-circuito-activo #viaha-col-configurador { display: block !important; grid-column: 2 !important; }
     .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; }
+}
 
-    /* ==========================================================================
-       LÓGICA HÍBRIDA DE ISOLOGOS:
-       1. Por defecto en 2 columnas: VISIBLES SIEMPRE.
-       2. En modo circuito (3 columnas): Ocultos si pantalla < 1500px, Visibles si > 1500px.
-       ========================================================================== */
-    
-    /* Visibilidad por defecto (2 columnas) */
+/* ==========================================================================
+   LÓGICA BLINDADA DE ISOLOGOS (Fuera de Media Queries de Layout)
+   ========================================================================== */
+
+/* 1. Por defecto, siempre visibles si la pantalla es mayor a 850px (Modo 2 columnas) */
+@media (min-width: 850px) {
     .decoracion-flotante { display: block !important; z-index: 1 !important; }
+}
 
-    /* Excepción: Si es modo circuito Y la pantalla es estrecha (< 1500px), los ocultamos */
+/* 2. EXCEPCIÓN: Si estamos en modo CIRCUITO y la pantalla es menor a 1500px, los ocultamos */
+@media (min-width: 850px) and (max-width: 1499px) {
     .container.modo-circuito-activo ~ .decoracion-flotante {
         display: none !important;
     }
+}
 
-    /* Regla para recuperar visibilidad en circuito si la pantalla es lo suficientemente ancha */
-    @media (min-width: 1500px) {
-        .container.modo-circuito-activo ~ .decoracion-flotante {
-            display: block !important;
-        }
-    }
+/* 3. RECUPERACIÓN: Si estamos en modo CIRCUITO y la pantalla es >= 1500px, los mostramos */
+@media (min-width: 1500px) {
+    .decoracion-flotante { display: block !important; z-index: 1 !important; }
 }
