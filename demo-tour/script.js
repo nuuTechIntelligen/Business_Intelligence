@@ -17,7 +17,7 @@ const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxma
 // Endpoint analítico de bloqueos de calendario sincronizado con Google Sheets
 const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
-// Catálogo maestro estructurado de rutas opcionales y pluses por destino
+// Catálogo maestro de rutas opcionales y pluses por destino (CORRECCIÓN: Llaves perfectamente homologadas)
 const catalogoEstructuraTours = {
      cenotes: { complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"], plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"] },
      chichen: { complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
@@ -330,7 +330,7 @@ function cerrarModal() { document.getElementById('modal-agenda').style.display =
 
 function ejecutarOpcionC_HorariosFijos() {
      const contenedor = document.getElementById('contenedor-render-agenda');
-     contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Llamada</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
+     contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Call</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
 
      flatpickr("#fecha-llamada-fija", {
          locale: "es", minDate: "today", dateFormat: "Y-m-d",  
@@ -341,7 +341,7 @@ function ejecutarOpcionC_HorariosFijos() {
              btn.onclick = () => {
                  const bloques = document.getElementById('select-hora-fija').value;
                  gtag('event', 'lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloques });
-                 let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloque}–\n\n¿Me confirman si Roberto y Romain tienen espacio disponible?`;
+                 let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloques}\n\n¿Me confirman si Roberto y Romain tienen espacio disponible?`;
                  window.open(`https://wa.me/529618150804?text=${encodeURIComponent(txt)}`, '_blank');
              };
          }
