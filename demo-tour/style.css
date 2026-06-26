@@ -337,7 +337,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     }
 
     /* Regla para recuperar visibilidad en circuito si la pantalla es lo suficientemente ancha */
-    @media (min-width: 1700px) {
+    @media (min-width: 1500px) {
         .container.modo-circuito-activo ~ .decoracion-flotante {
             display: block !important;
         }
