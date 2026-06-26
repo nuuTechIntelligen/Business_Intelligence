@@ -1,17 +1,26 @@
 <!DOCTYPE html> 
 <html lang="es"> 
 <head> 
+     <!-- ==========================================================================
+        METADATOS DE CONFIGURACIÓN Y RENDIMIENTO BASE
+        ========================================================================== -->
      <meta charset="UTF-8"> 
      <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
       
      <title>VÍA HA' MÉXICO | Reservas y Cotizaciones Online</title> 
 
+     <!-- ==========================================================================
+        INFRAESTRUCTURA SEO AVANZADA (Estrategia Nuu Tech-Art)
+        ========================================================================== -->
      <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados premium con fotografía profesional incluida. Experiencias exclusivas en el Mayab."> 
      <meta name="keywords" content="viaha mexico, via ha, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche, cotizador de viajes yucatan"> 
      <meta name="author" content="Nuu Tech-Art"> 
      <meta name="robots" content="index, follow"> 
      <link rel="canonical" href="https://viaha.com">
 
+     <!-- ==========================================================================
+        PROTOCOLO OPEN GRAPH (Optimización para Redes Sociales: WhatsApp, FB)
+        ========================================================================== -->
      <meta property="og:type" content="website"> 
      <meta property="og:title" content="VÍA HA' MÉXICO | Experiencias Privadas Exclusivas"> 
      <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva tu experiencia privada con fotografía profesional incluida."> 
@@ -20,10 +29,16 @@
      <meta property="og:site_name" content="VÍA HA' MÉXICO"> 
      <meta property="og:locale" content="es_MX">
 
+     <!-- ==========================================================================
+        FUENTES TIPOGRÁFICAS Y RECURSOS ESTILÍSTICOS (Flatpickr CDN)
+        ========================================================================== -->
      <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@600;800&family=Urbanist:wght@400;700&display=swap" rel="stylesheet"> 
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
      <link rel="stylesheet" href="style.css"> 
 
+     <!-- ==========================================================================
+        NÚCLEO ANALÍTICO CENTRAL: Google Analytics (G-9JZDZ31TPV)
+        ========================================================================== -->
      <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZDZ31TPV"></script> 
      <script> 
        window.dataLayer = window.dataLayer || []; 
@@ -34,6 +49,9 @@
 </head> 
 <body> 
 
+     <!-- ==========================================================================
+        SECCIÓN HERO: Slider Crossfade de Portadas del Destino
+        ========================================================================== -->
      <div class="hero"> 
          <div class="hero-slider-wrapper">
              <div class="slide-foto" style="background-image: url('img/Portada1.jpg');"></div>
@@ -52,6 +70,7 @@
          <div class="badge-private" data-i18n="hero_badge">✨ Sumérgete al Mayab</div> 
      </div>
 
+     <!-- Patrón dinámico de Isologos en PC -->
      <div class="decoracion-flotante fondo-isologos">
          <div class="isologo-izq iso-slide-1" style="background-image: url('img/isologos/VIAHA_-11.svg');"></div>
          <div class="isologo-izq iso-slide-2" style="background-image: url('img/isologos/cenotes.svg');"></div>
@@ -65,7 +84,10 @@
      </div>
      <div class="decoracion-flotante fondo-mixto"></div>
 
-     <div class="container" id="viaha-main-container"> 
+     <!-- ==========================================================================
+        CONTENEDOR PRINCIPAL DE INTERFAZ DE RESERVAS
+        ========================================================================== -->
+    <div class="container" id="viaha-main-container"> 
          <div class="lang-switch-container" id="lang-lista"> 
              <button type="button" id="btn-agendar-llamada" class="btn-agendar-top" onclick="dispararAgendado()">
                  📞 Agendar Llamada
@@ -76,6 +98,7 @@
              </select> 
          </div>
          
+         <!-- Switcher de Modalidad Maestro (Fijo desde el HTML) -->
          <div class="modalidad-switcher-wrapper">
              <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModalidad('single')">🌅 Tour de 1 Día</button>
              <button type="button" id="tab-circuit" class="tab-btn" onclick="cambiarModalidad('circuit')">🗺️ Circuito Vía Há (Multi-Días)</button>
@@ -83,8 +106,12 @@
          
          <div class="grid-layout" id="viaha-grid-layout"> 
               
+             <!-- ==========================================================================
+                COLUMNA 1: TODO LO REFERENTE AL TOUR (Alineación Estricta con imagen_3.png)
+                ========================================================================== -->
              <div class="grid-col-1" id="viaha-col-info"> 
                  
+                 <!-- APARTADO A: Pregunta y Selector Principal Fijo (Primer lugar absoluto de la Columna 1) -->
                  <div id="wrapper-selector-single-fijo" class="box-personalizacion" style="background-color: var(--light-bg); border: 2px solid var(--executive-dark); margin-bottom: 20px;">
                      <label class="section-title" style="font-size:22px; border:none; padding:0; display:block; margin-bottom:10px !important;">¿Qué paraíso quieres visitar hoy?</label>
                      <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
@@ -97,7 +124,9 @@
                      </select>
                  </div>
 
+                 <!-- APARTADO B: Tarjetas de Información del Catálogo (Fotos, Descr, Inclusiones) -->
                  <div id="catalogo-tarjetas-tours">
+                     <!-- Chichén Itzá -->
                      <div id="info-chichen" class="tour-info-card"> 
                          <div class="carousel-container"> 
                              <button type="button" class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
@@ -135,6 +164,7 @@
                          </div>
                      </div> 
 
+                     <!-- Cenotes -->
                      <div id="info-cenotes" class="tour-info-card"> 
                          <div class="carousel-container"> 
                              <button type="button" class="carousel-btn prev" onclick="moverCarrusel('cenotes', -1)">&#10094;</button> 
@@ -172,6 +202,7 @@
                          </div>
                      </div> 
 
+                     <!-- Coloradas -->
                      <div id="info-coloradas" class="tour-info-card"> 
                          <div class="carousel-container"> 
                              <button type="button" class="carousel-btn prev" onclick="moverCarrusel('coloradas', -1)">&#10094;</button> 
@@ -208,6 +239,7 @@
                          </div>
                      </div> 
 
+                     <!-- Uxmal -->
                      <div id="info-uxmal" class="tour-info-card"> 
                          <div class="carousel-container"> 
                              <button type="button" class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
@@ -244,6 +276,7 @@
                          </div>
                      </div>
 
+                     <!-- Celestún -->
                      <div id="info-celestun" class="tour-info-card"> 
                          <div class="carousel-container"> 
                              <button type="button" class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
@@ -279,6 +312,7 @@
                          </div>
                      </div>
 
+                     <!-- Campeche -->
                      <div id="info-campeche" class="tour-info-card"> 
                          <div class="carousel-container"> 
                              <button type="button" class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
@@ -318,10 +352,14 @@
                  </div>
              </div>  
 
+             <!-- APARTADO C: BLOQUE CONFIGURADOR (Se comporta como el sótano de Col 1 en modo 1 día, y como la COLUMNA CENTRAL 2 en modo circuito) -->
              <div class="grid-col-1-b" id="viaha-col-configurador">
                  <div id="seccion-personalizacion-tour"></div>
              </div>
 
+             <!-- ==========================================================================
+                COLUMNA 2 (PC): TODO LO REFERENTE A COTIZA TU GRUPO (Fijo y blindado a la derecha)
+                ========================================================================== -->
              <div class="grid-col-2" id="viaha-col-cotizador"> 
                  <div class="cotizador-header-wrapper"> 
                      <div class="dynamic-tour-logo-container logo-c2"></div> 
