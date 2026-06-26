@@ -341,7 +341,7 @@ function ejecutarOpcionC_HorariosFijos() {
              btn.onclick = () => {
                  const bloque = document.getElementById('select-hora-fija').value;
                  gtag('event', 'lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloque });
-                 let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloque}\n\n¿Me confirman si Roberto y Román tienen espacio disponible?`;
+                 let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloque}\n\n¿Me confirman si Roberto y Romain tienen espacio disponible?`;
                  window.open(`https://wa.me/529618150804?text=${encodeURIComponent(txt)}`, '_blank');
              };
          }
