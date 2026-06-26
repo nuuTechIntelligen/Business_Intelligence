@@ -41,7 +41,7 @@ const traducciones = {
       es: { 
           hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "¿Qué paraíso quieres visitar hoy?", tour_cenotes: "SUMERGETE A CENOTES", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
           titulo_cotizador: "Cotiza tu grupo", label_nombre: "Nombre", ph_nombre: "Escribe tu nombre completo...", label_fecha: "Fecha del Recorrido", ph_fecha: "Selecciona una fecha o rango...", label_adultos: "Adultos", label_ninos: "Niños (-12 años)", total_estimado: "Total Estimado (Servicio Privado):", btn_reservar: "Reservar por WhatsApp", alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", alert_fecha: "Por favor, selecciona una fecha disponible.", 
-          wa_saludo: "¡Hola! Me interesa reservar con *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Nombre:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Fecha o Período:*", wa_adultos: "👥 *Adultos:*", wa_ninos: "👶 *Niños:*", wa_total: "💰 *Total estimado:*", wa_pregunta: "¿Tienen disponibilidad para estas condiciones?"
+          wa_saludo: "¡Hola! Me interesa reservar con *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Nombre:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Fecha o Período:*", wa_adultos: "👥 *Adultos:*", wa_ninos: "👶 *Niños:*", wa_total: "💰 *Total estimado:*", wa_pregunta: "¿Tienen disponibilidad para estas conditions?"
       }, 
       en: { 
           hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Immerse yourself in the Mayab", pregunta_tour: "What paradise do you want to visit today?", tour_cenotes: "Cenotes Tour", tour_chichen: "Chichen Itza", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestun", tour_campeche: "Campeche",
@@ -114,16 +114,16 @@ function cambiarModalidad(tipo) {
 }
 
 /**
- * RECONSOLIDADO RÍGIDO DE UX: Pregunta, selector y personalizaciones abajo del catálogo de información
+ * MODIFICACIÓN CLAVE: Inyectamos pregunta, selector principal y acordeones HASTA ARRIBA de la info visual (.grid-col-1)
  */
 function renderizarEstructuraSegunModalidad() {
     const contenedorTarget = document.getElementById('seccion-personalizacion-tour');
     if (!contenedorTarget) return;
 
     if (modalidadActiva === 'single') {
-        // Modo 1 Día: Pregunta, Selector Principal de Destinos y campos de personalización abajo
+        // Modo 1 Día: Pregunta y Selector Principal inyectados ARRIBA de la galería
         contenedorTarget.innerHTML = `
-            <div class="box-personalizacion" style="background-color: var(--light-bg); border: 2px solid var(--executive-dark);">
+            <div class="box-personalizacion" style="background-color: var(--light-bg); border: 2px solid var(--executive-dark); margin-bottom: 20px;">
                 <label class="section-title" style="font-size:22px; border:none; padding:0; display:block; margin-bottom:10px !important;" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label>
                 <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
                     <option value="chichen">CHICHÉN ITZÁ</option>
@@ -139,7 +139,7 @@ function renderizarEstructuraSegunModalidad() {
         renderizarCamposSingle();
         mostrarTarjetaCatalogo("chichen");
     } else {
-        // Modo Circuito de Tours: Tablero dinámico con estructura de Acordeones por cada día
+        // Modo Circuito de Tours: El Tablero completo de Acordeones por días toma el control superior
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
         for (let i = 1; i <= diasCircuitoContador; i++) {
@@ -414,7 +414,7 @@ function cargarBloqueos() {
               const fechas = data.filter(row => row.fecha && row.fecha.trim().length > 5).map(row => row.fecha.trim());  
               if (fp && typeof fp.set === 'function') fp.set("disable", fechas);  
           })  
-          .catch(err => console.error("❌ Error de comunicación analítica con SheetDB:", err));  
+          .catch(err => console.error("❌ Error de communication analítica con SheetDB:", err));  
 }  
 
 function cambiarCant(tipo, cambio) {  
@@ -481,7 +481,7 @@ function enviarWhatsApp() {
        
       gtag('event', 'conversion_reserva_click', {  
           'lead_traveler_name': nombre, 'modalidad_reserva': modalidadActiva, 'total_dias_circuito': modalidadActiva === 'circuit' ? diasCircuitoContador : 1,
-          'date_range_booked': fechaSeleccionada, 'quantity_adults': adultos, 'quantity_children': ninos, 'estimated_total_quoted': total  
+          'date_range_booked': fechaSeleccionada, 'quantity_adults': adults, 'quantity_children': ninos, 'estimated_total_quoted': total  
       });  
 
       window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
