@@ -117,27 +117,23 @@ body {
 } 
 
 @media (min-width: 850px) {
-    /* MODIFICACIÓN: Altura del Hero ampliada a 45vh en pantallas de escritorio */
     .hero { height: 45vh !important; }
     #hero-logo-img.hero-logo-movil { display: none !important; }
     .hero-title-pc { display: block; font-size: 56px; }
-    
-    /* MODIFICACIÓN PROFESIONAL: Obligamos al lienzo slider a estirarse sin deformación responsiva */
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
+    
+    /* MODIFICACIÓN CLAVE: El margen de -100px ahora solo se aplica de forma exclusiva en PC */
+    .container { margin: -100px auto 50px !important; padding: 30px; } 
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; } 
 }
 
-/* MODIFICACIÓN: Margen negativo superior incrementado de -30px a -100px para encabalgar la tarjeta */
+/* CORRECCIÓN EXCLUSIVA: El contenedor en móvil regresa a su margen seguro de -30px para no tapar el Slogan */
 .container { 
-    width: 92%; max-width: 950px; margin: -100px auto 50px !important; background: var(--white); padding: 20px; 
+    width: 92%; max-width: 950px; margin: -30px auto 50px; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
 } 
 
 .grid-layout { display: flex; flex-direction: column; gap: 30px; } 
-
-@media (min-width: 850px) { 
-    .container { padding: 30px; } 
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; } 
-} 
 
 .carousel-container { position: relative; width: 100%; height: 230px; overflow: hidden; border-radius: 12px 12px 0 0; touch-action: pan-y pin-x; } 
 @media (min-width: 600px) { .carousel-container { height: 280px; } } 
