@@ -142,7 +142,7 @@ body {
     position: absolute;
     /* MODIFICACIÓN: Bajamos los elementos a 15vh para evitar colisiones con el Hero al hacer scroll */
     top: 30vh !important; 
-    width: 300px;         /* Proporción estilizada tipo marca de agua */
+    width: 250px;         /* Proporción estilizada tipo marca de agua */
     height: 70vh;         /* Altura optimizada para centrar el patrón vertical */
     background-repeat: no-repeat;
     background-size: contain;
