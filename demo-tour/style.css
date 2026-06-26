@@ -299,7 +299,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link:hover { color: var(--turquesa); } 
 
 /* ==========================================================================
-   MEDIA QUERY: Reglas para PC (Escritorio) - Estructura Dual Inteligente
+   MEDIA QUERY: Reglas para PC (Escritorio) - Estructura Dual/Triple Inteligente
    ========================================================================== */
 @media (min-width: 850px) {
     .hero { height: 45vh !important; }
@@ -307,14 +307,20 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .hero-title-pc { display: block; font-size: 56px; }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
-    /* 1. MODO TOUR 1 DÍA (Por Defecto): 2 Columnas perfectas independientes */
+    /* 1. MODO TOUR 1 DÍA (Por Defecto) */
     .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
     .grid-layout { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 40px !important; align-items: start !important; } 
     
     #viaha-col-configurador { display: none !important; }
     
-    /* 2. MODO CIRCUITO MULTIDÍAS: Distribuye en 3 Columnas paralelas */
-    .container.modo-circuito-activo { max-width: 1400px !important; }
+    /* 2. MODO CIRCUITO MULTIDÍAS (3 Columnas) */
+    .container.modo-circuito-activo { 
+        max-width: 1380px !important; 
+        /* Aseguramos que el contenedor no empuje los isologos laterales */
+        margin-left: auto !important; 
+        margin-right: auto !important; 
+    }
+    
     .container.modo-circuito-activo .grid-layout { 
         grid-template-columns: 1fr 1.1fr 0.9fr !important; 
         gap: 30px !important; 
@@ -324,5 +330,14 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .container.modo-circuito-activo #viaha-col-configurador { display: block !important; grid-column: 2 !important; }
     .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; }
 
-    .decoracion-flotante { display: block !important; }
+    /* 3. CORRECCIÓN DE CAPAS: Aseguramos que los isologos se queden atrás (z-index 1) 
+       y no se oculten bajo el contenedor del cotizador */
+    .decoracion-flotante { 
+        display: block !important; 
+        z-index: 1 !important; 
+    }
+    
+    /* Ajuste de posición para que no se encimen con los bordes del cotizador ancho */
+    .isologo-izq { left: 2vw !important; }
+    .isologo-der { right: 2vw !important; }
 }
