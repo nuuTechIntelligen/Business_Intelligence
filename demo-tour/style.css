@@ -305,20 +305,23 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .hero-title-pc { display: block; font-size: 56px; }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
-    /* 1. MODO 1 DÍA (Por Defecto): 2 Columnas tradicionales exactas. Col 1 (Info/Tour) y Col 2 (Cotizador) */
+    /* 1. MODO TOUR 1 DÍA (Por Defecto): Respetado 100% según imagen_3.png. 2 Columnas perfectas */
     .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
     .grid-layout { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 40px !important; align-items: start !important; } 
     
-    /* 2. MODO CIRCUITO MULTIDÍAS (Clase Dinámica Activa): Rompe a 3 Columnas en paralelo en PC */
-    .container.modo-circuito-activo { max-width: 1380px !important; }
+    /* Escondemos el carril configurador central en el modo de un solo día */
+    #viaha-col-configurador { display: none !important; }
+    
+    /* 2. MODO CIRCUITO MULTIDÍAS (Clase Dinámica Activa): Despliega las 3 Columnas en paralelo */
+    .container.modo-circuito-activo { max-width: 1400px !important; }
     .container.modo-circuito-activo .grid-layout { 
-        grid-template-columns: 1fr 1fr 0.8fr !important; 
+        grid-template-columns: 1fr 1.1fr 0.9fr !important; 
         gap: 30px !important; 
     }
     
-    /* Enrutamiento de áreas Grid exclusivas únicamente cuando el circuito multidías está encendido */
+    /* Redistribución milimétrica de carriles en modo circuito */
     .container.modo-circuito-activo #viaha-col-info { grid-column: 1 !important; }
-    .container.modo-circuito-activo #viaha-col-configurador { grid-column: 2 !important; }
+    .container.modo-circuito-activo #viaha-col-configurador { display: block !important; grid-column: 2 !important; }
     .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; }
 
     .decoracion-flotante { display: block !important; }
