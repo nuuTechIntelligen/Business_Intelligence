@@ -1,17 +1,26 @@
 <!DOCTYPE html> 
 <html lang="es"> 
 <head> 
+     <!-- ==========================================================================
+        METADATOS DE CONFIGURACIÓN Y RENDIMIENTO BASE
+        ========================================================================== -->
      <meta charset="UTF-8"> 
      <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
       
      <title>VÍA HA' MÉXICO | Reservas y Cotizaciones Online</title> 
 
+     <!-- ==========================================================================
+        INFRAESTRUCTURA SEO AVANZADA (Estrategia Nuu Tech-Art)
+        ========================================================================== -->
      <meta name="description" content="Descubre México con VÍA HA' MÉXICO. Cotiza y reserva tus tours privados premium con fotografía profesional incluida. Experiencias exclusivas en el Mayab."> 
      <meta name="keywords" content="viaha mexico, via ha, tours privados, fotografia profesional tours, cenotes yucatan, chichen itza, uxmal, celestun, campeche, cotizador de viajes yucatan"> 
      <meta name="author" content="Nuu Tech-Art"> 
      <meta name="robots" content="index, follow"> 
      <link rel="canonical" href="https://viaha.com">
 
+     <!-- ==========================================================================
+        PROTOCOLO OPEN GRAPH (Optimización para Redes Sociales: WhatsApp, FB)
+        ========================================================================== -->
      <meta property="og:type" content="website"> 
      <meta property="og:title" content="VÍA HA' MÉXICO | Experiencias Privadas Exclusivas"> 
      <meta property="og:description" content="Cotiza tu próximo destino al instante y reserva tu experiencia privada con fotografía profesional incluida."> 
@@ -20,10 +29,16 @@
      <meta property="og:site_name" content="VÍA HA' MÉXICO"> 
      <meta property="og:locale" content="es_MX">
 
+     <!-- ==========================================================================
+        FUENTES TIPOGRÁFICAS Y RECURSOS ESTILÍSTICOS (Flatpickr CDN)
+        ========================================================================== -->
      <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@600;800&family=Urbanist:wght@400;700&display=swap" rel="stylesheet"> 
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
      <link rel="stylesheet" href="style.css"> 
 
+     <!-- ==========================================================================
+        NÚCLEO ANALÍTICO CENTRAL: Google Analytics (G-9JZDZ31TPV)
+        ========================================================================== -->
      <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZDZ31TPV"></script> 
      <script> 
        window.dataLayer = window.dataLayer || []; 
@@ -34,6 +49,9 @@
 </head> 
 <body> 
 
+     <!-- ==========================================================================
+        SECCIÓN HERO: Slider Crossfade de Portadas del Destino
+        ========================================================================== -->
      <div class="hero"> 
          <div class="hero-slider-wrapper">
              <div class="slide-foto" style="background-image: url('img/Portada1.jpg');"></div>
@@ -52,6 +70,7 @@
          <div class="badge-private" data-i18n="hero_badge">✨ Sumérgete al Mayab</div> 
      </div>
 
+     <!-- Patrón dinámico de Isologos en Carrusel CSS para los laterales color Arena en PC -->
      <div class="decoracion-flotante fondo-isologos">
          <div class="isologo-izq iso-slide-1" style="background-image: url('img/isologos/VIAHA_-11.svg');"></div>
          <div class="isologo-izq iso-slide-2" style="background-image: url('img/isologos/cenotes.svg');"></div>
@@ -65,7 +84,10 @@
      </div>
      <div class="decoracion-flotante fondo-mixto"></div>
 
-     <div class="container"> 
+     <!-- ==========================================================================
+        CONTENEDOR PRINCIPAL DE INTERFAZ DE RESERVAS
+        ========================================================================== -->
+    <div class="container"> 
          <div class="lang-switch-container" id="lang-lista"> 
              <button type="button" id="btn-agendar-llamada" class="btn-agendar-top" onclick="dispararAgendado()">
                  📞 Agendar Llamada
@@ -76,247 +98,255 @@
              </select> 
          </div>
          
+         <!-- MODIFICACIÓN CENTRAL: Selector de Modalidad (Pestañas de Experiencia vs Circuito) -->
+         <div class="modalidad-switcher-wrapper">
+             <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModalidad('single')">🌅 Tour de 1 Día</button>
+             <button type="button" id="tab-circuit" class="tab-btn" onclick="cambiarModalidad('circuit')">🗺️ Circuito Vía Há (Multi-Días)</button>
+         </div>
+
          <div class="grid-layout"> 
               
+             <!-- ==========================================================================
+                BLOQUE IZQUIERDO: Tarjetas de Información Dinámica o Tablero del Circuito
+                ========================================================================== -->
              <div class="grid-col-1"> 
-                 <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label> 
-                  
-                 <select id="tour-select" class="tour-picker" onchange="actualizarInterfaz()"> 
-                     <option value="chichen" data-categoria="arqueologia" data-i18n="tour_chichen">CHICHÉN ITZÁ</option> 
-                     <option value="cenotes" data-categoria="cenotes" data-i18n="tour_cenotes">SUMERGETE A CENOTES</option> 
-                     <option value="coloradas" data-categoria="aviturismo" data-i18n="tour_coloradas">COLORADAS TOUR DAY</option> 
-                     <option value="uxmal" data-categoria="arqueologia" data-i18n="tour_uxmal">UXMAL</option> 
-                     <option value="celestun" data-categoria="aviturismo" data-i18n="tour_celestun">CELESTÚN</option> 
-                     <option value="campeche" data-categoria="urbano" data-i18n="tour_campeche">CAMPECHE</option> 
-                 </select> 
+                 
+                 <!-- Zona que se manipula por JS dependiendo de la modalidad activa -->
+                 <div id="wrapper-dinamico-izquierdo">
+                     <!-- El motor inyectará aquí los selectores individuales o los acordeones del circuito -->
+                 </div>
 
-                 <div id="info-chichen" class="tour-info-card active"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-chichen"> 
-                             <img src="img/chichen/Chichen.webp" alt="Fotografía profesional de la pirámide de Chichén Itzá" class="tour-card-img"> 
-                             <img src="img/chichen/Izamal.webp" alt="Convento de Izamal pueblo mágico" class="tour-card-img"> 
-                             <img src="img/chichen/Lol-ha.webp" alt="Cenote Lol-Ha Yucatán" class="tour-card-img"> 
-                             <img src="img/chichen/Valladolid.webp" alt="Centro histórico de Valladolid" class="tour-card-img"> 
-                             <img src="img/chichen/Zaci.webp" alt="Cenote abierto Zací en Valladolid" class="tour-card-img"> 
+                 <!-- Catálogo oculto de tarjetas informativas con carrusel (Se activan dinámicamente) -->
+                 <div id="catalogo-tarjetas-tours" style="margin-top: 20px;">
+                     <!-- Chichén Itzá -->
+                     <div id="info-chichen" class="tour-info-card"> 
+                         <div class="carousel-container"> 
+                             <button class="carousel-btn prev" onclick="moverCarrusel('chichen', -1)">&#10094;</button> 
+                             <div class="carousel-track" id="track-chichen"> 
+                                 <img src="img/chichen/Chichen.webp" alt="Pirámide de Chichén Itzá" class="tour-card-img"> 
+                                 <img src="img/chichen/Izamal.webp" alt="Convento de Izamal pueblo mágico" class="tour-card-img"> 
+                                 <img src="img/chichen/Lol-ha.webp" alt="Cenote Lol-Ha Yucatán" class="tour-card-img"> 
+                                 <img src="img/chichen/Valladolid.webp" alt="Centro histórico de Valladolid" class="tour-card-img"> 
+                                 <img src="img/chichen/Zaci.webp" alt="Cenote abierto Zací" class="tour-card-img"> 
+                             </div> 
+                             <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
                          </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('chichen', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_chichen" style="margin:0; border:none; padding:0;">Maravilla del Mundo</h3> 
-                     </div> 
-                     <p data-i18n="desc_chichen">Sumérgete al maravilloso mundo de los Itzaes. Toma el power de una ciudad icónica y déjate envolver en su grandeza.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_chichen_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
-                             </ul>
+                         <div class="tour-title-wrapper"> 
+                             <div class="dynamic-tour-logo-container logo-c1"></div> 
+                             <h3 class="section-title">Maravilla del Mundo</h3> 
+                         </div> 
+                         <p data-i18n="desc_chichen">Sumérgete al maravilloso mundo de los Itzaes. Toma el power de una ciudad icónica y déjate envolver en su grandeza.</p> 
+                         <div class="inc-no-inc-container">
+                             <div class="inc-col">
+                                 <div class="inc-title">🟢 Incluye</div>
+                                 <ul class="inc-list">
+                                     <li>Transporte desde tu lugar de Hospedaje.</li>
+                                     <li>Guía Federal Certificado.</li>
+                                     <li>Hielera con agua.</li>
+                                     <li>Estacionamientos y Peajes.</li>
+                                 </ul>
+                             </div>
+                             <div class="no-inc-col">
+                                 <div class="no-inc-title">🔴 No Incluye</div>
+                                 <ul class="no-inc-list">
+                                     <li>Entradas.</li>
+                                     <li>Alimentos.</li>
+                                 </ul>
+                             </div>
                          </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_chichen_list">
-                                <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
+                     </div> 
+
+                     <!-- Cenotes -->
+                     <div id="info-cenotes" class="tour-info-card"> 
+                         <div class="carousel-container"> 
+                             <button class="carousel-btn prev" onclick="moverCarrusel('cenotes', -1)">&#10094;</button> 
+                             <div class="carousel-track" id="track-cenotes"> 
+                                 <img src="img/cenotes/Homun.webp" alt="Cenote cerrado en Homún" class="tour-card-img"> 
+                                 <img src="img/cenotes/Nah_Yah.webp" alt="Cenote abierto Nah Yah" class="tour-card-img"> 
+                                 <img src="img/cenotes/Nah_Yah_.webp" alt="Bicicletas listas para el recorrido maya" class="tour-card-img"> 
+                                 <img src="img/cenotes/Su_Hem.webp" alt="Cenote Su-hem" class="tour-card-img"> 
+                                 <img src="img/cenotes/Grutas_Tzabnah.webp" alt="Grutas Tzabnah" class="tour-card-img"> 
+                             </div> 
+                             <button class="carousel-btn next" onclick="moverCarrusel('cenotes', 1)">&#10095;</button> 
+                         </div> 
+                         <div class="tour-title-wrapper"> 
+                             <div class="dynamic-tour-logo-container logo-c1"></div> 
+                             <h3 class="section-title">Detalles Tour Cenotes</h3> 
+                         </div> 
+                         <p data-i18n="desc_cenotes">Sumérgete al azul de las profundidades de la tierra. Explora las puertas del inframundo Maya.</p> 
+                         <div class="inc-no-inc-container">
+                             <div class="inc-col">
+                                 <div class="inc-title">🟢 Incluye</div>
+                                 <ul class="inc-list">
+                                     <li>Transporte desde tu lugar de Hospedaje.</li>
+                                     <li>Guía Federal Certificado.</li>
+                                     <li>Hielera con agua.</li>
+                                     <li>Estacionamientos y Peajes.</li>
+                                 </ul>
+                             </div>
+                             <div class="no-inc-col">
+                                 <div class="no-inc-title">🔴 No Incluye</div>
+                                 <ul class="no-inc-list">
+                                     <li>Entradas.</li>
+                                     <li>Alimentos.</li>
+                                 </ul>
+                             </div>
+                         </div>
+                     </div> 
+
+                     <!-- Coloradas -->
+                     <div id="info-coloradas" class="tour-info-card"> 
+                         <div class="carousel-container"> 
+                             <button class="carousel-btn prev" onclick="moverCarrusel('coloradas', -1)">&#10094;</button> 
+                             <div class="carousel-track" id="track-coloradas"> 
+                                 <img src="img/coloradas/Coloradas.webp" alt="Las Coloradas Yucatán" class="tour-card-img"> 
+                                 <img src="img/coloradas/Playa_Cancunito.webp" alt="Playa Cancunito" class="tour-card-img"> 
+                                 <img src="img/coloradas/Las-coloradas.webp" alt="Charcas rosadas" class="tour-card-img"> 
+                                 <img src="img/coloradas/Motul.webp" alt="Motul centro" class="tour-card-img"> 
+                             </div> 
+                             <button class="carousel-btn next" onclick="moverCarrusel('coloradas', 1)">&#10095;</button> 
+                         </div> 
+                         <div class="tour-title-wrapper"> 
+                             <div class="dynamic-tour-logo-container logo-c1"></div> 
+                             <h3 class="section-title">Coloradas Tour Day</h3> 
+                         </div> 
+                         <p data-i18n="desc_coloradas">Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.</p> 
+                         <div class="inc-no-inc-container">
+                             <div class="inc-col">
+                                 <div class="inc-title">🟢 Incluye</div>
+                                 <ul class="inc-list">
+                                     <li>Transporte desde tu lugar de Hospedaje.</li>
+                                     <li>Guía Federal Certificado.</li>
+                                     <li>Hielera con agua.</li>
+                                     <li>Estacionamientos y Peajes.</li>
+                                 </ul>
+                             </div>
+                             <div class="no-inc-col">
+                                 <div class="no-inc-title">🔴 No Incluye</div>
+                                 <ul class="no-inc-list">
+                                     <li>Entradas.</li>
+                                     <li>Alimentos.</li>
+                                 </ul>
+                             </div>
+                         </div>
+                     </div> 
+
+                     <!-- Uxmal -->
+                     <div id="info-uxmal" class="tour-info-card"> 
+                         <div class="carousel-container"> 
+                             <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
+                             <div class="carousel-track" id="track-uxmal"> 
+                                 <img src="img/uxmal/Hacienda_Mucuyche.webp" alt="Hacienda Mucuyché" class="tour-card-img"> 
+                                 <img src="img/uxmal/Museo_chocolate.webp" alt="Choco-Story Uxmal" class="tour-card-img"> 
+                                 <img src="img/uxmal/Uxmal.webp" alt="Zona arqueológica Uxmal" class="tour-card-img"> 
+                                 <img src="img/uxmal/Yaal_Utzil.webp" alt="Cenote Yaal Utzil" class="tour-card-img"> 
+                             </div> 
+                             <button class="carousel-btn next" onclick="moverCarrusel('uxmal', 1)">&#10095;</button> 
+                         </div> 
+                         <div class="tour-title-wrapper"> 
+                             <div class="dynamic-tour-logo-container logo-c1"></div> 
+                             <h3 class="section-title">Uxmal</h3> 
+                         </div> 
+                         <p data-i18n="desc_uxmal">Sumérgete en la arquitectura Puuc. Un tesoro natural de la presencia de los Dioses.</p> 
+                         <div class="inc-no-inc-container">
+                             <div class="inc-col">
+                                 <div class="inc-title">🟢 Incluye</div>
+                                 <ul class="inc-list">
+                                     <li>Transporte desde tu lugar de Hospedaje.</li>
+                                     <li>Guía Federal Certificado.</li>
+                                     <li>Hielera con agua.</li>
+                                     <li>Estacionamientos y Peajes.</li>
+                                 </ul>
+                             </div>
+                             <div class="no-inc-col">
+                                 <div class="no-inc-title">🔴 No Incluye</div>
+                                 <ul class="no-inc-list">
+                                     <li>Entradas.</li>
+                                     <li>Alimentos.</li>
+                                 </ul>
+                             </div>
                          </div>
                      </div>
-                 </div> 
 
-                 <div id="info-cenotes" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('cenotes', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-cenotes"> 
-                             <img src="img/cenotes/Homun.webp" alt="Fotografía profesional de cenote cerrado en Yucatán" class="tour-card-img"> 
-                             <img src="img/cenotes/Nah_Yah.webp" alt="Turistas disfrutando de aguas cristalinas en cenote abierto" class="tour-card-img"> 
-                             <img src="img/cenotes/Nah_Yah_.webp" alt="Bicicletas listas para el recorrido maya en el tour de cenotes" class="tour-card-img"> 
-                             <img src="img/cenotes/Su_Hem.webp" alt="Cenote Su-hem aguas cristalinas" class="tour-card-img"> 
-                             <img src="img/cenotes/Grutas_Tzabnah.webp" alt="Exploración de grutas en Yucatán" class="tour-card-img"> 
+                     <!-- Celestún -->
+                     <div id="info-celestun" class="tour-info-card"> 
+                         <div class="carousel-container"> 
+                             <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
+                             <div class="carousel-track" id="track-celestun"> 
+                                 <img src="img/celestun/Celestun.webp" alt="Ría de Celestún" class="tour-card-img"> 
+                                 <img src="img/celestun/Bote.webp" alt="Paseo en bote Celestún" class="tour-card-img"> 
+                                 <img src="img/celestun/Lancha.webp" alt="Lanchas en la ría" class="tour-card-img"> 
+                             </div> 
+                             <button class="carousel-btn next" onclick="moverCarrusel('celestun', 1)">&#10095;</button> 
                          </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('cenotes', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_cenotes" style="margin:0; border:none; padding:0;">Detalles Tour Cenotes</h3> 
-                     </div> 
-                     <p data-i18n="desc_cenotes">Sumérgete al azul de las profundidades de la tierra. Explora las puertas del inframundo Maya.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_cenotes_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
-                             </ul>
-                         </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_cenotes_list">
-                                 <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
+                         <div class="tour-title-wrapper"> 
+                             <div class="dynamic-tour-logo-container logo-c1"></div> 
+                             <h3 class="section-title">Celestún</h3> 
+                         </div> 
+                         <p data-i18n="desc_celestun">Sumérgete en el mundo de los Manglares y los Flamencos. Navega por aguas llenas de Biodiversidad.</p> 
+                         <div class="inc-no-inc-container">
+                             <div class="inc-col">
+                                 <div class="inc-title">🟢 Incluye</div>
+                                 <ul class="inc-list">
+                                     <li>Transporte desde tu lugar de Hospedaje.</li>
+                                     <li>Guía Federal Certificado.</li>
+                                     <li>Hielera con agua.</li>
+                                     <li>Estacionamientos y Peajes.</li>
+                                 </ul>
+                             </div>
+                             <div class="no-inc-col">
+                                 <div class="no-inc-title">🔴 No Incluye</div>
+                                 <ul class="no-inc-list">
+                                     <li>Entradas.</li>
+                                     <li>Alimentos.</li>
+                                 </ul>
+                             </div>
                          </div>
                      </div>
-                 </div> 
 
-                 <div id="info-coloradas" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('coloradas', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-coloradas"> 
-                             <img src="img/coloradas/Coloradas.webp" alt="Gastronomía tradicional en Motul Yucatán" class="tour-card-img"> 
-                             <img src="img/coloradas/Playa_Cancunito.webp" alt="Aguas rosadas de las charcas de las Coloradas" class="tour-card-img"> 
-                             <img src="img/coloradas/Las-coloradas.webp" alt="Inmensidad de Playa Cancunito" class="tour-card-img"> 
-                             <img src="img/coloradas/Motul.webp" alt="Centro de Motul Yucatán" class="tour-card-img"> 
+                     <!-- Campeche -->
+                     <div id="info-campeche" class="tour-info-card"> 
+                         <div class="carousel-container"> 
+                             <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
+                             <div class="carousel-track" id="track-campeche"> 
+                                 <img src="img/campeche/Centro_campeche.webp" alt="Centro histórico Campeche" class="tour-card-img"> 
+                                 <img src="img/campeche/Oxkintok.webp" alt="Zona arqueológica Oxkintok" class="tour-card-img"> 
+                                 <img src="img/campeche/Fuerte_San_Miguel_Campeche.webp" alt="Fuerte de San Miguel" class="tour-card-img"> 
+                                 <img src="img/campeche/Malecon_Campeche.webp" alt="Malecón de Campeche" class="tour-card-img"> 
+                                 <img src="img/campeche/Museo_Arqueologia_Campeche.webp" alt="Museo de arqueología" class="tour-card-img"> 
+                             </div> 
+                             <button class="carousel-btn next" onclick="moverCarrusel('campeche', 1)">&#10095;</button> 
                          </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('coloradas', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_coloradas" style="margin:0; border:none; padding:0;">Coloradas Tour Day</h3> 
-                     </div> 
-                     <p data-i18n="desc_coloradas">Sumérgete en el rosa mexicano de la península. Siente la inmensidad del hábitat de los flamencos.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_coloradas_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
-                             </ul>
-                         </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_coloradas_list">
-                                <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
-                         </div>
-                     </div>
-                 </div> 
-
-                 <div id="info-uxmal" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('uxmal', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-uxmal"> 
-                             <img src="img/uxmal/Hacienda_Mucuyche.webp" alt="Cenotes de la Hacienda Mucuyché en Yucatán" class="tour-card-img"> 
-                             <img src="img/uxmal/Museo_chocolate.webp" alt="Museo del chocolate Choco-Story Uxmal" class="tour-card-img"> 
-                             <img src="img/uxmal/Uxmal.webp" alt="Pirámide del Adivino en la zona arqueológica de Uxmal" class="tour-card-img"> 
-                             <img src="img/uxmal/Yaal_Utzil.webp" alt="Cenote Yaal Utzil en Yucatán" class="tour-card-img"> 
+                         <div class="tour-title-wrapper"> 
+                             <div class="dynamic-tour-logo-container logo-c1"></div> 
+                             <h3 class="section-title">Campeche</h3> 
                          </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('uxmal', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_uxmal" style="margin:0; border:none; padding:0;">Uxmal</h3> 
-                     </div> 
-                     <p data-i18n="desc_uxmal">Sumérgete en la arquitectura Puuc. Un tesoro natural de la presencia de los Dioses.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_uxmal_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos and Peajes.</li>
-                             </ul>
-                         </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_uxmal_list">
-                                <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
+                         <p data-i18n="desc_campeche">Camina por los baluartes de una histórica ciudad fortificada frente al mar y revive historias de piratas del Caribe.</p> 
+                         <div class="inc-no-inc-container">
+                             <div class="inc-col">
+                                 <div class="inc-title">🟢 Incluye</div>
+                                 <ul class="inc-list">
+                                     <li>Transporte desde tu lugar de Hospedaje.</li>
+                                     <li>Guía Federal Certificado.</li>
+                                     <li>Hielera con agua.</li>
+                                     <li>Estacionamientos y Peajes.</li>
+                                 </ul>
+                             </div>
+                             <div class="no-inc-col">
+                                 <div class="no-inc-title">🔴 No Incluye</div>
+                                 <ul class="no-inc-list">
+                                     <li>Entradas.</li>
+                                     <li>Alimentos.</li>
+                                 </ul>
+                             </div>
                          </div>
                      </div>
                  </div>
-
-                 <div id="info-celestun" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('celestun', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-celestun"> 
-                             <img src="img/celestun/Celestun.webp" alt="Reserva de la biosfera de Celestún ría de flamencos" class="tour-card-img"> 
-                             <img src="img/celestun/Bote.webp" alt="Recorrido en bote por los manglares de Celestún" class="tour-card-img"> 
-                             <img src="img/celestun/Lancha.webp" alt="Lancha turística en Celestún" class="tour-card-img"> 
-                         </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('celestun', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_celestun" style="margin:0; border:none; padding:0;">Celestún</h3> 
-                     </div> 
-                     <p data-i18n="desc_celestun">Sumérgete en el mundo de los Manglares y los Flamencos. Navega por aguas llenas de Biodiversidad.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_celestun_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
-                             </ul>
-                         </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_celestun_list">
-                                <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
-                         </div>
-                     </div>
-                 </div>
-
-                 <div id="info-campeche" class="tour-info-card"> 
-                     <div class="carousel-container"> 
-                         <button class="carousel-btn prev" onclick="moverCarrusel('campeche', -1)">&#10094;</button> 
-                         <div class="carousel-track" id="track-campeche"> 
-                             <img src="img/campeche/Centro_campeche.webp" alt="Centro histórico de la ciudad amurallada de Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Oxkintok.webp" alt="Zona arqueológica de Oxkintok en Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Fuerte_San_Miguel_Campeche.webp" alt="Fuerte de San Miguel en Campeche" class="tour-card-img"> 
-                             <img src="img/campeche/Malecon_Campeche.webp" alt="Malecón de Campeche frente al mar" class="tour-card-img"> 
-                             <img src="img/campeche/Museo_Arqueologia_Campeche.webp" alt="Museo de arquitectura maya en Campeche" class="tour-card-img"> 
-                         </div> 
-                         <button class="carousel-btn next" onclick="moverCarrusel('campeche', 1)">&#10095;</button> 
-                     </div> 
-                     <div class="tour-title-wrapper"> 
-                         <div class="dynamic-tour-logo-container logo-c1"></div> 
-                         <h3 class="section-title" data-i18n="titulo_campeche" style="margin:0; border:none; padding:0;">Campeche</h3> 
-                     </div> 
-                     <p data-i18n="desc_campeche">Camina por los baluartes de una histórica ciudad fortificada frente al mar y revive historias de piratas del Caribe.</p> 
-                     
-                     <div class="inc-no-inc-container">
-                         <div class="inc-col">
-                             <div class="inc-title" data-i18n="inc_title">🟢 Incluye</div>
-                             <ul class="inc-list" data-i18n="inc_campeche_list">
-                                 <li>Transporte desde tu lugar de Hospedaje.</li>
-                                 <li>Guía Federal Certificado.</li>
-                                 <li>Hielera con agua.</li>
-                                 <li>Estacionamientos y Peajes.</li>
-                             </ul>
-                         </div>
-                         <div class="no-inc-col">
-                             <div class="no-inc-title" data-i18n="no_inc_title">🔴 No Incluye</div>
-                             <ul class="no-inc-list" data-i18n="no_inc_campeche_list">
-                                <li>Entradas.</li>
-                                 <li>Alimentos.</li>
-                             </ul>
-                         </div>
-                     </div>
-                 </div>
-
-                 <div id="seccion-personalizacion-tour" style="margin-top: 20px;"></div>
              </div>  
 
+             <!-- ==========================================================================
+                BLOQUE DERECHO: Formulario de Control y Resumen de Precios
+                ========================================================================== -->
              <div class="grid-col-2"> 
                  <div class="cotizador-header-wrapper"> 
                      <div class="dynamic-tour-logo-container logo-c2"></div> 
@@ -324,19 +354,26 @@
                  </div> 
 
                  <div class="form-group"> 
-                     <label class="input-label" data-i18n="label_nombre">Nombre</label> 
-                     <input type="text" id="nombre-cliente" placeholder="Escribe tu nombre completo..." data-i18n-ph="ph_nombre"> 
+                     <label class="input-label">Nombre</label> 
+                     <input type="text" id="nombre-cliente" placeholder="Escribe tu nombre completo..."> 
                  </div> 
 
-                 <div id="seccion-idioma-tour"></div> 
+                 <!-- Idioma global del servicio -->
+                 <div class="box-personalizacion">
+                     <div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
+                     <label class="opcion-item"><input type="radio" name="viaha-idioma-global" value="Español" checked onclick="document.getElementById('wrapper-otro-idioma-global').style.display='none'"> <span>Español</span></label>
+                     <label class="opcion-item"><input type="radio" name="viaha-idioma-global" value="Inglés" onclick="document.getElementById('wrapper-otro-idioma-global').style.display='none'"> <span>Inglés</span></label>
+                     <label class="opcion-item"><input type="radio" name="viaha-idioma-global" value="Otro" onclick="document.getElementById('wrapper-otro-idioma-global').style.display='block'"> <span>Otro idioma</span></label>
+                     <div id="wrapper-otro-idioma-global" style="display:none;"><input type="text" id="input-otro-idioma-global" class="input-otro-idioma" placeholder="Especificar idioma..."></div>
+                 </div>
                     
-                 <div class="form-group" class="counter-container"> 
-                     <label data-i18n="label_fecha">Fecha del Recorrido</label> 
-                     <input type="text" id="fecha-reserva" placeholder="Selecciona una fecha o rango..." data-i18n-ph="ph_fecha"> 
+                 <div class="form-group"> 
+                     <label id="label-fecha-dinamica">Fecha del Recorrido</label> 
+                     <input type="text" id="fecha-reserva" placeholder="Selecciona una fecha o rango..."> 
                  </div> 
 
                  <div class="counter-container"> 
-                     <span class="counter-label" data-i18n="label_adultos">Adultos</span> 
+                     <span class="counter-label">Adultos</span> 
                      <div class="counter-controls"> 
                          <button class="btn-qty" onclick="cambiarCant('adultos', -1)">-</button> 
                          <span id="qty-adultos" class="qty-val">2</span> 
@@ -345,7 +382,7 @@
                  </div> 
 
                  <div class="counter-container"> 
-                     <span class="counter-label" data-i18n="label_ninos">Niños (-12 años)</span> 
+                     <span class="counter-label">Niños (-12 años)</span> 
                      <div class="counter-controls"> 
                          <button class="btn-qty" onclick="cambiarCant('ninos', -1)">-</button> 
                          <span id="qty-ninos" class="qty-val">0</span> 
@@ -355,31 +392,30 @@
 
                  <div class="sello-sustentable-box">
                      <div class="sello-icon">🌱</div>
-                     <p class="sello-text" data-i18n="sello_sustentable_texto">
+                     <p class="sello-text">
                          <strong>Garantía por Compromiso:</strong> Al contratar tu experience con Vía Há México, un porcentaje de tu pago se destina directamente al desarrollo sustentable de las comunidades mayas y la preservación de su entorno natural.
                      </p>
                  </div>
 
                  <div class="summary-box"> 
-                     <div style="font-size: 14px; opacity: 0.9;" data-i18n="total_estimado">Total Estimado (Servicio Privado):</div> 
+                     <div style="font-size: 14px; opacity: 0.9;">Total Estimado (Servicio Privado):</div> 
                      <div class="total-price" id="total-display">$0 MXN</div> 
                  </div> 
 
-                 <a href="javascript:void(0)" id="wa-link" onclick="enviarWhatsApp()" class="btn-whatsapp" data-i18n="btn_reservar"> 
+                 <a href="javascript:void(0)" id="wa-link" onclick="enviarWhatsApp()" class="btn-whatsapp"> 
                      Reservar por WhatsApp 
                  </a> 
              </div>  
          </div>  
 
          <div class="footer-info"> 
-             <p class="reviews-footer-text" data-i18n="reviews_text">⭐ Descubre por qué nos recomiendan nuestros viajeros</p> 
-
+             <p class="reviews-footer-text">⭐ Descubre por qué nos recomiendan nuestros viajeros</p> 
              <div class="social-links"> 
                  <a href="https://www.facebook.com/share/1JnitC6yFz/" target="_blank" class="social-icon-link" title="Facebook"> 
                      <svg viewBox="0 0 24 24" class="icon-svg"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1V12h3l-.5 3h-2.5v6.8c4.56-.93 8-4.96 8-9.8z"/></svg> 
                  </a> 
                  <a href="https://instagram.com" target="_blank" class="social-icon-link" title="Instagram"> 
-                     <svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0 3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> 
+                     <svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg> 
                  </a> 
                  <a href="https://tiktok.com" target="_blank" class="social-icon-link" title="TikTok"> 
                      <svg viewBox="0 0 24 24" class="icon-svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> 
@@ -388,8 +424,8 @@
               
              <div class="footer-text"> 
                  📍 Mérida, Yucatán |  
-                 📞 <a href="tel:+529618150804" class="footer-link" onclick="gtag('event', 'click_contacto_directo', {'medio': 'telefono'});">9992719285</a> |  
-                 📧 <a href="mailto:viahamexico@gmail.com" class="footer-link" onclick="gtag('event', 'click_contacto_directo', {'medio': 'correo'});">viahamexico@gmail.com</a> 
+                 📞 <a href="tel:+529618150804" class="footer-link">9992719285</a> |  
+                 📧 <a href="mailto:viahamexico@gmail.com" class="footer-link">viahamexico@gmail.com</a> 
              </div> 
          </div> 
      </div> 
