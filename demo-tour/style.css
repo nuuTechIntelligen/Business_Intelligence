@@ -121,6 +121,12 @@ body {
     .hero { height: 45vh !important; }
     #hero-logo-img.hero-logo-movil { display: none !important; }
     .hero-title-pc { display: block; font-size: 56px; }
+
+    /* MODIFICACIÓN: Margen negativo superior incrementado de -30px a -100px para encabalgar la tarjeta */
+.container { 
+    width: 92%; max-width: 950px; margin: -100px auto 50px !important; background: var(--white); padding: 20px; 
+    border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
+} 
     
     /* MODIFICACIÓN PROFESIONAL: Obligamos al lienzo slider a estirarse sin deformación responsiva */
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
@@ -128,7 +134,7 @@ body {
 
 /* MODIFICACIÓN: Margen negativo superior incrementado de -30px a -100px para encabalgar la tarjeta */
 .container { 
-    width: 92%; max-width: 950px; margin: -100px auto 50px !important; background: var(--white); padding: 20px; 
+    width: 92%; max-width: 950px; margin: -30px auto 50px !important; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
 } 
 
