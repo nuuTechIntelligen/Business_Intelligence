@@ -20,12 +20,12 @@ const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxma
 const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
 const catalogoEstructuraTours = {
-     chichen: { complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"], plus: ["Avistamiento de aves", "Dinámica de observación"], txt: "Chichén Itzá" },
-     cenotes: { complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"], plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"], txt: "Tour Cenotes" },
-     coloradas: { complementos: [], plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"], txt: "Coloradas Tour Day" },
-     uxmal: { complementos: ["Chocostory", "Hda Mucuyché", "Yaal Utzil"], plus: ["Avistamiento de aves", "Dinámica de observación"], txt: "Uxmal" },
-     celestun: { complementos: ["Bote", "Lancha"], plus: ["Avistamiento de aves", "Dinámica de observación"], txt: "Celestún" },
-     campeche: { complementos: ["Tour de 1 dia", "Tour of 2 dias"], plus: ["Temporada de Avistamiento de Flamencos (Noviembre- Febrero)"], txt: "Campeche" }
+     chichen: { complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"], plus: ["Avistamiento de aves", "Dinámica de observación"], txt: "Chichén Itzá", cat: "arqueologia" },
+     cenotes: { complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"], plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"], txt: "Tour Cenotes", cat: "cenotes" },
+     coloradas: { complementos: [], plus: ["Avistamiento de aves", "Dinámica de observación", "Sesión fotográfica", "Recorrido en lancha", "Paseo ecoturístico"], txt: "Coloradas Tour Day", cat: "aviturismo" },
+     uxmal: { complementos: ["Chocostory", "Hda Mucuyché", "Yaal Utzil"], plus: ["Avistamiento de aves", "Dinámica de observación"], txt: "Uxmal", cat: "arqueologia" },
+     celestun: { complementos: ["Bote", "Lancha"], plus: ["Avistamiento de aves", "Dinámica de observación"], txt: "Celestún", cat: "aviturismo" },
+     campeche: { complementos: ["Tour de 1 dia", "Tour de 2 dias"], plus: ["Temporada de Avistamiento de Flamencos (Noviembre- Febrero)"], txt: "Campeche", cat: "urbano" }
 };
 
 const matrizTarifasEscaladas = {
@@ -51,7 +51,7 @@ const traducciones = {
 }; 
 
 /**
- * Inicializador asíncrono central.
+ * Inicializador maestro.
  */
 async function inicializarSistema() {  
       while (typeof flatpickr === 'undefined') {  
@@ -62,22 +62,17 @@ async function inicializarSistema() {
           cargarBloqueos();  
           inicializarSoportesTactiles();   
           renderizarEstructuraSegunModalidad();
-          actualizarLogosDinamicos();  
           calcular();  
       } catch (error) {  
           console.error("❌ Error en inicialización:", error.message);  
       }  
 }  
 
-/**
- * Control del calendario Flatpickr con cálculo de rango de días mínimos dinámicos
- */
 function inicializarCalendario() {  
       const campoFecha = document.getElementById('fecha-reserva');  
       if (!campoFecha) return;  
       if (fp) fp.destroy();   
 
-      // El rango mínimo de días depende de cuántos días tenga el circuito activo
       const minDiasRequeridos = (modalidadActiva === 'circuit') ? diasCircuitoContador : 1;
 
       fp = flatpickr(campoFecha, {  
@@ -86,7 +81,6 @@ function inicializarCalendario() {
           onChange: function(selectedDates, dateStr) {  
               fechaSeleccionada = dateStr;  
               
-              // Validación estricta UX: Evita que elijan menos días de los tours agregados
               if (modalidadActiva === 'circuit' && selectedDates.length === 2) {
                   const milisegundosPorDia = 24 * 60 * 60 * 1000;
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
@@ -102,9 +96,6 @@ function inicializarCalendario() {
       });  
 }  
 
-/**
- * Cambia entre modalidad de 1 día o Circuito Multi-días
- */
 function cambiarModalidad(tipo) {
     modalidadActiva = tipo;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -123,33 +114,33 @@ function cambiarModalidad(tipo) {
 }
 
 /**
- * Renderiza la interfaz izquierda asíncronamente para evitar pesadez visual (UX Premium)
+ * CORRECCIÓN: Estructura inyectada invertida. Primero la Info/Galería fija arriba, y los selectores ABAJO.
  */
 function renderizarEstructuraSegunModalidad() {
-    const contenedor = document.getElementById('wrapper-dinamico-izquierdo');
-    if (!contenedor) return;
+    const contenedorTarget = document.getElementById('seccion-personalizacion-tour');
+    if (!contenedorTarget) return;
 
     if (modalidadActiva === 'single') {
-        // Interfaz clásica de 1 Día
-        contenedor.innerHTML = `
-            <label class="section-title" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label>
-            <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
-                <option value="chichen">CHICHÉN ITZÁ</option>
-                <option value="cenotes">SUMERGETE A CENOTES</option>
-                <option value="coloradas">COLORADAS TOUR DAY</option>
-                <option value="uxmal">UXMAL</option>
-                <option value="celestun">CELESTÚN</option>
-                <option value="campeche">CAMPECHE</option>
-            </select>
+        // En 1 día, inyectamos el selector de tours y sus campos ABAJO del carrusel informativo
+        contenedorTarget.innerHTML = `
+            <div class="box-personalizacion" style="background-color: var(--light-bg); border: 2px solid var(--executive-dark);">
+                <label class="input-label" style="font-size:16px;">¿Qué paraíso quieres visitar hoy?</label>
+                <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
+                    <option value="chichen">CHICHÉN ITZÁ</option>
+                    <option value="cenotes">SUMERGETE A CENOTES</option>
+                    <option value="coloradas">COLORADAS TOUR DAY</option>
+                    <option value="uxmal">UXMAL</option>
+                    <option value="celestun">CELESTÚN</option>
+                    <option value="campeche">CAMPECHE</option>
+                </select>
+            </div>
             <div id="wrapper-personalizacion-single" style="margin-top:15px;"></div>
         `;
         renderizarCamposSingle();
-        // Muestra la tarjeta de información correspondiente del catálogo
-        const select = document.getElementById('tour-select');
-        mostrarTarjetaCatalogo(select.value);
+        mostrarTarjetaCatalogo("chichen");
     } else {
-        // Interfaz de Circuito: Construye el Tablero por Acordeones
-        let htmlAcordeones = `<label class="section-title">🗺️ Diseña tu Circuito Privado (Por Días)</label><div id="accordion-circuito-container" style="margin-top:15px;">`;
+        // En Circuito, inyectamos el Tablero completo de Acordeones ABAJO del carrusel informativo
+        let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
         for (let i = 1; i <= diasCircuitoContador; i++) {
             htmlAcordeones += `
@@ -162,7 +153,7 @@ function renderizarEstructuraSegunModalidad() {
                         </div>
                     </div>
                     <div class="accordion-content-dia">
-                        <label class="input-label">Selecciona el Tour para este día:</label>
+                        <label class="input-label" style="font-size:14px; margin-top:5px;">Elige el Destino para este día:</label>
                         <select class="tour-picker picker-circuito-destino" data-dia="${i}" onchange="cambiarDestinoDiaCircuito(${i}, this.value)">
                             <option value="chichen">CHICHÉN ITZÁ</option>
                             <option value="cenotes">SUMERGETE A CENOTES</option>
@@ -171,31 +162,30 @@ function renderizarEstructuraSegunModalidad() {
                             <option value="celestun">CELESTÚN</option>
                             <option value="campeche">CAMPECHE</option>
                         </select>
-                        <div id="campos-personalizados-dia-${i}" style="margin-top:15px;"></div>
+                        <div id="campos-personalizados-dia-${i}" style="margin-top:12px;"></div>
                     </div>
                 </div>`;
         }
         
         htmlAcordeones += `</div><button type="button" class="btn-add-dia-circuito" onclick="agregarDiaCircuito()">➕ Agregar Siguiente Día al Itinerario</button>`;
-        contenedor.innerHTML = htmlAcordeones;
+        contenedorTarget.innerHTML = htmlAcordeones;
 
-        // Inyecta las opciones internas de cada día sin recargar imágenes (Rendimiento Extremo)
+        // Carga inicial controlada de los acordeones del circuito
         for (let i = 1; i <= diasCircuitoContador; i++) {
             const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
             if(i === 1) selectDia.value = "chichen";
             if(i === 2) selectDia.value = "cenotes";
             renderizarCamposDiaCircuito(i, selectDia.value);
         }
-        mostrarTarjetaCatalogo("chichen"); // Deja activa la portada líder
+        mostrarTarjetaCatalogo("chichen"); 
     }
     actualizarLogosDinamicos();
 }
 
-/**
- * Inyección de opciones específicas para la modalidad de 1 Día
- */
 function renderizarCamposSingle() {
-    const tour = document.getElementById('tour-select').value;
+    const select = document.getElementById('tour-select');
+    if (!select) return;
+    const tour = select.value;
     const datos = catalogoEstructuraTours[tour];
     const target = document.getElementById('wrapper-personalizacion-single');
     if (!datos || !target) return;
@@ -212,18 +202,15 @@ function renderizarCamposSingle() {
     }
 
     if (datos.plus.length > 0) {
-        html += `<div class="box-personalizacion"><div class="titulo-interactivo">✨ ¿Quieres agregar un Plus?</div>`;
-        datos.plus.forEach(pl => {
-            html += `<label class="opcion-item"><input type="checkbox" name="viaha-plus" value="${pl}"><span>${pl}</span></label>`;
-        });
-        html += `</div>`;
+         html += `<div class="box-personalizacion"><div class="titulo-interactivo">✨ ¿Quieres agregar un Plus?</div>`;
+         datos.plus.forEach(pl => {
+             html += `<label class="opcion-item"><input type="checkbox" name="viaha-plus" value="${pl}"><span>${pl}</span></label>`;
+         });
+         html += `</div>`;
      }
      target.innerHTML = html;
 }
 
-/**
- * Inyección de opciones ligeras para cada día del circuito (Optimizado paraUX sin pesadez)
- */
 function renderizarCamposDiaCircuito(dia, tour) {
     const datos = catalogoEstructuraTours[tour];
     const target = document.getElementById(`campos-personalizados-dia-${dia}`);
@@ -231,19 +218,19 @@ function renderizarCamposDiaCircuito(dia, tour) {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        html += `<div class="box-personalizacion" style="padding:10px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px;">📍 Elige la Ruta del Día ${dia}</div>`;
+        html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px; border:none; margin:0; padding:0;">📍 Ruta del Día ${dia}</div>`;
         datos.complementos.forEach((comp, index) => {
-            html += `<label class="opcion-item" style="font-size:15px;"><input type="radio" name="viaha-complemento-dia-${dia}" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="calcular()"><span>${comp}</span></label>`;
+            html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="radio" name="viaha-complemento-dia-${dia}" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="calcular()"><span>${comp}</span></label>`;
         });
         html += `</div>`;
     } else {
-        html += `<div class="box-personalizacion" style="padding:10px; margin-bottom:10px; border-style:dashed;"><div class="titulo-interactivo" style="font-size:14px;">📋 Ruta Completa Integrada</div></div>`;
+        html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px; border-style:dashed;"><div class="titulo-interactivo" style="font-size:14px; margin:0; border:none;">📋 Ruta Completa Integrada</div></div>`;
     }
 
     if (datos.plus.length > 0) {
-        html += `<div class="box-personalizacion" style="padding:10px; margin-bottom:0;"><div class="titulo-interactivo" style="font-size:14px;">✨ Pluses Disponibles</div>`;
+        html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:0;"><div class="titulo-interactivo" style="font-size:14px; margin:0; border:none;">✨ Pluses Disponibles</div>`;
         datos.plus.forEach(pl => {
-            html += `<label class="opcion-item" style="font-size:15px;"><input type="checkbox" name="viaha-plus-dia-${dia}" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
+            html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="checkbox" name="viaha-plus-dia-${dia}" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
         });
         html += `</div>`;
     }
@@ -260,8 +247,6 @@ function cambiarDestinoDiaCircuito(dia, tour) {
 function toggleAccordion(dia) {
     const item = document.getElementById(`accordion-dia-${dia}`);
     const isOpen = item.classList.contains('open');
-    
-    // Regla de UX Móvil: Colapsa los demás al abrir uno nuevo
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     if (!isOpen) item.classList.add('open');
 }
@@ -270,14 +255,13 @@ function agregarDiaCircuito() {
     diasCircuitoContador++;
     renderizarEstructuraSegunModalidad();
     inicializarCalendario();
-    // Abre automáticamente el nuevo día agregado
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     document.getElementById(`accordion-dia-${diasCircuitoContador}`).classList.add('open');
     calcular();
 }
 
-function eliminarDiaCircuito(event, dia) {
-    event.stopPropagation(); // Evita que el clic dispare el despliegue del acordeón
+function eliminarDiaCircuito(e, dia) {
+    e.stopPropagation(); // Evita que se abra/cierre al dar clic al botón de eliminar
     if (diasCircuitoContador > 2) {
         diasCircuitoContador--;
         renderizarEstructuraSegunModalidad();
@@ -286,23 +270,50 @@ function eliminarDiaCircuito(event, dia) {
     }
 }
 
-function actualizarInterfazSingle() {
-    renderizarCamposSingle();
-    const tour = document.getElementById('tour-select').value;
-    mostrarTarjetaCatalogo(tour);
-    actualizarLogosDinamicos();
-    calcular();
-}
+function actualizarInterfazSingle() {  
+      const select = document.getElementById('tour-select');  
+      const selectedTour = select.value;  
+       
+      mostrarTarjetaCatalogo(selectedTour);
+      renderizarCamposSingle();  
+      actualizarLogosDinamicos();  
+      calcular();  
+}  
 
-function mostrarTarjetaCatalogo(tour) {
-    document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active'));
-    const targetCard = document.getElementById('info-' + tour);
-    if(targetCard) targetCard.classList.add('active');
+/**
+ * Centralizador de renderizado para las tarjetas de información y autoplay
+ */
+function mostrarTarjetaCatalogo(idTour) {
+    Object.keys(intervalosCarrusel).forEach(tourKey => detenerAutoplayCarrusel(tourKey));  
+    document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active'));  
+    
+    const tarjetaTarget = document.getElementById('info-' + idTour);
+    if (tarjetaTarget) tarjetaTarget.classList.add('active');
+    
+    activarAutoplayCarrusel(idTour);
+    
+    gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoEstructuraTours[idTour].txt });
 }
 
 /**
- * ALGORITMO CORE: Motor de cálculo adaptativo (Soporta 1 Día y Circuitos Acumulados)
+ * CORRECCIÓN SÓLIDA: Corrección del error del null.svg. Mapea la categoría real dependiendo de la pantalla activa.
  */
+function actualizarLogosDinamicos() {  
+      let categoria = "arqueologia";
+      if (modalidadActiva === 'single') {
+          const select = document.getElementById('tour-select');  
+          if (select) categoria = catalogoEstructuraTours[select.value].cat;  
+      } else {
+          // Si es circuito, extrae la categoría del Tour activo del Día 1
+          const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
+          if (selectPrimero) categoria = catalogoEstructuraTours[selectPrimero.value].cat;
+      }
+      
+      const rutaSvg = `img/isologos/${categoria}.svg`;
+      const htmlImg = `<img src="${rutaSvg}" alt="Isologo Vía Há ${categoria}" class="img-isologo-dinamico">`;
+      document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => { container.innerHTML = htmlImg; });  
+}  
+
 function calcular() {  
       let granTotalCalculado = 0;
       const totalPasajeros = adultos + ninos;
@@ -316,7 +327,6 @@ function calcular() {
 
           granTotalCalculado = obtenerPrecioMatriz(idTour, compSel, totalPasajeros);
       } else {
-          // Bucle iterativo sobre cada acordeón de día activo
           for (let i = 1; i <= diasCircuitoContador; i++) {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
@@ -339,7 +349,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
     if (!combinacion) return 0;
 
     if (pasajeros <= 2) {
-        return combinacion[2]; // Tramo base congelado de 2 Pax
+        return combinacion[2]; 
     } else {
         let rangoKey = (pasajeros === 3) ? 3 : 4;
         return pasajeros * combinacion[rangoKey];
@@ -386,21 +396,6 @@ function inicializarSoportesTactiles() {
       });  
 }  
 
-function actualizarLogosDinamicos() {  
-      let categoria = "arqueologia";
-      if (modalidadActiva === 'single') {
-          const select = document.getElementById('tour-select');  
-          if (select) categoria = select.options[select.selectedIndex].getAttribute('data-categoria');  
-      } else {
-          const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
-          if (selectPrimero) categoria = selectPrimero.options[selectPrimero.selectedIndex].getAttribute('data-categoria');
-      }
-      
-      const rutaSvg = `img/isologos/${categoria}.svg`;
-      const htmlImg = `<img src="${rutaSvg}" alt="Isologo Vía Há ${categoria}" class="img-isologo-dinamico">`;
-      document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => { container.innerHTML = htmlImg; });  
-}  
-
 function cambiarIdioma() {  
       idiomaActual = document.getElementById('lang-switch').value;  
       const t = traducciones[idiomaActual];  
@@ -427,7 +422,7 @@ function cargarBloqueos() {
               const fechas = data.filter(row => row.fecha && row.fecha.trim().length > 5).map(row => row.fecha.trim());  
               if (fp && typeof fp.set === 'function') fp.set("disable", fechas);  
           })  
-          .catch(err => console.error("❌ Error de comunicación analítica con SheetDB:", err));  
+          .catch(err => console.error("❌ Error de communication analítica con SheetDB:", err));  
 }  
 
 function cambiarCant(tipo, cambio) {  
@@ -441,9 +436,6 @@ function cambiarCant(tipo, cambio) {
       calcular();   
 }  
 
-/**
- * DISPARADOR MAESTRO EXTENDIDO: Compila itinerarios multidías hacia WhatsApp API de forma cronológica
- */
 function enviarWhatsApp() {  
       const t = traducciones[idiomaActual];  
       const nombre = document.getElementById('nombre-cliente').value.trim();  
@@ -465,7 +457,6 @@ function enviarWhatsApp() {
       let mensaje = "";
 
       if (modalidadActiva === 'single') {
-          // Despacho clásico para 1 solo Tour
           const select = document.getElementById('tour-select');  
           const tourName = select.options[select.selectedIndex].text;  
           const r_complemento = document.querySelector('input[name="viaha-complemento"]:checked');
@@ -477,7 +468,6 @@ function enviarWhatsApp() {
 
           mensaje = `¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n🌴 *Tour:* ${tourName}\n📍 *Ruta:* ${complementoTexto}\n✨ *Plus:* ${plusTexto}\n🗣️ *Idioma:* ${idiomaTexto}\n📅 *Fecha:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos}\n👶 *Niños:* ${ninos}\n💰 *Total estimado:* ${total}\n\n¿Tienen disponibilidad?`;
       } else {
-          // Despacho premium y estructurado para CIRCUITOS MULTIDÍAS
           mensaje = `¡Hola! Me interesa cotizar un *CIRCUITO PRIVADO MULTIDÍAS* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n📅 *Período:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos} | 👶 *Niños:* ${ninos}\n🗣️ *Idioma:* ${idiomaTexto}\n\n🗺️ *ITINERARIO PLANIFICADO:*`;
           
           for (let i = 1; i <= diasCircuitoContador; i++) {
@@ -488,7 +478,7 @@ function enviarWhatsApp() {
                   const compDiaTxt = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
                   const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
                   let plusDiaArr = [];
-                  checksPlusDia.forEach(c => plusDiaArr.push(造型 = c.value));
+                  checksPlusDia.forEach(c => plusDiaArr.push(c.value));
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
 
                   mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compDiaTxt}\n   ✨ Pluses: ${plusDiaTxt}`;
