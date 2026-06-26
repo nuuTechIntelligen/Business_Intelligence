@@ -238,7 +238,9 @@ body {
 .section-title { color: var(--text); font-size: 24px; border-left: 5px solid var(--turquesa); padding-left: 10px; margin: 0 !important; text-transform: uppercase; font-weight: bold; font-family: 'Big Shoulders Text', sans-serif; } 
 
 body .flatpickr-input, body #fecha-reserva, body .tour-picker, body #nombre-cliente { width: 100% !important; padding: 14px !important; font-size: 18px !important; font-family: 'Big Shoulders Text', sans-serif !important; font-weight: bold !important; border: 2px solid var(--executive-dark) !important; border-radius: 12px !important; background-color: var(--light-bg) !important; color: var(--text) !important; box-sizing: border-box !important; display: block !important; } 
-body .flatpickr-input, body #fecha-reserva, body .tour-picker { padding-right: 40px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555554' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !repeat; background-position: right 15px center !important; background-size: 18px !important; appearance: none !important; } 
+
+/* CORRECCIÓN VISUAL: Reemplazado '!repeat' por '!important' para erradicar las flechas duplicadas en cascada */
+body .flatpickr-input, body #fecha-reserva, body .tour-picker { padding-right: 40px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555554' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: right 15px center !important; background-size: 18px !important; appearance: none !important; } 
 body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover { border-color: var(--turquesa) !important; background-color: #ffffff !important; } 
 
 .form-group { margin-bottom: 15px; } 
