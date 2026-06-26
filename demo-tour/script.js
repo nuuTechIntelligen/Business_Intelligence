@@ -275,9 +275,10 @@ function renderizarCamposPersonalizados() {
      contenedorIzquierdo.innerHTML = htmlIzquierdo;
 
      contenedorDerecho.innerHTML = `
-         <div class="box-personalizacion"><div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
+         <div class="box-personalizacion"><div class="titulo-interactivo">🗣️ Idioma</div>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Español" checked onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Español</span></label>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Inglés" onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Inglés</span></label>
+             <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Francés" onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Francés</span></label>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Otro" onclick="document.getElementById('wrapper-otro-idioma').style.display='block'"> <span>Otro idioma</span></label>
              <div id="wrapper-otro-idioma" style="display:none;"><input type="text" id="input-otro-idioma" class="input-otro-idioma" placeholder="Especificar idioma..."></div>
          </div>`;
