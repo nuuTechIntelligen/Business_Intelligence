@@ -98,7 +98,7 @@
              </select> 
          </div>
          
-         <!-- Switcher de Modalidad Maestro (Fijo desde el HTML) -->
+         <!-- Switcher de Modalidad Nacio desde HTML -->
          <div class="modalidad-switcher-wrapper">
              <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModalidad('single')">🌅 Tour de 1 Día</button>
              <button type="button" id="tab-circuit" class="tab-btn" onclick="cambiarModalidad('circuit')">🗺️ Circuito Vía Há (Multi-Días)</button>
@@ -107,11 +107,11 @@
          <div class="grid-layout" id="viaha-grid-layout"> 
               
              <!-- ==========================================================================
-                COLUMNA 1: TODO LO REFERENTE AL TOUR (Alineación Estricta con imagen_3.png)
+                COLUMNA 1: TODO LO REFERENTE AL TOUR (Alineación Certificada)
                 ========================================================================== -->
              <div class="grid-col-1" id="viaha-col-info"> 
                  
-                 <!-- APARTADO A: Pregunta y Selector Principal Fijo (Primer lugar absoluto de la Columna 1) -->
+                 <!-- Selector Principal Fijo (Al tope de Col 1) -->
                  <div id="wrapper-selector-single-fijo" class="box-personalizacion" style="background-color: var(--light-bg); border: 2px solid var(--executive-dark); margin-bottom: 20px;">
                      <label class="section-title" style="font-size:22px; border:none; padding:0; display:block; margin-bottom:10px !important;">¿Qué paraíso quieres visitar hoy?</label>
                      <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
@@ -124,7 +124,7 @@
                      </select>
                  </div>
 
-                 <!-- APARTADO B: Tarjetas de Información del Catálogo (Fotos, Descr, Inclusiones) -->
+                 <!-- Catálogo Informativo (Fotos, Títulos, Inclusiones) -->
                  <div id="catalogo-tarjetas-tours">
                      <!-- Chichén Itzá -->
                      <div id="info-chichen" class="tour-info-card"> 
@@ -263,7 +263,7 @@
                                      <li>Transporte desde tu lugar de Hospedaje.</li>
                                      <li>Guía Federal Certificado.</li>
                                      <li>Hielera con agua.</li>
-                                     <li>Estacionamientos y Peajes.</li>
+                                     <li>Estacionamientos and Peajes.</li>
                                  </ul>
                              </div>
                              <div class="no-inc-col">
@@ -350,15 +350,18 @@
                          </div>
                      </div>
                  </div>
+
+                 <!-- CORRECCIÓN ULTRA-ESTRICTA: Aquí se inyectan Complementos y Pluses en modo 1 día (Al fondo de la Columna 1, como en imagen_3.png) -->
+                 <div id="wrapper-personalizacion-single" style="margin-top: 20px;"></div>
              </div>  
 
-             <!-- APARTADO C: BLOQUE CONFIGURADOR (Se comporta como el sótano de Col 1 en modo 1 día, y como la COLUMNA CENTRAL 2 en modo circuito) -->
+             <!-- APARTADO MESA DE ACORDEONES (Exclusiva de la Columna Central 2 solo en modo Circuito) -->
              <div class="grid-col-1-b" id="viaha-col-configurador">
                  <div id="seccion-personalizacion-tour"></div>
              </div>
 
              <!-- ==========================================================================
-                COLUMNA 2 (PC): TODO LO REFERENTE A COTIZA TU GRUPO (Fijo y blindado a la derecha)
+                COLUMNA 2 (PC): COTIZA TU GRUPO (Formulario completo, garantía, costo y botón)
                 ========================================================================== -->
              <div class="grid-col-2" id="viaha-col-cotizador"> 
                  <div class="cotizador-header-wrapper"> 
