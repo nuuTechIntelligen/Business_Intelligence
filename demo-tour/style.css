@@ -116,34 +116,14 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
 } 
 
-@media (min-width: 850px) {
-    /* MODIFICACIÓN: Altura del Hero ampliada a 45vh en pantallas de escritorio */
-    .hero { height: 45vh !important; }
-    #hero-logo-img.hero-logo-movil { display: none !important; }
-    .hero-title-pc { display: block; font-size: 56px; }
-
-    /* MODIFICACIÓN: Margen negativo superior incrementado de -30px a -100px para encabalgar la tarjeta */
+/* ESTILOS POR DEFECTO (Móvil): El contenedor hereda el margen de -30px seguro */
 .container { 
-    width: 92%; max-width: 950px; margin: -100px auto 50px !important; background: var(--white); padding: 20px; 
-    border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
-} 
-    
-    /* MODIFICACIÓN PROFESIONAL: Obligamos al lienzo slider a estirarse sin deformación responsiva */
-    .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
-}
-
-/* MODIFICACIÓN: Margen negativo superior incrementado de -30px a -100px para encabalgar la tarjeta */
-.container { 
-    width: 92%; max-width: 950px; margin: -30px auto 50px !important; background: var(--white); padding: 20px; 
+    width: 92%; max-width: 950px; margin: -30px auto 50px; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
 } 
 
+/* Layout base en una sola columna vertical para celulares */
 .grid-layout { display: flex; flex-direction: column; gap: 30px; } 
-
-@media (min-width: 850px) { 
-    .container { padding: 30px; } 
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; } 
-} 
 
 .carousel-container { position: relative; width: 100%; height: 230px; overflow: hidden; border-radius: 12px 12px 0 0; touch-action: pan-y pin-x; } 
 @media (min-width: 600px) { .carousel-container { height: 280px; } } 
@@ -230,4 +210,18 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .social-icon-link:hover .icon-svg { fill: var(--turquesa); }
 .footer-text { font-size: 15px; color: var(--text); padding: 0 10px; font-weight: bold;} 
 .footer-link { color: var(--text); text-decoration: none; font-weight: bold; } 
-.footer-link:hover { color: var(--turquesa); }
+.footer-link:hover { color: var(--turquesa); } 
+
+/* ==========================================================================
+   MEDIA QUERY: Reglas exclusivas para pantallas de PC (Escritorio)
+   ========================================================================== */
+@media (min-width: 850px) {
+    .hero { height: 45vh !important; }
+    #hero-logo-img.hero-logo-movil { display: none !important; }
+    .hero-title-pc { display: block; font-size: 56px; }
+    .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
+    
+    /* El encabalgado fuerte de -100px y las 2 columnas en paralelo activas al tiro */
+    .container { margin: -100px auto 50px !important; padding: 30px; } 
+    .grid-layout { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 40px !important; align-items: start !important; } 
+}
