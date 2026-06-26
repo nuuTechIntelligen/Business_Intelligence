@@ -117,7 +117,7 @@ body {
 } 
 
 /* ==========================================================================
-   ESTILOS DE CAPAS DECORATIVAS FLOTANTES (CARRUSEL INFUNITO CSS)
+   ESTILOS DE CAPAS DECORATIVAS FLOTANTES (CARRUSEL INTERACTIVO AJUSTADO)
    ========================================================================== */
 .decoracion-flotante {
     position: fixed;
@@ -204,7 +204,6 @@ body {
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
 } 
 
-/* En celulares todo corre en un solo bloque vertical descendente ordenado */
 .grid-layout { display: flex; flex-direction: column; gap: 30px; } 
 
 .carousel-container { position: relative; width: 100%; height: 230px; overflow: hidden; border-radius: 12px; touch-action: pan-y pin-x; } 
@@ -298,7 +297,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link:hover { color: var(--turquesa); } 
 
 /* ==========================================================================
-   MEDIA QUERY: Reglas para PC (Escritorio) - Distribución Adaptativa Dual
+   MEDIA QUERY: Reglas para PC (Escritorio) - Estructura Dual Inteligente
    ========================================================================== */
 @media (min-width: 850px) {
     .hero { height: 45vh !important; }
@@ -306,13 +305,21 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .hero-title-pc { display: block; font-size: 56px; }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
-    /* Configuración por defecto: 2 Columnas tradicionales para el Tour de 1 Día */
+    /* 1. MODO 1 DÍA (Por Defecto): 2 Columnas tradicionales exactas. Col 1 (Info/Tour) y Col 2 (Cotizador) */
     .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
     .grid-layout { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 40px !important; align-items: start !important; } 
     
-    /* MODIFICACIÓN PREMIUM: Cuando el circuito se activa, expandimos el lienzo horizontal a 3 Columnas */
+    /* 2. MODO CIRCUITO MULTIDÍAS (Clase Dinámica Activa): Rompe a 3 Columnas en paralelo en PC */
     .container.modo-circuito-activo { max-width: 1380px !important; }
-    .container.modo-circuito-activo .grid-layout { grid-template-columns: 1fr 1fr 0.8fr !important; gap: 30px !important; }
+    .container.modo-circuito-activo .grid-layout { 
+        grid-template-columns: 1fr 1fr 0.8fr !important; 
+        gap: 30px !important; 
+    }
     
+    /* Enrutamiento de áreas Grid exclusivas únicamente cuando el circuito multidías está encendido */
+    .container.modo-circuito-activo #viaha-col-info { grid-column: 1 !important; }
+    .container.modo-circuito-activo #viaha-col-configurador { grid-column: 2 !important; }
+    .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; }
+
     .decoracion-flotante { display: block !important; }
 }
