@@ -4,7 +4,7 @@
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
-let adultos = 2;                // MODIFICACIÓN: El contador arranca nativamente en 2 adultos
+let adultos = 2;                // El contador arranca nativamente en 2 adultos
 let ninos = 0; 
 let fp = null;                  // Instancia controladora del calendario Flatpickr
 let fechaSeleccionada = ""; 
@@ -17,7 +17,7 @@ const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxma
 // Endpoint analítico de bloqueos de calendario sincronizado con Google Sheets
 const API_URL = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 
-// Catálogo maestro estructurado de rutas opcionales y pluses por destino (CORRECCIÓN: Llaves homologadas con la matriz)
+// Catálogo maestro estructurado de rutas opcionales y pluses por destino
 const catalogoEstructuraTours = {
      cenotes: { complementos: ["Nah-Yah / Su-hem", "Grutas de Tzabnah", "Homún"], plus: ["Avistamiento de aves", "Dinámica de observación","Hacienda Pixyah","Taller Tekit"] },
      chichen: { complementos: ["Cenote Zací / Valladolid", "Izamal", "Cenote Lol-Ha / Taller con Chef", "Chichén Itzá Viejo / Cenote Yodzonot"], plus: ["Avistamiento de aves", "Dinámica de observación"] },
@@ -189,7 +189,7 @@ function cargarBloqueos() {
  */
 function cambiarCant(tipo, cambio) {  
       if (tipo === 'adultos') {  
-          // MODIFICACIÓN: Congelamos el límite mínimo en 2 adultos para respetar el tramo base comercial
+          // Congelamos el límite mínimo en 2 adultos para respetar el tramo base comercial
           if (adultos + cambio >= 2) adultos += cambio;   
           document.getElementById('qty-adultos').innerText = adultos; 
       } else {  
@@ -275,7 +275,7 @@ function renderizarCamposPersonalizados() {
      contenedorIzquierdo.innerHTML = htmlIzquierdo;
 
      contenedorDerecho.innerHTML = `
-         <div class="box-personalizacion"><div class="titulo-interactivo">🗣️ Idioma</div>
+         <div class="box-personalizacion"><div class="titulo-interactivo">🗣️ Idioma del Tour Privado</div>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Español" checked onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Español</span></label>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Inglés" onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Inglés</span></label>
              <label class="opcion-item"><input type="radio" name="viaha-idioma" value="Francés" onclick="document.getElementById('wrapper-otro-idioma').style.display='none'"> <span>Francés</span></label>
@@ -339,9 +339,9 @@ function ejecutarOpcionC_HorariosFijos() {
              const btn = document.getElementById('btn-confirmar-fijo');
              btn.style.display = 'block';
              btn.onclick = () => {
-                 const bloque = document.getElementById('select-hora-fija').value;
-                 gtag('event', 'lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloque });
-                 let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloque}\n\n¿Me confirman si Roberto y Romain tienen espacio disponible?`;
+                 const bloques = document.getElementById('select-hora-fija').value;
+                 gtag('event', 'lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloques });
+                 let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloques}\n\n¿Me confirman si Roberto y Romain tienen espacio disponible?`;
                  window.open(`https://wa.me/529618150804?text=${encodeURIComponent(txt)}`, '_blank');
              };
          }
