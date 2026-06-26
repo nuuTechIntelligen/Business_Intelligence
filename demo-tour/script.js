@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Soporte avanzado para Circuitos Multidías con Acordeones y Amarre de Flatpickr.
+ * Código unificado con soporte para circuitos multi-días y ordenamiento invertido de UI.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -39,12 +39,12 @@ const matrizTarifasEscaladas = {
 
 const traducciones = { 
       es: { 
-          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "Configura tu Paraíso", tour_cenotes: "SUMERGETE A CENOTES", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
+          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "¿Qué paraíso quieres visitar hoy?", tour_cenotes: "SUMERGETE A CENOTES", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
           titulo_cotizador: "Cotiza tu grupo", label_nombre: "Nombre", ph_nombre: "Escribe tu nombre completo...", label_fecha: "Fecha del Recorrido", ph_fecha: "Selecciona una fecha o rango...", label_adultos: "Adultos", label_ninos: "Niños (-12 años)", total_estimado: "Total Estimado (Servicio Privado):", btn_reservar: "Reservar por WhatsApp", alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", alert_fecha: "Por favor, selecciona una fecha disponible.", 
           wa_saludo: "¡Hola! Me interesa reservar con *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Nombre:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Fecha o Período:*", wa_adultos: "👥 *Adultos:*", wa_ninos: "👶 *Niños:*", wa_total: "💰 *Total estimado:*", wa_pregunta: "¿Tienen disponibilidad para estas condiciones?"
       }, 
       en: { 
-          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Immerse yourself in the Mayab", pregunta_tour: "Configure your Paradise", tour_cenotes: "Cenotes Tour", tour_chichen: "Chichen Itza", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestun", tour_campeche: "Campeche",
+          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Immerse yourself in the Mayab", pregunta_tour: "What paradise do you want to visit today?", tour_cenotes: "Cenotes Tour", tour_chichen: "Chichen Itza", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestun", tour_campeche: "Campeche",
           titulo_cotizador: "Quote your group", label_nombre: "Name", ph_nombre: "Enter your full name...", label_fecha: "Tour Date", ph_fecha: "Select a date or range...", label_adultos: "Adultos", label_ninos: "Children (Under 12)", total_estimado: "Estimated Total (Private Service):", btn_reservar: "Book via WhatsApp", alert_nombre: "Please enter your full name to customize your quote.", alert_fecha: "Please select an available date.", 
           wa_saludo: "Hello! I am interested in booking with *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Name:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Dates:*", wa_adultos: "👥 *Adults:*", wa_ninos: "👶 *Children:*", wa_total: "💰 *Estimated Total:*", wa_pregunta: "Do you have availability for these conditions?"
       } 
@@ -114,17 +114,17 @@ function cambiarModalidad(tipo) {
 }
 
 /**
- * CORRECCIÓN: Estructura inyectada invertida. Primero la Info/Galería fija arriba, y los selectores ABAJO.
+ * RECONSOLIDADO RÍGIDO DE UX: Pregunta, selector y personalizaciones abajo del catálogo de información
  */
 function renderizarEstructuraSegunModalidad() {
     const contenedorTarget = document.getElementById('seccion-personalizacion-tour');
     if (!contenedorTarget) return;
 
     if (modalidadActiva === 'single') {
-        // En 1 día, inyectamos el selector de tours y sus campos ABAJO del carrusel informativo
+        // Modo 1 Día: Pregunta, Selector Principal de Destinos y campos de personalización abajo
         contenedorTarget.innerHTML = `
             <div class="box-personalizacion" style="background-color: var(--light-bg); border: 2px solid var(--executive-dark);">
-                <label class="input-label" style="font-size:16px;">¿Qué paraíso quieres visitar hoy?</label>
+                <label class="section-title" style="font-size:22px; border:none; padding:0; display:block; margin-bottom:10px !important;" data-i18n="pregunta_tour">¿Qué paraíso quieres visitar hoy?</label>
                 <select id="tour-select" class="tour-picker" onchange="actualizarInterfazSingle()">
                     <option value="chichen">CHICHÉN ITZÁ</option>
                     <option value="cenotes">SUMERGETE A CENOTES</option>
@@ -139,7 +139,7 @@ function renderizarEstructuraSegunModalidad() {
         renderizarCamposSingle();
         mostrarTarjetaCatalogo("chichen");
     } else {
-        // En Circuito, inyectamos el Tablero completo de Acordeones ABAJO del carrusel informativo
+        // Modo Circuito de Tours: Tablero dinámico con estructura de Acordeones por cada día
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
         for (let i = 1; i <= diasCircuitoContador; i++) {
@@ -170,7 +170,6 @@ function renderizarEstructuraSegunModalidad() {
         htmlAcordeones += `</div><button type="button" class="btn-add-dia-circuito" onclick="agregarDiaCircuito()">➕ Agregar Siguiente Día al Itinerario</button>`;
         contenedorTarget.innerHTML = htmlAcordeones;
 
-        // Carga inicial controlada de los acordeones del circuito
         for (let i = 1; i <= diasCircuitoContador; i++) {
             const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
             if(i === 1) selectDia.value = "chichen";
@@ -261,7 +260,7 @@ function agregarDiaCircuito() {
 }
 
 function eliminarDiaCircuito(e, dia) {
-    e.stopPropagation(); // Evita que se abra/cierre al dar clic al botón de eliminar
+    e.stopPropagation(); 
     if (diasCircuitoContador > 2) {
         diasCircuitoContador--;
         renderizarEstructuraSegunModalidad();
@@ -272,6 +271,7 @@ function eliminarDiaCircuito(e, dia) {
 
 function actualizarInterfazSingle() {  
       const select = document.getElementById('tour-select');  
+      if(!select) return;
       const selectedTour = select.value;  
        
       mostrarTarjetaCatalogo(selectedTour);
@@ -280,9 +280,6 @@ function actualizarInterfazSingle() {
       calcular();  
 }  
 
-/**
- * Centralizador de renderizado para las tarjetas de información y autoplay
- */
 function mostrarTarjetaCatalogo(idTour) {
     Object.keys(intervalosCarrusel).forEach(tourKey => detenerAutoplayCarrusel(tourKey));  
     document.querySelectorAll('.tour-info-card').forEach(card => card.classList.remove('active'));  
@@ -291,20 +288,15 @@ function mostrarTarjetaCatalogo(idTour) {
     if (tarjetaTarget) tarjetaTarget.classList.add('active');
     
     activarAutoplayCarrusel(idTour);
-    
     gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoEstructuraTours[idTour].txt });
 }
 
-/**
- * CORRECCIÓN SÓLIDA: Corrección del error del null.svg. Mapea la categoría real dependiendo de la pantalla activa.
- */
 function actualizarLogosDinamicos() {  
       let categoria = "arqueologia";
       if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');  
           if (select) categoria = catalogoEstructuraTours[select.value].cat;  
       } else {
-          // Si es circuito, extrae la categoría del Tour activo del Día 1
           const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
           if (selectPrimero) categoria = catalogoEstructuraTours[selectPrimero.value].cat;
       }
@@ -422,7 +414,7 @@ function cargarBloqueos() {
               const fechas = data.filter(row => row.fecha && row.fecha.trim().length > 5).map(row => row.fecha.trim());  
               if (fp && typeof fp.set === 'function') fp.set("disable", fechas);  
           })  
-          .catch(err => console.error("❌ Error de communication analítica con SheetDB:", err));  
+          .catch(err => console.error("❌ Error de comunicación analítica con SheetDB:", err));  
 }  
 
 function cambiarCant(tipo, cambio) {  
@@ -492,7 +484,7 @@ function enviarWhatsApp() {
           'date_range_booked': fechaSeleccionada, 'quantity_adults': adultos, 'quantity_children': ninos, 'estimated_total_quoted': total  
       });  
 
-      window.open(`https://wa.me/529618150804?text=${encodeURIComponent(mensaje)}`, '_blank');  
+      window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
 
 function dispararAgendado() { document.getElementById('modal-agenda').style.display = 'flex'; ejecutarOpcionC_HorariosFijos(); }
