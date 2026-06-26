@@ -333,7 +333,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 }
 
 /* 2. EXCEPCIÓN: Si estamos en modo CIRCUITO y la pantalla es menor a 1500px, los ocultamos */
-@media (min-width: 850px) and (max-width: 1499px) {
+@media (min-width: 850px) and (max-width: 1799px) {
     .container.modo-circuito-activo ~ .decoracion-flotante {
         display: none !important;
     }
