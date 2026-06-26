@@ -116,13 +116,55 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
 } 
 
-/* ESTILOS POR DEFECTO (Móvil): El contenedor hereda el margen de -30px seguro */
+/* ==========================================================================
+   ESTILOS DE CAPAS DECORATIVAS FLOTANTES (CARRUSEL INFUNITO CSS)
+   ========================================================================== */
+.decoracion-flotante {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permite hacer clic a través de los fondos decorativos */
+    display: none;        /* Oculto en móviles por defecto */
+}
+
+.isologo-izq, .isologo-der {
+    position: fixed;
+    top: 0;
+    width: 250px; /* Ancho controlado para las franjas laterales */
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0;
+    z-index: 2;
+    animation: desvanecerIsologos 24s infinite ease-in-out; /* Animación de 24 segundos en ciclo */
+}
+
+/* Posicionamiento rígido en los extremos de la pantalla */
+.isologo-izq { left: 20px; background-position: left center; }
+.isologo-der { right: 20px; background-position: right center; }
+
+/* REGLAS ASÍNCRONAS: Retardos de tiempo para simular la rotación del carrusel de fondos */
+.iso-slide-1 { animation-delay: 0s; }
+.iso-slide-2 { animation-delay: 6s; }
+.iso-slide-3 { animation-delay: 12s; }
+.iso-slide-4 { animation-delay: 18s; }
+
+/* Keyframes para la transición limpia y elegante de opacidad (Crossfade) */
+@keyframes desvanecerIsologos {
+    0% { opacity: 0; }
+    5% { opacity: 0.25; z-index: 3; }  /* Opacidad al 25% para que actúe como marca de agua sutil */
+    25% { opacity: 0.25; }             
+    30% { opacity: 0; z-index: 2; } 
+    100% { opacity: 0; }
+}
+
 .container { 
     width: 92%; max-width: 950px; margin: -30px auto 50px; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
 } 
 
-/* Layout base en una sola columna vertical para celulares */
 .grid-layout { display: flex; flex-direction: column; gap: 30px; } 
 
 .carousel-container { position: relative; width: 100%; height: 230px; overflow: hidden; border-radius: 12px 12px 0 0; touch-action: pan-y pin-x; } 
@@ -224,4 +266,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     /* El encabalgado fuerte de -100px y las 2 columnas en paralelo activas al tiro */
     .container { margin: -100px auto 50px !important; padding: 30px; } 
     .grid-layout { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 40px !important; align-items: start !important; } 
+    
+    /* Proyectamos y activamos el Grid flotante para los isologos en PC */
+    .decoracion-flotante { display: block !important; }
 }
