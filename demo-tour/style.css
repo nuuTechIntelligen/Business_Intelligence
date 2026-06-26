@@ -10,13 +10,12 @@
 } 
 
 body { 
-    font-family: 'Big Shoulders Text', sans-serif; 
-    font-weight: 600;
+    font-family: 'Urbanist', sans-serif; 
     margin: 0; padding: 0; 
     background-color: var(--light-bg); 
     color: var(--text); 
     line-height: 1.5; 
-    font-size: 19px; 
+    font-size: 18px; 
 } 
 
 .hero { 
@@ -126,24 +125,22 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none; 
-    display: none;        /* Oculto en móviles por defecto */
+    display: none;        
 }
 
-/* Contenedor maestro del carrusel lateral en PC: Centra el área de renderizado */
 .decoracion-flotante.fondo-isologos {
     left: 50%;
     transform: translateX(-50%);
-    max-width: 1455px;    /* Delimita la apertura para que se acerquen sutilmente al cotizador */
+    max-width: 1455px;    
     width: 100%;
     height: 100%;
 }
 
 .isologo-izq, .isologo-der {
     position: absolute;
-    /* MODIFICACIÓN: Bajamos los elementos a 15vh para evitar colisiones con el Hero al hacer scroll */
     top: 45vh !important; 
-    width: 200px;         /* Proporción estilizada tipo marca de agua */
-    height: 70vh;         /* Altura optimizada para centrar el patrón vertical */
+    width: 200px;         
+    height: 70vh;         
     background-repeat: no-repeat;
     background-size: contain;
     opacity: 0;
@@ -151,11 +148,9 @@ body {
     animation: desvanecerIsologos 24s infinite ease-in-out; 
 }
 
-/* Ubicación refinada respecto al eje centralizado del max-width de 1400px */
 .isologo-izq { left: 30px !important; background-position: left center; }
 .isologo-der { right: 30px !important; background-position: right center; }
 
-/* REGLAS ASÍNCRONAS: Tiempos congelados de retraso para el crossfade */
 .iso-slide-1 { animation-delay: 0s; }
 .iso-slide-2 { animation-delay: 6s; }
 .iso-slide-3 { animation-delay: 12s; }
@@ -163,12 +158,138 @@ body {
 
 @keyframes desvanecerIsologos {
     0% { opacity: 0; }
-    5% { opacity: 0.18; z-index: 3; }  /* Bajamos a 18% para un fondo ultra-premium y sutil que no compita con el texto */
+    5% { opacity: 0.18; z-index: 3; }  
     25% { opacity: 0.18; }             
     30% { opacity: 0; z-index: 2; } 
     100% { opacity: 0; }
 }
 
+/* ==========================================================================
+   MODIFICACIÓN: Estilos de Componentes de Pestañas (Modalidad Switcher)
+   ========================================================================== */
+.modalidad-switcher-wrapper {
+    display: flex;
+    width: 100%;
+    background-color: var(--light-bg);
+    padding: 6px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: 1px solid var(--executive-dark);
+    box-sizing: border-box;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px;
+    font-family: 'Big Shoulders Text', sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    text-transform: uppercase;
+}
+
+.tab-btn.active {
+    background-color: var(--white);
+    color: var(--text);
+    box-shadow: 0 4px 12px rgba(85,85,84,0.08);
+}
+
+/* ==========================================================================
+   MODIFICACIÓN: Estilos Estructurales de Acordeones de Circuito
+   ========================================================================== */
+.accordion-item-circuito {
+    background-color: var(--light-bg);
+    border: 1px solid var(--executive-dark);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.accordion-header-dia {
+    width: 100%;
+    background-color: var(--white);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none;
+    font-family: 'Big Shoulders Text', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s ease;
+}
+
+.accordion-header-dia:hover {
+    background-color: #FFFBF7;
+}
+
+.accordion-indicator-icon {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.accordion-item-circuito.open .accordion-indicator-icon {
+    transform: rotate(180deg);
+}
+
+.accordion-content-dia {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    padding: 0 20px;
+}
+
+.accordion-item-circuito.open .accordion-content-dia {
+    max-height: 1200px; /* Suficiente espacio para inyectar selectores e inputs internos */
+    padding: 20px;
+    border-top: 1px solid var(--executive-dark);
+    background-color: var(--white);
+}
+
+.btn-add-dia-circuito {
+    width: 100%;
+    background-color: transparent;
+    border: 2px dashed var(--turquesa);
+    color: var(--text);
+    padding: 14px;
+    border-radius: 12px;
+    font-family: 'Big Shoulders Text', sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-add-dia-circuito:hover {
+    background-color: var(--white);
+    border-color: var(--turquesa-dark);
+}
+
+.btn-remove-dia {
+    background-color: transparent;
+    border: none;
+    color: #E74C3C;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 4px 8px;
+    font-family: 'Urbanist', sans-serif;
+    text-transform: uppercase;
+}
+
+/* ==========================================================================
+   ESTILOS COMPLEMENTARIOS DE ELEMENTOS BASE
+   ========================================================================== */
 .container { 
     width: 92%; max-width: 950px; margin: -30px auto 50px; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
@@ -202,7 +323,7 @@ body {
 .btn-agendar-top { display: inline-block; background-color: transparent; border: 2px solid var(--turquesa-dark); color: var(--text); padding: 6px 14px; border-radius: 8px; font-family: 'Big Shoulders Text', sans-serif; font-weight: bold; font-size: 15px; cursor: pointer; transition: all 0.3s ease; }
 .btn-agendar-top:hover { background-color: var(--executive-dark); border-color: var(--executive-dark); }
 
-.section-title { color: var(--text); font-size: 24px; border-left: 5px solid var(--turquesa); padding-left: 10px; margin: 0 !important; text-transform: uppercase; font-weight: bold; } 
+.section-title { color: var(--text); font-size: 24px; border-left: 5px solid var(--turquesa); padding-left: 10px; margin: 0 !important; text-transform: uppercase; font-weight: bold; font-family: 'Big Shoulders Text', sans-serif; } 
 
 body .flatpickr-input, body #fecha-reserva, body .tour-picker, body #nombre-cliente { width: 100% !important; padding: 14px !important; font-size: 18px !important; font-family: 'Big Shoulders Text', sans-serif !important; font-weight: bold !important; border: 2px solid var(--executive-dark) !important; border-radius: 12px !important; background-color: var(--light-bg) !important; color: var(--text) !important; box-sizing: border-box !important; display: block !important; } 
 body .flatpickr-input, body #fecha-reserva, body .tour-picker { padding-right: 40px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555554' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: right 15px center !important; background-size: 18px !important; appearance: none !important; } 
@@ -273,8 +394,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
     .container { margin: -100px auto 50px !important; padding: 30px; } 
-    .grid-layout { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 40px !important; align-items: start !important; } 
+    .grid-layout { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 40px !important; align-items: start !important; } 
     
-    /* Proyectamos y activamos el Grid flotante centrado para los isologos en PC */
     .decoracion-flotante { display: block !important; }
 }
