@@ -340,6 +340,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 }
 
 /* 3. RECUPERACIÓN: Si estamos en modo CIRCUITO y la pantalla es >= 1500px, los mostramos */
-@media (min-width: 1500px) {
+@media (min-width: 1800px) {
     .decoracion-flotante { display: block !important; z-index: 1 !important; }
 }
