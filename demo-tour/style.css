@@ -3,7 +3,7 @@
     --turquesa: #ECBB90;         /* Color Principal 1 (Arena) */ 
     --turquesa-dark: #555554;    /* Neutro Textos e Iconos (Gris Oscuro) */ 
     --white: #ffffff; 
-    --text: #555554;             /* Color de texto sutil base */ 
+    --text: #555554;             /* Color de texto base del manual */ 
     --light-bg: #F9F4EE;         /* Neutro Fondos (Crema Suave) */ 
     --executive-dark: #BEDFCA;   /* Color Principal 2 (Agua/Menta) */ 
     --accent-coral: #FDB1A3;     /* Color de Acento (Coral/Flamingo) */
@@ -117,7 +117,7 @@ body {
 } 
 
 /* ==========================================================================
-   ESTILOS DE CAPAS DECORATIVAS FLOTANTES (CARRUSEL INTERACTIVO AJUSTADO)
+   ESTILOS DE CAPAS DECORATIVAS FLOTANTES (CARRUSEL INFUNITO CSS)
    ========================================================================== */
 .decoracion-flotante {
     position: fixed;
@@ -197,13 +197,14 @@ body {
 .btn-remove-dia { background-color: transparent; border: none; color: #E74C3C; cursor: pointer; font-size: 14px; font-weight: bold; padding: 4px 8px; font-family: 'Big Shoulders Text', sans-serif; text-transform: uppercase; }
 
 /* ==========================================================================
-   ESTILOS COMPLEMENTARIOS DE INTERFAZ
+   ESTILOS COMPLEMENTARIOS DE INTERFAZ RESPONSIVA (MÓVIL POR DEFECTO)
    ========================================================================== */
 .container { 
     width: 92%; max-width: 950px; margin: -30px auto 50px; background: var(--white); padding: 20px; 
     border-radius: 20px; box-shadow: 0 15px 35px rgba(85,85,84,0.08); box-sizing: border-box; position: relative; z-index: 5;
 } 
 
+/* En celulares todo corre en un solo bloque vertical descendente ordenado */
 .grid-layout { display: flex; flex-direction: column; gap: 30px; } 
 
 .carousel-container { position: relative; width: 100%; height: 230px; overflow: hidden; border-radius: 12px; touch-action: pan-y pin-x; } 
@@ -296,14 +297,22 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link { color: var(--text); text-decoration: none; font-weight: bold; } 
 .footer-link:hover { color: var(--turquesa); } 
 
+/* ==========================================================================
+   MEDIA QUERY: Reglas para PC (Escritorio) - Distribución Adaptativa Dual
+   ========================================================================== */
 @media (min-width: 850px) {
     .hero { height: 45vh !important; }
     #hero-logo-img.hero-logo-movil { display: none !important; }
     .hero-title-pc { display: block; font-size: 56px; }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
-    .container { margin: -100px auto 50px !important; padding: 30px; } 
+    /* Configuración por defecto: 2 Columnas tradicionales para el Tour de 1 Día */
+    .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
     .grid-layout { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 40px !important; align-items: start !important; } 
+    
+    /* MODIFICACIÓN PREMIUM: Cuando el circuito se activa, expandimos el lienzo horizontal a 3 Columnas */
+    .container.modo-circuito-activo { max-width: 1380px !important; }
+    .container.modo-circuito-activo .grid-layout { grid-template-columns: 1fr 1fr 0.8fr !important; gap: 30px !important; }
     
     .decoracion-flotante { display: block !important; }
 }
