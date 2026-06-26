@@ -298,6 +298,38 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link { color: var(--text); text-decoration: none; font-weight: bold; } 
 .footer-link:hover { color: var(--turquesa); } 
 
+/* --- LÓGICA MOBILE-FIRST PARA HIBRIDACIÓN --- */
+
+@media (max-width: 849px) {
+    /* 1. Botón de Reserva Flotante (Sticky Footer) */
+    .summary-box, .btn-whatsapp {
+        position: sticky;
+        bottom: 0;
+        z-index: 1000;
+        margin: 0;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-whatsapp {
+        padding: 20px;
+        font-size: 20px;
+    }
+
+    /* 2. Encabezados de días anclados (Sticky Headers) */
+    .accordion-header-dia {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid var(--executive-dark);
+    }
+
+    /* Ajuste para que el footer no tape el contenido al final del scroll */
+    .container {
+        padding-bottom: 120px !important;
+    }
+}
+
 /* ==========================================================================
    MEDIA QUERY: Reglas para PC (Escritorio)
    ========================================================================== */
