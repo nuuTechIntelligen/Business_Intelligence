@@ -299,14 +299,11 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link:hover { color: var(--turquesa); } 
 
 /* --- LÓGICA MOBILE-FIRST PARA HIBRIDACIÓN --- */
-
 @media (max-width: 849px) {
-    /* Corregimos el contenedor principal para permitir el comportamiento sticky */
     .container { 
-        padding-bottom: 150px !important; /* Más espacio para que el footer no tape el contenido */
+        padding-bottom: 150px !important; 
     }
 
-    /* 1. Footer Fijo (Total + Botón) */
     .summary-box, .btn-whatsapp {
         position: fixed;
         bottom: 0;
@@ -321,19 +318,19 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     }
     
     .summary-box { 
-        bottom: 75px; /* Se sitúa justo encima del botón */
+        bottom: 75px;
         background-color: var(--white) !important;
         border-top: 2px solid var(--executive-dark);
     }
 
-    /* 2. Acordeones Sticky (Forzamos el comportamiento) */
+    /* Acordeones Sticky */
     .accordion-item-circuito {
-        overflow: visible !important; /* CLAVE: Si es hidden, el sticky falla */
+        overflow: visible !important; 
     }
 
     .accordion-header-dia {
         position: sticky !important;
-        top: 0px; /* Se pegará al borde superior */
+        top: 0px; 
         z-index: 99;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
@@ -362,25 +359,20 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .container.modo-circuito-activo #viaha-col-info { grid-column: 1 !important; }
     .container.modo-circuito-activo #viaha-col-configurador { display: block !important; grid-column: 2 !important; }
     .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; }
-}
 
-/* ==========================================================================
-   LÓGICA BLINDADA DE ISOLOGOS (Fuera de Media Queries de Layout)
-   ========================================================================== */
-
-/* 1. Por defecto, siempre visibles si la pantalla es mayor a 850px (Modo 2 columnas) */
-@media (min-width: 850px) {
+    /* LÓGICA DE ISOLOGOS: Prioridad correcta */
+    /* 1. Por defecto, siempre visibles (modo 2 columnas) */
     .decoracion-flotante { display: block !important; z-index: 1 !important; }
-}
 
-/* 2. EXCEPCIÓN: Si estamos en modo CIRCUITO y la pantalla es menor a 1500px, los ocultamos */
-@media (min-width: 850px) and (max-width: 1899px) {
+    /* 2. Si es modo circuito y pantalla pequeña (< 1900px), los ocultamos */
     .container.modo-circuito-activo ~ .decoracion-flotante {
         display: none !important;
     }
-}
 
-/* 3. RECUPERACIÓN: Si estamos en modo CIRCUITO y la pantalla es >= 1500px, los mostramos */
-@media (min-width: 1900px) {
-    .decoracion-flotante { display: block !important; z-index: 1 !important; }
+    /* 3. Si es modo circuito Y pantalla muy grande (>= 1900px), los volvemos a mostrar */
+    @media (min-width: 1900px) {
+        .container.modo-circuito-activo ~ .decoracion-flotante {
+            display: block !important;
+        }
+    }
 }
