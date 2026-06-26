@@ -127,7 +127,7 @@ body {
 }
 
 .decoracion-flotante.fondo-isologos {
-    left: 50%; transform: translateX(-50%); max-width: 1455px; width: 100%; height: 100%;
+    left: 50%; transform: translateX(-50%); max-width: 1900px; width: 100%; height: 100%;
 }
 
 .isologo-izq, .isologo-der {
@@ -337,7 +337,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     }
 
     /* Regla para recuperar visibilidad en circuito si la pantalla es lo suficientemente ancha */
-    @media (min-width: 1500px) {
+    @media (min-width: 1700px) {
         .container.modo-circuito-activo ~ .decoracion-flotante {
             display: block !important;
         }
