@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Código unificado con soporte para circuitos multi-días y ordenamiento invertido de UI.
+ * Código unificado con soporte responsivo para Circuitos de 3 Columnas en PC.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -36,6 +36,19 @@ const matrizTarifasEscaladas = {
      celestun: { "Bote": { 2: 3380, 3: 1150, 4: 900 }, "Lancha": { 2: 3380, 3: 1150, 4: 900 } },
      campeche: { "Tour de 1 dia": { 2: 3400, 3: 1150, 4: 850 }, "Tour de 2 dias": { 2: 6800, 3: 2250, 4: 1700 } }
 };
+
+const traducciones = { 
+      es: { 
+          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Sumérgete al Mayab", pregunta_tour: "¿Qué paraíso quieres visitar hoy?", tour_cenotes: "SUMERGETE A CENOTES", tour_chichen: "Chichén Itzá", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestún", tour_campeche: "Campeche",
+          titulo_cotizador: "Cotiza tu grupo", label_nombre: "Nombre", ph_nombre: "Escribe tu nombre completo...", label_fecha: "Fecha del Recorrido", ph_fecha: "Selecciona una fecha o rango...", label_adultos: "Adultos", label_ninos: "Niños (-12 años)", total_estimado: "Total Estimado (Servicio Privado):", btn_reservar: "Reservar por WhatsApp", alert_nombre: "Por favor, ingresa tu nombre completo para personalizar tu cotización.", alert_fecha: "Por favor, selecciona una fecha disponible.", 
+          wa_saludo: "¡Hola! Me interesa reservar con *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Nombre:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Fecha o Período:*", wa_adultos: "👥 *Adultos:*", wa_ninos: "👶 *Niños:*", wa_total: "💰 *Total estimado:*", wa_pregunta: "¿Tienen disponibilidad para estas condiciones?"
+      }, 
+      en: { 
+          hero_title: "VIA HA' MÉXICO", hero_badge: "✨ Immerse yourself in the Mayab", pregunta_tour: "What paradise do you want to visit today?", tour_cenotes: "Cenotes Tour", tour_chichen: "Chichen Itza", tour_coloradas: "Coloradas Tour Day", tour_uxmal: "Uxmal", tour_celestun: "Celestun", tour_campeche: "Campeche",
+          titulo_cotizador: "Quote your group", label_nombre: "Name", ph_nombre: "Enter your full name...", label_fecha: "Tour Date", ph_fecha: "Select a date or range...", label_adultos: "Adultos", label_ninos: "Children (Under 12)", total_estimado: "Estimated Total (Private Service):", btn_reservar: "Book via WhatsApp", alert_nombre: "Please enter your full name to customize your quote.", alert_fecha: "Please select an available date.", 
+          wa_saludo: "Hello! I am interested in booking with *VÍA HA' MÉXICO*:\n\n", wa_nombre: "👤 *Name:*", wa_tour: "🌴 *Tour:*", wa_fecha: "📅 *Dates:*", wa_adultos: "👥 *Adults:*", wa_ninos: "👶 *Children:*", wa_total: "💰 *Estimated Total:*", wa_pregunta: "Do you have availability for these conditions?"
+      } 
+}; 
 
 /**
  * Inicializador maestro.
@@ -83,16 +96,23 @@ function inicializarCalendario() {
       });  
 }  
 
+/**
+ * MODIFICACIÓN MAESTRA: Control de inyección de clases CSS dinámicas para activar las 3 Columnas en PC
+ */
 function cambiarModalidad(tipo) {
     modalidadActiva = tipo;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     
+    const mainContainer = document.getElementById('viaha-main-container');
+
     if (tipo === 'single') {
         document.getElementById('tab-single').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Fecha del Recorrido";
+        if(mainContainer) mainContainer.classList.remove('modo-circuito-activo'); // Regresa a 2 columnas
     } else {
         document.getElementById('tab-circuit').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Período del Circuito (Fechas)";
+        if(mainContainer) mainContainer.classList.add('modo-circuito-activo');    // Dispara las 3 columnas
     }
     
     renderizarEstructuraSegunModalidad();
@@ -100,29 +120,21 @@ function cambiarModalidad(tipo) {
     calcular();
 }
 
-/**
- * RECONSOLIDADO RÍGIDO FIN DE ARQUITECTURA VISUAL: Mapeo milimétrico alineado con imagen.jpg
- */
 function renderizarEstructuraSegunModalidad() {
     const contenedorSuperiorSelector = document.getElementById('wrapper-selector-single-fijo');
     const contenedorInferiorDinamico = document.getElementById('seccion-personalizacion-tour');
     if (!contenedorSuperiorSelector || !contenedorInferiorDinamico) return;
 
     if (modalidadActiva === 'single') {
-        // 1. En un solo día: Activamos y mostramos el selector nativo fijo ARRIBA
         contenedorSuperiorSelector.style.display = 'block';
-        
-        // 2. Inyectamos las opciones exclusivas de complementos y pluses ABAJO (Igual a imagen.jpg)
         contenedorInferiorDinamico.innerHTML = `<div id="wrapper-personalizacion-single"></div>`;
         renderizarCamposSingle();
         
         const select = document.getElementById('tour-select');
         if(select) mostrarTarjetaCatalogo(select.value);
     } else {
-        // 1. En circuito: Escondemos el selector plano superior para evitar ruidos de UX
         contenedorSuperiorSelector.style.display = 'none';
         
-        // 2. Transformamos el contenedor inferior en el tablero maestro de Acordeones Multidías
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
         for (let i = 1; i <= diasCircuitoContador; i++) {
