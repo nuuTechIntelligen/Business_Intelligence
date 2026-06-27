@@ -296,7 +296,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 
     .mobile-only { display: block; }
     
-    /* 1. CORRECCIÓN TRASLAPE: Barra de Progreso Sticky */
+    /* Barra de Progreso Sticky */
     .wizard-progress-container {
         position: sticky;
         top: 0;
@@ -327,10 +327,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .wizard-progress .line { height: 3px; width: 40px; background: #e0e0e0; transition: 0.3s; border-radius: 2px; }
     .wizard-progress .line.completed-line { background: var(--executive-dark); }
 
-    /* Ocultar pasos inactivos por defecto (Modo Circuito) */
-    .wizard-step { display: none; }
-    .wizard-step.active { display: block; animation: fadeInWizard 0.4s ease forwards; }
-
+    /* 1. Botones de Navegación (Se declaran ANTES para no sobreescribir la ocultación) */
     .mobile-nav-buttons { display: flex; gap: 10px; margin-top: 25px; margin-bottom: 10px; }
     .btn-wizard { 
         flex: 1; padding: 14px; border-radius: 12px; font-family: 'Big Shoulders Text', sans-serif; 
@@ -340,12 +337,17 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .btn-wizard.next { background: var(--turquesa); color: var(--text); }
     .btn-wizard.prev { background: #e0e0e0; color: var(--text); }
 
+    /* 2. Ocultar pasos inactivos (Se declara DESPUÉS para que gane la pelea) */
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; animation: fadeInWizard 0.4s ease forwards; }
+    .wizard-step.active.mobile-nav-buttons { display: flex; } /* Restaura el flex solo si está activo */
+
     @keyframes fadeInWizard { 
         from { opacity: 0; transform: translateY(10px); } 
         to { opacity: 1; transform: translateY(0); } 
     }
 
-    /* 2. CORRECCIÓN STICKY FOOTER: Regresa al flujo normal en todos los casos */
+    /* Regresa al flujo normal en todos los casos */
     .summary-box, .btn-whatsapp {
         width: 100%;
         margin-top: 15px;
@@ -366,7 +368,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* 3. MAGIA HÍBRIDA: LÓGICA PARA MODO "TOUR DE 1 DÍA" */
+    /* LÓGICA PARA MODO "TOUR DE 1 DÍA" */
     .container.modo-single-activo .wizard-step {
         display: block !important; 
         animation: none !important;
