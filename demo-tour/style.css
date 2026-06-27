@@ -287,11 +287,11 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link:hover { color: var(--turquesa); } 
 
 /* ==========================================================================
-   LÓGICA MOBILE (Wizard Condicional y Ajustes UX) 
+   LÓGICA MOBILE (Wizard Condicional 2 Pasos y Ajustes UX) 
    ========================================================================== */
 @media (max-width: 849px) {
     .container { 
-        padding-bottom: 40px !important; /* Reducido al quitar el sticky footer */
+        padding-bottom: 40px !important; 
     }
 
     .mobile-only { display: block; }
@@ -303,7 +303,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         z-index: 1000;
         background: var(--white);
         padding: 15px 0;
-        margin: 15px -20px 20px -20px; /* Margen superior positivo para no tapar el idioma */
+        margin: 15px -20px 20px -20px; 
         border-radius: 20px 20px 0 0;
         border-bottom: 2px solid var(--light-bg);
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
@@ -345,7 +345,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         to { opacity: 1; transform: translateY(0); } 
     }
 
-    /* 2. CORRECCIÓN STICKY FOOTER: Se elimina el fixed, regresa al flujo normal */
+    /* 2. CORRECCIÓN STICKY FOOTER: Regresa al flujo normal en todos los casos */
     .summary-box, .btn-whatsapp {
         width: 100%;
         margin-top: 15px;
@@ -366,15 +366,14 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* 3. MAGIA: LÓGICA PARA MODO "TOUR DE 1 DÍA" */
-    /* Si el contenedor tiene esta clase, rompemos las reglas del wizard */
+    /* 3. MAGIA HÍBRIDA: LÓGICA PARA MODO "TOUR DE 1 DÍA" */
     .container.modo-single-activo .wizard-step {
-        display: block !important; /* Muestra todo junto */
+        display: block !important; 
         animation: none !important;
     }
-    .container.modo-single-activo .mobile-nav-buttons,
-    .container.modo-single-activo .wizard-progress-container {
-        display: none !important; /* Oculta barra de progreso y botones de siguiente/atrás */
+    .container.modo-single-activo .wizard-progress-container,
+    .container.modo-single-activo .circuit-only-btn {
+        display: none !important; 
     }
 }
 
@@ -388,7 +387,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
     /* Ocultar elementos exclusivos de móvil */
-    .mobile-only, .mobile-nav-buttons { display: none !important; }
+    .mobile-only, .mobile-nav-buttons, .circuit-only-btn { display: none !important; }
     
     /* Romper las clases de "Paso a paso" para mostrar todo en PC */
     .wizard-step { display: block !important; }
