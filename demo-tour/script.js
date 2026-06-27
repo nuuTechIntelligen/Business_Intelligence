@@ -15,6 +15,9 @@ let modalidadActiva = 'single';
 let diasCircuitoContador = 2; 
 let pasoActual = 1; 
 
+// Caché para optimizar consultas a SheetDB
+let fechasBloqueadasGlobal = [];
+
 const posicionesCarrusel = { cenotes: 0, chichen: 0, coloradas: 0, uxmal: 0, celestun: 0, campeche: 0 }; 
 const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxmal: null, celestun: null, campeche: null }; 
 
@@ -59,32 +62,84 @@ async function inicializarSistema() {
           cargarBloqueos();  
           inicializarSoportesTactiles();   
           renderizarEstructuraSegunModalidad();
-          inicializarCalendario();  
-          calcular();  
+          actualizarDependenciasFecha(); // <--- Llamada centralizada
       } catch (error) {  
           console.error("❌ Error en inicialización:", error.message);  
       }  
 }  
 
+/* ==========================================================================
+   FUNCIÓN CENTRAL: GESTOR DE DEPENDENCIAS DE FECHA Y PRECIO
+   ========================================================================== */
+function actualizarDependenciasFecha() {
+    calcular(); // 1. Actualiza el total económico
+    inicializarCalendario(); // 2. Adapta las reglas del calendario
+}
+
 function inicializarCalendario() {  
       const campoFecha = document.getElementById('fecha-reserva');  
       if (!campoFecha) return;  
-      if (fp) fp.destroy();   
+      
+      // 1. MENTE MAESTRA: Calcular días requeridos según selecciones actuales
+      let minDiasRequeridos = modalidadActiva === 'circuit' ? diasCircuitoContador : 1;
 
-      const minDiasRequeridos = (modalidadActiva === 'circuit') ? diasCircuitoContador : 1;
+      if (modalidadActiva === 'single') {
+          const select = document.getElementById('tour-select');
+          if (select && select.value === 'campeche') {
+              const r_comp = document.querySelector('input[name="viaha-complemento"]:checked');
+              if (r_comp && r_comp.value === "Tour de 2 dias") {
+                  minDiasRequeridos = 2; // Forzamos 2 días
+              }
+          }
+      } else {
+          for (let i = 1; i <= diasCircuitoContador; i++) {
+              const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
+              if (selectDia && selectDia.value === 'campeche') {
+                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
+                  if (r_compDia && r_compDia.value === "Tour de 2 dias") {
+                      minDiasRequeridos++; // Sumamos 1 día extra por cada "Campeche 2 días"
+                  }
+              }
+          }
+      }
 
+      // 2. Decide el modo visual del calendario
+      const modoCalendario = minDiasRequeridos > 1 ? "range" : "single";
+
+      // 3. Limpiar memoria si el calendario cambia de reglas (evita arrastrar fechas inválidas)
+      if (fp) {
+          fp.destroy();
+          document.getElementById('fecha-reserva').value = ""; 
+          fechaSeleccionada = "";
+      }   
+
+      // 4. Inyectar nuevo calendario blindado
       fp = flatpickr(campoFecha, {  
           locale: "es", 
-          mode: "range", minDate: "today", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", altInputClass: "flatpickr-input", disableMobile: true, disable: [],   
+          mode: modoCalendario, 
+          minDate: "today", 
+          dateFormat: "Y-m-d", 
+          altInput: true, 
+          altFormat: "d/m/Y", 
+          altInputClass: "flatpickr-input", 
+          disableMobile: true, 
+          disable: fechasBloqueadasGlobal, // Usa la caché para no parpadear
           onChange: function(selectedDates, dateStr) {  
               fechaSeleccionada = dateStr;  
               
-              if (modalidadActiva === 'circuit' && selectedDates.length === 2) {
+              if (modoCalendario === 'range' && selectedDates.length === 2) {
                   const milisegundosPorDia = 24 * 60 * 60 * 1000;
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
-                  if (diasRealesSeleccionados < minDiasRequeridos) {
-                      alert(`⚠️ Alerta Vía Há: Tu circuito tiene ${minDiasRequeridos} días planeados. Por favor, selecciona un rango de fechas de mínimo ${minDiasRequeridos} días en el calendario.`);
+                  // Validación: Campeche 2 días (Exige exactamente 2 días)
+                  if (modalidadActiva === 'single' && minDiasRequeridos === 2 && diasRealesSeleccionados !== 2) {
+                      alert(`⚠️ Has seleccionado un tour de 2 días. Por favor, selecciona un rango de exactamente 2 días en el calendario.`);
+                      fp.clear();
+                      fechaSeleccionada = "";
+                  } 
+                  // Validación: Circuito (Exige un mínimo de días)
+                  else if (modalidadActiva === 'circuit' && diasRealesSeleccionados < minDiasRequeridos) {
+                      alert(`⚠️ Tu itinerario exige un mínimo de ${minDiasRequeridos} días de viaje. Por favor, amplía el rango en el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   }
@@ -147,8 +202,7 @@ function cambiarModalidad(tipo) {
     }
     
     renderizarEstructuraSegunModalidad();
-    inicializarCalendario();
-    calcular();
+    actualizarDependenciasFecha(); // <--- Cambio a función inteligente
 }
 
 function renderizarEstructuraSegunModalidad() {
@@ -223,7 +277,8 @@ function renderizarCamposSingle() {
     if (datos.complementos.length > 0) {
         html += `<div class="box-personalizacion"><div class="titulo-interactivo">📍 Personaliza tu Ruta (Elige 1)</div>`;
         datos.complementos.forEach((comp, index) => {
-            html += `<label class="opcion-item"><input type="radio" name="viaha-complemento" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="calcular()"><span>${comp}</span></label>`;
+            // Se actualizan dependencias de fecha al cambiar la ruta
+            html += `<label class="opcion-item"><input type="radio" name="viaha-complemento" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="actualizarDependenciasFecha()"><span>${comp}</span></label>`;
         });
         html += `</div>`;
     } else {
@@ -249,7 +304,8 @@ function renderizarCamposDiaCircuito(dia, tour) {
     if (datos.complementos.length > 0) {
         html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px; border:none; margin:0; padding:0;">📍 Ruta del Día ${dia}</div>`;
         datos.complementos.forEach((comp, index) => {
-            html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="radio" name="viaha-complemento-dia-${dia}" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="calcular()"><span>${comp}</span></label>`;
+            // Se actualizan dependencias de fecha al cambiar la ruta
+            html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="radio" name="viaha-complemento-dia-${dia}" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="actualizarDependenciasFecha()"><span>${comp}</span></label>`;
         });
         html += `</div>`;
     } else {
@@ -270,7 +326,7 @@ function cambiarDestinoDiaCircuito(dia, tour) {
     renderizarCamposDiaCircuito(dia, tour);
     mostrarTarjetaCatalogo(tour);
     actualizarLogosDinamicos();
-    calcular();
+    actualizarDependenciasFecha(); // <--- Cambio a función inteligente
 }
 
 function toggleAccordion(dia) {
@@ -296,11 +352,10 @@ function toggleAccordion(dia) {
 function agregarDiaCircuito() {
     diasCircuitoContador++;
     renderizarEstructuraSegunModalidad();
-    inicializarCalendario();
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     const nuevoElemento = document.getElementById(`accordion-dia-${diasCircuitoContador}`);
     if(nuevoElemento) nuevoElemento.classList.add('open');
-    calcular();
+    actualizarDependenciasFecha(); // <--- Cambio a función inteligente
 }
 
 function eliminarDiaCircuito(e, dia) {
@@ -308,8 +363,7 @@ function eliminarDiaCircuito(e, dia) {
     if (diasCircuitoContador > 2) {
         diasCircuitoContador--;
         renderizarEstructuraSegunModalidad();
-        inicializarCalendario();
-        calcular();
+        actualizarDependenciasFecha(); // <--- Cambio a función inteligente
     }
 }
 
@@ -321,7 +375,7 @@ function actualizarInterfazSingle() {
       mostrarTarjetaCatalogo(selectedTour);
       renderizarCamposSingle();  
       actualizarLogosDinamicos();  
-      calcular();  
+      actualizarDependenciasFecha(); // <--- Cambio a función inteligente
 }  
 
 function mostrarTarjetaCatalogo(idTour) {
@@ -444,19 +498,24 @@ function cambiarIdioma() {
           const key = el.getAttribute('data-i18n-ph');  
           if (t[key]) el.placeholder = t[key];  
       });  
-
-      inicializarCalendario();  
-      cargarBloqueos();   
+  
       renderizarEstructuraSegunModalidad();  
+      actualizarDependenciasFecha(); // <--- Cambio a función inteligente
       gtag('event', 'cambio_idioma_plataforma', { 'idioma_activo': idiomaActual });  
 }  
 
 function cargarBloqueos() {  
+      // Optimización: Si ya tenemos las fechas bloqueadas, no le pedimos a SheetDB de nuevo.
+      if (fechasBloqueadasGlobal.length > 0) {
+          if (fp && typeof fp.set === 'function') fp.set("disable", fechasBloqueadasGlobal);
+          return;
+      }
+
       fetch(API_URL)  
           .then(res => res.json())  
           .then(data => {  
-              const fechas = data.filter(row => row.fecha && row.fecha.trim().length > 5).map(row => row.fecha.trim());  
-              if (fp && typeof fp.set === 'function') fp.set("disable", fechas);  
+              fechasBloqueadasGlobal = data.filter(row => row.fecha && row.fecha.trim().length > 5).map(row => row.fecha.trim());  
+              if (fp && typeof fp.set === 'function') fp.set("disable", fechasBloqueadasGlobal);  
           })  
           .catch(err => console.error("❌ Error de comunicación analítica con SheetDB:", err));  
 }  
