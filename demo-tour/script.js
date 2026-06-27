@@ -146,11 +146,18 @@ function cambiarModalidad(tipo) {
     if (tipo === 'single') {
         document.getElementById('tab-single').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Fecha del Recorrido";
-        if(mainContainer) mainContainer.classList.remove('modo-circuito-activo'); 
+        if(mainContainer) {
+            mainContainer.classList.remove('modo-circuito-activo'); 
+            mainContainer.classList.add('modo-single-activo'); // <--- Activa la vista unificada en móvil
+        }
     } else {
         document.getElementById('tab-circuit').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Período del Circuito (Fechas)";
-        if(mainContainer) mainContainer.classList.add('modo-circuito-activo');    
+        if(mainContainer) {
+            mainContainer.classList.add('modo-circuito-activo');    
+            mainContainer.classList.remove('modo-single-activo'); // <--- Despierta el Wizard
+        }
+        irPaso(1); // Reinicia el Wizard al paso 1 cuando entran al modo Circuito
     }
     
     renderizarEstructuraSegunModalidad();
