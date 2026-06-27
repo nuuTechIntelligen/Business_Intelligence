@@ -80,15 +80,15 @@ function inicializarCalendario() {
       const campoFecha = document.getElementById('fecha-reserva');  
       if (!campoFecha) return;  
       
-      // 1. MENTE MAESTRA: Calcular días requeridos según selecciones actuales
-      let minDiasRequeridos = modalidadActiva === 'circuit' ? diasCircuitoContador : 1;
+      // 1. MENTE MAESTRA: Calcular días requeridos (Exactos)
+      let diasRequeridos = modalidadActiva === 'circuit' ? diasCircuitoContador : 1;
 
       if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');
           if (select && select.value === 'campeche') {
               const r_comp = document.querySelector('input[name="viaha-complemento"]:checked');
               if (r_comp && r_comp.value === "Tour de 2 dias") {
-                  minDiasRequeridos = 2; // Forzamos 2 días
+                  diasRequeridos = 2; // Forzamos 2 días
               }
           }
       } else {
@@ -97,14 +97,14 @@ function inicializarCalendario() {
               if (selectDia && selectDia.value === 'campeche') {
                   const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
                   if (r_compDia && r_compDia.value === "Tour de 2 dias") {
-                      minDiasRequeridos++; // Sumamos 1 día extra por cada "Campeche 2 días"
+                      diasRequeridos++; // Sumamos 1 día extra por cada "Campeche 2 días"
                   }
               }
           }
       }
 
       // 2. Decide el modo visual del calendario
-      const modoCalendario = minDiasRequeridos > 1 ? "range" : "single";
+      const modoCalendario = diasRequeridos > 1 ? "range" : "single";
 
       // 3. Limpiar memoria si el calendario cambia de reglas (evita arrastrar fechas inválidas)
       if (fp) {
@@ -131,23 +131,17 @@ function inicializarCalendario() {
                   const milisegundosPorDia = 24 * 60 * 60 * 1000;
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
-                  // Validación: Campeche 2 días (Exige exactamente 2 días)
-                  if (modalidadActiva === 'single' && minDiasRequeridos === 2 && diasRealesSeleccionados !== 2) {
-                      alert(`⚠️ Has seleccionado un tour de 2 días. Por favor, selecciona un rango de exactamente 2 días en el calendario.`);
+                  // Validación Estricta: Exige EXACTAMENTE los días calculados
+                  if (diasRealesSeleccionados !== diasRequeridos) {
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
-                  // Validación: Circuito (Exige un mínimo de días)
-                  else if (modalidadActiva === 'circuit' && diasRealesSeleccionados < minDiasRequeridos) {
-                      alert(`⚠️ Tu itinerario exige un mínimo de ${minDiasRequeridos} días de viaje. Por favor, amplía el rango en el calendario.`);
-                      fp.clear();
-                      fechaSeleccionada = "";
-                  }
               }
               gtag('event', 'seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
           }  
       });  
-}  
+}
 
 /* ==========================================================================
    CEREBRO DEL WIZARD MÓVIL (2 PASOS)
