@@ -287,32 +287,29 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link:hover { color: var(--turquesa); } 
 
 /* ==========================================================================
-   LÓGICA MOBILE WIZARD (Asistente Paso a Paso) 
+   LÓGICA MOBILE (Wizard Condicional y Ajustes UX) 
    ========================================================================== */
 @media (max-width: 849px) {
     .container { 
-        padding-bottom: 150px !important; 
+        padding-bottom: 40px !important; /* Reducido al quitar el sticky footer */
     }
 
-    /* Mostrar elementos del Wizard solo en móvil */
     .mobile-only { display: block; }
     
-    /* Configuración de la Barra de Progreso Sticky */
+    /* 1. CORRECCIÓN TRASLAPE: Barra de Progreso Sticky */
     .wizard-progress-container {
         position: sticky;
         top: 0;
         z-index: 1000;
         background: var(--white);
         padding: 15px 0;
-        margin: -20px -20px 20px -20px; /* Expande para chocar con bordes */
+        margin: 15px -20px 20px -20px; /* Margen superior positivo para no tapar el idioma */
         border-radius: 20px 20px 0 0;
         border-bottom: 2px solid var(--light-bg);
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
-    .wizard-progress { 
-        display: flex; justify-content: center; align-items: center; gap: 10px; 
-    }
+    .wizard-progress { display: flex; justify-content: center; align-items: center; gap: 10px; }
     
     .wizard-progress .step { 
         width: 34px; height: 34px; border-radius: 50%; background: #e0e0e0; 
@@ -325,21 +322,15 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         box-shadow: 0 2px 8px rgba(236, 187, 144, 0.5); 
     }
     
-    .wizard-progress .step.completed { 
-        background: var(--executive-dark); color: var(--text); 
-    }
+    .wizard-progress .step.completed { background: var(--executive-dark); color: var(--text); }
     
-    .wizard-progress .line { 
-        height: 3px; width: 40px; background: #e0e0e0; transition: 0.3s; border-radius: 2px; 
-    }
-    
+    .wizard-progress .line { height: 3px; width: 40px; background: #e0e0e0; transition: 0.3s; border-radius: 2px; }
     .wizard-progress .line.completed-line { background: var(--executive-dark); }
 
-    /* Ocultar pasos inactivos */
+    /* Ocultar pasos inactivos por defecto (Modo Circuito) */
     .wizard-step { display: none; }
     .wizard-step.active { display: block; animation: fadeInWizard 0.4s ease forwards; }
 
-    /* Botones de Navegación del Wizard */
     .mobile-nav-buttons { display: flex; gap: 10px; margin-top: 25px; margin-bottom: 10px; }
     .btn-wizard { 
         flex: 1; padding: 14px; border-radius: 12px; font-family: 'Big Shoulders Text', sans-serif; 
@@ -354,31 +345,36 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         to { opacity: 1; transform: translateY(0); } 
     }
 
-    /* Footer Fijo (Cotización final) */
+    /* 2. CORRECCIÓN STICKY FOOTER: Se elimina el fixed, regresa al flujo normal */
     .summary-box, .btn-whatsapp {
-        position: fixed;
-        bottom: 0; left: 0; width: 100%;
-        margin: 0 !important;
-        border-radius: 20px 20px 0 0 !important;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
-        z-index: 1000;
-        padding: 10px 20px !important;
+        width: 100%;
+        margin-top: 15px;
         box-sizing: border-box;
     }
     
     .summary-box { 
-        bottom: 75px;
-        background-color: var(--white) !important;
-        border-top: 2px solid var(--executive-dark);
+        background-color: var(--executive-dark) !important;
+        border-top: none;
     }
 
-    /* Acordeones Sticky (ahora viven debajo de la barra de progreso) */
+    /* Acordeones Sticky */
     .accordion-item-circuito { overflow: visible !important; }
     .accordion-header-dia {
         position: sticky !important;
-        top: 65px; /* Compensa la altura de la barra del wizard */
+        top: 65px; 
         z-index: 99;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* 3. MAGIA: LÓGICA PARA MODO "TOUR DE 1 DÍA" */
+    /* Si el contenedor tiene esta clase, rompemos las reglas del wizard */
+    .container.modo-single-activo .wizard-step {
+        display: block !important; /* Muestra todo junto */
+        animation: none !important;
+    }
+    .container.modo-single-activo .mobile-nav-buttons,
+    .container.modo-single-activo .wizard-progress-container {
+        display: none !important; /* Oculta barra de progreso y botones de siguiente/atrás */
     }
 }
 
