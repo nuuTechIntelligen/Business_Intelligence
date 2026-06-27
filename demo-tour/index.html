@@ -65,7 +65,7 @@
      </div>
      <div class="decoracion-flotante fondo-mixto"></div>
 
-     <div class="container modo-single-activo" id="viaha-main-container">
+     <div class="container modo-single-activo" id="viaha-main-container"> 
          <div class="lang-switch-container" id="lang-lista"> 
              <button type="button" id="btn-agendar-llamada" class="btn-agendar-top" onclick="dispararAgendado()">
                  📞 Agendar Llamada
@@ -76,29 +76,22 @@
              </select> 
          </div>
 
+         <div class="modalidad-switcher-wrapper">
+             <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModalidad('single')">🌅 Tour de 1 Día</button>
+             <button type="button" id="tab-circuit" class="tab-btn" onclick="cambiarModalidad('circuit')">🗺️ Circuito Vía Há (Multi-Días)</button>
+         </div>
+
          <div class="wizard-progress-container mobile-only">
              <div class="wizard-progress">
                  <div class="step active" id="dot-1">1</div>
                  <div class="line" id="line-1"></div>
                  <div class="step" id="dot-2">2</div>
-                 <div class="line" id="line-2"></div>
-                 <div class="step" id="dot-3">3</div>
-             </div>
-         </div>
-         
-         <div class="wizard-step active" data-step="1">
-             <div class="modalidad-switcher-wrapper">
-                 <button type="button" id="tab-single" class="tab-btn active" onclick="cambiarModalidad('single')">🌅 Tour de 1 Día</button>
-                 <button type="button" id="tab-circuit" class="tab-btn" onclick="cambiarModalidad('circuit')">🗺️ Circuito Vía Há (Multi-Días)</button>
-             </div>
-             <div class="mobile-nav-buttons">
-                 <button class="btn-wizard next" onclick="irPaso(2)">Siguiente: Diseñar Itinerario ➔</button>
              </div>
          </div>
          
          <div class="grid-layout" id="viaha-grid-layout"> 
               
-             <div class="grid-col-1 wizard-step" data-step="2" id="viaha-col-info"> 
+             <div class="grid-col-1 wizard-step active" data-step="1" id="viaha-col-info"> 
                  
                  <div id="wrapper-selector-single-fijo" style="margin-bottom: 20px;">
                      <label class="section-title" style="margin-bottom: 12px !important; display: block;">¿Qué paraíso quieres visitar hoy?</label>
@@ -335,19 +328,18 @@
                  <div id="wrapper-personalizacion-single" style="margin-top: 20px;"></div>
              </div>  
 
-             <div class="grid-col-1-b wizard-step" data-step="2" id="viaha-col-configurador">
+             <div class="grid-col-1-b wizard-step active" data-step="1" id="viaha-col-configurador">
                  <div id="seccion-personalizacion-tour"></div>
              </div>
 
-             <div class="wizard-step mobile-nav-buttons" data-step="2" style="order: 99;">
-                 <button class="btn-wizard prev" onclick="irPaso(1)">⬅ Volver</button>
-                 <button class="btn-wizard next" onclick="irPaso(3)">Siguiente: Resumen ➔</button>
+             <div class="wizard-step active mobile-nav-buttons circuit-only-btn" data-step="1" style="order: 99;">
+                 <button class="btn-wizard next" onclick="irPaso(2)">Siguiente: Cotización y Datos ➔</button>
              </div>
 
-             <div class="grid-col-2 wizard-step" data-step="3" id="viaha-col-cotizador"> 
+             <div class="grid-col-2 wizard-step" data-step="2" id="viaha-col-cotizador"> 
                  
-                 <div class="mobile-nav-buttons" style="margin-top: 0; margin-bottom: 25px;">
-                     <button class="btn-wizard prev" onclick="irPaso(2)">⬅ Modificar Itinerario</button>
+                 <div class="mobile-nav-buttons circuit-only-btn" style="margin-top: 0; margin-bottom: 25px;">
+                     <button class="btn-wizard prev" onclick="irPaso(1)">⬅ Modificar Itinerario</button>
                  </div>
 
                  <div class="cotizador-header-wrapper"> 
