@@ -386,11 +386,11 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .hero-title-pc { display: block; font-size: 56px; }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
-    /* Ocultar elementos exclusivos de móvil */
-    .mobile-only, .mobile-nav-buttons, .circuit-only-btn { display: none !important; }
-    
-    /* Romper las clases de "Paso a paso" para mostrar todo en PC */
+    /* 1. Romper las clases de "Paso a paso" para mostrar todo el contenido en PC */
     .wizard-step { display: block !important; }
+    
+    /* 2. Ocultar elementos exclusivos de móvil (DEBE IR DESPUÉS para ganar prioridad) */
+    .mobile-only, .mobile-nav-buttons, .circuit-only-btn { display: none !important; }
 
     .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
     .grid-layout { display: grid !important; grid-template-columns: 1.2fr 0.8fr !important; gap: 40px !important; align-items: start !important; } 
