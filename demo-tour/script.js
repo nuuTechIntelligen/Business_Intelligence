@@ -12,8 +12,8 @@ let idiomaActual = "es";
 
 // Control de modalidad activa ('single' para 1 día, 'circuit' para multidías)
 let modalidadActiva = 'single';
-let diasCircuitoContador = 2; // El circuito arranca por defecto con 2 días mínimos
-let pasoActual = 1; // Para control del Wizard Móvil
+let diasCircuitoContador = 2; 
+let pasoActual = 1; 
 
 const posicionesCarrusel = { cenotes: 0, chichen: 0, coloradas: 0, uxmal: 0, celestun: 0, campeche: 0 }; 
 const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxmal: null, celestun: null, campeche: null }; 
@@ -51,9 +51,6 @@ const traducciones = {
       } 
 }; 
 
-/**
- * Inicializador maestro.
- */
 async function inicializarSistema() {  
       while (typeof flatpickr === 'undefined') {  
           await new Promise(resolve => setTimeout(resolve, 100));  
@@ -98,38 +95,27 @@ function inicializarCalendario() {
 }  
 
 /* ==========================================================================
-   CEREBRO DEL WIZARD MÓVIL
+   CEREBRO DEL WIZARD MÓVIL (2 PASOS)
    ========================================================================== */
 function irPaso(paso) {
     if (window.innerWidth < 850) {
-        // 1. Ocultar todos los pasos y activar el seleccionado
         document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
         document.querySelectorAll(`.wizard-step[data-step="${paso}"]`).forEach(el => el.classList.add('active'));
         
-        // 2. Actualizar visualmente la barra de progreso
-        for(let i = 1; i <= 3; i++) {
-            const dot = document.getElementById(`dot-${i}`);
-            const line = document.getElementById(`line-${i}`);
-            
-            if (dot) {
-                dot.classList.remove('active', 'completed');
-                if (i < paso) {
-                    dot.classList.add('completed');
-                    dot.innerHTML = '✓';
-                } else if (i === paso) {
-                    dot.classList.add('active');
-                    dot.innerHTML = i;
-                } else {
-                    dot.innerHTML = i;
-                }
-            }
-            if (line) {
-                if (i < paso) line.classList.add('completed-line');
-                else line.classList.remove('completed-line');
-            }
+        const dot1 = document.getElementById('dot-1');
+        const dot2 = document.getElementById('dot-2');
+        const line1 = document.getElementById('line-1');
+
+        if (paso === 1) {
+            if(dot1) { dot1.classList.add('active'); dot1.classList.remove('completed'); dot1.innerHTML = '1'; }
+            if(dot2) { dot2.classList.remove('active', 'completed'); }
+            if(line1) { line1.classList.remove('completed-line'); }
+        } else if (paso === 2) {
+            if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
+            if(dot2) { dot2.classList.add('active'); }
+            if(line1) { line1.classList.add('completed-line'); }
         }
         
-        // 3. Scroll suave al inicio del formulario para mantener el contexto
         const topPos = document.getElementById('viaha-main-container').offsetTop;
         window.scrollTo({ top: topPos - 20, behavior: 'smooth' });
         
@@ -148,16 +134,16 @@ function cambiarModalidad(tipo) {
         document.getElementById('label-fecha-dinamica').innerText = "Fecha del Recorrido";
         if(mainContainer) {
             mainContainer.classList.remove('modo-circuito-activo'); 
-            mainContainer.classList.add('modo-single-activo'); // <--- Activa la vista unificada en móvil
+            mainContainer.classList.add('modo-single-activo'); 
         }
     } else {
         document.getElementById('tab-circuit').classList.add('active');
         document.getElementById('label-fecha-dinamica').innerText = "Período del Circuito (Fechas)";
         if(mainContainer) {
             mainContainer.classList.add('modo-circuito-activo');    
-            mainContainer.classList.remove('modo-single-activo'); // <--- Despierta el Wizard
+            mainContainer.classList.remove('modo-single-activo'); 
         }
-        irPaso(1); // Reinicia el Wizard al paso 1 cuando entran al modo Circuito
+        irPaso(1); 
     }
     
     renderizarEstructuraSegunModalidad();
@@ -296,10 +282,9 @@ function toggleAccordion(dia) {
     
     if (!isOpen) {
         item.classList.add('open');
-        // Pequeño scroll para centrar el acordeón abierto en móvil respetando el Wizard Header
         if (window.innerWidth < 850) {
             setTimeout(() => {
-                const headerOffset = 70; // Altura de la barra
+                const headerOffset = 70; 
                 const elementPosition = item.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
                 window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
