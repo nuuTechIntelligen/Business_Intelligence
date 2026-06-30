@@ -319,7 +319,7 @@ function renderizarEstructuraSegunModalidad() {
         
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
-        // Creamos las opciones del selector basadas en las llaves del catálogo dinámico
+        // CORRECCIÓN: Creamos las opciones del selector basadas en las llaves del catálogo DINÁMICO
         let opcionesDestinosDinamicos = "";
         Object.keys(catalogoToursDinamico).forEach(key => {
             opcionesDestinosDinamicos += `<option value="${key}">${catalogoToursDinamico[key].txt.toUpperCase()}</option>`;
@@ -351,8 +351,10 @@ function renderizarEstructuraSegunModalidad() {
         for (let i = 1; i <= diasCircuitoContador; i++) {
             const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
             const llavesDisponibles = Object.keys(catalogoToursDinamico);
-            if(i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "chichen";
-            if(i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || "cenotes";
+            
+            // CORRECCIÓN: Asignamos por defecto los primeros destinos dinámicos reales de la base de datos
+            if(i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "";
+            if(i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || llavesDisponibles[0] || "";
             if(selectDia) renderizarCamposDiaCircuito(i, selectDia.value);
         }
         const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
@@ -360,7 +362,6 @@ function renderizarEstructuraSegunModalidad() {
     }
     actualizarLogosDinamicos();
 }
-
 function renderizarCamposSingle() {
     const select = document.getElementById('tour-select');
     const target = document.getElementById('wrapper-personalizacion-single');
@@ -490,16 +491,17 @@ function actualizarLogosDinamicos() {
       let categoria = "arqueologia";
       if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');  
-          if (select && catalogoEstructuraTours[select.value]) categoria = catalogoEstructuraTours[select.value].cat;  
+          if (select && catalogoToursDinamico[select.value]) categoria = catalogoToursDinamico[select.value].cat;  
       } else {
           const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
-          if (selectPrimero && catalogoEstructuraTours[selectPrimero.value]) categoria = catalogoEstructuraTours[selectPrimero.value].cat;
+          // CORRECCIÓN: Leer la categoría desde el nuevo catálogo dinámico de Sheets
+          if (selectPrimero && catalogoToursDinamico[selectPrimero.value]) categoria = catalogoToursDinamico[selectPrimero.value].cat;
       }
       
       const rutaSvg = `img/isologos/${categoria}.svg`;
       const htmlImg = `<img src="${rutaSvg}" alt="Isologo Vía Há ${categoria}" class="img-isologo-dinamico">`;
       document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => { container.innerHTML = htmlImg; });  
-}  
+}
 
 function calcular() {  
       if (Object.keys(catalogoToursDinamico).length === 0) return;
