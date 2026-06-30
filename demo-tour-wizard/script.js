@@ -17,11 +17,14 @@ let pasoActual = 1;
 
 // CACHÉ DE BASE DE DATOS (Mantiene la persistencia sin saturar llamadas a la API)
 let fechasBloqueadasGlobal = [];
-let catalogoToursDinamico = {}; // Reemplaza al objeto estático antiguo
+let catalogoToursDinamico = {}; 
 
 // CONFIGURACIÓN DE ENDPOINTS DE LA API (SheetDB)
 const API_BLOQUEOS = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 const API_CATALOGO = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=catalogo_tours'; 
+
+const posicionesCarrusel = { cenotes: 0, chichen: 0, coloradas: 0, uxmal: 0, celestun: 0, campeche: 0 }; 
+const intervalosCarrusel = { cenotes: null, chichen: null, coloradas: null, uxmal: null, celestun: null, campeche: null }; 
 
 const traducciones = { 
       es: { 
@@ -45,7 +48,7 @@ async function inicializarSistema() {
       }  
       try {          
           await cargarBloqueos();  
-          await descargarYProcesarCatalogo(); // <--- Descarga la configuración del Sheet
+          await descargarYProcesarCatalogo(); 
           inicializarSoportesTactiles();   
           actualizarDependenciasFecha(); 
       } catch (error) {  
@@ -54,8 +57,8 @@ async function inicializarSistema() {
 }  
 
 /**
- * MOTOR DE PROCESAMIENTO ACTUALIZADO (FASE 1.2):
- * Descarga catálogo, filtra disponibilidad e inyecta dinámicamente texto, precios y GALERÍA DE IMÁGENES.
+ * MOTOR DE PROCESAMIENTO ACTUALIZADO:
+ * Descarga catálogo, filtra disponibilidad e inyecta dinámicamente texto, precios y imágenes.
  */
 async function descargarYProcesarCatalogo() {
     try {
@@ -72,17 +75,15 @@ async function descargarYProcesarCatalogo() {
         catalogoToursDinamico = {};
 
         filas.forEach(fila => {
-            // Filtros de Clima y Estacionalidad
             if (fila.estado !== 'activo') return;
             if (fila.fecha_inicio && fila.fecha_inicio !== 'siempre' && hoy < fila.fecha_inicio) return;
             if (fila.fecha_fin && fila.fecha_fin !== 'siempre' && hoy > fila.fecha_fin) return;
 
             const id = fila.id_tour.trim();
             
-            // Parseo de rutas, pluses y matrices de precios
             const complementosArr = fila.complementos ? fila.complementos.split('|').map(s => s.trim()) : [];
             const plusesArr = fila.pluses ? fila.pluses.split('|').map(s => s.trim()) : [];
-            const imagenesArr = fila.imagenes ? fila.imagenes.split('|').map(s => s.trim()) : []; // <--- Nueva línea
+            const imagenesArr = fila.imagenes ? fila.imagenes.split('|').map(s => s.trim()) : []; 
             
             const precios2 = fila.precios_pax_2 ? fila.precios_pax_2.split('|').map(s => parseFloat(s.trim())) : [];
             const precios3 = fila.precios_pax_3 ? fila.precios_pax_3.split('|').map(s => parseFloat(s.trim())) : [];
@@ -101,7 +102,6 @@ async function descargarYProcesarCatalogo() {
                 estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
-            // Guardamos en la caché global del sistema
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
@@ -110,15 +110,10 @@ async function descargarYProcesarCatalogo() {
                 tarifas: estructuraTarifariaMapeada
             };
 
-            // Generamos las opciones del menú desplegable
             opcionesSelect += `<option value="${id}">${fila.nombre_tour.trim().toUpperCase()}</option>`;
 
-            // ==========================================================================
-            // INYECCIÓN CONSTRUCTORA DEL HTML DE LA TARJETA Y SU CARRUSEL DE FOTOS
-            // ==========================================================================
             let htmlImagenesCarrusel = "";
             imagenesArr.forEach(img => {
-                // Sigue la regla de negocio de tus rutas de carpetas (ej: img/chichen/Chichen.webp)
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()} - Vía Há" class="tour-card-img">`;
             });
 
@@ -157,16 +152,10 @@ async function descargarYProcesarCatalogo() {
                 </div>`;
         });
 
-        // Inyectamos las opciones del selector en el DOM
         if (selectHTML) selectHTML.innerHTML = opcionesSelect;
-        
-        // Inyectamos todas las tarjetas autoconstruidas en el DOM
         if (contenedorTarjetas) contenedorTarjetas.innerHTML = htmlTarjetasDinamicas;
 
-        // Inicializamos los soportes táctiles para los nuevos carruseles creados
         inicializarSoportesTactiles();
-
-        // Renderiza el primer estado visual válido
         renderizarEstructuraSegunModalidad();
 
     } catch (error) {
@@ -294,7 +283,7 @@ function cambiarModalidad(tipo) {
     }
     
     renderizarEstructuraSegunModalidad();
-    actualizarDependenciesFecha(); 
+    actualizarDependenciasFecha(); // CORREGIDO TYPO
 }
 
 function renderizarEstructuraSegunModalidad() {
@@ -302,7 +291,6 @@ function renderizarEstructuraSegunModalidad() {
     const contenedorCentralAcordeones = document.getElementById('seccion-personalizacion-tour');
     const contenedorSingleInterno = document.getElementById('wrapper-personalizacion-single');
 
-    // Validación de seguridad por si el catálogo dinámico aún no ha terminado de cargar
     if (Object.keys(catalogoToursDinamico).length === 0) return;
 
     if (modalidadActiva === 'single') {
@@ -319,7 +307,6 @@ function renderizarEstructuraSegunModalidad() {
         
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
-        // CORRECCIÓN: Creamos las opciones del selector basadas en las llaves del catálogo DINÁMICO
         let opcionesDestinosDinamicos = "";
         Object.keys(catalogoToursDinamico).forEach(key => {
             opcionesDestinosDinamicos += `<option value="${key}">${catalogoToursDinamico[key].txt.toUpperCase()}</option>`;
@@ -352,7 +339,6 @@ function renderizarEstructuraSegunModalidad() {
             const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
             const llavesDisponibles = Object.keys(catalogoToursDinamico);
             
-            // CORRECCIÓN: Asignamos por defecto los primeros destinos dinámicos reales de la base de datos
             if(i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "";
             if(i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || llavesDisponibles[0] || "";
             if(selectDia) renderizarCamposDiaCircuito(i, selectDia.value);
@@ -362,6 +348,7 @@ function renderizarEstructuraSegunModalidad() {
     }
     actualizarLogosDinamicos();
 }
+
 function renderizarCamposSingle() {
     const select = document.getElementById('tour-select');
     const target = document.getElementById('wrapper-personalizacion-single');
@@ -451,7 +438,7 @@ function agregarDiaCircuito() {
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     const nuevoElemento = document.getElementById(`accordion-dia-${diasCircuitoContador}`);
     if(nuevoElemento) nuevoElemento.classList.add('open');
-    actualizarDependenciesFecha(); 
+    actualizarDependenciasFecha(); // CORREGIDO TYPO
 }
 
 function eliminarDiaCircuito(e, dia) {
@@ -459,7 +446,7 @@ function eliminarDiaCircuito(e, dia) {
     if (diasCircuitoContador > 2) {
         diasCircuitoContador--;
         renderizarEstructuraSegunModalidad();
-        actualizarDependenciasFecha(); 
+        actualizarDependenciasFecha(); // CORREGIDO TYPO
     }
 }
 
@@ -482,8 +469,10 @@ function mostrarTarjetaCatalogo(idTour) {
     if (tarjetaTarget) tarjetaTarget.classList.add('active');
     
     activarAutoplayCarrusel(idTour);
-    if(catalogoEstructuraTours[idTour]) {
-        gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoEstructuraTours[idTour].txt });
+    
+    // CORRECCIÓN: Leer del catálogo dinámico real
+    if(catalogoToursDinamico[idTour]) {
+        gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
     }
 }
 
@@ -494,7 +483,6 @@ function actualizarLogosDinamicos() {
           if (select && catalogoToursDinamico[select.value]) categoria = catalogoToursDinamico[select.value].cat;  
       } else {
           const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
-          // CORRECCIÓN: Leer la categoría desde el nuevo catálogo dinámico de Sheets
           if (selectPrimero && catalogoToursDinamico[selectPrimero.value]) categoria = catalogoToursDinamico[selectPrimero.value].cat;
       }
       
@@ -623,7 +611,7 @@ function cargarBloqueos() {
 function cambiarCant(tipo, cambio) {  
       if (tipo === 'adultos') {  
           if (adultos + cambio >= 2) adultos += cambio;   
-          document.getElementById('qty-adultos').innerText = adultos; 
+          document.getElementById('qty-adultos').innerText = adults = adultos; 
       } else {  
           if (ninos + cambio >= 0) ninos += cambio;   
           document.getElementById('qty-ninos').innerText = ninos;  
@@ -691,7 +679,6 @@ function enviarWhatsApp() {
           mensaje += `\n\n💰 *TOTAL ESTIMADO DEL CIRCUITO:* ${total}\n\n¿Tienen disponibilidad para coordinar estos días con el equipo?`;
       }
        
-      // CAPA DE DATOS AVANZADA PARA LOOKER STUDIO / GA4
       gtag('event', 'conversion_reserva_click', {  
           'lead_traveler_name': nombre,
           'destination_selected': tourParaAnalytics,
