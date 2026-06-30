@@ -11,6 +11,14 @@
 </head>
 <body>
 
+    <!-- PANTALLA DE CARGA INICIAL (Fase 2) -->
+    <div id="loading-overlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p>Cargando Conny CRM...</p>
+        </div>
+    </div>
+
     <!-- BARRA DE FILTROS SUPERIOR -->
     <div class="filter-bar">
         <div class="filter-group">
@@ -25,6 +33,9 @@
                 <option value="">Selecciona un cliente...</option>
             </select>
         </div>
+        <div class="filter-group" style="justify-content: flex-end; align-items: flex-end;">
+            <button onclick="abrirModalCliente(true)" class="btn-wa" style="background-color: var(--gold); border: 1px solid var(--white); padding: 9px 15px; font-size: 13px; font-weight: bold; width: auto; margin: 0; cursor: pointer;">Nuevo Cliente ➕</button>
+        </div>
         <div class="badges-container">
             <div class="udi-live-badge">
                 <span>UDI Real-Time:</span>
@@ -38,6 +49,42 @@
     </div>
 
     <div class="dashboard-container">
+        
+        <!-- PANEL DE MÉTRICAS GLOBALES (Fase 2) -->
+        <div class="metrics-panel-container" style="grid-column: 1 / -1;">
+            <div class="metrics-grid">
+                <div class="metric-card-global">
+                    <span class="metric-icon">💰</span>
+                    <div class="metric-info">
+                        <h4>Primas Vigentes Totales</h4>
+                        <p id="total-primas-vigentes">$0.00 MXN</p>
+                    </div>
+                </div>
+                <div class="metric-card-global">
+                    <span class="metric-icon">✅</span>
+                    <div class="metric-info">
+                        <h4>Recaudado (Año Actual)</h4>
+                        <p id="total-recaudado">$0.00 MXN</p>
+                    </div>
+                </div>
+                <div class="metric-card-global">
+                    <span class="metric-icon">⏳</span>
+                    <div class="metric-info">
+                        <h4>Pendiente por Recaudar</h4>
+                        <p id="total-pendiente">$0.00 MXN</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="monthly-income-card">
+                <div class="card-header-block" style="padding: 10px 15px; border-bottom: 2px solid var(--gold); border-radius: 6px 6px 0 0;">
+                    <h3 style="margin: 0; font-size: 11px; text-transform: uppercase;">Distribución Mensual de Cobranza Realizada (MXN)</h3>
+                </div>
+                <div class="monthly-grid" id="monthly-income-grid">
+                    <!-- Se llena dinámicamente en JS -->
+                </div>
+            </div>
+        </div>
         
         <!-- SIDEBAR DE ALERTAS TEMPRANAS -->
         <div class="alerts-sidebar">
@@ -81,9 +128,12 @@
         <div class="main-card">
             <div class="card-header-block">
                 <h2 id="lbl-contratante">SELECCIONA UN CLIENTE</h2>
-                <div class="plan-selector-box">
-                    <label>Plan Activo:</label>
-                    <select id="plan-select" onchange="actualizarPlanEspecifico()"></select>
+                <div class="plan-selector-box" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label>Plan Activo:</label>
+                        <select id="plan-select" onchange="actualizarPlanEspecifico()"></select>
+                    </div>
+                    <button id="btn-editar-cliente" onclick="abrirModalCliente(false)" class="btn-wa btn-wa-pago" style="padding: 8px 12px; font-size: 11px; width: auto; background-color: var(--gold); margin: 0; border: 1px solid var(--white); cursor: pointer;">Editar Póliza ✏️</button>
                 </div>
             </div>
 
@@ -157,6 +207,15 @@
                         <div class="sub-cell"><span>Prima de Pago:</span> <strong id="txt-prima-pago">-</strong></div>
                         <div class="sub-cell"><span>Al Cobro (Pesos):</span> <strong id="txt-cobro-pesos" style="font-size:16px; color:#134074;">-</strong></div>
                         <div class="sub-cell"><span>Día de cobro:</span> <strong id="txt-dia-cobro">-</strong></div>
+                        <div class="sub-cell" style="flex-direction: column; align-items: stretch; gap: 5px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; width: 100%;">
+                                <span>Progreso de Pago Anual:</span>
+                                <span id="txt-progreso-pct">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="bar-progreso-pago" class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,13 +239,245 @@
             <div class="table-grid grid-4" id="grid-beneficiarios"></div>
 
             <!-- NUEVA SECCIÓN GLOBAL: BITÁCORA DE OBSERVACIONES INTERACTIVAS -->
-            <div class="bg-navy font-white panel-title">Observaciones / Notas Internas del Cliente</div>
+            <div class="bg-navy font-white panel-title">Bitácora e Historial de Gestión</div>
             <div class="notes-panel-container">
-                <textarea id="txa-observaciones" placeholder="Escribe aquí notas importantes sobre este cliente o póliza..."></textarea>
-                <button id="btn-guardar-nota" onclick="guardarObservacionEnSheets()">Guardar Nota 💾</button>
+                <div id="history-log-container" class="history-log-container">
+                    <div class="alert-empty-msg">No hay notas registradas para este cliente.</div>
+                </div>
+                <div class="new-note-container" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                    <textarea id="txa-nueva-nota" placeholder="Redactar nueva nota de gestión para este cliente..." style="width: 100%; height: 80px; padding: 10px; font-family: 'Urbanist', sans-serif; font-size: 14px; border: 1px solid #cbd5e0; border-radius: 6px; resize: vertical; outline: none; box-sizing: border-box;"></textarea>
+                    <button id="btn-guardar-nota" onclick="guardarNuevaNotaHistorial()" style="align-self: flex-end; background-color: var(--navy-light); color: var(--white); border: none; padding: 10px 20px; font-family: 'Urbanist', sans-serif; font-weight: bold; font-size: 13px; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background-color 0.2s, transform 0.1s;">Agregar Nota 💾</button>
+                </div>
             </div>
         </div>
 
+    </div>
+
+    <!-- MODAL DE FORMULARIO DE CLIENTE (CREACIÓN / EDICIÓN) -->
+    <div id="client-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Agregar / Editar Cliente</h3>
+                <span class="close-btn" onclick="cerrarModalCliente()">&times;</span>
+            </div>
+            <form id="client-form" onsubmit="guardarFormularioCliente(event)">
+                <input type="hidden" id="form-action" value="create"> <!-- 'create' o 'edit' -->
+                <input type="hidden" id="form-id" value="">
+                
+                <div class="form-grid">
+                    <!-- Datos Básicos -->
+                    <div class="form-section-title">Datos Generales</div>
+                    <div class="form-group-modal">
+                        <label for="form-contratante">Contratante *</label>
+                        <input type="text" id="form-contratante" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-empresa">Empresa *</label>
+                        <input type="text" id="form-empresa" required placeholder="Seguros Monterrey, etc.">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-poliza">No. Póliza *</label>
+                        <input type="text" id="form-poliza" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-ramo">Ramo *</label>
+                        <input type="text" id="form-ramo" required placeholder="Vida, Gastos Médicos, etc.">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-plan">Plan *</label>
+                        <input type="text" id="form-plan" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-estatus">Estatus *</label>
+                        <select id="form-estatus" required>
+                            <option value="Vigente">Vigente</option>
+                            <option value="Vencido">Vencido</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+
+                    <!-- Datos Financieros -->
+                    <div class="form-section-title">Datos Financieros y Vigencia</div>
+                    <div class="form-group-modal">
+                        <label for="form-suma-asegurada">Suma Asegurada *</label>
+                        <input type="number" step="0.01" id="form-suma-asegurada" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-moneda">Moneda *</label>
+                        <select id="form-moneda" required>
+                            <option value="MXN">MXN</option>
+                            <option value="USD">USD</option>
+                            <option value="UDI">UDI</option>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-tc">Tipo de Cambio Fijo</label>
+                        <input type="number" step="0.0001" id="form-tc" placeholder="1.0000">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-forma-pago">Forma de Pago *</label>
+                        <select id="form-forma-pago" required>
+                            <option value="Anual">Anual</option>
+                            <option value="Semestral">Semestral</option>
+                            <option value="Trimestral">Trimestral</option>
+                            <option value="Mensual">Mensual</option>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-prima-anual">Prima Anual *</label>
+                        <input type="number" step="0.01" id="form-prima-anual" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-prima-pago">Prima por Periodo *</label>
+                        <input type="number" step="0.01" id="form-prima-pago" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-cobro-pesos">Monto al Cobro (Pesos) *</label>
+                        <input type="text" id="form-cobro-pesos" required placeholder="$0.00">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-dia-cobro">Día del Mes para Cobro (1-31)</label>
+                        <input type="number" min="1" max="31" id="form-dia-cobro">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-emision">Fecha Emisión (DD/MM/YYYY)</label>
+                        <input type="text" id="form-emision" placeholder="e.g. 15/06/2026">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-vencimiento">Fecha Vencimiento (DD/MM/YYYY)</label>
+                        <input type="text" id="form-vencimiento">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-nacimiento">Nacimiento Contratante (DD/MM/YYYY)</label>
+                        <input type="text" id="form-nacimiento">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-auditoria">Última Auditoría (DD/MM/YYYY)</label>
+                        <input type="text" id="form-auditoria">
+                    </div>
+
+                    <!-- Estructura Comercial -->
+                    <div class="form-section-title">Estructura Comercial y Cobertura</div>
+                    <div class="form-group-modal">
+                        <label for="form-ppr">¿Es PPR? (SI/NO)</label>
+                        <select id="form-ppr">
+                            <option value="NO">NO</option>
+                            <option value="SI">SI</option>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-prox-dotal">Próximo Dotal</label>
+                        <input type="text" id="form-prox-dotal" placeholder="N/A o fecha">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-deducible">Deducible</label>
+                        <input type="text" id="form-deducible">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-coaseguro">Coaseguro</label>
+                        <input type="text" id="form-coaseguro">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-aves-cp">AVES CP</label>
+                        <input type="text" id="form-aves-cp" placeholder="N/A">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-aves-lp">AVES LP</label>
+                        <input type="text" id="form-aves-lp" placeholder="N/A">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-num-cuenta">Token / Cuenta</label>
+                        <input type="text" id="form-num-cuenta">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-prima-planeada">Prima Planeada</label>
+                        <select id="form-prima-planeada">
+                            <option value="NO">NO</option>
+                            <option value="SI">SI</option>
+                        </select>
+                    </div>
+
+                    <!-- Contacto y Facturación -->
+                    <div class="form-section-title">Contacto y Facturación</div>
+                    <div class="form-group-modal">
+                        <label for="form-telefono">Teléfono (10 dígitos) *</label>
+                        <input type="text" id="form-telefono" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-email">E-mail *</label>
+                        <input type="email" id="form-email" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-rfc">RFC</label>
+                        <input type="text" id="form-rfc">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-regimen">Régimen Fiscal</label>
+                        <input type="text" id="form-regimen" placeholder="e.g. 612">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-cp-postal">Código Postal</label>
+                        <input type="text" id="form-cp-postal">
+                    </div>
+                    <div class="form-group-modal form-full-width">
+                        <label for="form-direccion">Dirección Fiscal</label>
+                        <input type="text" id="form-direccion">
+                    </div>
+
+                    <!-- Asegurados y Cobranza -->
+                    <div class="form-section-title">Asegurados, Cobranza y Beneficiarios</div>
+                    <div class="form-group-modal form-full-width">
+                        <label for="form-asegurados">Asegurados (Separados por comas) *</label>
+                        <input type="text" id="form-asegurados" required placeholder="Juan Pérez, María Pérez">
+                    </div>
+                    <div class="form-group-modal form-full-width">
+                        <label for="form-cobranza">Cobranza Anual (12 valores separados por comas, ej: P,P,P,-,-,-...)</label>
+                        <input type="text" id="form-cobranza" placeholder="P,P,-,-,-,-,-,-,-,-,-,-" value="P,-,-,-,-,-,-,-,-,-,-,-">
+                    </div>
+
+                    <!-- Beneficiario 1 -->
+                    <div class="form-group-modal">
+                        <label for="form-b1-nombre">Beneficiario 1: Nombre</label>
+                        <input type="text" id="form-b1-nombre">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-b1-motivo">B1: Parentesco/Motivo</label>
+                        <input type="text" id="form-b1-motivo">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-b1-pct">B1: Porcentaje (e.g. 100%)</label>
+                        <input type="text" id="form-b1-pct">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-b1-nac">B1: Fecha Nac. (DD/MM/YYYY)</label>
+                        <input type="text" id="form-b1-nac">
+                    </div>
+
+                    <!-- Beneficiario 2 -->
+                    <div class="form-group-modal">
+                        <label for="form-b2-nombre">Beneficiario 2: Nombre</label>
+                        <input type="text" id="form-b2-nombre">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-b2-motivo">B2: Parentesco/Motivo</label>
+                        <input type="text" id="form-b2-motivo">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-b2-pct">B2: Porcentaje</label>
+                        <input type="text" id="form-b2-pct">
+                    </div>
+                    <div class="form-group-modal">
+                        <label for="form-b2-nac">B2: Fecha Nac.</label>
+                        <input type="text" id="form-b2-nac">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="cerrarModalCliente()">Cancelar</button>
+                    <button type="submit" id="btn-submit-form" class="btn-save">Guardar Cliente 💾</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="script.js?v=2.4"></script>

@@ -299,3 +299,405 @@ body {
         width: auto; /* Regresa a su tamaño original en PC */
     }
 }
+
+/* ==========================================
+   PANTALLA DE CARGA INICIAL (SPINNER)
+   ========================================== */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(11, 37, 69, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.spinner-container {
+    text-align: center;
+    color: var(--white);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top: 5px solid var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-container p {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+/* ==========================================
+   PANEL DE MÉTRICAS FINANCIERAS GLOBALES
+   ========================================== */
+.metrics-panel-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+@media (min-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.metric-card-global {
+    background: var(--white);
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.metric-icon {
+    font-size: 28px;
+}
+
+.metric-info h4 {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #718096;
+    letter-spacing: 0.5px;
+}
+
+.metric-info p {
+    margin: 5px 0 0 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--navy-dark);
+}
+
+/* DESGLOSE MENSUAL DE INGRESOS */
+.monthly-income-card {
+    background: var(--white);
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.monthly-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 15px;
+}
+
+@media (min-width: 600px) {
+    .monthly-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (min-width: 900px) {
+    .monthly-grid {
+        grid-template-columns: repeat(12, 1fr);
+    }
+}
+
+.monthly-bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 5px;
+    font-size: 11px;
+}
+
+.monthly-bar-label {
+    font-weight: bold;
+    color: var(--navy-light);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.monthly-bar-val {
+    font-weight: bold;
+    color: var(--text-dark);
+    margin-top: 5px;
+}
+
+.monthly-bar-track {
+    width: 8px;
+    height: 60px;
+    background: #edf2f7;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.monthly-bar-fill {
+    width: 100%;
+    background: var(--navy-light);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-radius: 4px;
+    transition: height 0.5s ease-out;
+}
+
+/* ==========================================
+   BARRA DE PROGRESO DE PAGOS POR CLIENTE
+   ========================================== */
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: #edf2f7;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 3px;
+    box-sizing: border-box;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--navy-light);
+    border-radius: 5px;
+    transition: width 0.4s ease-in-out, background-color 0.4s ease;
+}
+
+/* ==========================================
+   BITÁCORA E HISTORIAL DE GESTIÓN
+   ========================================== */
+.history-log-container {
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.history-item {
+    border-left: 3px solid var(--navy-light);
+    padding-left: 10px;
+    font-size: 13px;
+    color: var(--text-dark);
+    text-align: left;
+}
+
+.history-date {
+    font-weight: bold;
+    color: var(--navy-dark);
+    font-size: 11px;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
+
+.history-text {
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* ==========================================
+   MODAL DE FORMULARIO DE CLIENTE (CRUD)
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(11, 37, 69, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: var(--white);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: var(--navy-dark);
+    color: var(--white);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--gold);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.close-btn {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: var(--gold);
+}
+
+#client-form {
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+@media (min-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.form-section-title {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--navy-light);
+    border-bottom: 1px solid #cbd5e0;
+    padding-bottom: 5px;
+    margin-top: 15px;
+    text-transform: uppercase;
+}
+
+.form-section-title:first-child {
+    margin-top: 0;
+}
+
+.form-group-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group-modal.form-full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group-modal label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #4a5568;
+    text-transform: uppercase;
+}
+
+.form-group-modal input, .form-group-modal select {
+    padding: 8px 12px;
+    font-family: 'Urbanist', sans-serif;
+    font-size: 14px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group-modal input:focus, .form-group-modal select:focus {
+    border-color: var(--navy-light);
+}
+
+.form-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 15px;
+}
+
+.btn-cancel {
+    background: #edf2f7;
+    color: #4a5568;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Urbanist', sans-serif;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.btn-save {
+    background: var(--navy-light);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Urbanist', sans-serif;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-save:hover {
+    background: var(--navy-dark);
+}
+

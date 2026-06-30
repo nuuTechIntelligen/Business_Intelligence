@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Cliente Express | Conny CRM</title>
+    
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap">
+    <link rel="stylesheet" href="portal.css?v=1.0">
+</head>
+<body>
+
+    <!-- OVERLAY DE CARGA -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p>Buscando póliza...</p>
+        </div>
+    </div>
+
+    <div class="portal-wrapper">
+        <!-- PANTALLA DE ACCESO (LOGIN) -->
+        <div class="login-card" id="login-screen">
+            <div class="login-header">
+                <h2>Conny CRM</h2>
+                <p>Portal del Cliente Express</p>
+            </div>
+            <div class="login-body">
+                <p class="login-instructions">Ingresa tus credenciales para consultar el estatus y vigencia de tu póliza de seguros.</p>
+                
+                <div id="login-error" class="login-error-msg hidden">
+                    ❌ No se encontró ninguna póliza activa con los datos ingresados. Por favor, verifica el RFC y Número de Póliza.
+                </div>
+
+                <form onsubmit="autenticarCliente(event)">
+                    <div class="form-group">
+                        <label for="rfc-input">RFC de Facturación</label>
+                        <input type="text" id="rfc-input" required placeholder="e.g. OEGA950112QW0" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label for="poliza-input">Número de Póliza</label>
+                        <input type="text" id="poliza-input" required placeholder="e.g. VI0002910515">
+                    </div>
+                    <button type="submit" class="btn-login">Consultar Póliza 🔍</button>
+                </form>
+            </div>
+            <div class="login-footer">
+                <p>¿Tienes dudas? Comunícate con tu asesor de seguros.</p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD DEL CLIENTE (VISTA DETALLE) -->
+        <div class="client-dashboard hidden" id="dashboard-screen">
+            <div class="dashboard-header">
+                <div>
+                    <span class="portal-badge">CLIENTE AUTENTICADO</span>
+                    <h2 id="lbl-contratante">CLIENTE</h2>
+                    <p id="lbl-plan">Plan Especial</p>
+                </div>
+                <button onclick="salirPortal()" class="btn-logout">Salir 🚪</button>
+            </div>
+
+            <div class="dashboard-content">
+                <!-- GRID DE INFORMACIÓN DE LA PÓLIZA -->
+                <div class="info-grid">
+                    <!-- Bloque 1: Estado y General -->
+                    <div class="info-card">
+                        <div class="info-card-header">Detalles de la Póliza</div>
+                        <div class="info-row">
+                            <span>No. Póliza:</span>
+                            <strong id="txt-poliza">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Aseguradora:</span>
+                            <strong id="txt-empresa">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Ramo:</span>
+                            <strong id="txt-ramo">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Estatus:</span>
+                            <span id="txt-estatus" class="estatus-badge">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 2: Vigencia -->
+                    <div class="info-card">
+                        <div class="info-card-header">Vigencia y Cobertura</div>
+                        <div class="info-row">
+                            <span>Fecha de Emisión:</span>
+                            <strong id="txt-emision">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Fecha de Vencimiento:</span>
+                            <strong id="txt-vencimiento">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Suma Asegurada:</span>
+                            <strong id="txt-suma">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Moneda:</span>
+                            <strong id="txt-moneda">-</strong>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 3: Progreso de Pagos -->
+                    <div class="info-card progress-card">
+                        <div class="info-card-header">Progreso de Pago Anual</div>
+                        <div class="progress-details">
+                            <div class="progress-labels">
+                                <span>Porcentaje Pagado:</span>
+                                <strong id="txt-progreso-pct">0%</strong>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="bar-progreso-pago" class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="info-row border-top-dash" style="margin-top: 15px; padding-top: 10px;">
+                            <span>Forma de Pago:</span>
+                            <strong id="txt-forma-pago">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Monto de Pago:</span>
+                            <strong id="txt-prima-pago">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DE BENEFICIARIOS -->
+                <div class="beneficiaries-section">
+                    <h3>Estructura de Beneficiarios</h3>
+                    <div class="beneficiaries-grid" id="grid-beneficiarios">
+                        <!-- Llenado dinámico -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="portal.js?v=1.0"></script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+/* DESIGN SYSTEM: Paleta de colores maestros (Igual al CRM de Conny) */
+:root {
+    --navy-dark: #0b2545;     /* Azul Marino Profundo */
+    --navy-light: #134074;    /* Azul Corporativo */
+    --gold: #daa520;          /* Oro Ejecutivo */
+    --white: #ffffff;         /* Fondos limpios */
+    --text-dark: #333333;      /* Texto de alta legibilidad */
+    --bg-light: #f0f4f8;      /* Fondo general grisáceo suave */
+}
+
+body {
+    font-family: 'Urbanist', sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.portal-wrapper {
+    width: 95%;
+    max-width: 1000px;
+    margin: 20px auto;
+}
+
+/* ==========================================
+   PANTALLA DE ACCESO (LOGIN)
+   ========================================== */
+.login-card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 1px solid #dcdcdc;
+    overflow: hidden;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.login-header {
+    background: var(--navy-dark);
+    color: var(--white);
+    padding: 30px 20px;
+    text-align: center;
+    border-bottom: 4px solid var(--gold);
+}
+
+.login-header h2 {
+    margin: 0;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.login-header p {
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    color: #ff9f1c;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.login-body {
+    padding: 30px;
+}
+
+.login-instructions {
+    font-size: 13px;
+    color: #718096;
+    margin-top: 0;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--navy-light);
+    text-transform: uppercase;
+}
+
+.form-group input {
+    padding: 12px;
+    font-family: 'Urbanist', sans-serif;
+    font-size: 15px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.1);
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: var(--navy-light);
+    color: var(--white);
+    border: none;
+    font-family: 'Urbanist', sans-serif;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(19, 64, 116, 0.15);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-login:hover {
+    background: var(--navy-dark);
+}
+
+.btn-login:active {
+    transform: scale(0.99);
+}
+
+.login-error-msg {
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.login-footer {
+    padding: 15px 30px;
+    background: #f7fafc;
+    border-top: 1px solid #edf2f7;
+    text-align: center;
+}
+
+.login-footer p {
+    margin: 0;
+    font-size: 11px;
+    color: #a0aec0;
+}
+
+/* ==========================================
+   DASHBOARD DEL CLIENTE (VISTA DETALLE)
+   ========================================== */
+.client-dashboard {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #dcdcdc;
+    overflow: hidden;
+}
+
+.dashboard-header {
+    background: var(--navy-light);
+    color: var(--white);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid var(--gold);
+}
+
+.portal-badge {
+    background: rgba(255,255,255,0.15);
+    color: #ff9f1c;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    font-size: 20px;
+    text-transform: uppercase;
+}
+
+.dashboard-header p {
+    margin: 3px 0 0 0;
+    font-size: 13px;
+    color: #edf2f7;
+}
+
+.btn-logout {
+    background: rgba(255,255,255,0.1);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 15px;
+    font-family: 'Urbanist', sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-logout:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.dashboard-content {
+    padding: 20px;
+}
+
+/* GRID DE DETALLES */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .info-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.info-card {
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-card-header {
+    background: var(--navy-dark);
+    color: var(--white);
+    font-weight: bold;
+    font-size: 11px;
+    padding: 8px 12px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.info-row {
+    border-bottom: 1px solid #edf2f7;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.estatus-badge {
+    background-color: #c6f6d5;
+    color: #22543d;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.estatus-badge.vencido {
+    background-color: #fed7d7;
+    color: #9b2c2c;
+}
+
+/* PROGRESO DE PAGOS */
+.progress-card {
+    background: #fffdf0; /* Gold light accent */
+}
+
+.progress-details {
+    padding: 12px;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 12px;
+    background-color: #edf2f7;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--navy-light);
+    border-radius: 6px;
+    transition: width 0.5s ease-in-out, background-color 0.5s;
+}
+
+.border-top-dash {
+    border-top: 1px dashed #cbd5e0;
+}
+
+/* SECCIÓN BENEFICIARIOS */
+.beneficiaries-section {
+    margin-top: 30px;
+}
+
+.beneficiaries-section h3 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--navy-dark);
+    border-left: 4px solid var(--gold);
+    padding-left: 10px;
+}
+
+.beneficiaries-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+@media (min-width: 600px) {
+    .beneficiaries-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.beneficiary-card {
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 15px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.beneficiary-name {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--navy-light);
+}
+
+.beneficiary-detail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+.beneficiary-pct-badge {
+    background: var(--navy-light);
+    color: white;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* ==========================================
+   PANTALLA DE CARGA (SPINNER)
+   ========================================== */
+#loading-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(11, 37, 69, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.spinner-container {
+    text-align: center;
+    color: var(--white);
+}
+
+.spinner {
+    width: 45px;
+    height: 45px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-container p {
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* CLASES DE UTILIDAD */
+.hidden {
+    display: none !important;
+}

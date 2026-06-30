@@ -71,7 +71,11 @@ async function consultarDivisasRealTime() {
 }
 
 // 2. CARGA MAESTRA DE DATOS DESDE GOOGLE SHEETS
+// 2. CARGA MAESTRA DE DATOS DESDE GOOGLE SHEETS
 async function cargarBaseDeDatos() {
+    const loader = document.getElementById('loading-overlay');
+    if (loader) loader.classList.remove('hidden');
+    
     await consultarDivisasRealTime(); 
     
     try {
@@ -98,6 +102,7 @@ async function cargarBaseDeDatos() {
                 vencimiento: row.vencimiento || '-', 
                 auditoria: row.auditoria || '-',         
                 observaciones: row.observaciones || '', 
+                historial_gestion: row.historial_gestion || '', // Nuevo campo acumulativo
                 tc: row.tc,
                 estatus: row.estatus,
                 forma_pago: row.forma_pago || 'Anual', 
@@ -116,18 +121,43 @@ async function cargarBaseDeDatos() {
                 aves_lp: row.aves_lp || 'N/A',
                 num_cuenta: row.num_cuenta || '-',
                 prima_planeada: row.prima_planeada || 'NO',
+                b1_nombre: row.b1_nombre || '',
+                b1_motivo: row.b1_motivo || '',
+                b1_pct: row.b1_pct || '',
+                b1_nac: row.b1_nac || '',
+                b2_nombre: row.b2_nombre || '',
+                b2_motivo: row.b2_motivo || '',
+                b2_pct: row.b2_pct || '',
+                b2_nac: row.b2_nac || '',
                 beneficiarios: [
                     { nombre: row.b1_nombre, motivo: row.b1_motivo, pct: row.b1_pct, nac: row.b1_nac },
                     { nombre: row.b2_nombre, motivo: row.b2_motivo, pct: row.b2_pct, nac: row.b2_nac }
-                ].filter(b => b.nombre && b.nombre !== "N/A" && b.nombre !== "") 
+                ].filter(b => b.nombre && b.nombre !== "N/A" && b.nombre !== ""),
+                beneficiarios_raw: {
+                    b1_nombre: row.b1_nombre || '',
+                    b1_motivo: row.b1_motivo || '',
+                    b1_pct: row.b1_pct || '',
+                    b1_nac: row.b1_nac || '',
+                    b2_nombre: row.b2_nombre || '',
+                    b2_motivo: row.b2_motivo || '',
+                    b2_pct: row.b2_pct || '',
+                    b2_nac: row.b2_nac || ''
+                }
             };
         });
 
         actualizarContadoresAlertas();
         llenarSelectorEmpresas();
         llenarSelectorClientes(baseDatosCompleta);
+        calcularMetricasGlobales(); // Actualiza el panel global financiero
     } catch (error) {
         console.error("❌ Error sincronizando datos desde SheetDB / Excel:", error);
+    } finally {
+        if (loader) {
+            setTimeout(() => {
+                loader.classList.add('hidden');
+            }, 600); // Suaviza la transición inicial
+        }
     }
 }
 
@@ -305,7 +335,6 @@ function actualizarContadoresAlertas() {
     }
 }
 
-// 2. DESPLIEGUE COMPLETO DE LA TARJETA DEL CLIENTE EN PANTALLA
 function desplegarInformacionPantalla() {
     if(!clienteSeleccionado) return;
     const c = clienteSeleccionado;
@@ -347,9 +376,28 @@ function desplegarInformacionPantalla() {
     safeInject('txt-num-cuenta', c.num_cuenta);
     safeInject('txt-prima-planeada', c.prima_planeada);
 
-    const txtAreaObs = document.getElementById('txa-observaciones');
-    if (txtAreaObs) {
-        txtAreaObs.value = c.observaciones || ''; 
+    // Limpiar input de nueva nota y desplegar el historial de gestión
+    const txtAreaNota = document.getElementById('txa-nueva-nota');
+    if (txtAreaNota) txtAreaNota.value = '';
+    desplegarHistorialGestion(c);
+
+    // Calcular y desplegar barra de progreso de pago anual por cliente
+    const progreso = calcularProgresoPago(c);
+    const txtProgresoPct = document.getElementById('txt-progreso-pct');
+    const barProgresoPago = document.getElementById('bar-progreso-pago');
+    
+    if (txtProgresoPct) {
+        txtProgresoPct.innerText = `${progreso.pct}% (${progreso.pagados}/${progreso.totales} pagos)`;
+    }
+    if (barProgresoPago) {
+        barProgresoPago.style.width = `${progreso.pct}%`;
+        if (progreso.pct === 100) {
+            barProgresoPago.style.backgroundColor = '#25D366'; // Verde completado
+        } else if (progreso.pct >= 50) {
+            barProgresoPago.style.backgroundColor = '#134074'; // Navy estándar
+        } else {
+            barProgresoPago.style.backgroundColor = '#ff9f1c'; // Naranja advertencia
+        }
     }
 
     const linkTel = document.getElementById('link-tel');
@@ -472,21 +520,201 @@ function conmutarAcordeon(idLista) {
     }
 }
 
-// 8. ACTUALIZAR OBSERVACIONES EN GOOGLE SHEETS EN TIEMPO REAL
-async function guardarObservacionEnSheets() {
+// =========================================================================
+// FUNCIONES DE LA FASE 2: MÉTRICAS, PROGRESO, HISTORIAL Y CRUD (V3.0)
+// =========================================================================
+
+// 1. CÁLCULO DE AVANCE DE PAGO ANUAL POR CLIENTE
+function calcularProgresoPago(c) {
+    const trackCobranza = c.cobranza ? c.cobranza.split(',') : [];
+    const countP = trackCobranza.filter(v => v.trim().toUpperCase() === 'P').length;
+    let totalPagosEsperados = 12;
+    
+    const forma = String(c.forma_pago).toLowerCase();
+    if (forma.includes('anual')) {
+        totalPagosEsperados = 1;
+    } else if (forma.includes('semestral')) {
+        totalPagosEsperados = 2;
+    } else if (forma.includes('trimestral')) {
+        totalPagosEsperados = 4;
+    } else if (forma.includes('mensual')) {
+        totalPagosEsperados = 12;
+    }
+    
+    const pct = Math.min(100, Math.round((countP / totalPagosEsperados) * 100));
+    return {
+        pct: pct,
+        pagados: countP,
+        totales: totalPagosEsperados
+    };
+}
+
+// 2. OBTENER TASA DE CAMBIO
+function obtenerTC(moneda, tcDefecto) {
+    if (moneda === 'UDI') return udiValorActualGlobal;
+    if (moneda === 'USD') return usdValorActualGlobal;
+    return parseFloat(tcDefecto) || 1.0;
+}
+
+// 3. OBTENER EL COBRO MENSUAL/PERIODO EN PESOS
+function obtenerCobroPesos(c) {
+    if (c.cobro_pesos && c.cobro_pesos !== '-') {
+        const num = parseFloat(String(c.cobro_pesos).replace(/[^0-9.-]+/g, ""));
+        if (!isNaN(num)) return num;
+    }
+    const tc = obtenerTC(c.moneda, c.tc);
+    const primaPagoNum = parseFloat(c.prima_pago) || 0;
+    return primaPagoNum * tc;
+}
+
+// 4. CALCULAR MÉTRICAS GLOBALES E INYECTAR EN LA INTERFAZ
+function calcularMetricasGlobales() {
+    let totalPrimasVigentes = 0;
+    let totalRecaudado = 0;
+    let totalPendiente = 0;
+    
+    let ingresosMensuales = Array(12).fill(0);
+    let pendientesMensuales = Array(12).fill(0);
+    
+    baseDatosCompleta.forEach(c => {
+        const esVigente = c.estatus && c.estatus.toLowerCase() === 'vigente';
+        const tc = obtenerTC(c.moneda, c.tc);
+        
+        if (esVigente) {
+            const primaAnualNum = parseFloat(c.prima_anual) || 0;
+            totalPrimasVigentes += primaAnualNum * tc;
+        }
+        
+        const trackCobranza = c.cobranza ? c.cobranza.split(',') : [];
+        const cobroPesos = obtenerCobroPesos(c);
+        
+        trackCobranza.forEach((estado, i) => {
+            if (i >= 12) return;
+            const val = estado.trim().toUpperCase();
+            if (val === 'P') {
+                ingresosMensuales[i] += cobroPesos;
+                totalRecaudado += cobroPesos;
+            } else if (val === 'V' || (esVigente && val === '-')) {
+                pendientesMensuales[i] += cobroPesos;
+                totalPendiente += cobroPesos;
+            }
+        });
+    });
+    
+    const elVigentes = document.getElementById('total-primas-vigentes');
+    const elRecaudado = document.getElementById('total-recaudado');
+    const elPendiente = document.getElementById('total-pendiente');
+    
+    if (elVigentes) elVigentes.innerText = formatearAmonedaLocal(totalPrimasVigentes);
+    if (elRecaudado) elRecaudado.innerText = formatearAmonedaLocal(totalRecaudado);
+    if (elPendiente) elPendiente.innerText = formatearAmonedaLocal(totalPendiente);
+    
+    // Renderizar gráfico de barras mensuales
+    const monthlyGrid = document.getElementById('monthly-income-grid');
+    if (monthlyGrid) {
+        monthlyGrid.innerHTML = '';
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const maxIngreso = Math.max(...ingresosMensuales, 1);
+        
+        meses.forEach((mes, i) => {
+            const ing = ingresosMensuales[i];
+            const pctAltura = Math.round((ing / maxIngreso) * 100);
+            const titleTooltip = `Cobrado: ${formatearAmonedaLocal(ing)}\nPendiente: ${formatearAmonedaLocal(pendientesMensuales[i])}`;
+            
+            monthlyGrid.innerHTML += `
+                <div class="monthly-bar-container" title="${titleTooltip}">
+                    <div class="monthly-bar-label">${mes}</div>
+                    <div class="monthly-bar-track">
+                        <div class="monthly-bar-fill" style="height: ${pctAltura}%;"></div>
+                    </div>
+                    <div class="monthly-bar-val">${formatAbrevMonto(ing)}</div>
+                </div>
+            `;
+        });
+    }
+}
+
+// Abreviar números financieros grandes
+function formatAbrevMonto(valor) {
+    if (valor >= 1000000) {
+        return `$${(valor / 1000000).toFixed(1)}M`;
+    }
+    if (valor >= 1000) {
+        return `$${(valor / 1000).toFixed(1)}k`;
+    }
+    return `$${valor.toFixed(0)}`;
+}
+
+// 5. DESPLEGAR EL HISTORIAL DE GESTIÓN EN MODO LECTURA
+function desplegarHistorialGestion(c) {
+    const container = document.getElementById('history-log-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    let notes = [];
+    if (c.historial_gestion && c.historial_gestion.trim() !== '') {
+        notes = c.historial_gestion.split(' - ').filter(n => n.trim() !== '');
+    } else if (c.observaciones && c.observaciones.trim() !== '') {
+        // Soporte de retrocompatibilidad para notas antiguas
+        notes = [c.observaciones];
+    }
+    
+    if (notes.length === 0) {
+        container.innerHTML = '<div class="alert-empty-msg">No hay notas registradas para este cliente.</div>';
+        return;
+    }
+    
+    // Las notas se muestran de la más nueva a la más antigua
+    const notesToShow = [...notes];
+    notesToShow.reverse().forEach(note => {
+        const matchDate = note.match(/^\[(\d{1,2}\/\d{1,2}\/\d{4})\]:\s*(.*)$/);
+        let fecha = 'Nota';
+        let texto = note;
+        
+        if (matchDate) {
+            fecha = matchDate[1];
+            texto = matchDate[2];
+        }
+        
+        container.innerHTML += `
+            <div class="history-item">
+                <div class="history-date">📅 ${fecha}</div>
+                <div class="history-text">${texto}</div>
+            </div>
+        `;
+    });
+}
+
+// 6. AGREGAR NUEVA NOTA Y CONCATENAR AL HISTORIAL
+async function guardarNuevaNotaHistorial() {
     if (!clienteSeleccionado) {
         alert("⚠️ Por favor, selecciona primero un cliente.");
         return;
     }
 
-    const txtArea = document.getElementById('txa-observaciones');
+    const txtArea = document.getElementById('txa-nueva-nota');
     const btnGuardar = document.getElementById('btn-guardar-nota');
     if (!txtArea || !btnGuardar) return;
 
     const nuevaNota = txtArea.value.trim();
+    if (nuevaNota === '') {
+        alert("⚠️ Por favor, escribe una nota antes de guardar.");
+        return;
+    }
+
+    // Obtener fecha actual en formato DD/MM/YYYY
+    const hoy = new Date();
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const anio = hoy.getFullYear();
+    const fechaHoy = `${dia}/${mes}/${anio}`;
+
+    const nuevoRegistro = `[${fechaHoy}]: ${nuevaNota}`;
+    const viejaNota = clienteSeleccionado.historial_gestion || '';
+    const notaConcatenada = viejaNota.trim() !== '' ? `${viejaNota} - ${nuevoRegistro}` : nuevoRegistro;
+    
     const idPoliza = clienteSeleccionado.id;
 
-    // UX 3: Bloqueo de doble clic dinámico evitando cargas dobles accidentales ("Enviando... ⏳")
     btnGuardar.disabled = true;
     btnGuardar.innerText = "Enviando... ⏳";
 
@@ -502,7 +730,7 @@ async function guardarObservacionEnSheets() {
             },
             body: JSON.stringify({
                 data: {
-                    observaciones: nuevaNota
+                    historial_gestion: notaConcatenada
                 }
             })
         });
@@ -510,9 +738,12 @@ async function guardarObservacionEnSheets() {
         const resultado = await response.json();
 
         if (response.ok && resultado.updated && resultado.updated > 0) {
-            clienteSeleccionado.observaciones = nuevaNota;
+            clienteSeleccionado.historial_gestion = notaConcatenada;
             const index = baseDatosCompleta.findIndex(item => item.id === idPoliza);
-            if (index !== -1) baseDatosCompleta[index].observaciones = nuevaNota;
+            if (index !== -1) baseDatosCompleta[index].historial_gestion = notaConcatenada;
+
+            txtArea.value = '';
+            desplegarHistorialGestion(clienteSeleccionado);
 
             txtArea.style.borderColor = "#25D366";
             txtArea.style.boxShadow = "0 0 0 3px rgba(37, 211, 102, 0.2)";
@@ -522,7 +753,7 @@ async function guardarObservacionEnSheets() {
                 txtArea.style.boxShadow = "";
             }, 1500);
 
-            alert("✅ Nota guardada exitosamente en Google Sheets.");
+            alert("✅ Nota añadida al historial exitosamente.");
         } else {
             throw new Error("No se afectaron filas en el servidor.");
         }
@@ -531,11 +762,308 @@ async function guardarObservacionEnSheets() {
         console.error("❌ Error guardando la nota en SheetDB:", error);
         alert("🚨 Hubo un problema al conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
     } finally {
-        // Al terminar el ciclo, liberamos el botón a su estado normal de guardado
         btnGuardar.disabled = false;
-        btnGuardar.innerText = "Guardar Nota 💾";
+        btnGuardar.innerText = "Agregar Nota 💾";
     }
 }
 
-// DISPARADOR GLOBAL DE INICIALIZACIÓN
+// 7. GENERAR ID SECUENCIAL
+function generarSiguienteID() {
+    let maxNum = 0;
+    baseDatosCompleta.forEach(c => {
+        if (c.id && c.id.startsWith('P-')) {
+            const num = parseInt(c.id.replace('P-', ''));
+            if (!isNaN(num) && num > maxNum) {
+                maxNum = num;
+            }
+        }
+    });
+    const siguienteNum = maxNum + 1;
+    return `P-${String(siguienteNum).padStart(3, '0')}`;
+}
+
+// 8. CONTROLADORES DEL MODAL DE CLIENTES (CRUD)
+function abrirModalCliente(esNuevo) {
+    const modal = document.getElementById('client-modal');
+    if (!modal) return;
+    
+    const form = document.getElementById('client-form');
+    if (form) form.reset();
+    
+    const actionInput = document.getElementById('form-action');
+    const idInput = document.getElementById('form-id');
+    const title = document.getElementById('modal-title');
+    
+    if (esNuevo) {
+        if (actionInput) actionInput.value = 'create';
+        if (idInput) idInput.value = '';
+        if (title) title.innerText = 'Nuevo Cliente / Póliza';
+        
+        const elCobranza = document.getElementById('form-cobranza');
+        if (elCobranza) elCobranza.value = 'P,-,-,-,-,-,-,-,-,-,-,-';
+    } else {
+        if (!clienteSeleccionado) {
+            alert("⚠️ Por favor, selecciona primero un cliente para editar.");
+            return;
+        }
+        if (actionInput) actionInput.value = 'edit';
+        if (idInput) idInput.value = clienteSeleccionado.id;
+        if (title) title.innerText = `Editar Cliente: ${clienteSeleccionado.contratante} (ID: ${clienteSeleccionado.id})`;
+        
+        // Llenar campos
+        const val = (id) => document.getElementById(id);
+        
+        if (val('form-contratante')) val('form-contratante').value = clienteSeleccionado.contratante || '';
+        if (val('form-empresa')) val('form-empresa').value = clienteSeleccionado.empresa || '';
+        if (val('form-poliza')) val('form-poliza').value = clienteSeleccionado.poliza || '';
+        if (val('form-ramo')) val('form-ramo').value = clienteSeleccionado.ramo || '';
+        if (val('form-plan')) val('form-plan').value = clienteSeleccionado.plan || '';
+        if (val('form-estatus')) val('form-estatus').value = clienteSeleccionado.estatus || 'Vigente';
+        
+        if (val('form-suma-asegurada')) {
+            const rawSuma = parseFloat(String(clienteSeleccionado.suma_asegurada).replace(/[^0-9.-]+/g, ""));
+            val('form-suma-asegurada').value = isNaN(rawSuma) ? 0 : rawSuma;
+        }
+        
+        if (val('form-moneda')) val('form-moneda').value = clienteSeleccionado.moneda || 'MXN';
+        if (val('form-tc')) val('form-tc').value = clienteSeleccionado.tc || '';
+        if (val('form-forma-pago')) val('form-forma-pago').value = clienteSeleccionado.forma_pago || 'Anual';
+        
+        if (val('form-prima-anual')) {
+            const rawPrimaAnual = parseFloat(String(clienteSeleccionado.prima_anual).replace(/[^0-9.-]+/g, ""));
+            val('form-prima-anual').value = isNaN(rawPrimaAnual) ? 0 : rawPrimaAnual;
+        }
+        if (val('form-prima-pago')) {
+            const rawPrimaPago = parseFloat(String(clienteSeleccionado.prima_pago).replace(/[^0-9.-]+/g, ""));
+            val('form-prima-pago').value = isNaN(rawPrimaPago) ? 0 : rawPrimaPago;
+        }
+        
+        if (val('form-cobro-pesos')) val('form-cobro-pesos').value = clienteSeleccionado.cobro_pesos || '';
+        if (val('form-dia-cobro')) val('form-dia-cobro').value = clienteSeleccionado.dia_cobro || '';
+        if (val('form-emision')) val('form-emision').value = clienteSeleccionado.emision || '';
+        if (val('form-vencimiento')) val('form-vencimiento').value = clienteSeleccionado.vencimiento || '';
+        if (val('form-nacimiento')) val('form-nacimiento').value = clienteSeleccionado.nacimiento || '';
+        if (val('form-auditoria')) val('form-auditoria').value = clienteSeleccionado.auditoria || '';
+        
+        if (val('form-ppr')) val('form-ppr').value = clienteSeleccionado.ppr || 'NO';
+        if (val('form-prox-dotal')) val('form-prox-dotal').value = clienteSeleccionado.prox_dotal || 'N/A';
+        if (val('form-deducible')) val('form-deducible').value = clienteSeleccionado.deducible || 'N/A';
+        if (val('form-coaseguro')) val('form-coaseguro').value = clienteSeleccionado.coaseguro || 'N/A';
+        if (val('form-aves-cp')) val('form-aves-cp').value = clienteSeleccionado.aves_cp || 'N/A';
+        if (val('form-aves-lp')) val('form-aves-lp').value = clienteSeleccionado.aves_lp || 'N/A';
+        if (val('form-num-cuenta')) val('form-num-cuenta').value = clienteSeleccionado.num_cuenta || '';
+        if (val('form-prima-planeada')) val('form-prima-planeada').value = clienteSeleccionado.prima_planeada || 'NO';
+        
+        if (val('form-telefono')) val('form-telefono').value = clienteSeleccionado.telefono || '';
+        if (val('form-email')) val('form-email').value = clienteSeleccionado.email || '';
+        if (val('form-rfc')) val('form-rfc').value = clienteSeleccionado.rfc || '';
+        if (val('form-regimen')) val('form-regimen').value = clienteSeleccionado.regimen || '';
+        if (val('form-cp-postal')) val('form-cp-postal').value = clienteSeleccionado.cp_postal || '';
+        if (val('form-direccion')) val('form-direccion').value = clienteSeleccionado.direccion || '';
+        
+        if (val('form-asegurados')) val('form-asegurados').value = clienteSeleccionado.asegurados || '';
+        if (val('form-cobranza')) val('form-cobranza').value = clienteSeleccionado.cobranza || 'P,-,-,-,-,-,-,-,-,-,-,-';
+        
+        const b = clienteSeleccionado.beneficiarios_raw || {};
+        if (val('form-b1-nombre')) val('form-b1-nombre').value = b.b1_nombre || '';
+        if (val('form-b1-motivo')) val('form-b1-motivo').value = b.b1_motivo || '';
+        if (val('form-b1-pct')) val('form-b1-pct').value = b.b1_pct || '';
+        if (val('form-b1-nac')) val('form-b1-nac').value = b.b1_nac || '';
+        
+        if (val('form-b2-nombre')) val('form-b2-nombre').value = b.b2_nombre || '';
+        if (val('form-b2-motivo')) val('form-b2-motivo').value = b.b2_motivo || '';
+        if (val('form-b2-pct')) val('form-b2-pct').value = b.b2_pct || '';
+        if (val('form-b2-nac')) val('form-b2-nac').value = b.b2_nac || '';
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function cerrarModalCliente() {
+    const modal = document.getElementById('client-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// 9. GUARDAR NUEVO O ACTUALIZAR
+async function guardarFormularioCliente(event) {
+    event.preventDefault();
+    
+    const action = document.getElementById('form-action').value;
+    const id = document.getElementById('form-id').value;
+    const btnSubmit = document.getElementById('btn-submit-form');
+    
+    const payload = {
+        id: action === 'create' ? generarSiguienteID() : id,
+        empresa: document.getElementById('form-empresa').value.trim(),
+        poliza: document.getElementById('form-poliza').value.trim(),
+        contratante: document.getElementById('form-contratante').value.trim(),
+        asegurados: document.getElementById('form-asegurados').value.trim(),
+        nacimiento: document.getElementById('form-nacimiento').value.trim(),
+        plan: document.getElementById('form-plan').value.trim(),
+        ppr: document.getElementById('form-ppr').value,
+        prox_dotal: document.getElementById('form-prox-dotal').value.trim() || 'N/A',
+        deducible: document.getElementById('form-deducible').value.trim() || 'N/A',
+        coaseguro: document.getElementById('form-coaseguro').value.trim() || 'N/A',
+        ramo: document.getElementById('form-ramo').value.trim(),
+        suma_asegurada: document.getElementById('form-suma-asegurada').value.trim(),
+        moneda: document.getElementById('form-moneda').value,
+        emision: document.getElementById('form-emision').value.trim() || '-',
+        vencimiento: document.getElementById('form-vencimiento').value.trim() || '-',
+        tc: document.getElementById('form-tc').value.trim() || '1.0',
+        estatus: document.getElementById('form-estatus').value,
+        forma_pago: document.getElementById('form-forma-pago').value,
+        prima_anual: document.getElementById('form-prima-anual').value.trim(),
+        prima_pago: document.getElementById('form-prima-pago').value.trim(),
+        cobro_pesos: document.getElementById('form-cobro-pesos').value.trim(),
+        dia_cobro: document.getElementById('form-dia-cobro').value.trim() || '-',
+        email: document.getElementById('form-email').value.trim(),
+        telefono: document.getElementById('form-telefono').value.trim(),
+        cobranza: document.getElementById('form-cobranza').value.trim() || 'P,-,-,-,-,-,-,-,-,-,-,-',
+        rfc: document.getElementById('form-rfc').value.trim() || 'N/A',
+        regimen: document.getElementById('form-regimen').value.trim() || 'N/A',
+        direccion: document.getElementById('form-direccion').value.trim() || 'N/A',
+        cp_postal: document.getElementById('form-cp-postal').value.trim() || 'N/A',
+        aves_cp: document.getElementById('form-aves-cp').value.trim() || 'N/A',
+        aves_lp: document.getElementById('form-aves-lp').value.trim() || 'N/A',
+        num_cuenta: document.getElementById('form-num-cuenta').value.trim() || '-',
+        prima_planeada: document.getElementById('form-prima-planeada').value,
+        b1_nombre: document.getElementById('form-b1-nombre').value.trim() || 'N/A',
+        b1_motivo: document.getElementById('form-b1-motivo').value.trim() || 'N/A',
+        b1_pct: document.getElementById('form-b1-pct').value.trim() || 'N/A',
+        b1_nac: document.getElementById('form-b1-nac').value.trim() || 'N/A',
+        b2_nombre: document.getElementById('form-b2-nombre').value.trim() || 'N/A',
+        b2_motivo: document.getElementById('form-b2-motivo').value.trim() || 'N/A',
+        b2_pct: document.getElementById('form-b2-pct').value.trim() || 'N/A',
+        b2_nac: document.getElementById('form-b2-nac').value.trim() || 'N/A',
+        auditoria: document.getElementById('form-auditoria').value.trim() || '-'
+    };
+    
+    if (action === 'edit' && clienteSeleccionado) {
+        payload.observaciones = clienteSeleccionado.observaciones || '';
+        payload.historial_gestion = clienteSeleccionado.historial_gestion || '';
+    } else {
+        payload.observaciones = '';
+        payload.historial_gestion = '';
+    }
+    
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = "Guardando... ⏳";
+    
+    const apiRaiz = API_URL.split('?')[0];
+    let url = `${apiRaiz}?sheet=Base_Datos`;
+    let method = 'POST';
+    let bodyData = { data: [payload] };
+    
+    if (action === 'edit') {
+        url = `${apiRaiz}/id/${payload.id}?sheet=Base_Datos`;
+        method = 'PUT';
+        bodyData = { data: payload };
+    }
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bodyData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && (result.created || result.updated)) {
+            alert(action === 'create' ? "✅ Cliente creado exitosamente." : "✅ Póliza actualizada exitosamente.");
+            cerrarModalCliente();
+            
+            const mappedItem = {
+                id: payload.id,
+                empresa: payload.empresa,
+                poliza: payload.poliza,
+                contratante: payload.contratante,
+                asegurados: payload.asegurados,
+                nacimiento: payload.nacimiento,
+                plan: payload.plan,
+                ppr: payload.ppr,
+                prox_dotal: payload.prox_dotal,
+                deducible: payload.deducible,
+                coaseguro: payload.coaseguro,
+                ramo: payload.ramo,
+                suma_asegurada: parseFloat(payload.suma_asegurada || 0).toLocaleString('es-MX', {minimumFractionDigits: 2}),
+                moneda: payload.moneda,
+                emision: payload.emision,
+                vencimiento: payload.vencimiento,
+                auditoria: payload.auditoria,
+                observaciones: payload.observaciones,
+                historial_gestion: payload.historial_gestion,
+                tc: payload.tc,
+                estatus: payload.estatus,
+                forma_pago: payload.forma_pago,
+                prima_anual: payload.prima_anual,
+                prima_pago: payload.prima_pago,
+                cobro_pesos: payload.cobro_pesos,
+                dia_cobro: payload.dia_cobro,
+                email: payload.email,
+                telefono: payload.telefono,
+                cobranza: payload.cobranza,
+                rfc: payload.rfc,
+                regimen: payload.regimen,
+                direccion: payload.direccion,
+                cp_postal: payload.cp_postal,
+                aves_cp: payload.aves_cp,
+                aves_lp: payload.aves_lp,
+                num_cuenta: payload.num_cuenta,
+                prima_planeada: payload.prima_planeada,
+                beneficiarios: [
+                    { nombre: payload.b1_nombre, motivo: payload.b1_motivo, pct: payload.b1_pct, nac: payload.b1_nac },
+                    { nombre: payload.b2_nombre, motivo: payload.b2_motivo, pct: payload.b2_pct, nac: payload.b2_nac }
+                ].filter(b => b.nombre && b.nombre !== "N/A" && b.nombre !== ""),
+                beneficiarios_raw: {
+                    b1_nombre: payload.b1_nombre,
+                    b1_motivo: payload.b1_motivo,
+                    b1_pct: payload.b1_pct,
+                    b1_nac: payload.b1_nac,
+                    b2_nombre: payload.b2_nombre,
+                    b2_motivo: payload.b2_motivo,
+                    b2_pct: payload.b2_pct,
+                    b2_nac: payload.b2_nac
+                }
+            };
+            
+            if (action === 'create') {
+                baseDatosCompleta.push(mappedItem);
+            } else {
+                const idx = baseDatosCompleta.findIndex(item => item.id === payload.id);
+                if (idx !== -1) {
+                    baseDatosCompleta[idx] = mappedItem;
+                }
+            }
+            
+            actualizarContadoresAlertas();
+            llenarSelectorEmpresas();
+            
+            const currentEmpresa = document.getElementById('filtro-empresa').value;
+            const listToUse = currentEmpresa === 'ALL' ? baseDatosCompleta : baseDatosCompleta.filter(i => i.empresa === currentEmpresa);
+            llenarSelectorClientes(listToUse);
+            
+            const selectCliente = document.getElementById('filtro-cliente');
+            if (selectCliente) {
+                selectCliente.value = payload.contratante;
+                cargarDatosCliente();
+            }
+            
+            calcularMetricasGlobales();
+        } else {
+            throw new Error("No se pudo confirmar la acción en el servidor.");
+        }
+    } catch (error) {
+        console.error("Error al guardar el formulario:", error);
+        alert("🚨 Error de conexión o proceso. Detalles: " + error.message);
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerText = action === 'create' ? "Guardar Cliente 💾" : "Actualizar Póliza 💾";
+    }
+}
+
 document.addEventListener('DOMContentLoaded', cargarBaseDeDatos);
+
