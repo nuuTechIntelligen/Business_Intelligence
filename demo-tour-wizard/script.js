@@ -54,38 +54,40 @@ async function inicializarSistema() {
 }  
 
 /**
- * MOTOR DE PROCESAMIENTO: Descarga el catálogo desde Google Sheets y analiza las estructuras delimitadas por "|"
+ * MOTOR DE PROCESAMIENTO ACTUALIZADO (FASE 1.2):
+ * Descarga catálogo, filtra disponibilidad e inyecta dinámicamente texto, precios y GALERÍA DE IMÁGENES.
  */
 async function descargarYProcesarCatalogo() {
     try {
         const respuesta = await fetch(API_CATALOGO);
         const filas = await respuesta.json();
         
-        const hoy = new Date().toISOString().split('T')[0]; // Obtiene la fecha de hoy en formato YYYY-MM-DD
+        const hoy = new Date().toISOString().split('T')[0];
         const selectHTML = document.getElementById('tour-select');
-        let opcionesSelect = "";
+        const contenedorTarjetas = document.getElementById('catalogo-tarjetas-tours');
         
-        // Limpiamos el objeto de caché global
+        let opcionesSelect = "";
+        let htmlTarjetasDinamicas = "";
+        
         catalogoToursDinamico = {};
 
         filas.forEach(fila => {
-            // 1. VALIDACIÓN DE REGLAS DE NEGOCIO: Filtrar por Clima (Estado) y Fechas (Estacionalidad)
-            if (fila.estado !== 'activo') return; // Interruptor de clima: descarta si está inactivo
-
+            // Filtros de Clima y Estacionalidad
+            if (fila.estado !== 'activo') return;
             if (fila.fecha_inicio && fila.fecha_inicio !== 'siempre' && hoy < fila.fecha_inicio) return;
             if (fila.fecha_fin && fila.fecha_fin !== 'siempre' && hoy > fila.fecha_fin) return;
 
             const id = fila.id_tour.trim();
             
-            // 2. PARSEO DE MATRICES RELACIONALES: Convertir cadenas separadas por "|" en arreglos limpios
+            // Parseo de rutas, pluses y matrices de precios
             const complementosArr = fila.complementos ? fila.complementos.split('|').map(s => s.trim()) : [];
             const plusesArr = fila.pluses ? fila.pluses.split('|').map(s => s.trim()) : [];
+            const imagenesArr = fila.imagenes ? fila.imagenes.split('|').map(s => s.trim()) : []; // <--- Nueva línea
             
             const precios2 = fila.precios_pax_2 ? fila.precios_pax_2.split('|').map(s => parseFloat(s.trim())) : [];
             const precios3 = fila.precios_pax_3 ? fila.precios_pax_3.split('|').map(s => parseFloat(s.trim())) : [];
             const precios4 = fila.precios_pax_4 ? fila.precios_pax_4.split('|').map(s => parseFloat(s.trim())) : [];
 
-            // 3. RECONSTRUCCIÓN ESTRUCTURAL DE TARIFAS (Vincula cada complemento con sus costos indexados)
             let estructuraTarifariaMapeada = {};
             if (complementosArr.length > 0) {
                 complementosArr.forEach((comp, index) => {
@@ -96,15 +98,10 @@ async function descargarYProcesarCatalogo() {
                     };
                 });
             } else {
-                // Caso de borde: Si no tiene complementos (como Las Coloradas), mapea la Ruta Fija Corrida
-                estructuraTarifariaMapeada["Ruta Fija Corrida"] = {
-                    2: precios2[0] || 0,
-                    3: precios3[0] || 0,
-                    4: precios4[0] || 0
-                };
+                estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
-            // 4. ALMACENAMIENTO EN CACHÉ GLOBAL DE OPERACIÓN
+            // Guardamos en la caché global del sistema
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
@@ -113,19 +110,67 @@ async function descargarYProcesarCatalogo() {
                 tarifas: estructuraTarifariaMapeada
             };
 
-            // 5. INYECCIÓN DINÁMICA DE ELEMENTOS DE INTERFAZ (UI)
+            // Generamos las opciones del menú desplegable
             opcionesSelect += `<option value="${id}">${fila.nombre_tour.trim().toUpperCase()}</option>`;
+
+            // ==========================================================================
+            // INYECCIÓN CONSTRUCTORA DEL HTML DE LA TARJETA Y SU CARRUSEL DE FOTOS
+            // ==========================================================================
+            let htmlImagenesCarrusel = "";
+            imagenesArr.forEach(img => {
+                // Sigue la regla de negocio de tus rutas de carpetas (ej: img/chichen/Chichen.webp)
+                htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()} - Vía Há" class="tour-card-img">`;
+            });
+
+            htmlTarjetasDinamicas += `
+                <div id="info-${id}" class="tour-info-card"> 
+                    <div class="carousel-container"> 
+                        <button type="button" class="carousel-btn prev" onclick="moverCarrusel('${id}', -1)">&#10094;</button> 
+                        <div class="carousel-track" id="track-${id}"> 
+                            ${htmlImagenesCarrusel}
+                        </div> 
+                        <button type="button" class="carousel-btn next" onclick="moverCarrusel('${id}', 1)">&#10095;</button> 
+                    </div> 
+                    <div class="tour-title-wrapper"> 
+                        <div class="dynamic-tour-logo-container logo-c1"></div> 
+                        <h3 class="section-title">${fila.nombre_tour.trim()}</h3> 
+                    </div> 
+                    <p>Disfruta de una experiencia premium privada con fotografía profesional incluida.</p> 
+                    <div class="inc-no-inc-container">
+                        <div class="inc-col">
+                            <div class="inc-title">🟢 Incluye</div>
+                            <ul class="inc-list">
+                                <li>Transporte privado desde tu hospedaje.</li>
+                                <li>Guía Federal Certificado.</li>
+                                <li>Hielera con agua.</li>
+                                <li>Estacionamientos y Peajes.</li>
+                            </ul>
+                        </div>
+                        <div class="no-inc-col">
+                            <div class="no-inc-title">🔴 No Incluye</div>
+                            <ul class="no-inc-list">
+                                <li>Entradas a los sitios arqueológicos o cenotes.</li>
+                                <li>Alimentos no especificados.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>`;
         });
 
-        if (selectHTML) {
-            selectHTML.innerHTML = opcionesSelect;
-        }
+        // Inyectamos las opciones del selector en el DOM
+        if (selectHTML) selectHTML.innerHTML = opcionesSelect;
+        
+        // Inyectamos todas las tarjetas autoconstruidas en el DOM
+        if (contenedorTarjetas) contenedorTarjetas.innerHTML = htmlTarjetasDinamicas;
 
-        // Renderiza el primer tour disponible de forma automática
+        // Inicializamos los soportes táctiles para los nuevos carruseles creados
+        inicializarSoportesTactiles();
+
+        // Renderiza el primer estado visual válido
         renderizarEstructuraSegunModalidad();
 
     } catch (error) {
-        console.error("❌ Error procesando el catálogo dinámico desde SheetDB:", error);
+        console.error("❌ Error en Fase 1.2 (Catálogo e Imágenes Dinámicas):", error);
     }
 }
 
