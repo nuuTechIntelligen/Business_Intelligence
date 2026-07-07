@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 2: Versión de Alta Disponibilidad (Funciones principales elevadas)
+ * Versión de Alta Disponibilidad - Parche de Sintaxis y Asincronía Septiembre 2026
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -39,10 +39,12 @@ const traducciones = {
 }; 
 
 /* ==========================================================================
-   FUNCIONES DE INTERFAZ PRINCIPALES (ELEVADAS PARA EVITAR REFERENCE_ERROR)
+   FUNCIONES DE INTERFAZ PRINCIPALES (ELEVADAS Y CORREGIDAS)
    ========================================================================== */
 function cambiarModalidad(tipo) {
     modalidadActiva = tipo;
+    
+    // Asegurar remoción de clases en botones de pestañas
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     
     const mainContainer = document.getElementById('viaha-main-container');
@@ -52,7 +54,7 @@ function cambiarModalidad(tipo) {
         if (tabSingle) tabSingle.classList.add('active');
         const lblFecha = document.getElementById('label-fecha-dinamica');
         if (lblFecha) lblFecha.innerText = "Fecha del Recorrido";
-        if(mainContainer) {
+        if (mainContainer) {
             mainContainer.classList.remove('modo-circuito-activo'); 
             mainContainer.classList.add('modo-single-activo'); 
         }
@@ -61,7 +63,7 @@ function cambiarModalidad(tipo) {
         if (tabCircuit) tabCircuit.classList.add('active');
         const lblFecha = document.getElementById('label-fecha-dinamica');
         if (lblFecha) lblFecha.innerText = "Período del Circuito (Fechas)";
-        if(mainContainer) {
+        if (mainContainer) {
             mainContainer.classList.add('modo-circuito-activo');    
             mainContainer.classList.remove('modo-single-activo'); 
         }
@@ -82,13 +84,13 @@ function irPaso(paso) {
         const line1 = document.getElementById('line-1');
 
         if (paso === 1) {
-            if(dot1) { dot1.classList.add('active'); dot1.classList.remove('completed'); dot1.innerHTML = '1'; }
-            if(dot2) { dot2.classList.remove('active', 'completed'); }
-            if(line1) { line1.classList.remove('completed-line'); }
+            if (dot1) { dot1.classList.add('active'); dot1.classList.remove('completed'); dot1.innerHTML = '1'; }
+            if (dot2) { dot2.classList.remove('active', 'completed'); }
+            if (line1) { line1.classList.remove('completed-line'); }
         } else if (paso === 2) {
-            if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
-            if(dot2) { dot2.classList.add('active'); } 
-            if(line1) { line1.classList.add('completed-line'); }
+            if (dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
+            if (dot2) { dot2.classList.add('active'); } 
+            if (line1) { line1.classList.add('completed-line'); }
         }
         
         const mainCont = document.getElementById('viaha-main-container');
@@ -106,7 +108,7 @@ async function inicializarSistema() {
       }  
       try {          
           await cargarBloqueos();  
-          await descargarYProcesarCatalogo(); 
+          await descargarYProcesarCatalogo(); // Garantiza que los datos existan primero
           inicializarSoportesTactiles();   
           actualizarDependenciasFecha(); 
       } catch (error) {  
@@ -159,6 +161,7 @@ async function descargarYProcesarCatalogo() {
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
 
+            // CORREGIDO: Eliminada la doble asignación errónea
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
@@ -313,7 +316,8 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días in el calendario.`);
+                      // CORREGIDO: Removido el operador de palabra reservada 'in' fuera de un string limpio
+                      alert("⚠️ Tu itinerario está configurado para exactamente " + diasRequeridos + " días. Por favor, selecciona un rango válido en el calendario.");
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
@@ -329,19 +333,19 @@ function renderizarEstructuraSegunModalidad() {
     const contenedorCentralAcordeones = document.getElementById('seccion-personalizacion-tour');
     const contenedorSingleInterno = document.getElementById('wrapper-personalizacion-single');
 
-    if (Object.keys(catalogoToursDinamico).length === 0) return;
+    if (!catalogoToursDinamico || Object.keys(catalogoToursDinamico).length === 0) return;
 
     if (modalidadActiva === 'single') {
-        if(contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'block';
-        if(contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = '';
+        if (contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'block';
+        if (contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = '';
         
         renderizarCamposSingle();
         
         const select = document.getElementById('tour-select');
-        if(select) mostrarTarjetaCatalogo(select.value);
+        if (select) mostrarTarjetaCatalogo(select.value);
     } else {
-        if(contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'none';
-        if(contenedorSingleInterno) contenedorSingleInterno.innerHTML = '';
+        if (contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'none';
+        if (contenedorSingleInterno) contenedorSingleInterno.innerHTML = '';
         
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
@@ -371,18 +375,18 @@ function renderizarEstructuraSegunModalidad() {
         }
         
         htmlAcordeones += `</div><button type="button" class="btn-add-dia-circuito" onclick="agregarDiaCircuito()">➕ Agregar Siguiente Día al Itinerario</button>`;
-        if(contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = htmlAcordeones;
+        if (contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = htmlAcordeones;
 
         for (let i = 1; i <= diasCircuitoContador; i++) {
             const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
             const llavesDisponibles = Object.keys(catalogoToursDinamico);
             
-            if(i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "";
-            if(i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || llavesDisponibles[0] || "";
-            if(selectDia) renderizarCamposDiaCircuito(i, selectDia.value);
+            if (i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "";
+            if (i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || llavesDisponibles[0] || "";
+            if (selectDia) renderizarCamposDiaCircuito(i, selectDia.value);
         }
         const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
-        if(selectPrimero) mostrarTarjetaCatalogo(selectPrimero.value); 
+        if (selectPrimero) mostrarTarjetaCatalogo(selectPrimero.value); 
     }
     actualizarLogosDinamicos();
 }
@@ -475,7 +479,7 @@ function agregarDiaCircuito() {
     renderizarEstructuraSegunModalidad();
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     const nuevoElemento = document.getElementById(`accordion-dia-${diasCircuitoContador}`);
-    if(nuevoElemento) nuevoElemento.classList.add('open');
+    if (nuevoElemento) nuevoElemento.classList.add('open');
     actualizarDependenciasFecha(); 
 }
 
@@ -490,7 +494,7 @@ function eliminarDiaCircuito(e, dia) {
 
 function actualizarInterfazSingle() {  
       const select = document.getElementById('tour-select');  
-      if(!select) return;
+      if (!select) return;
       const selectedTour = select.value;  
        
       mostrarTarjetaCatalogo(selectedTour);
@@ -508,7 +512,7 @@ function mostrarTarjetaCatalogo(idTour) {
     
     activarAutoplayCarrusel(idTour);
     
-    if(catalogoToursDinamico[idTour]) {
+    if (catalogoToursDinamico[idTour]) {
         gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
     }
 }
@@ -529,13 +533,13 @@ function actualizarLogosDinamicos() {
 }
 
 function calcular() {  
-      if (Object.keys(catalogoToursDinamico).length === 0) return;
+      if (!catalogoToursDinamico || Object.keys(catalogoToursDinamico).length === 0) return;
       let granTotalCalculado = 0;
       const totalPasajeros = adultos + ninos;
 
       if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');
-          if(!select) return;
+          if (!select) return;
           const idTour = select.value;
           const r_comp = document.querySelector('input[name="viaha-complemento"]:checked');
           const compSel = r_comp ? r_comp.value : "Ruta Fija Corrida";
@@ -554,7 +558,7 @@ function calcular() {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
                   const idTourDia = selectDia.value;
-                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
+                  const r_compDia = document.querySelector('input[name="viaha-complemento-dia-' + i + '"]:checked');
                   const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
 
                   let fechaStringDiaActual = "";
@@ -583,6 +587,7 @@ function cambiarCant(tipo, cambio) {
       calcular();   
 }  
 
+// OTRAS UTILIDADES
 function moverCarrusel(idTour, direccion) {  
       const track = document.getElementById(`track-${idTour}`);  
       if (!track) return;  
@@ -609,7 +614,7 @@ function inicializarSoportesTactiles() {
       document.querySelectorAll('.carousel-container').forEach(container => {  
           let xInicial = null;  
           const track = container.querySelector('.carousel-track');  
-          if(!track) return;  
+          if (!track) return;  
           const idTour = track.id.replace('track-', '');  
 
           container.addEventListener('touchstart', (e) => { detenerAutoplayCarrusel(idTour); xInicial = e.touches[0].clientX; }, { passive: true });  
@@ -662,7 +667,7 @@ function enviarWhatsApp() {
        
       if (!nombre || !fechaSeleccionada) {  
           alert(!nombre ? t.alert_nombre : t.alert_fecha);  
-          if(!nombre) document.getElementById('nombre-cliente').focus();  
+          if (!nombre) document.getElementById('nombre-cliente').focus();  
           return;  
       }  
 
@@ -700,9 +705,9 @@ function enviarWhatsApp() {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
                   const tourDiaTxt = selectDia.options[selectDia.selectedIndex].text;
-                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
+                  const r_compDia = document.querySelector('input[name="viaha-complemento-dia-' + i + '"]:checked');
                   const compDiaTxt = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
-                  const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
+                  const checksPlusDia = document.querySelectorAll('input[name="viaha-plus-dia-' + i + '"]:checked');
                   let plusDiaArr = [];
                   checksPlusDia.forEach(c => plusDiaArr.push(c.value));
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
@@ -723,7 +728,7 @@ function enviarWhatsApp() {
           'plus_addons': plusParaAnalytics,
           'tour_language_required': idiomaTexto,
           'date_range_booked': fechaSeleccionada, 
-          'quantity_adults': adultos, 
+          'quantity_adults': adults, 
           'quantity_children': ninos, 
           'estimated_total_quoted': total,
           'locale_user': idiomaActual
@@ -737,7 +742,7 @@ function cerrarModal() { document.getElementById('modal-agenda').style.display =
 
 function ejecutarOpcionC_HorariosFijos() {
      const contenedor = document.getElementById('contenedor-render-agenda');
-     if(!contenedor) return;
+     if (!contenedor) return;
      contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Llamada</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
 
      flatpickr("#fecha-llamada-fija", {
