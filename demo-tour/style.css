@@ -1,4 +1,3 @@
-
 /* VARIABLES GLOBALES REEMPLAZADAS CON LA PALETA OFICIAL VÍA HÁ */
 :root { 
     --turquesa: #ECBB90;         /* Color Principal 1 (Arena) */ 
@@ -117,9 +116,6 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
 } 
 
-/* ==========================================================================
-   ESTILOS DE CAPAS DECORATIVAS FLOTANTES
-   ========================================================================== */
 .decoracion-flotante {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -159,9 +155,6 @@ body {
     100% { opacity: 0; }
 }
 
-/* ==========================================================================
-   COMPONENTES DE INTERFAZ 
-   ========================================================================== */
 .modalidad-switcher-wrapper {
     display: flex; width: 100%; background-color: var(--light-bg); padding: 6px; border-radius: 14px; margin-bottom: 20px; border: 1px solid var(--executive-dark); box-sizing: border-box;
 }
@@ -297,7 +290,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 
     .mobile-only { display: block; }
     
-    /* Barra de Progreso Sticky */
     .wizard-progress-container {
         position: sticky;
         top: 0;
@@ -328,7 +320,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .wizard-progress .line { height: 3px; width: 40px; background: #e0e0e0; transition: 0.3s; border-radius: 2px; }
     .wizard-progress .line.completed-line { background: var(--executive-dark); }
 
-    /* 1. Botones de Navegación (Se declaran ANTES para no sobreescribir la ocultación) */
     .mobile-nav-buttons { display: flex; gap: 10px; margin-top: 25px; margin-bottom: 10px; }
     .btn-wizard { 
         flex: 1; padding: 14px; border-radius: 12px; font-family: 'Big Shoulders Text', sans-serif; 
@@ -338,17 +329,15 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .btn-wizard.next { background: var(--turquesa); color: var(--text); }
     .btn-wizard.prev { background: #e0e0e0; color: var(--text); }
 
-    /* 2. Ocultar pasos inactivos (Se declara DESPUÉS para que gane la pelea) */
     .wizard-step { display: none; }
     .wizard-step.active { display: block; animation: fadeInWizard 0.4s ease forwards; }
-    .wizard-step.active.mobile-nav-buttons { display: flex; } /* Restaura el flex solo si está activo */
+    .wizard-step.active.mobile-nav-buttons { display: flex; } 
 
     @keyframes fadeInWizard { 
         from { opacity: 0; transform: translateY(10px); } 
         to { opacity: 1; transform: translateY(0); } 
     }
 
-    /* Regresa al flujo normal en todos los casos */
     .summary-box, .btn-whatsapp {
         width: 100%;
         margin-top: 15px;
@@ -360,7 +349,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         border-top: none;
     }
 
-    /* Acordeones Sticky */
     .accordion-item-circuito { overflow: visible !important; }
     .accordion-header-dia {
         position: sticky !important;
@@ -369,7 +357,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* LÓGICA PARA MODO "TOUR DE 1 DÍA" */
     .container.modo-single-activo .wizard-step {
         display: block !important; 
         animation: none !important;
@@ -389,10 +376,8 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .hero-title-pc { display: block; font-size: 56px; }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
-    /* 1. Romper las clases de "Paso a paso" para mostrar todo el contenido en PC */
     .wizard-step { display: block !important; }
     
-    /* 2. Ocultar elementos exclusivos de móvil (DEBE IR DESPUÉS para ganar prioridad) */
     .mobile-only, .mobile-nav-buttons, .circuit-only-btn { display: none !important; }
 
     .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
@@ -410,7 +395,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .container.modo-circuito-activo #viaha-col-configurador { display: block !important; grid-column: 2 !important; }
     .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; }
 
-    /* LÓGICA BLINDADA DE ISOLOGOS */
     .decoracion-flotante { display: block !important; z-index: 1 !important; }
 
     .container.modo-circuito-activo ~ .decoracion-flotante {
