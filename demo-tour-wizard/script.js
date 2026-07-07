@@ -57,8 +57,8 @@ async function inicializarSistema() {
 }  
 
 /**
- * MOTOR DE PROCESAMIENTO ACTUALIZADO:
- * Descarga catálogo, filtra disponibilidad e inyecta dinámicamente texto, precios y imágenes.
+ * MOTOR DE PROCESAMIENTO ACTUALIZADO (FASE 2):
+ * Descarga catálogo, mapea rutas, imágenes y ahora las REGLAS DE FACTOR ESTACIONAL.
  */
 async function descargarYProcesarCatalogo() {
     try {
@@ -75,6 +75,7 @@ async function descargarYProcesarCatalogo() {
         catalogoToursDinamico = {};
 
         filas.forEach(fila => {
+            // Filtros de Clima e inactividad manual
             if (fila.estado !== 'activo') return;
             if (fila.fecha_inicio && fila.fecha_inicio !== 'siempre' && hoy < fila.fecha_inicio) return;
             if (fila.fecha_fin && fila.fecha_fin !== 'siempre' && hoy > fila.fecha_fin) return;
@@ -102,12 +103,23 @@ async function descargarYProcesarCatalogo() {
                 estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
+            // FASE 2: Extracción y limpieza de datos estacionales
+            const factorAlta = fila.factor_alta ? parseFloat(fila.factor_alta.trim()) : 1.0;
+            const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
+            const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
+
+            // Guardamos en la caché global incluyendo los multiplicadores
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
                 txt: fila.nombre_tour.trim(),
                 cat: fila.categoria.trim(),
-                tarifas: estructuraTarifariaMapeada
+                tarifas: estructuraTarifariaMapeada,
+                estacionalidad: {
+                    factor: factorAlta,
+                    inicio: inicioAlta,
+                    fin: finAlta
+                }
             };
 
             opcionesSelect += `<option value="${id}">${fila.nombre_tour.trim().toUpperCase()}</option>`;
@@ -159,8 +171,50 @@ async function descargarYProcesarCatalogo() {
         renderizarEstructuraSegunModalidad();
 
     } catch (error) {
-        console.error("❌ Error en Fase 1.2 (Catálogo e Imágenes Dinámicas):", error);
+        console.error("❌ Error en Fase 2 (Carga de Estacionalidad):", error);
     }
+}
+
+/**
+ * MOTOR DE PRECIOS MEJORADO: 
+ * Evalúa si la fecha seleccionada cae dentro del periodo de temporada alta del tour.
+ */
+function obtenerPrecioMatriz(tour, complemento, pasajeros) {
+    const datosTour = catalogoToursDinamico[tour];
+    if (!datosTour || !datosTour.tarifas) return 0;
+    
+    // 1. Obtener precio base según la ruta o complemento
+    const combinacion = datosTour.tarifas[complemento] || datosTour.tarifas["Ruta Fija Corrida"];
+    if (!combinacion) return 0;
+
+    let precioBaseCalculado = 0;
+    if (pasajeros <= 2) {
+        precioBaseCalculado = combinacion[2]; 
+    } else {
+        let rangoKey = (pasajeros === 3) ? 3 : 4;
+        precioBaseCalculado = pasajeros * combinacion[rangoKey];
+    }
+
+    // 2. FASE 2: Validar si la fecha seleccionada aplica para Multiplicador de Temporada Alta
+    // Para circuitos evaluamos la primera fecha del rango seleccionado
+    let fechaAComprobar = fechaSeleccionada;
+    if (fechaSeleccionada.includes(" a ")) {
+        fechaAComprobar = fechaSeleccionada.split(" a ")[0].trim();
+    }
+
+    if (fechaAComprobar && datosTour.estacionalidad) {
+        const est = datosTour.estacionalidad;
+        // Si hay un periodo válido de alta configurado en el Sheet
+        if (est.inicio && est.fin && est.factor > 1.0) {
+            if (fechaAComprobar >= est.inicio && fechaAComprobar <= est.fin) {
+                // Aplicamos el factor estacional matemáticamente
+                precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
+                console.log(`🚀 ¡Tarifa de Temporada Alta Aplicada para ${tour}! Factor: x${est.factor}`);
+            }
+        }
+    }
+
+    return precioBaseCalculado;
 }
 
 function actualizarDependenciasFecha() {
