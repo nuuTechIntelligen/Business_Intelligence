@@ -1,4 +1,3 @@
-
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
  * Fase 1: Catálogo Dinámico desde Google Sheets (SheetDB) con Soporte Estacional y de Clima.
