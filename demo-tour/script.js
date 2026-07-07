@@ -164,7 +164,8 @@ async function descargarYProcesarCatalogo() {
 }
 
 /**
- * DETECTOR ULTRA-BLINDADO DE TEMPORADA ALTA (FASE 2)
+ * MOTOR DE PRECIOS MEJORADO: 
+ * Evalúa si la fecha seleccionada cae dentro del periodo de temporada alta del tour.
  */
 function obtenerPrecioMatriz(tour, complemento, pasajeros) {
     const datosTour = catalogoToursDinamico[tour];
@@ -262,7 +263,6 @@ function inicializarCalendario() {
                       fechaSeleccionada = "";
                   } 
               }
-              // CORRECCIÓN CLAVE: Invocación forzada del cálculo al hacer click
               calcular();
               gtag('event', 'seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
           }  
@@ -547,7 +547,7 @@ function calcular() {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
                   const idTourDia = selectDia.value;
-                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
+                  const r_compDia = document.querySelector('input[name="viaha-complemento-dia-' + i + '"]:checked');
                   const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
 
                   granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros);
@@ -709,7 +709,7 @@ function enviarWhatsApp() {
           'plus_addons': plusParaAnalytics,
           'tour_language_required': idiomaTexto,
           'date_range_booked': fechaSeleccionada, 
-          'quantity_adults': adults = adultos, 
+          'quantity_adults': adultos, 
           'quantity_children': ninos, 
           'estimated_total_quoted': total,
           'locale_user': idiomaActual
