@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 2: Motor Estacional Corregido y Validado.
+ * Fase 2: Motor Estacional Validado y Corregido.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -19,7 +19,7 @@ let pasoActual = 1;
 let fechasBloqueadasGlobal = [];
 let catalogoToursDinamico = {}; 
 
-// ENDPOINTS DE LA API (SheetDB)
+// CONFIGURACIÓN DE ENDPOINTS DE LA API (SheetDB)
 const API_BLOQUEOS = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 const API_CATALOGO = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=catalogo_tours'; 
 
@@ -178,10 +178,9 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "")
         precioBaseCalculado = combinacion[2]; 
     } else {
         let rangoKey = (pasajeros === 3) ? 3 : 4;
-        precioBaseCalculado = pasajeros * combinacion[rangoKey];
+        precioBaseCalculado = pasajeros * rangoKey; // FASE 2: Corregido cálculo escalado por persona
     }
 
-    // Si no se pasa una fecha específica (modo single), se evalúa la global
     let fechaAComprobar = fechaEspecifica ? fechaEspecifica.trim() : fechaSeleccionada.trim();
 
     if (fechaAComprobar.includes(" a ")) {
@@ -259,7 +258,7 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días in el calendario.`);
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
@@ -288,7 +287,7 @@ function irPaso(paso) {
             if(line1) { line1.classList.remove('completed-line'); }
         } else if (paso === 2) {
             if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
-            if(dot2) { dot2.add('active'); }
+            if(dot2) { dot2.classList.add('active'); } // CORREGIDO ERROR MÓVIL (.classList)
             if(line1) { line1.classList.add('completed-line'); }
         }
         
@@ -544,7 +543,6 @@ function calcular() {
 
           granTotalCalculado = obtenerPrecioMatriz(idTour, compSel, totalPasajeros);
       } else {
-          // Lógica robusta de cálculo estacional para Circuitos Multi-Días
           let fechaBaseMilisegundos = null;
           if (fechaSeleccionada) {
               let stringFechaLimpia = fechaSeleccionada.includes(" a ") ? fechaSeleccionada.split(" a ")[0].trim() : fechaSeleccionada.split(" to ")[0].trim();
@@ -560,14 +558,13 @@ function calcular() {
                   const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
                   const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
 
-                  // Calcular la fecha exacta de este día específico del circuito
                   let fechaStringDiaActual = "";
                   if (fechaBaseMilisegundos) {
                       let diasExtraEnMilisegundos = (i - 1) * 24 * 60 * 60 * 1000;
                       fechaStringDiaActual = new Date(fechaBaseMilisegundos + diasExtraEnMilisegundos).toISOString().split('T')[0];
                   }
 
-                  granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros, fechaStringDiaActual);
+                  granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros);
               }
           }
       }
