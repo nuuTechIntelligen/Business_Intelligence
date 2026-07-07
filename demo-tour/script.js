@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 1: Catálogo Dinámico desde Google Sheets (SheetDB) con Soporte Estacional y de Clima.
+ * Fase 2: Motor Estacional Blindado y Analytics Dinámico desde Sheets.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -15,11 +15,11 @@ let modalidadActiva = 'single';
 let diasCircuitoContador = 2; 
 let pasoActual = 1; 
 
-// CACHÉ DE BASE DE DATOS (Mantiene la persistencia sin saturar llamadas a la API)
+// CACHÉ DE BASE DE DATOS E INTERFAZ
 let fechasBloqueadasGlobal = [];
 let catalogoToursDinamico = {}; 
 
-// CONFIGURACIÓN DE ENDPOINTS DE LA API (SheetDB)
+// ENDPOINTS DE LA API (SheetDB)
 const API_BLOQUEOS = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 const API_CATALOGO = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=catalogo_tours'; 
 
@@ -39,9 +39,6 @@ const traducciones = {
       } 
 }; 
 
-/**
- * Inicializador maestro asíncrono.
- */
 async function inicializarSistema() {  
       while (typeof flatpickr === 'undefined') {  
           await new Promise(resolve => setTimeout(resolve, 100));  
@@ -57,8 +54,7 @@ async function inicializarSistema() {
 }  
 
 /**
- * MOTOR DE PROCESAMIENTO ACTUALIZADO (FASE 2):
- * Descarga catálogo, mapea rutas, imágenes y ahora las REGLAS DE FACTOR ESTACIONAL.
+ * MOTOR DE PROCESAMIENTO: Descarga catálogo y mapea el inventario estacional y de imágenes.
  */
 async function descargarYProcesarCatalogo() {
     try {
@@ -71,11 +67,9 @@ async function descargarYProcesarCatalogo() {
         
         let opcionesSelect = "";
         let htmlTarjetasDinamicas = "";
-        
         catalogoToursDinamico = {};
 
         filas.forEach(fila => {
-            // Filtros de Clima e inactividad manual
             if (fila.estado !== 'activo') return;
             if (fila.fecha_inicio && fila.fecha_inicio !== 'siempre' && hoy < fila.fecha_inicio) return;
             if (fila.fecha_fin && fila.fecha_fin !== 'siempre' && hoy > fila.fecha_fin) return;
@@ -103,30 +97,24 @@ async function descargarYProcesarCatalogo() {
                 estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
-            // FASE 2: Extracción y limpieza de datos estacionales
             const factorAlta = fila.factor_alta ? parseFloat(fila.factor_alta.trim()) : 1.0;
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
 
-            // Guardamos en la caché global incluyendo los multiplicadores
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
                 txt: fila.nombre_tour.trim(),
                 cat: fila.categoria.trim(),
                 tarifas: estructuraTarifariaMapeada,
-                estacionalidad: {
-                    factor: factorAlta,
-                    inicio: inicioAlta,
-                    fin: finAlta
-                }
+                estacionalidad: { factor: factorAlta, inicio: inicioAlta, fin: finAlta }
             };
 
             opcionesSelect += `<option value="${id}">${fila.nombre_tour.trim().toUpperCase()}</option>`;
 
             let htmlImagenesCarrusel = "";
             imagenesArr.forEach(img => {
-                htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()} - Vía Há" class="tour-card-img">`;
+                htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
 
             htmlTarjetasDinamicas += `
@@ -176,14 +164,12 @@ async function descargarYProcesarCatalogo() {
 }
 
 /**
- * MOTOR DE PRECIOS MEJORADO: 
- * Evalúa si la fecha seleccionada cae dentro del periodo de temporada alta del tour.
+ * DETECTOR ULTRA-BLINDADO DE TEMPORADA ALTA (FASE 2)
  */
 function obtenerPrecioMatriz(tour, complemento, pasajeros) {
     const datosTour = catalogoToursDinamico[tour];
     if (!datosTour || !datosTour.tarifas) return 0;
     
-    // 1. Obtener precio base según la ruta o complemento
     const combinacion = datosTour.tarifas[complemento] || datosTour.tarifas["Ruta Fija Corrida"];
     if (!combinacion) return 0;
 
@@ -195,36 +181,22 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
-    // 2. FASE 2: DETECTOR ULTRA-BLINDADO DE TEMPORADA ALTA
     let fechaAComprobar = fechaSeleccionada.trim();
-
-    // Si Flatpickr devuelve un rango (ej: "2026-07-11 a 2026-07-12" o "2026-07-11 to 2026-07-12")
     if (fechaAComprobar.includes(" a ")) {
         fechaAComprobar = fechaAComprobar.split(" a ")[0].trim();
     } else if (fechaAComprobar.includes(" to ")) {
         fechaAComprobar = fechaAComprobar.split(" to ")[0].trim();
     }
 
-    // REVISIÓN EN CONSOLA (Abre F12 en tu navegador para ver esto)
-    console.log(`🔍 Evaluando precios estacionales para: ${tour}`);
-    console.log(`📅 Fecha seleccionada limpia: "${fechaAComprobar}"`);
-
     if (fechaAComprobar && datosTour.estacionalidad) {
         const est = datosTour.estacionalidad;
-        
-        console.log(`📅 Regla del Sheet: Inicio "${est.inicio}" | Fin "${est.fin}" | Factor: x${est.factor}`);
-
-        // Verificación estricta de strings de fechas (ej: "2026-07-11" >= "2026-07-10")
         if (est.inicio && est.fin && est.factor > 1.0) {
             if (fechaAComprobar >= est.inicio && fechaAComprobar <= est.fin) {
                 precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
-                console.log(`🚀 ¡ÉXITO! Multiplicador aplicado. Nuevo total: $${precioBaseCalculado}`);
-            } else {
-                console.log(`ℹ️ La fecha está fuera del rango de temporada alta.`);
+                console.log(`🚀 ¡Multiplicador Estacional Exitoso para ${tour}! factor x${est.factor}`);
             }
         }
     }
-
     return precioBaseCalculado;
 }
 
@@ -290,6 +262,8 @@ function inicializarCalendario() {
                       fechaSeleccionada = "";
                   } 
               }
+              // CORRECCIÓN CLAVE: Invocación forzada del cálculo al hacer click
+              calcular();
               gtag('event', 'seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
           }  
       });  
@@ -348,7 +322,7 @@ function cambiarModalidad(tipo) {
     }
     
     renderizarEstructuraSegunModalidad();
-    actualizarDependenciasFecha(); // CORREGIDO TYPO
+    actualizarDependenciasFecha(); 
 }
 
 function renderizarEstructuraSegunModalidad() {
@@ -503,7 +477,7 @@ function agregarDiaCircuito() {
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     const nuevoElemento = document.getElementById(`accordion-dia-${diasCircuitoContador}`);
     if(nuevoElemento) nuevoElemento.classList.add('open');
-    actualizarDependenciasFecha(); // CORREGIDO TYPO
+    actualizarDependenciasFecha(); 
 }
 
 function eliminarDiaCircuito(e, dia) {
@@ -511,7 +485,7 @@ function eliminarDiaCircuito(e, dia) {
     if (diasCircuitoContador > 2) {
         diasCircuitoContador--;
         renderizarEstructuraSegunModalidad();
-        actualizarDependenciasFecha(); // CORREGIDO TYPO
+        actualizarDependenciasFecha(); 
     }
 }
 
@@ -535,7 +509,6 @@ function mostrarTarjetaCatalogo(idTour) {
     
     activarAutoplayCarrusel(idTour);
     
-    // CORRECCIÓN: Leer del catálogo dinámico real
     if(catalogoToursDinamico[idTour]) {
         gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
     }
@@ -585,20 +558,16 @@ function calcular() {
       document.getElementById('total-display').innerText = `$${granTotalCalculado.toLocaleString()} MXN`;  
 }  
 
-function obtenerPrecioMatriz(tour, complemento, pasajeros) {
-    const datosTour = catalogoToursDinamico[tour];
-    if (!datosTour || !datosTour.tarifas) return 0;
-    
-    const combinacion = datosTour.tarifas[complemento] || datosTour.tarifas["Ruta Fija Corrida"];
-    if (!combinacion) return 0;
-
-    if (pasajeros <= 2) {
-        return combinacion[2]; 
-    } else {
-        let rangoKey = (pasajeros === 3) ? 3 : 4;
-        return pasajeros * combinacion[rangoKey];
-    }
-}
+function cambiarCant(tipo, cambio) {  
+      if (tipo === 'adultos') {  
+          if (adultos + cambio >= 2) adultos += cambio;   
+          document.getElementById('qty-adultos').innerText = adultos; 
+      } else {  
+          if (ninos + cambio >= 0) ninos += cambio;   
+          document.getElementById('qty-ninos').innerText = ninos;  
+      }  
+      calcular();   
+}  
 
 function moverCarrusel(idTour, direccion) {  
       const track = document.getElementById(`track-${idTour}`);  
@@ -673,17 +642,6 @@ function cargarBloqueos() {
           .catch(err => console.error("❌ Error en bloqueos:", err));  
 }  
 
-function cambiarCant(tipo, cambio) {  
-      if (tipo === 'adultos') {  
-          if (adultos + cambio >= 2) adultos += cambio;   
-          document.getElementById('qty-adultos').innerText = adults = adultos; 
-      } else {  
-          if (ninos + cambio >= 0) ninos += cambio;   
-          document.getElementById('qty-ninos').innerText = ninos;  
-      }  
-      calcular();   
-}  
-
 function enviarWhatsApp() {  
       const t = traducciones[idiomaActual];  
       const nombre = document.getElementById('nombre-cliente').value.trim();  
@@ -751,7 +709,7 @@ function enviarWhatsApp() {
           'plus_addons': plusParaAnalytics,
           'tour_language_required': idiomaTexto,
           'date_range_booked': fechaSeleccionada, 
-          'quantity_adults': adultos, 
+          'quantity_adults': adults = adultos, 
           'quantity_children': ninos, 
           'estimated_total_quoted': total,
           'locale_user': idiomaActual
