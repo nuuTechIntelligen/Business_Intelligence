@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 2: Motor Estacional Blindado y Analytics Dinámico desde Sheets.
+ * Fase 2: Motor Estacional Corregido y Validado.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -159,15 +159,14 @@ async function descargarYProcesarCatalogo() {
         renderizarEstructuraSegunModalidad();
 
     } catch (error) {
-        console.error("❌ Error en Fase 2 (Carga de Estacionalidad):", error);
+        console.error("❌ Error en Catálogo Dinámico:", error);
     }
 }
 
 /**
- * MOTOR DE PRECIOS MEJORADO: 
- * Evalúa si la fecha seleccionada cae dentro del periodo de temporada alta del tour.
+ * MOTOR DE PRECIOS CON DETECTOR ESTACIONAL (FASE 2)
  */
-function obtenerPrecioMatriz(tour, complemento, pasajeros) {
+function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "") {
     const datosTour = catalogoToursDinamico[tour];
     if (!datosTour || !datosTour.tarifas) return 0;
     
@@ -182,7 +181,9 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
-    let fechaAComprobar = fechaSeleccionada.trim();
+    // Si no se pasa una fecha específica (modo single), se evalúa la global
+    let fechaAComprobar = fechaEspecifica ? fechaEspecifica.trim() : fechaSeleccionada.trim();
+
     if (fechaAComprobar.includes(" a ")) {
         fechaAComprobar = fechaAComprobar.split(" a ")[0].trim();
     } else if (fechaAComprobar.includes(" to ")) {
@@ -194,7 +195,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         if (est.inicio && est.fin && est.factor > 1.0) {
             if (fechaAComprobar >= est.inicio && fechaAComprobar <= est.fin) {
                 precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
-                console.log(`🚀 ¡Multiplicador Estacional Exitoso para ${tour}! factor x${est.factor}`);
+                console.log(`🚀 Tarifa de Temporada Alta Aplicada para ${tour} (Fecha: ${fechaAComprobar}) -> Factor x${est.factor}`);
             }
         }
     }
@@ -258,7 +259,7 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días in el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
@@ -287,7 +288,7 @@ function irPaso(paso) {
             if(line1) { line1.classList.remove('completed-line'); }
         } else if (paso === 2) {
             if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
-            if(dot2) { dot2.classList.add('active'); }
+            if(dot2) { dot2.add('active'); }
             if(line1) { line1.classList.add('completed-line'); }
         }
         
@@ -543,14 +544,30 @@ function calcular() {
 
           granTotalCalculado = obtenerPrecioMatriz(idTour, compSel, totalPasajeros);
       } else {
+          // Lógica robusta de cálculo estacional para Circuitos Multi-Días
+          let fechaBaseMilisegundos = null;
+          if (fechaSeleccionada) {
+              let stringFechaLimpia = fechaSeleccionada.includes(" a ") ? fechaSeleccionada.split(" a ")[0].trim() : fechaSeleccionada.split(" to ")[0].trim();
+              if (stringFechaLimpia) {
+                  fechaBaseMilisegundos = new Date(stringFechaLimpia + "T12:00:00").getTime();
+              }
+          }
+
           for (let i = 1; i <= diasCircuitoContador; i++) {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
                   const idTourDia = selectDia.value;
-                  const r_compDia = document.querySelector('input[name="viaha-complemento-dia-' + i + '"]:checked');
+                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
                   const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
 
-                  granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros);
+                  // Calcular la fecha exacta de este día específico del circuito
+                  let fechaStringDiaActual = "";
+                  if (fechaBaseMilisegundos) {
+                      let diasExtraEnMilisegundos = (i - 1) * 24 * 60 * 60 * 1000;
+                      fechaStringDiaActual = new Date(fechaBaseMilisegundos + diasExtraEnMilisegundos).toISOString().split('T')[0];
+                  }
+
+                  granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros, fechaStringDiaActual);
               }
           }
       }
