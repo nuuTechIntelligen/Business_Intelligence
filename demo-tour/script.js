@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 2: Motor Estacional Corregido y Validado.
+ * Fase 2: Motor Estacional y de Catálogo Dinámico sin Errores de Sintaxis.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -106,7 +106,7 @@ async function descargarYProcesarCatalogo() {
                 plus: plusesArr,
                 txt: fila.nombre_tour.trim(),
                 cat: fila.categoria.trim(),
-                tarifas: estructuraTarifariaMapeada,
+                tarifas: structureTarifariaMapeada = estructuraTarifariaMapeada,
                 estacionalidad: { factor: factorAlta, inicio: inicioAlta, fin: finAlta }
             };
 
@@ -287,7 +287,7 @@ function irPaso(paso) {
             if(line1) { line1.classList.remove('completed-line'); }
         } else if (paso === 2) {
             if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
-            if(dot2) { dot2.classList.add('active'); } // CORREGIDO: .classList.add()
+            if(dot2) { dot2.classList.add('active'); } // CORREGIDO: Sintaxis DOM classList.add()
             if(line1) { line1.classList.add('completed-line'); }
         }
         
