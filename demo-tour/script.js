@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 2: Motor Estacional Validado y Corregido.
+ * Fase 2: Motor Estacional Corregido y Validado.
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -19,7 +19,7 @@ let pasoActual = 1;
 let fechasBloqueadasGlobal = [];
 let catalogoToursDinamico = {}; 
 
-// CONFIGURACIÓN DE ENDPOINTS DE LA API (SheetDB)
+// ENDPOINTS DE LA API (SheetDB)
 const API_BLOQUEOS = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
 const API_CATALOGO = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=catalogo_tours'; 
 
@@ -178,7 +178,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "")
         precioBaseCalculado = combinacion[2]; 
     } else {
         let rangoKey = (pasajeros === 3) ? 3 : 4;
-        precioBaseCalculado = pasajeros * rangoKey; // FASE 2: Corregido cálculo escalado por persona
+        precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
     let fechaAComprobar = fechaEspecifica ? fechaEspecifica.trim() : fechaSeleccionada.trim();
@@ -287,7 +287,7 @@ function irPaso(paso) {
             if(line1) { line1.classList.remove('completed-line'); }
         } else if (paso === 2) {
             if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
-            if(dot2) { dot2.classList.add('active'); } // CORREGIDO ERROR MÓVIL (.classList)
+            if(dot2) { dot2.classList.add('active'); } // CORREGIDO: .classList.add()
             if(line1) { line1.classList.add('completed-line'); }
         }
         
@@ -564,7 +564,7 @@ function calcular() {
                       fechaStringDiaActual = new Date(fechaBaseMilisegundos + diasExtraEnMilisegundos).toISOString().split('T')[0];
                   }
 
-                  granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros);
+                  granTotalCalculado += obtenerPrecioMatriz(idTourDia, compSelDia, totalPasajeros, fechaStringDiaActual);
               }
           }
       }
