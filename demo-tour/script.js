@@ -195,21 +195,32 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
-    // 2. FASE 2: Validar si la fecha seleccionada aplica para Multiplicador de Temporada Alta
-    // Para circuitos evaluamos la primera fecha del rango seleccionado
-    let fechaAComprobar = fechaSeleccionada;
-    if (fechaSeleccionada.includes(" a ")) {
-        fechaAComprobar = fechaSeleccionada.split(" a ")[0].trim();
+    // 2. FASE 2: DETECTOR ULTRA-BLINDADO DE TEMPORADA ALTA
+    let fechaAComprobar = fechaSeleccionada.trim();
+
+    // Si Flatpickr devuelve un rango (ej: "2026-07-11 a 2026-07-12" o "2026-07-11 to 2026-07-12")
+    if (fechaAComprobar.includes(" a ")) {
+        fechaAComprobar = fechaAComprobar.split(" a ")[0].trim();
+    } else if (fechaAComprobar.includes(" to ")) {
+        fechaAComprobar = fechaAComprobar.split(" to ")[0].trim();
     }
+
+    // REVISIÓN EN CONSOLA (Abre F12 en tu navegador para ver esto)
+    console.log(`🔍 Evaluando precios estacionales para: ${tour}`);
+    console.log(`📅 Fecha seleccionada limpia: "${fechaAComprobar}"`);
 
     if (fechaAComprobar && datosTour.estacionalidad) {
         const est = datosTour.estacionalidad;
-        // Si hay un periodo válido de alta configurado en el Sheet
+        
+        console.log(`📅 Regla del Sheet: Inicio "${est.inicio}" | Fin "${est.fin}" | Factor: x${est.factor}`);
+
+        // Verificación estricta de strings de fechas (ej: "2026-07-11" >= "2026-07-10")
         if (est.inicio && est.fin && est.factor > 1.0) {
             if (fechaAComprobar >= est.inicio && fechaAComprobar <= est.fin) {
-                // Aplicamos el factor estacional matemáticamente
                 precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
-                console.log(`🚀 ¡Tarifa de Temporada Alta Aplicada para ${tour}! Factor: x${est.factor}`);
+                console.log(`🚀 ¡ÉXITO! Multiplicador aplicado. Nuevo total: $${precioBaseCalculado}`);
+            } else {
+                console.log(`ℹ️ La fecha está fuera del rango de temporada alta.`);
             }
         }
     }
