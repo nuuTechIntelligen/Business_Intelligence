@@ -1,6 +1,6 @@
 /**
- * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Versión de Alta Disponibilidad - Parche de Sintaxis y Asincronía Septiembre 2026
+ * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
+ * Parche Homologado con Tolerancia a Fallos del DOM y Analíticas (2026)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -17,6 +17,19 @@ let pasoActual = 1;
 // CACHÉ DE BASE DE DATOS E INTERFAZ
 let fechasBloqueadasGlobal = [];
 let catalogoToursDinamico = {}; 
+
+// OPERACIÓN SEGURO DE ANALÍTICAS (Evita colapso si gtag no está cargado)
+const safeGtag = (eventName, params) => {
+    try {
+        if (typeof gtag === 'function') {
+            gtag('event', eventName, params);
+        } else {
+            console.warn(`[gtag simulado]: Evento '${eventName}' registrado con parámetros`, params);
+        }
+    } catch (e) {
+        console.error("Error al enviar métricas a Analytics:", e);
+    }
+};
 
 // ENDPOINTS DE LA API (SheetDB)
 const API_BLOQUEOS = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
@@ -39,39 +52,41 @@ const traducciones = {
 }; 
 
 /* ==========================================================================
-   FUNCIONES DE INTERFAZ PRINCIPALES (ELEVADAS Y CORREGIDAS)
+   FUNCIONES DE INTERFAZ PRINCIPALES 
    ========================================================================== */
 function cambiarModalidad(tipo) {
-    modalidadActiva = tipo;
-    
-    // Asegurar remoción de clases en botones de pestañas
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    const mainContainer = document.getElementById('viaha-main-container');
+    try {
+        modalidadActiva = tipo;
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        const mainContainer = document.getElementById('viaha-main-container');
 
-    if (tipo === 'single') {
-        const tabSingle = document.getElementById('tab-single');
-        if (tabSingle) tabSingle.classList.add('active');
-        const lblFecha = document.getElementById('label-fecha-dinamica');
-        if (lblFecha) lblFecha.innerText = "Fecha del Recorrido";
-        if (mainContainer) {
-            mainContainer.classList.remove('modo-circuito-activo'); 
-            mainContainer.classList.add('modo-single-activo'); 
+        if (tipo === 'single') {
+            const tabSingle = document.getElementById('tab-single');
+            if (tabSingle) tabSingle.classList.add('active');
+            const lblFecha = document.getElementById('label-fecha-dinamica');
+            if (lblFecha) lblFecha.innerText = "Fecha del Recorrido";
+            if (mainContainer) {
+                mainContainer.classList.remove('modo-circuito-activo'); 
+                mainContainer.classList.add('modo-single-activo'); 
+            }
+        } else {
+            const tabCircuit = document.getElementById('tab-circuit');
+            if (tabCircuit) tabCircuit.classList.add('active');
+            const lblFecha = document.getElementById('label-fecha-dinamica');
+            if (lblFecha) lblFecha.innerText = "Período del Circuito (Fechas)";
+            if (mainContainer) {
+                mainContainer.classList.add('modo-circuito-activo');    
+                mainContainer.classList.remove('modo-single-activo'); 
+            }
+            irPaso(1); 
         }
-    } else {
-        const tabCircuit = document.getElementById('tab-circuit');
-        if (tabCircuit) tabCircuit.classList.add('active');
-        const lblFecha = document.getElementById('label-fecha-dinamica');
-        if (lblFecha) lblFecha.innerText = "Período del Circuito (Fechas)";
-        if (mainContainer) {
-            mainContainer.classList.add('modo-circuito-activo');    
-            mainContainer.classList.remove('modo-single-activo'); 
-        }
-        irPaso(1); 
+        
+        renderizarEstructuraSegunModalidad();
+        actualizarDependenciasFecha(); 
+    } catch (err) {
+        console.error("⚠️ Error controlado en cambiarModalidad:", err.message);
     }
-    
-    renderizarEstructuraSegunModalidad();
-    actualizarDependenciasFecha(); 
 }
 
 function irPaso(paso) {
@@ -108,8 +123,7 @@ async function inicializarSistema() {
       }  
       try {          
           await cargarBloqueos();  
-          await descargarYProcesarCatalogo(); // Garantiza que los datos existan primero
-          inicializarSoportesTactiles();   
+          await descargarYProcesarCatalogo(); 
           actualizarDependenciasFecha(); 
       } catch (error) {  
           console.error("❌ Error Crítico en inicialización:", error.message);  
@@ -161,7 +175,6 @@ async function descargarYProcesarCatalogo() {
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
 
-            // CORREGIDO: Eliminada la doble asignación errónea
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
@@ -252,7 +265,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "")
         if (est.inicio && est.fin && est.factor > 1.0) {
             if (fechaAComprobar >= est.inicio && fechaAComprobar <= est.fin) {
                 precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
-                console.log(`🚀 Tarifa de Temporada Alta Aplicada para ${tour} (Fecha: ${fechaAComprobar}) -> Factor x${est.factor}`);
+                console.log(`🚀 Tarifa Estacional Activa en ${tour} para (${fechaAComprobar}) -> Multiplicador x${est.factor}`);
             }
         }
     }
@@ -294,7 +307,7 @@ function inicializarCalendario() {
 
       if (fp) {
           fp.destroy();
-          document.getElementById('fecha-reserva').value = ""; 
+          campoFecha.value = ""; 
           fechaSeleccionada = "";
       }   
 
@@ -316,14 +329,13 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      // CORREGIDO: Removido el operador de palabra reservada 'in' fuera de un string limpio
-                      alert("⚠️ Tu itinerario está configurado para exactamente " + diasRequeridos + " días. Por favor, selecciona un rango válido en el calendario.");
+                      alert("⚠️ Tu itinerario requiere exactamente " + diasRequeridos + " días distribuidos. Ajusta tu ventana en el calendario.");
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
               }
               calcular();
-              gtag('event', 'seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
+              safeGtag('seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
           }  
       });  
 }  
@@ -513,7 +525,7 @@ function mostrarTarjetaCatalogo(idTour) {
     activarAutoplayCarrusel(idTour);
     
     if (catalogoToursDinamico[idTour]) {
-        gtag('event', 'visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
+        safeGtag('visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
     }
 }
 
@@ -598,7 +610,7 @@ function moverCarrusel(idTour, direccion) {
       if (posicionesCarrusel[idTour] < 0) posicionesCarrusel[idTour] = imagenes.length - 1;  
        
       track.style.transform = `translateX(${posicionesCarrusel[idTour] * -100}%)`;  
-      gtag('event', 'desplazamiento_galeria', { 'id_destino': idTour, 'imagen_index': posicionesCarrusel[idTour] }); 
+      safeGtag('desplazamiento_galeria', { 'id_destino': idTour, 'imagen_index': posicionesCarrusel[idTour] }); 
 }  
 
 function activarAutoplayCarrusel(idTour) {  
@@ -643,7 +655,7 @@ function cambiarIdioma() {
   
       renderizarEstructuraSegunModalidad();  
       actualizarDependenciasFecha(); 
-      gtag('event', 'cambio_idioma_plataforma', { 'idioma_activo': idiomaActual });  
+      safeGtag('cambio_idioma_plataforma', { 'idioma_activo': idiomaActual });  
 }  
 
 function cargarBloqueos() {  
@@ -721,14 +733,14 @@ function enviarWhatsApp() {
           mensaje += `\n\n💰 *TOTAL ESTIMADO DEL CIRCUITO:* ${total}\n\n¿Tienen disponibilidad para coordinar estos días con el equipo?`;
       }
        
-      gtag('event', 'conversion_reserva_click', {  
+      safeGtag('conversion_reserva_click', {  
           'lead_traveler_name': nombre,
           'destination_selected': tourParaAnalytics,
           'route_complement': complementoParaAnalytics,
           'plus_addons': plusParaAnalytics,
           'tour_language_required': idiomaTexto,
           'date_range_booked': fechaSeleccionada, 
-          'quantity_adults': adults, 
+          'quantity_adults': adultos, 
           'quantity_children': ninos, 
           'estimated_total_quoted': total,
           'locale_user': idiomaActual
@@ -753,7 +765,7 @@ function ejecutarOpcionC_HorariosFijos() {
              btn.style.display = 'block';
              btn.onclick = () => {
                  const bloques = document.getElementById('select-hora-fija').value;
-                 gtag('event', 'lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloques });
+                 safeGtag('lead_llamada_disparado', { 'fecha_propuesta': dateStr, 'bloque_horario': bloques });
                  let txt = `¡Hola! Me gustaría coordinar mi llamada de personalización de viaje con Vía Há México.\n\n📅 *Fecha:* ${dateStr}\n⏰ *Horario propuesto:* ${bloques}\n\n¿Me confirman si Roberto y Romain tienen espacio disponible?`;
                  window.open(`https://wa.me/529618150804?text=${encodeURIComponent(txt)}`, '_blank');
              };
