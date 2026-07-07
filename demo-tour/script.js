@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE INTELIGENCIA DE NEGOCIO Y RESERVAS ONLINE
- * Fase 2: Motor Estacional y de Catálogo Dinámico sin Errores de Sintaxis.
+ * Fase 2: Versión de Alta Disponibilidad (Funciones principales elevadas)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -10,7 +10,6 @@ let fp = null;
 let fechaSeleccionada = ""; 
 let idiomaActual = "es";        
 
-// Control de modalidad activa ('single' para 1 día, 'circuit' para multidías)
 let modalidadActiva = 'single';
 let diasCircuitoContador = 2; 
 let pasoActual = 1; 
@@ -39,6 +38,68 @@ const traducciones = {
       } 
 }; 
 
+/* ==========================================================================
+   FUNCIONES DE INTERFAZ PRINCIPALES (ELEVADAS PARA EVITAR REFERENCE_ERROR)
+   ========================================================================== */
+function cambiarModalidad(tipo) {
+    modalidadActiva = tipo;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    const mainContainer = document.getElementById('viaha-main-container');
+
+    if (tipo === 'single') {
+        const tabSingle = document.getElementById('tab-single');
+        if (tabSingle) tabSingle.classList.add('active');
+        const lblFecha = document.getElementById('label-fecha-dinamica');
+        if (lblFecha) lblFecha.innerText = "Fecha del Recorrido";
+        if(mainContainer) {
+            mainContainer.classList.remove('modo-circuito-activo'); 
+            mainContainer.classList.add('modo-single-activo'); 
+        }
+    } else {
+        const tabCircuit = document.getElementById('tab-circuit');
+        if (tabCircuit) tabCircuit.classList.add('active');
+        const lblFecha = document.getElementById('label-fecha-dinamica');
+        if (lblFecha) lblFecha.innerText = "Período del Circuito (Fechas)";
+        if(mainContainer) {
+            mainContainer.classList.add('modo-circuito-activo');    
+            mainContainer.classList.remove('modo-single-activo'); 
+        }
+        irPaso(1); 
+    }
+    
+    renderizarEstructuraSegunModalidad();
+    actualizarDependenciasFecha(); 
+}
+
+function irPaso(paso) {
+    if (window.innerWidth < 850) {
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll(`.wizard-step[data-step="${paso}"]`).forEach(el => el.classList.add('active'));
+        
+        const dot1 = document.getElementById('dot-1');
+        const dot2 = document.getElementById('dot-2');
+        const line1 = document.getElementById('line-1');
+
+        if (paso === 1) {
+            if(dot1) { dot1.classList.add('active'); dot1.classList.remove('completed'); dot1.innerHTML = '1'; }
+            if(dot2) { dot2.classList.remove('active', 'completed'); }
+            if(line1) { line1.classList.remove('completed-line'); }
+        } else if (paso === 2) {
+            if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
+            if(dot2) { dot2.classList.add('active'); } 
+            if(line1) { line1.classList.add('completed-line'); }
+        }
+        
+        const mainCont = document.getElementById('viaha-main-container');
+        if (mainCont) {
+            const topPos = mainCont.offsetTop;
+            window.scrollTo({ top: topPos - 20, behavior: 'smooth' });
+        }
+        pasoActual = paso;
+    }
+}
+
 async function inicializarSistema() {  
       while (typeof flatpickr === 'undefined') {  
           await new Promise(resolve => setTimeout(resolve, 100));  
@@ -53,9 +114,6 @@ async function inicializarSistema() {
       }  
 }  
 
-/**
- * MOTOR DE PROCESAMIENTO: Descarga catálogo y mapea el inventario estacional y de imágenes.
- */
 async function descargarYProcesarCatalogo() {
     try {
         const respuesta = await fetch(API_CATALOGO);
@@ -106,7 +164,7 @@ async function descargarYProcesarCatalogo() {
                 plus: plusesArr,
                 txt: fila.nombre_tour.trim(),
                 cat: fila.categoria.trim(),
-                tarifas: structureTarifariaMapeada = estructuraTarifariaMapeada,
+                tarifas: estructuraTarifariaMapeada,
                 estacionalidad: { factor: factorAlta, inicio: inicioAlta, fin: finAlta }
             };
 
@@ -163,9 +221,6 @@ async function descargarYProcesarCatalogo() {
     }
 }
 
-/**
- * MOTOR DE PRECIOS CON DETECTOR ESTACIONAL (FASE 2)
- */
 function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "") {
     const datosTour = catalogoToursDinamico[tour];
     if (!datosTour || !datosTour.tarifas) return 0;
@@ -258,7 +313,7 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días in el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
@@ -268,62 +323,6 @@ function inicializarCalendario() {
           }  
       });  
 }  
-
-/* ==========================================================================
-   CEREBRO DEL WIZARD MÓVIL (2 PASOS)
-   ========================================================================== */
-function irPaso(paso) {
-    if (window.innerWidth < 850) {
-        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll(`.wizard-step[data-step="${paso}"]`).forEach(el => el.classList.add('active'));
-        
-        const dot1 = document.getElementById('dot-1');
-        const dot2 = document.getElementById('dot-2');
-        const line1 = document.getElementById('line-1');
-
-        if (paso === 1) {
-            if(dot1) { dot1.classList.add('active'); dot1.classList.remove('completed'); dot1.innerHTML = '1'; }
-            if(dot2) { dot2.classList.remove('active', 'completed'); }
-            if(line1) { line1.classList.remove('completed-line'); }
-        } else if (paso === 2) {
-            if(dot1) { dot1.classList.remove('active'); dot1.classList.add('completed'); dot1.innerHTML = '✓'; }
-            if(dot2) { dot2.classList.add('active'); } // CORREGIDO: Sintaxis DOM classList.add()
-            if(line1) { line1.classList.add('completed-line'); }
-        }
-        
-        const topPos = document.getElementById('viaha-main-container').offsetTop;
-        window.scrollTo({ top: topPos - 20, behavior: 'smooth' });
-        
-        pasoActual = paso;
-    }
-}
-
-function cambiarModalidad(tipo) {
-    modalidadActiva = tipo;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    const mainContainer = document.getElementById('viaha-main-container');
-
-    if (tipo === 'single') {
-        document.getElementById('tab-single').classList.add('active');
-        document.getElementById('label-fecha-dinamica').innerText = "Fecha del Recorrido";
-        if(mainContainer) {
-            mainContainer.classList.remove('modo-circuito-activo'); 
-            mainContainer.classList.add('modo-single-activo'); 
-        }
-    } else {
-        document.getElementById('tab-circuit').classList.add('active');
-        document.getElementById('label-fecha-dinamica').innerText = "Período del Circuito (Fechas)";
-        if(mainContainer) {
-            mainContainer.classList.add('modo-circuito-activo');    
-            mainContainer.classList.remove('modo-single-activo'); 
-        }
-        irPaso(1); 
-    }
-    
-    renderizarEstructuraSegunModalidad();
-    actualizarDependenciasFecha(); 
-}
 
 function renderizarEstructuraSegunModalidad() {
     const contenedorSuperiorSelector = document.getElementById('wrapper-selector-single-fijo');
@@ -569,7 +568,8 @@ function calcular() {
           }
       }
 
-      document.getElementById('total-display').innerText = `$${granTotalCalculado.toLocaleString()} MXN`;  
+      const txtDisplay = document.getElementById('total-display');
+      if (txtDisplay) txtDisplay.innerText = `$${granTotalCalculado.toLocaleString()} MXN`;  
 }  
 
 function cambiarCant(tipo, cambio) {  
@@ -737,6 +737,7 @@ function cerrarModal() { document.getElementById('modal-agenda').style.display =
 
 function ejecutarOpcionC_HorariosFijos() {
      const contenedor = document.getElementById('contenedor-render-agenda');
+     if(!contenedor) return;
      contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Llamada</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
 
      flatpickr("#fecha-llamada-fija", {
