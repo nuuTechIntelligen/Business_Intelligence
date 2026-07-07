@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Parche Homologado con Tolerancia a Fallos del DOM y Analíticas (2026)
+ * Base Segura + Fase 2 (Precios Estacionales Dinámicos)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -18,7 +18,7 @@ let pasoActual = 1;
 let fechasBloqueadasGlobal = [];
 let catalogoToursDinamico = {}; 
 
-// OPERACIÓN SEGURO DE ANALÍTICAS (Evita colapso si gtag no está cargado)
+// OPERACIÓN SEGURO DE ANALÍTICAS
 const safeGtag = (eventName, params) => {
     try {
         if (typeof gtag === 'function') {
@@ -171,6 +171,7 @@ async function descargarYProcesarCatalogo() {
                 estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
+            // [FASE 2: Lectura de variables estacionales desde Sheet]
             const factorAlta = fila.factor_alta ? parseFloat(fila.factor_alta.trim()) : 1.0;
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
@@ -237,6 +238,9 @@ async function descargarYProcesarCatalogo() {
     }
 }
 
+/**
+ * [FASE 2: Motor de Precios Dinámicos por Clima/Temporada]
+ */
 function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "") {
     const datosTour = catalogoToursDinamico[tour];
     if (!datosTour || !datosTour.tarifas) return 0;
@@ -252,6 +256,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "")
         precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
+    // Filtrar la fecha para comprobación estacional
     let fechaAComprobar = fechaEspecifica ? fechaEspecifica.trim() : fechaSeleccionada.trim();
 
     if (fechaAComprobar.includes(" a ")) {
@@ -265,10 +270,11 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros, fechaEspecifica = "")
         if (est.inicio && est.fin && est.factor > 1.0) {
             if (fechaAComprobar >= est.inicio && fechaAComprobar <= est.fin) {
                 precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
-                console.log(`🚀 Tarifa Estacional Activa en ${tour} para (${fechaAComprobar}) -> Multiplicador x${est.factor}`);
+                console.log(`🚀 Multiplicador activo en ${tour} -> x${est.factor}`);
             }
         }
     }
+    
     return precioBaseCalculado;
 }
 
@@ -307,7 +313,7 @@ function inicializarCalendario() {
 
       if (fp) {
           fp.destroy();
-          campoFecha.value = ""; 
+          document.getElementById('fecha-reserva').value = ""; 
           fechaSeleccionada = "";
       }   
 
@@ -329,11 +335,12 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert("⚠️ Tu itinerario requiere exactamente " + diasRequeridos + " días distribuidos. Ajusta tu ventana en el calendario.");
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
               }
+              // FASE 2: Recalcular precio automáticamente al tocar una fecha
               calcular();
               safeGtag('seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
           }  
@@ -345,19 +352,19 @@ function renderizarEstructuraSegunModalidad() {
     const contenedorCentralAcordeones = document.getElementById('seccion-personalizacion-tour');
     const contenedorSingleInterno = document.getElementById('wrapper-personalizacion-single');
 
-    if (!catalogoToursDinamico || Object.keys(catalogoToursDinamico).length === 0) return;
+    if (Object.keys(catalogoToursDinamico).length === 0) return;
 
     if (modalidadActiva === 'single') {
-        if (contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'block';
-        if (contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = '';
+        if(contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'block';
+        if(contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = '';
         
         renderizarCamposSingle();
         
         const select = document.getElementById('tour-select');
-        if (select) mostrarTarjetaCatalogo(select.value);
+        if(select) mostrarTarjetaCatalogo(select.value);
     } else {
-        if (contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'none';
-        if (contenedorSingleInterno) contenedorSingleInterno.innerHTML = '';
+        if(contenedorSuperiorSelector) contenedorSuperiorSelector.style.display = 'none';
+        if(contenedorSingleInterno) contenedorSingleInterno.innerHTML = '';
         
         let htmlAcordeones = `<label class="section-title" style="margin-bottom:15px; display:block;">🗺️ Itinerario del Circuito Privado (Por Días)</label><div id="accordion-circuito-container">`;
         
@@ -387,18 +394,18 @@ function renderizarEstructuraSegunModalidad() {
         }
         
         htmlAcordeones += `</div><button type="button" class="btn-add-dia-circuito" onclick="agregarDiaCircuito()">➕ Agregar Siguiente Día al Itinerario</button>`;
-        if (contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = htmlAcordeones;
+        if(contenedorCentralAcordeones) contenedorCentralAcordeones.innerHTML = htmlAcordeones;
 
         for (let i = 1; i <= diasCircuitoContador; i++) {
             const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
             const llavesDisponibles = Object.keys(catalogoToursDinamico);
             
-            if (i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "";
-            if (i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || llavesDisponibles[0] || "";
-            if (selectDia) renderizarCamposDiaCircuito(i, selectDia.value);
+            if(i === 1 && selectDia) selectDia.value = llavesDisponibles[0] || "";
+            if(i === 2 && selectDia) selectDia.value = llavesDisponibles[1] || llavesDisponibles[0] || "";
+            if(selectDia) renderizarCamposDiaCircuito(i, selectDia.value);
         }
         const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
-        if (selectPrimero) mostrarTarjetaCatalogo(selectPrimero.value); 
+        if(selectPrimero) mostrarTarjetaCatalogo(selectPrimero.value); 
     }
     actualizarLogosDinamicos();
 }
@@ -491,7 +498,7 @@ function agregarDiaCircuito() {
     renderizarEstructuraSegunModalidad();
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
     const nuevoElemento = document.getElementById(`accordion-dia-${diasCircuitoContador}`);
-    if (nuevoElemento) nuevoElemento.classList.add('open');
+    if(nuevoElemento) nuevoElemento.classList.add('open');
     actualizarDependenciasFecha(); 
 }
 
@@ -506,7 +513,7 @@ function eliminarDiaCircuito(e, dia) {
 
 function actualizarInterfazSingle() {  
       const select = document.getElementById('tour-select');  
-      if (!select) return;
+      if(!select) return;
       const selectedTour = select.value;  
        
       mostrarTarjetaCatalogo(selectedTour);
@@ -524,7 +531,7 @@ function mostrarTarjetaCatalogo(idTour) {
     
     activarAutoplayCarrusel(idTour);
     
-    if (catalogoToursDinamico[idTour]) {
+    if(catalogoToursDinamico[idTour]) {
         safeGtag('visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
     }
 }
@@ -545,19 +552,20 @@ function actualizarLogosDinamicos() {
 }
 
 function calcular() {  
-      if (!catalogoToursDinamico || Object.keys(catalogoToursDinamico).length === 0) return;
+      if (Object.keys(catalogoToursDinamico).length === 0) return;
       let granTotalCalculado = 0;
       const totalPasajeros = adultos + ninos;
 
       if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');
-          if (!select) return;
+          if(!select) return;
           const idTour = select.value;
           const r_comp = document.querySelector('input[name="viaha-complemento"]:checked');
           const compSel = r_comp ? r_comp.value : "Ruta Fija Corrida";
 
           granTotalCalculado = obtenerPrecioMatriz(idTour, compSel, totalPasajeros);
       } else {
+          // [FASE 2: Calcular fecha por cada día del circuito para ver estacionalidad]
           let fechaBaseMilisegundos = null;
           if (fechaSeleccionada) {
               let stringFechaLimpia = fechaSeleccionada.includes(" a ") ? fechaSeleccionada.split(" a ")[0].trim() : fechaSeleccionada.split(" to ")[0].trim();
@@ -570,7 +578,7 @@ function calcular() {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
                   const idTourDia = selectDia.value;
-                  const r_compDia = document.querySelector('input[name="viaha-complemento-dia-' + i + '"]:checked');
+                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
                   const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
 
                   let fechaStringDiaActual = "";
@@ -584,8 +592,7 @@ function calcular() {
           }
       }
 
-      const txtDisplay = document.getElementById('total-display');
-      if (txtDisplay) txtDisplay.innerText = `$${granTotalCalculado.toLocaleString()} MXN`;  
+      document.getElementById('total-display').innerText = `$${granTotalCalculado.toLocaleString()} MXN`;  
 }  
 
 function cambiarCant(tipo, cambio) {  
@@ -599,7 +606,6 @@ function cambiarCant(tipo, cambio) {
       calcular();   
 }  
 
-// OTRAS UTILIDADES
 function moverCarrusel(idTour, direccion) {  
       const track = document.getElementById(`track-${idTour}`);  
       if (!track) return;  
@@ -626,7 +632,7 @@ function inicializarSoportesTactiles() {
       document.querySelectorAll('.carousel-container').forEach(container => {  
           let xInicial = null;  
           const track = container.querySelector('.carousel-track');  
-          if (!track) return;  
+          if(!track) return;  
           const idTour = track.id.replace('track-', '');  
 
           container.addEventListener('touchstart', (e) => { detenerAutoplayCarrusel(idTour); xInicial = e.touches[0].clientX; }, { passive: true });  
@@ -679,7 +685,7 @@ function enviarWhatsApp() {
        
       if (!nombre || !fechaSeleccionada) {  
           alert(!nombre ? t.alert_nombre : t.alert_fecha);  
-          if (!nombre) document.getElementById('nombre-cliente').focus();  
+          if(!nombre) document.getElementById('nombre-cliente').focus();  
           return;  
       }  
 
@@ -717,9 +723,9 @@ function enviarWhatsApp() {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
               if (selectDia) {
                   const tourDiaTxt = selectDia.options[selectDia.selectedIndex].text;
-                  const r_compDia = document.querySelector('input[name="viaha-complemento-dia-' + i + '"]:checked');
+                  const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
                   const compDiaTxt = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
-                  const checksPlusDia = document.querySelectorAll('input[name="viaha-plus-dia-' + i + '"]:checked');
+                  const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
                   let plusDiaArr = [];
                   checksPlusDia.forEach(c => plusDiaArr.push(c.value));
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
@@ -754,7 +760,7 @@ function cerrarModal() { document.getElementById('modal-agenda').style.display =
 
 function ejecutarOpcionC_HorariosFijos() {
      const contenedor = document.getElementById('contenedor-render-agenda');
-     if (!contenedor) return;
+     if(!contenedor) return;
      contenedor.innerHTML = `<h3 class="section-title" style="margin-top:0;">Agendar Llamada</h3><p style="font-size:15px; margin-bottom:15px;">Selecciona el día y el bloque de horario de tu preferencia para coordinar tu llamada o Videollamada personalizada con el equipo.</p><div class="form-group"><label class="input-label">1. Elige la Fecha</label><input type="text" id="fecha-llamada-fija" placeholder="Haga clic para abrir el calendario..." readonly></div><div id="wrapper-horarios-fijos" class="form-group" style="display:none;">Horarios disponibles de Vía Há (Zona Horaria CDMX)<select id="select-hora-fija" class="tour-picker"><option value="Mañana (9:00 AM - 12:00 PM)">Mañana (9:00 AM - 12:00 PM)</option><option value="Tarde (2:00 PM - 5:00 PM)">Tarde (2:00 PM - 5:00 PM)</option><option value="Sabatino (10:00 AM - 1:00 PM)">Sabatino (10:00 AM - 1:00 PM)</option></select></div><button type="button" id="btn-confirmar-fijo" class="btn-whatsapp" style="display:none; width:100%; border:none; cursor:pointer;">Confirmar e ir a WhatsApp ↗</button>`;
 
      flatpickr("#fecha-llamada-fija", {
