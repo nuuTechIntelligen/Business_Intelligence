@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Ruta Coloradas) + Modificación 3 (Nota Celestún en Pluses)
+ * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Ruta Coloradas) + Modificación 3 (Nota Celestún abajo de Checkboxes Pluses)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -430,14 +430,16 @@ function renderizarCamposSingle() {
     if (datos.plus.length > 0) {
          html += `<div class="box-personalizacion"><div class="titulo-interactivo">✨ ¿Quieres agregar un Plus?</div>`;
          
-         // MODIFICACIÓN EXCLUSIVA: Si es Celestún, inyectamos la nota estacional directo dentro de la caja de Pluses
-         if (tour === 'celestun') {
-             html += `<div class="viaha-nota-estacional" style="margin: 0 0 12px 0;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
-         }
-
+         // 1. Renderizamos primero todos los checkboxes de pluses disponibles
          datos.plus.forEach(pl => {
              html += `<label class="opcion-item"><input type="checkbox" name="viaha-plus" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
          });
+
+         // MODIFICACIÓN EXCLUSIVA: Ahora la nota estacional se concatena AL FINAL de los checkboxes (debajo de ellos)
+         if (tour === 'celestun') {
+             html += `<div class="viaha-nota-estacional" style="margin: 12px 0 0 0;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
+         }
+
          html += `</div>`;
      }
      target.innerHTML = html;
@@ -464,14 +466,16 @@ function renderizarCamposDiaCircuito(dia, tour) {
     if (datos.plus.length > 0) {
         html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:0;"><div class="titulo-interactivo" style="font-size:14px; margin:0; border:none;">✨ Pluses Disponibles</div>`;
         
-        // MODIFICACIÓN EXCLUSIVA CIRCUITO: Coloca la nota estacional dentro de la caja de pluses del día correspondiente
-        if (tour === 'celestun') {
-            html += `<div class="viaha-nota-estacional" style="margin: 0 0 12px 0; font-size: 14px; padding: 10px 14px;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
-        }
-
+        // 1. Renderizamos primero todos los checkboxes en circuito
         datos.plus.forEach(pl => {
             html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="checkbox" name="viaha-plus-dia-${dia}" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
         });
+
+        // MODIFICACIÓN EXCLUSIVA CIRCUITO: Coloca la nota estacional AL FINAL (debajo de las opciones)
+        if (tour === 'celestun') {
+            html += `<div class="viaha-nota-estacional" style="margin: 12px 0 0 0; font-size: 14px; padding: 10px 14px;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
+        }
+
         html += `</div>`;
     }
     target.innerHTML = html;
@@ -721,14 +725,14 @@ function enviarWhatsApp() {
               if (selectDia) {
                   const tourDiaTxt = selectDia.options[selectDia.selectedIndex].text;
                   const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
-                  const compDiaTxt = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
+                  const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
                   const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
                   let plusDiaArr = [];
                   checksPlusDia.forEach(c => plusDiaArr.push(c.value));
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
 
-                  mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compDiaTxt}\n   ✨ Pluses: ${plusDiaTxt}`;
-                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compDiaTxt})`);
+                  mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compSelDia}\n   ✨ Pluses: ${plusDiaTxt}`;
+                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compSelDia})`);
               }
           }
           complementoParaAnalytics = itinerarioResumen.join(' | ');
