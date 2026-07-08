@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Versión Estable + Modificación 1: Descripciones Dinámicas Estrictas desde Sheets
+ * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Sección de Ruta Adaptativa) + Modificación 3 (Nota Celestún)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -175,7 +175,7 @@ async function descargarYProcesarCatalogo() {
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
 
-            // MODIFICACIÓN DINÁMICA: Si la celda existe en Sheets, la procesamos; si no, queda vacía
+            // MODIFICACIÓN 1: Obtención de descripción dinámica (respeta cajas de incluye fijas)
             const descFila = (fila.descripcion && fila.descripcion.trim() !== "") ? fila.descripcion.trim() : "";
 
             catalogoToursDinamico[id] = {
@@ -194,8 +194,14 @@ async function descargarYProcesarCatalogo() {
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
 
-            // MODIFICACIÓN DINÁMICA: Si descFila tiene texto, envuelve en etiquetas <p>; si está vacío, no dibuja nada
+            // Envoltura de descripción
             let htmlBloqueDescripcion = descFila !== "" ? `<p>${descFila}</p>` : "";
+
+            // MODIFICACIÓN 3: Nota UI estacional de avistamiento para Celestún
+            let htmlNotaEstacional = "";
+            if (id === "celestun") {
+                htmlNotaEstacional = `<div class="viaha-nota-estacional">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
+            }
 
             htmlTarjetasDinamicas += `
                 <div id="info-${id}" class="tour-info-card"> 
@@ -211,6 +217,7 @@ async function descargarYProcesarCatalogo() {
                         <h3 class="section-title">${fila.nombre_tour.trim()}</h3> 
                     </div> 
                     ${htmlBloqueDescripcion} 
+                    ${htmlNotaEstacional}
                     <div class="inc-no-inc-container">
                         <div class="inc-col">
                             <div class="inc-title">🟢 Incluye</div>
@@ -418,7 +425,10 @@ function renderizarCamposSingle() {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        html += `<div class="box-personalizacion"><div class="titulo-interactivo">📍 Personaliza tu Ruta (Elige 1)</div>`;
+        // MODIFICACIÓN EXCLUSIVA PARTE 2: Cambia el título si solo hay 1 complemento interactivo
+        let stringTituloComplemento = datos.complementos.length > 1 ? "📍 Personaliza tu Ruta (Elige 1)" : "✨ Este tour contempla:";
+
+        html += `<div class="box-personalizacion"><div class="titulo-interactivo">${stringTituloComplemento}</div>`;
         datos.complementos.forEach((comp, index) => {
             html += `<label class="opcion-item"><input type="radio" name="viaha-complemento" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="actualizarDependenciasFecha()"><span>${comp}</span></label>`;
         });
@@ -444,7 +454,10 @@ function renderizarCamposDiaCircuito(dia, tour) {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px; border:none; margin:0; padding:0;">📍 Ruta del Día ${dia}</div>`;
+        // Se aplica la misma lógica adaptativa para el título dentro de los días del circuito
+        let stringTituloCompDia = datos.complementos.length > 1 ? `📍 Ruta del Día ${dia}` : "✨ Este tour contempla:";
+
+        html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px; border:none; margin:0; padding:0;">${stringTituloCompDia}</div>`;
         datos.complementos.forEach((comp, index) => {
             html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="radio" name="viaha-complemento-dia-${dia}" value="${comp}" ${index === 0 ? 'checked' : ''} onchange="actualizarDependenciasFecha()"><span>${comp}</span></label>`;
         });
@@ -494,7 +507,7 @@ function agregarDiaCircuito() {
     diasCircuitoContador++;
     renderizarEstructuraSegunModalidad();
     document.querySelectorAll('.accordion-item-circuito').forEach(el => el.classList.remove('open'));
-    const nuevoElemento = document.getElementById(`accordion-dia-${diasCircuitoContador}`);
+    const nuevoElemento = document.getElementById('accordion-dia-' + diasCircuitoContador);
     if(nuevoElemento) nuevoElemento.classList.add('open');
     actualizarDependenciasFecha(); 
 }
@@ -610,8 +623,6 @@ function activarAutoplayCarrusel(idTour) {
 function detenerAutoplayCarrusel(idTour) {  
       if (intervalosCarrusel[idTour]) { clearInterval(intervalosCarrusel[idTour]); intervalosCarrusel[idTour] = null; }  
 }  
-
-/* document.getElementById('wa-link').addEventListener('click', enviarWhatsApp); */ // Removido listener duplicado redundante
 
 function inicializarSoportesTactiles() {  
       document.querySelectorAll('.carousel-container').forEach(container => {  
