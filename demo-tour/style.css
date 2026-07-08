@@ -116,6 +116,18 @@ body {
     text-transform: uppercase; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
 } 
+/* Nota UI para el avistamiento estacional de flamencos */
+.viaha-nota-estacional {
+    background-color: rgba(236, 187, 144, 0.15);
+    border-left: 4px solid var(--turquesa);
+    padding: 10px 15px;
+    margin: 15px 20px 0 20px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text);
+    text-align: left;
+}
 
 /* ==========================================================================
    ESTILOS DE CAPAS DECORATIVAS FLOTANTES
