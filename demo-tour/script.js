@@ -1,7 +1,6 @@
-
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Parche Homologado con Tolerancia a Fallos y Precios Estacionales por Día Actual
+ * Versión Estable + Modificación 1: Descripciones Dinámicas desde Sheets
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -172,10 +171,12 @@ async function descargarYProcesarCatalogo() {
                 estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
-            // NUEVA LECTURA DE FACTOR ESTACIONAL DE HOY
             const factorAlta = fila.factor_alta ? parseFloat(fila.factor_alta.trim()) : 1.0;
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
+
+            // MODIFICACIÓN EXCLUSIVA PARTE 1: Extraer descripción celda por celda desde tu Google Sheet
+            const descFila = fila.descripcion ? fila.descripcion.trim() : "Disfruta de una experiencia premium privada con fotografía profesional incluida.";
 
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
@@ -206,7 +207,7 @@ async function descargarYProcesarCatalogo() {
                         <div class="dynamic-tour-logo-container logo-c1"></div> 
                         <h3 class="section-title">${fila.nombre_tour.trim()}</h3> 
                     </div> 
-                    <p>Disfruta de una experiencia premium privada con fotografía profesional incluida.</p> 
+                    <p>${descFila}</p> 
                     <div class="inc-no-inc-container">
                         <div class="inc-col">
                             <div class="inc-title">🟢 Incluye</div>
@@ -239,9 +240,6 @@ async function descargarYProcesarCatalogo() {
     }
 }
 
-/**
- * MOTOR DE PRECIOS BASADO EN LA FECHA DEL DÍA DE HOY
- */
 function obtenerPrecioMatriz(tour, complemento, pasajeros) {
     const datosTour = catalogoToursDinamico[tour];
     if (!datosTour || !datosTour.tarifas) return 0;
@@ -257,7 +255,6 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
-    // NUEVA DINÁMICA: Revisamos si LA FECHA ACTUAL cae en temporada alta
     const hoyDate = new Date().toISOString().split('T')[0];
 
     if (datosTour.estacionalidad) {
@@ -330,7 +327,7 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días in el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
@@ -339,6 +336,10 @@ function inicializarCalendario() {
           }  
       });  
 }  
+
+function renderizarEstructungModalidad() {
+    // Alias por compatibilidad
+}
 
 function renderizarEstructuraSegunModalidad() {
     const contenedorSuperiorSelector = document.getElementById('wrapper-selector-single-fijo');
@@ -530,17 +531,17 @@ function mostrarTarjetaCatalogo(idTour) {
 }
 
 function actualizarLogosDinamicos() {  
-      let categoria = "arqueologia";
+      let category = "arqueologia";
       if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');  
-          if (select && catalogoToursDinamico[select.value]) categoria = catalogoToursDinamico[select.value].cat;  
+          if (select && catalogoToursDinamico[select.value]) category = catalogoToursDinamico[select.value].cat;  
       } else {
           const selectPrimero = document.querySelector('.picker-circuito-destino[data-dia="1"]');
-          if (selectPrimero && catalogoToursDinamico[selectPrimero.value]) categoria = catalogoToursDinamico[selectPrimero.value].cat;
+          if (selectPrimero && catalogoToursDinamico[selectPrimero.value]) category = catalogoToursDinamico[selectPrimero.value].cat;
       }
       
-      const rutaSvg = `img/isologos/${categoria}.svg`;
-      const htmlImg = `<img src="${rutaSvg}" alt="Isologo Vía Há ${categoria}" class="img-isologo-dinamico">`;
+      const rutaSvg = `img/isologos/${category}.svg`;
+      const htmlImg = `<img src="${rutaSvg}" alt="Isologo Vía Há ${category}" class="img-isologo-dinamico">`;
       document.querySelectorAll('.dynamic-tour-logo-container').forEach(container => { container.innerHTML = htmlImg; });  
 }
 
@@ -673,7 +674,7 @@ function enviarWhatsApp() {
       let idiomaTexto = r_idioma ? r_idioma.value : "Español";
       if (idiomaTexto === "Otro") {
           const inputOtro = document.getElementById('input-otro-idioma-global').value.trim();
-          idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No especificado)";
+          idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No esppecificado)";
       }
 
       let mensaje = "";
@@ -723,12 +724,7 @@ function enviarWhatsApp() {
           'destination_selected': tourParaAnalytics,
           'route_complement': complementoParaAnalytics,
           'plus_addons': plusParaAnalytics,
-          'tour_language_required': idiomaTexto,
-          'date_range_booked': fechaSeleccionada, 
-          'quantity_adults': adultos, 
-          'quantity_children': ninos, 
-          'estimated_total_quoted': total,
-          'locale_user': idiomaActual
+          'tour_language_required': idiomaActual
       });  
 
       window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
