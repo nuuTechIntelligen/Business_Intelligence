@@ -1,6 +1,7 @@
+
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Parche Homologado con Tolerancia a Fallos, Descripciones Dinámicas y Reglas UX
+ * Parche Homologado con Tolerancia a Fallos y Precios Estacionales por Día Actual
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -171,19 +172,16 @@ async function descargarYProcesarCatalogo() {
                 estructuraTarifariaMapeada["Ruta Fija Corrida"] = { 2: precios2[0] || 0, 3: precios3[0] || 0, 4: precios4[0] || 0 };
             }
 
+            // NUEVA LECTURA DE FACTOR ESTACIONAL DE HOY
             const factorAlta = fila.factor_alta ? parseFloat(fila.factor_alta.trim()) : 1.0;
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
-
-            // REGLA 1: Extracción de descripción de la celda desde Sheets
-            const descFila = fila.descripcion ? fila.descripcion.trim() : "Disfruta de una experiencia premium privada con fotografía profesional incluida.";
 
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
                 plus: plusesArr,
                 txt: fila.nombre_tour.trim(),
                 cat: fila.categoria.trim(),
-                descripcion: descFila,
                 tarifas: estructuraTarifariaMapeada,
                 estacionalidad: { factor: factorAlta, inicio: inicioAlta, fin: finAlta }
             };
@@ -194,15 +192,6 @@ async function descargarYProcesarCatalogo() {
             imagenesArr.forEach(img => {
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
-
-            // REGLA 3: Inyección condicional de banner informativo sobre flamencos en Celestún
-            let htmlNotaEstacional = "";
-            if (id === "celestun") {
-                htmlNotaEstacional = `<div class="viaha-nota-estacional">🦩 Nota: La mejor temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
-            }
-
-            // REGLA 2: Evaluación del string de complementos para alternar títulos ("📍 Personaliza..." o "✨ Este tour incluye")
-            let stringTituloCajaIncluye = complementosArr.length > 1 ? "📍 Personaliza tu Ruta (Elige 1)" : "✨ Este tour incluye:";
 
             htmlTarjetasDinamicas += `
                 <div id="info-${id}" class="tour-info-card"> 
@@ -217,11 +206,10 @@ async function descargarYProcesarCatalogo() {
                         <div class="dynamic-tour-logo-container logo-c1"></div> 
                         <h3 class="section-title">${fila.nombre_tour.trim()}</h3> 
                     </div> 
-                    <p>${descFila}</p> 
-                    ${htmlNotaEstacional}
+                    <p>Disfruta de una experiencia premium privada con fotografía profesional incluida.</p> 
                     <div class="inc-no-inc-container">
                         <div class="inc-col">
-                            <div class="inc-title">${stringTituloCajaIncluye}</div>
+                            <div class="inc-title">🟢 Incluye</div>
                             <ul class="inc-list">
                                 <li>Transporte privado desde tu hospedaje.</li>
                                 <li>Guía Federal Certificado.</li>
@@ -251,6 +239,9 @@ async function descargarYProcesarCatalogo() {
     }
 }
 
+/**
+ * MOTOR DE PRECIOS BASADO EN LA FECHA DEL DÍA DE HOY
+ */
 function obtenerPrecioMatriz(tour, complemento, pasajeros) {
     const datosTour = catalogoToursDinamico[tour];
     if (!datosTour || !datosTour.tarifas) return 0;
@@ -266,6 +257,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         precioBaseCalculado = pasajeros * combinacion[rangoKey];
     }
 
+    // NUEVA DINÁMICA: Revisamos si LA FECHA ACTUAL cae en temporada alta
     const hoyDate = new Date().toISOString().split('T')[0];
 
     if (datosTour.estacionalidad) {
@@ -273,7 +265,7 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
         if (est.inicio && est.fin && est.factor > 1.0) {
             if (hoyDate >= est.inicio && hoyDate <= est.fin) {
                 precioBaseCalculado = Math.round(precioBaseCalculado * est.factor);
-                console.log(`🚀 Temporada Alta de HOY (${hoyDate}) detectada para ${tour}. Multiplicador aplicado: x${est.factor}`);
+                console.log(`🚀 Temporada Alta detectada por fecha de HOY (${hoyDate}). Multiplicador aplicado: x${est.factor}`);
             }
         }
     }
@@ -731,7 +723,12 @@ function enviarWhatsApp() {
           'destination_selected': tourParaAnalytics,
           'route_complement': complementoParaAnalytics,
           'plus_addons': plusParaAnalytics,
-          'tour_language_required': idiomaActual
+          'tour_language_required': idiomaTexto,
+          'date_range_booked': fechaSeleccionada, 
+          'quantity_adults': adultos, 
+          'quantity_children': ninos, 
+          'estimated_total_quoted': total,
+          'locale_user': idiomaActual
       });  
 
       window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
@@ -761,5 +758,4 @@ function ejecutarOpcionC_HorariosFijos() {
      });
 }
 
-document.getElementById('wa-link').addEventListener('click', enviarWhatsApp);
 document.addEventListener("DOMContentLoaded", inicializarSistema);
