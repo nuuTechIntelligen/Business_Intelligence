@@ -749,7 +749,7 @@ function enviarWhatsApp() {
           'tour_language_required': idiomaActual
       });  
 
-      window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
+      window.open(`https://wa.me/529618150804?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
 
 function dispararAgendado() { document.getElementById('modal-agenda').style.display = 'flex'; ejecutarOpcionC_HorariosFijos(); }
