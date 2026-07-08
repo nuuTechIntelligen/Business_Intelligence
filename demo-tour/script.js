@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Versión Estable + Modificación 1: Descripciones Dinámicas desde Sheets
+ * Versión Estable + Modificación 1: Descripciones Dinámicas Estrictas desde Sheets
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -175,8 +175,8 @@ async function descargarYProcesarCatalogo() {
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
 
-            // MODIFICACIÓN EXCLUSIVA PARTE 1: Extraer descripción celda por celda desde tu Google Sheet
-            const descFila = fila.descripcion ? fila.descripcion.trim() : "Disfruta de una experiencia premium privada con fotografía profesional incluida.";
+            // MODIFICACIÓN DINÁMICA: Si la celda existe en Sheets, la procesamos; si no, queda vacía
+            const descFila = (fila.descripcion && fila.descripcion.trim() !== "") ? fila.descripcion.trim() : "";
 
             catalogoToursDinamico[id] = {
                 complementos: complementosArr,
@@ -194,6 +194,9 @@ async function descargarYProcesarCatalogo() {
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
 
+            // MODIFICACIÓN DINÁMICA: Si descFila tiene texto, envuelve en etiquetas <p>; si está vacío, no dibuja nada
+            let htmlBloqueDescripcion = descFila !== "" ? `<p>${descFila}</p>` : "";
+
             htmlTarjetasDinamicas += `
                 <div id="info-${id}" class="tour-info-card"> 
                     <div class="carousel-container"> 
@@ -207,7 +210,7 @@ async function descargarYProcesarCatalogo() {
                         <div class="dynamic-tour-logo-container logo-c1"></div> 
                         <h3 class="section-title">${fila.nombre_tour.trim()}</h3> 
                     </div> 
-                    <p>${descFila}</p> 
+                    ${htmlBloqueDescripcion} 
                     <div class="inc-no-inc-container">
                         <div class="inc-col">
                             <div class="inc-title">🟢 Incluye</div>
@@ -327,7 +330,7 @@ function inicializarCalendario() {
                   const diasRealesSeleccionados = Math.round(Math.abs((selectedDates[1] - selectedDates[0]) / milisegundosPorDia)) + 1;
                   
                   if (diasRealesSeleccionados !== diasRequeridos) {
-                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días in el calendario.`);
+                      alert(`⚠️ Tu itinerario está configurado para exactamente ${diasRequeridos} días. Por favor, selecciona un rango de exactamente ${diasRequeridos} días en el calendario.`);
                       fp.clear();
                       fechaSeleccionada = "";
                   } 
@@ -608,6 +611,8 @@ function detenerAutoplayCarrusel(idTour) {
       if (intervalosCarrusel[idTour]) { clearInterval(intervalosCarrusel[idTour]); intervalosCarrusel[idTour] = null; }  
 }  
 
+/* document.getElementById('wa-link').addEventListener('click', enviarWhatsApp); */ // Removido listener duplicado redundante
+
 function inicializarSoportesTactiles() {  
       document.querySelectorAll('.carousel-container').forEach(container => {  
           let xInicial = null;  
@@ -674,7 +679,7 @@ function enviarWhatsApp() {
       let idiomaTexto = r_idioma ? r_idioma.value : "Español";
       if (idiomaTexto === "Otro") {
           const inputOtro = document.getElementById('input-otro-idioma-global').value.trim();
-          idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No esppecificado)";
+          idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No especificado)";
       }
 
       let mensaje = "";
