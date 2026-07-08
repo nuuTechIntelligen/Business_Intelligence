@@ -193,7 +193,8 @@ async function descargarYProcesarCatalogo() {
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
 
-            let htmlBloqueDescripcion = descFila !== "" ? `<p>${descFila}</p>` : "";
+            // Línea optimizada con clase de diseño:
+            let htmlBloqueDescripcion = descFila !== "" ? `<div class="tour-main-description">${descFila}</div>` : "";
 
             htmlTarjetasDinamicas += `
                 <div id="info-${id}" class="tour-info-card"> 
