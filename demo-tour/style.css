@@ -393,7 +393,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     /* MODIFICACIÓN PC LOGO: Forzamos la ampliación responsiva del logotipo oficial */
     .hero-logo-hero {
         max-width: 330px !important;
-        max-height: 25vh !important;
+        max-height: 30vh !important;
         margin: -50px auto 0 auto;
     }
     
