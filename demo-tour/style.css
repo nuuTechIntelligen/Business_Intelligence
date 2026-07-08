@@ -385,8 +385,13 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
    ========================================================================== */
 @media (min-width: 850px) {
     .hero { height: 45vh !important; }
-    #hero-logo-img.hero-logo-movil { display: none !important; }
-    .hero-title-pc { display: block; font-size: 56px; }
+    .hero-title-pc { 
+        display: none !important; 
+    }
+    .hero-logo-hero {
+        max-width: 350px !important; /* Escalado premium del logo en PC */
+        max-height: 25vh !important;
+    }
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; }
     
     /* 1. Romper las clases de "Paso a paso" para mostrar todo el contenido en PC */
