@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Ruta Adaptativa Exclusiva Coloradas) + Modificación 3 (Nota Celestún)
+ * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Ruta Coloradas) + Modificación 3 (Nota Celestún en Pluses)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -175,7 +175,6 @@ async function descargarYProcesarCatalogo() {
             const inicioAlta = fila.inicio_alta ? fila.inicio_alta.trim() : "";
             const finAlta = fila.fin_alta ? fila.fin_alta.trim() : "";
 
-            // MODIFICACIÓN 1: Obtención de descripción dinámica (respeta cajas de incluye fijas)
             const descFila = (fila.descripcion && fila.descripcion.trim() !== "") ? fila.descripcion.trim() : "";
 
             catalogoToursDinamico[id] = {
@@ -194,14 +193,7 @@ async function descargarYProcesarCatalogo() {
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
 
-            // Envoltura de descripción
             let htmlBloqueDescripcion = descFila !== "" ? `<p>${descFila}</p>` : "";
-
-            // MODIFICACIÓN 3: Nota UI estacional de avistamiento para Celestún
-            let htmlNotaEstacional = "";
-            if (id === "celestun") {
-                htmlNotaEstacional = `<div class="viaha-nota-estacional">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
-            }
 
             htmlTarjetasDinamicas += `
                 <div id="info-${id}" class="tour-info-card"> 
@@ -217,7 +209,6 @@ async function descargarYProcesarCatalogo() {
                         <h3 class="section-title">${fila.nombre_tour.trim()}</h3> 
                     </div> 
                     ${htmlBloqueDescripcion} 
-                    ${htmlNotaEstacional}
                     <div class="inc-no-inc-container">
                         <div class="inc-col">
                             <div class="inc-title">🟢 Incluye</div>
@@ -425,7 +416,6 @@ function renderizarCamposSingle() {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        // MODIFICACIÓN 2 RE-ASEGURADA: El cambio de título es exclusivo para el ID 'coloradas'
         let stringTituloComplemento = (tour === 'coloradas') ? "✨ Este tour contempla:" : "📍 Personaliza tu Ruta (Elige 1)";
 
         html += `<div class="box-personalizacion"><div class="titulo-interactivo">${stringTituloComplemento}</div>`;
@@ -439,6 +429,12 @@ function renderizarCamposSingle() {
 
     if (datos.plus.length > 0) {
          html += `<div class="box-personalizacion"><div class="titulo-interactivo">✨ ¿Quieres agregar un Plus?</div>`;
+         
+         // MODIFICACIÓN EXCLUSIVA: Si es Celestún, inyectamos la nota estacional directo dentro de la caja de Pluses
+         if (tour === 'celestun') {
+             html += `<div class="viaha-nota-estacional" style="margin: 0 0 12px 0;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
+         }
+
          datos.plus.forEach(pl => {
              html += `<label class="opcion-item"><input type="checkbox" name="viaha-plus" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
          });
@@ -454,7 +450,6 @@ function renderizarCamposDiaCircuito(dia, tour) {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        // Se aplica el mismo blindaje estricto por ID dentro de la configuración del circuito multidías
         let stringTituloCompDia = (tour === 'coloradas') ? "✨ Este tour contempla:" : `📍 Ruta del Día ${dia}`;
 
         html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px; border:none; margin:0; padding:0;">${stringTituloCompDia}</div>`;
@@ -468,6 +463,12 @@ function renderizarCamposDiaCircuito(dia, tour) {
 
     if (datos.plus.length > 0) {
         html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:0;"><div class="titulo-interactivo" style="font-size:14px; margin:0; border:none;">✨ Pluses Disponibles</div>`;
+        
+        // MODIFICACIÓN EXCLUSIVA CIRCUITO: Coloca la nota estacional dentro de la caja de pluses del día correspondiente
+        if (tour === 'celestun') {
+            html += `<div class="viaha-nota-estacional" style="margin: 0 0 12px 0; font-size: 14px; padding: 10px 14px;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
+        }
+
         datos.plus.forEach(pl => {
             html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="checkbox" name="viaha-plus-dia-${dia}" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
         });
@@ -548,7 +549,7 @@ function mostrarTarjetaCatalogo(idTour) {
 
 function actualizarLogosDinamicos() {  
       let category = "arqueologia";
-      if (modalidadActpx === 'single' || modalidadActiva === 'single') {
+      if (modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');  
           if (select && catalogoToursDinamico[select.value]) category = catalogoToursDinamico[select.value].cat;  
       } else {
@@ -720,14 +721,14 @@ function enviarWhatsApp() {
               if (selectDia) {
                   const tourDiaTxt = selectDia.options[selectDia.selectedIndex].text;
                   const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
-                  const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
+                  const compDiaTxt = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
                   const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
                   let plusDiaArr = [];
                   checksPlusDia.forEach(c => plusDiaArr.push(c.value));
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
 
-                  mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compSelDia}\n   ✨ Pluses: ${plusDiaTxt}`;
-                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compSelDia})`);
+                  mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compDiaTxt}\n   ✨ Pluses: ${plusDiaTxt}`;
+                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compDiaTxt})`);
               }
           }
           complementoParaAnalytics = itinerarioResumen.join(' | ');
