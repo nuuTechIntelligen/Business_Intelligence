@@ -394,6 +394,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .hero-logo-hero {
         max-width: 330px !important;
         max-height: 25vh !important;
+        margin: -50px auto 0 auto;
     }
     
     .slide-foto { background-size: 100% 100% !important; background-position: top center !important; } 
