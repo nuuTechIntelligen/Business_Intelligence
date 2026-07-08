@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Sección de Ruta Adaptativa) + Modificación 3 (Nota Celestún)
+ * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Ruta Adaptativa Exclusiva Coloradas) + Modificación 3 (Nota Celestún)
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -425,8 +425,8 @@ function renderizarCamposSingle() {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        // MODIFICACIÓN EXCLUSIVA PARTE 2: Cambia el título si solo hay 1 complemento interactivo
-        let stringTituloComplemento = datos.complementos.length > 1 ? "📍 Personaliza tu Ruta (Elige 1)" : "✨ Este tour contempla:";
+        // MODIFICACIÓN 2 RE-ASEGURADA: El cambio de título es exclusivo para el ID 'coloradas'
+        let stringTituloComplemento = (tour === 'coloradas') ? "✨ Este tour contempla:" : "📍 Personaliza tu Ruta (Elige 1)";
 
         html += `<div class="box-personalizacion"><div class="titulo-interactivo">${stringTituloComplemento}</div>`;
         datos.complementos.forEach((comp, index) => {
@@ -454,8 +454,8 @@ function renderizarCamposDiaCircuito(dia, tour) {
 
     let html = "";
     if (datos.complementos.length > 0) {
-        // Se aplica la misma lógica adaptativa para el título dentro de los días del circuito
-        let stringTituloCompDia = datos.complementos.length > 1 ? `📍 Ruta del Día ${dia}` : "✨ Este tour contempla:";
+        // Se aplica el mismo blindaje estricto por ID dentro de la configuración del circuito multidías
+        let stringTituloCompDia = (tour === 'coloradas') ? "✨ Este tour contempla:" : `📍 Ruta del Día ${dia}`;
 
         html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:10px;"><div class="titulo-interactivo" style="font-size:14px; border:none; margin:0; padding:0;">${stringTituloCompDia}</div>`;
         datos.complementos.forEach((comp, index) => {
@@ -548,7 +548,7 @@ function mostrarTarjetaCatalogo(idTour) {
 
 function actualizarLogosDinamicos() {  
       let category = "arqueologia";
-      if (modalidadActiva === 'single') {
+      if (modalidadActpx === 'single' || modalidadActiva === 'single') {
           const select = document.getElementById('tour-select');  
           if (select && catalogoToursDinamico[select.value]) category = catalogoToursDinamico[select.value].cat;  
       } else {
@@ -720,14 +720,14 @@ function enviarWhatsApp() {
               if (selectDia) {
                   const tourDiaTxt = selectDia.options[selectDia.selectedIndex].text;
                   const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
-                  const compDiaTxt = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
+                  const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
                   const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
                   let plusDiaArr = [];
                   checksPlusDia.forEach(c => plusDiaArr.push(c.value));
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
 
-                  mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compDiaTxt}\n   ✨ Pluses: ${plusDiaTxt}`;
-                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compDiaTxt})`);
+                  mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compSelDia}\n   ✨ Pluses: ${plusDiaTxt}`;
+                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compSelDia})`);
               }
           }
           complementoParaAnalytics = itinerarioResumen.join(' | ');
