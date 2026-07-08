@@ -287,6 +287,49 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-link { color: var(--text); text-decoration: none; font-weight: bold; } 
 .footer-link:hover { color: var(--turquesa); } 
 
+.reviews-footer-text { font-size: 16px; font-weight: bold; color: var(--text); margin: 0 auto 12px auto; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ==========================================================================
+   OPTIMIZACIÓN DE PESOS: PROTAGONISMO A LA DESCRIPCIÓN DEL TOUR
+   ========================================================================== */
+.tour-main-description {
+    font-family: 'Urbanist', sans-serif; /* Usamos Urbanist para que se lea más editorial y fino */
+    font-size: 17px;
+    line-height: 1.6;
+    color: #444444; 
+    padding: 0 20px;
+    margin: 18px 0;
+    font-weight: 500;
+    text-align: left;
+}
+
+/* Suavizamos ligeramente las cajas inferiores para que no roben tanta atención */
+.inc-no-inc-container { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+    padding: 0 20px; 
+    margin-top: 20px; /* Le damos más aire de separación respecto a la descripción */
+    border-top: 1px dashed var(--executive-dark); 
+    padding-top: 15px; 
+}
+
+.inc-col, .no-inc-col { 
+    background: #ffffff; 
+    padding: 12px 15px; 
+    border-radius: 10px; 
+    border: 1px solid #f1eae2; 
+    box-shadow: none; /* Quitamos sombras pesadas si las hubiera */
+}
+
+.inc-title, .no-inc-title { 
+    font-size: 15px !important; /* Un punto más pequeño para equilibrar el peso visual */
+    text-transform: uppercase; 
+    font-weight: bold; 
+    margin-bottom: 8px; 
+    letter-spacing: 0.5px; 
+}
+
 /* ==========================================================================
    LÓGICA MOBILE (Wizard Condicional 2 Pasos y Ajustes UX) 
    ========================================================================== */
