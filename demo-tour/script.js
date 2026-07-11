@@ -1,6 +1,6 @@
 /**
  * VÍA HA' MÉXICO - MOTOR DE RESERVAS ONLINE
- * Versión Estable + Modificación 1 (Descripciones) + Modificación 2 (Ruta Coloradas) + Modificación 3 (Nota Celestún abajo de Checkboxes Pluses)
+ * Versión Final Estable - Fase 3: Analítica de Eventos Completa para Looker Studio
  */
 
 // VARIABLES DE ESTADO LOCAL GLOBAL ELEVADAS
@@ -30,6 +30,42 @@ const safeGtag = (eventName, params) => {
         console.error("Error al enviar métricas a Analytics:", e);
     }
 };
+
+// NUEVO FASE 3: Captura de estado actual completo para Looker Studio
+function obtenerEstadoActualConfiguracion() {
+    let tourSel = "";
+    let rutaSel = "";
+    let plusSel = [];
+
+    if (modalidadActiva === 'single') {
+        const select = document.getElementById('tour-select');
+        tourSel = select ? select.options[select.selectedIndex].text : "N/A";
+        const r_comp = document.querySelector('input[name="viaha-complemento"]:checked');
+        rutaSel = r_comp ? r_comp.value : "Ruta Fija Corrida";
+        document.querySelectorAll('input[name="viaha-plus"]:checked').forEach(ch => plusSel.push(ch.value));
+    } else {
+        tourSel = "Circuito Vía Há (Multi-Días)";
+        let itinerarioResumen = [];
+        for (let i = 1; i <= diasCircuitoContador; i++) {
+            const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
+            if (selectDia) {
+                const tourDiaTxt = selectDia.options[selectDia.selectedIndex].text;
+                const r_compDia = document.querySelector(`input[name="viaha-complemento-dia-${i}"]:checked`);
+                const compSelDia = r_compDia ? r_compDia.value : "Ruta Fija Corrida";
+                itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compSelDia})`);
+                
+                const checksPlusDia = document.querySelectorAll(`input[name="viaha-plus-dia-${i}"]:checked`);
+                checksPlusDia.forEach(c => plusSel.push(`Día ${i}: ${c.value}`));
+            }
+        }
+        rutaSel = itinerarioResumen.join(' | ');
+    }
+    return { 
+        tour: tourParaAnalytics = tourSel, 
+        ruta: complementoParaAnalytics = rutaSel, 
+        pluses: plusParaAnalytics = plusSel.length > 0 ? plusSel.join(', ') : "Ninguno" 
+    };
+}
 
 // ENDPOINTS DE LA API (SheetDB)
 const API_BLOQUEOS = 'https://sheetdb.io/api/v1/2s1p744rscfly?sheet=bloqueos'; 
@@ -84,6 +120,9 @@ function cambiarModalidad(tipo) {
         
         renderizarEstructuraSegunModalidad();
         actualizarDependenciasFecha(); 
+
+        // ANALÍTICA FASE 3: Cambio de Modalidad
+        safeGtag('cambio_modalidad_cotizador', { 'modalidad_activa': tipo });
     } catch (err) {
         console.error("⚠️ Error controlado en cambiarModalidad:", err.message);
     }
@@ -114,6 +153,9 @@ function irPaso(paso) {
             window.scrollTo({ top: topPos - 20, behavior: 'smooth' });
         }
         pasoActual = paso;
+
+        // ANALÍTICA FASE 3: Cambio de Paso Wizard en móvil
+        safeGtag('cambio_paso_wizard', { 'paso_actual': paso });
     }
 }
 
@@ -193,7 +235,6 @@ async function descargarYProcesarCatalogo() {
                 htmlImagenesCarrusel += `<img src="img/${id}/${img}" alt="${fila.nombre_tour.trim()}" class="tour-card-img">`;
             });
 
-            // Línea optimizada con clase de diseño:
             let htmlBloqueDescripcion = descFila !== "" ? `<div class="tour-main-description">${descFila}</div>` : "";
 
             htmlTarjetasDinamicas += `
@@ -275,6 +316,13 @@ function obtenerPrecioMatriz(tour, complemento, pasajeros) {
 function actualizarDependenciasFecha() {
     calcular(); 
     inicializarCalendario(); 
+    
+    // ANALÍTICA FASE 3: Medición de cambios en la Ruta (Complementos)
+    const estado = obtenerEstadoActualConfiguracion();
+    safeGtag('cambio_configuracion_ruta', {
+        'tour_nombre': estado.tour,
+        'ruta_complemento': estado.ruta
+    });
 }
 
 function inicializarCalendario() {  
@@ -334,6 +382,7 @@ function inicializarCalendario() {
                       fechaSeleccionada = "";
                   } 
               }
+              // ANALÍTICA FASE 3: Selección de Fecha
               safeGtag('seleccion_fecha_viaje', { 'rango_fechas': dateStr, 'modalidad': modalidadActiva });  
           }  
       });  
@@ -430,13 +479,10 @@ function renderizarCamposSingle() {
 
     if (datos.plus.length > 0) {
          html += `<div class="box-personalizacion"><div class="titulo-interactivo">✨ ¿Quieres agregar un Plus?</div>`;
-         
-         // 1. Renderizamos primero todos los checkboxes de pluses disponibles
          datos.plus.forEach(pl => {
              html += `<label class="opcion-item"><input type="checkbox" name="viaha-plus" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
          });
 
-         // MODIFICACIÓN EXCLUSIVA: Ahora la nota estacional se concatena AL FINAL de los checkboxes (debajo de ellos)
          if (tour === 'celestun') {
              html += `<div class="viaha-nota-estacional" style="margin: 12px 0 0 0;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
          }
@@ -466,13 +512,10 @@ function renderizarCamposDiaCircuito(dia, tour) {
 
     if (datos.plus.length > 0) {
         html += `<div class="box-personalizacion" style="padding:12px; margin-bottom:0;"><div class="titulo-interactivo" style="font-size:14px; margin:0; border:none;">✨ Pluses Disponibles</div>`;
-        
-        // 1. Renderizamos primero todos los checkboxes en circuito
         datos.plus.forEach(pl => {
             html += `<label class="opcion-item" style="font-size:15px; margin-top:8px;"><input type="checkbox" name="viaha-plus-dia-${dia}" value="${pl}" onchange="calcular()"><span>${pl}</span></label>`;
         });
 
-        // MODIFICACIÓN EXCLUSIVA CIRCUITO: Coloca la nota estacional AL FINAL (debajo de las opciones)
         if (tour === 'celestun') {
             html += `<div class="viaha-nota-estacional" style="margin: 12px 0 0 0; font-size: 14px; padding: 10px 14px;">🦩 Nota: La temporada de avistamiento de Flamencos en esta reserva natural es de Noviembre a Febrero.</div>`;
         }
@@ -548,7 +591,12 @@ function mostrarTarjetaCatalogo(idTour) {
     activarAutoplayCarrusel(idTour);
     
     if(catalogoToursDinamico[idTour]) {
-        safeGtag('visualizacion_producto_tour', { 'id_destino': idTour, 'nombre_destino': catalogoToursDinamico[idTour].txt });
+        // ANALÍTICA FASE 3: Cambio de destino seleccionado en el selector
+        safeGtag('visualizacion_producto_tour', { 
+            'id_destino': idTour, 
+            'nombre_destino': catalogoToursDinamico[idTour].txt,
+            'modalidad_viaje': modalidadActiva
+        });
     }
 }
 
@@ -595,6 +643,13 @@ function calcular() {
 
       const txtDisplay = document.getElementById('total-display');
       if (txtDisplay) txtDisplay.innerText = `$${granTotalCalculado.toLocaleString()} MXN`;  
+
+      // ANALÍTICA FASE 3: Cambio e interacción con los Pluses
+      const estado = obtenerEstadoActualConfiguracion();
+      safeGtag('cambio_configuracion_plus', {
+          'tour_nombre': estado.tour,
+          'pluses_seleccionados': estado.pluses
+      });
 }  
 
 function cambiarCant(tipo, cambio) {  
@@ -606,6 +661,13 @@ function cambiarCant(tipo, cambio) {
           document.getElementById('qty-ninos').innerText = ninos;  
       }  
       calcular();   
+
+      // ANALÍTICA FASE 3: Cambio de volumen en Pax
+      safeGtag('cambio_contador_pax', {
+          'tipo_pasajero': tipo,
+          'adultos_totales': adultos,
+          'ninos_totales': ninos
+      });
 }  
 
 function moverCarrusel(idTour, direccion) {  
@@ -699,26 +761,14 @@ function enviarWhatsApp() {
           idiomaTexto = inputOtro ? `Otro (${inputOtro})` : "Otro (No especificado)";
       }
 
+      // FASE 3: Snapshot final exacto capturado para almacenar en GA4
+      const estadoAnaliticoFinal = obtenerEstadoActualConfiguracion();
+
       let mensaje = "";
-      let tourParaAnalytics = "";
-      let complementoParaAnalytics = "";
-      let plusParaAnalytics = "";
 
       if (modalidadActiva === 'single') {
-          const select = document.getElementById('tour-select');  
-          tourParaAnalytics = select.options[select.selectedIndex].text;  
-          const r_complemento = document.querySelector('input[name="viaha-complemento"]:checked');
-          complementoParaAnalytics = r_complemento ? r_complemento.value : "Ruta Fija Corrida";
-          const checkboxesPlus = document.querySelectorAll('input[name="viaha-plus"]:checked');
-          let plusSeleccionados = [];
-          checkboxesPlus.forEach(ch => plusSeleccionados.push(ch.value));
-          plusParaAnalytics = plusSeleccionados.length > 0 ? plusSeleccionados.join(', ') : "Ninguno";
-
-          mensaje = `¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n🌴 *Tour:* ${tourParaAnalytics}\n📍 *Ruta:* ${complementoParaAnalytics}\n✨ *Plus:* ${plusParaAnalytics}\n🗣️ *Idioma:* ${idiomaTexto}\n📅 *Fecha:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos}\n👶 *Niños:* ${ninos}\n💰 *Total estimado:* ${total}\n\n¿Tienen disponibilidad?`;
+          mensaje = `¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n🌴 *Tour:* ${estadoAnaliticoFinal.tour}\n📍 *Ruta:* ${estadoAnaliticoFinal.ruta}\n✨ *Plus:* ${estadoAnaliticoFinal.pluses}\n🗣️ *Idioma:* ${idiomaTexto}\n📅 *Fecha:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos}\n👶 *Niños:* ${ninos}\n💰 *Total estimado:* ${total}\n\n¿Tienen disponibilidad?`;
       } else {
-          tourParaAnalytics = "Circuito Vía Há (Multi-Días)";
-          let itinerarioResumen = [];
-          
           mensaje = `¡Hola! Me interesa cotizar un *CIRCUITO PRIVADO MULTIDÍAS* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n📅 *Período:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos} | 👶 *Niños:* ${ninos}\n🗣️ *Idioma:* ${idiomaTexto}\n\n🗺️ *ITINERARIO PLANIFICADO:*`;
           
           for (let i = 1; i <= diasCircuitoContador; i++) {
@@ -733,23 +783,25 @@ function enviarWhatsApp() {
                   const plusDiaTxt = plusDiaArr.length > 0 ? plusDiaArr.join(', ') : "Ninguno";
 
                   mensaje += `\n\n☀️ *DÍA ${i}:* ${tourDiaTxt}\n   📍 Ruta: ${compSelDia}\n   ✨ Pluses: ${plusDiaTxt}`;
-                  itinerarioResumen.push(`Día ${i}: ${tourDiaTxt} (${compSelDia})`);
               }
           }
-          complementoParaAnalytics = itinerarioResumen.join(' | ');
-          plusParaAnalytics = "Configurado por día en circuito";
           mensaje += `\n\n💰 *TOTAL ESTIMADO DEL CIRCUITO:* ${total}\n\n¿Tienen disponibilidad para coordinar estos días con el equipo?`;
       }
        
+      // ANALÍTICA FASE 3: Captura de conversión final cruzada con complementos y pluses
       safeGtag('conversion_reserva_click', {  
           'lead_traveler_name': nombre,
-          'destination_selected': tourParaAnalytics,
-          'route_complement': complementoParaAnalytics,
-          'plus_addons': plusParaAnalytics,
-          'tour_language_required': idiomaActual
+          'destination_selected': estadoAnaliticoFinal.tour,
+          'route_complement': estadoAnaliticoFinal.ruta,
+          'plus_addons': estadoAnaliticoFinal.pluses,
+          'tour_language_required': idiomaActual,
+          'total_value_numeric': parseFloat(total.replace(/[^0-9.-]+/g,"")) || 0,
+          'adults_count': adultos,
+          'children_count': ninos,
+          'selected_modalidad': modalidadActiva
       });  
 
-      window.open(`https://wa.me/529618150804?text=${encodeURIComponent(mensaje)}`, '_blank');  
+      window.open(`https://wa.me/525560040025?text=${encodeURIComponent(mensaje)}`, '_blank');  
 }  
 
 function dispararAgendado() { document.getElementById('modal-agenda').style.display = 'flex'; ejecutarOpcionC_HorariosFijos(); }
