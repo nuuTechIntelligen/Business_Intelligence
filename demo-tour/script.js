@@ -790,7 +790,6 @@ function enviarWhatsApp() {
        
       // ANALÍTICA FASE 3: Captura de conversión final cruzada con complementos y pluses
       safeGtag('conversion_reserva_click', {  
-          'lead_traveler_name': nombre,
           'destination_selected': estadoAnaliticoFinal.tour,
           'route_complement': estadoAnaliticoFinal.ruta,
           'plus_addons': estadoAnaliticoFinal.pluses,
