@@ -19,9 +19,16 @@ body {
     font-size: 19px; 
 } 
 
+/* ==========================================================================
+   AJUSTE DE PROPORCIÓN: HERO / HEADER OPTIMIZADO PARA PANTALLAS ALARGADAS
+   ========================================================================== */
 .hero { 
     position: relative;
-    height: 32vh;            
+    width: 100%;
+    /* Mantiene una proporción fija sin importar el ancho de la pantalla (formato cinematográfico fluido) */
+    aspect-ratio: 21 / 9; 
+    /* Evita que la altura colapse en pantallas pequeñas/móviles */
+    min-height: 380px;            
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -40,6 +47,9 @@ body {
 .slide-foto {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
+    /* Garantiza que la imagen se reescale de forma inteligente sin perder su proporción original jamás */
+    object-fit: cover;
+    object-position: center center;
     background-size: cover;          
     background-position: center center; 
     opacity: 0;
@@ -82,7 +92,7 @@ body {
     width: 100%;
 }
 
-/* NUEVO - Control responsivo fluido del logotipo de marca (Móvil) */
+/* Control responsivo fluido del logotipo de marca (Móvil) */
 .hero-logo-hero {
     display: block;
     max-width: 150px !important;       
@@ -280,8 +290,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .sello-icon { font-size: 22px; line-height: 1; }
 .sello-text { margin: 0; font-family: 'Big Shoulders Text', sans-serif; font-size: 14px; line-height: 1.4; color: var(--text); text-align: left; }
 
-.reviews-footer-text { font-size: 16px; font-weight: bold; color: var(--text); margin: 0 auto 12px auto; text-transform: uppercase; letter-spacing: 0.5px; }
-.footer-info { text-align: center; margin-top: 35px; border-top: 2px solid var(--light-bg); padding-top: 20px; } 
 .social-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 15px; } 
 .social-icon-link { display: inline-block; width: 36px !important; height: 32px !important; transition: transform 0.3s ease; } 
 .icon-svg { width: 100% !important; height: 100% !important; fill: #7F8C8D; transition: fill 0.3s ease; } 
@@ -290,8 +298,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
 .footer-text { font-size: 15px; color: var(--text); padding: 0 10px; font-weight: bold;} 
 .footer-link { color: var(--text); text-decoration: none; font-weight: bold; } 
 .footer-link:hover { color: var(--turquesa); } 
-
-.reviews-footer-text { font-size: 16px; font-weight: bold; color: var(--text); margin: 0 auto 12px auto; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* ==========================================================================
    OPTIMIZACIÓN DE PESOS: PROTAGONISMO A LA DESCRIPCIÓN DEL TOUR
@@ -313,7 +319,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     flex-direction: column; 
     gap: 15px; 
     padding: 0 20px; 
-    margin-top: 20px; /* Le damos más aire de separación respecto a la descripción */
+    margin-top: 20px; 
     border-top: 1px dashed var(--executive-dark); 
     padding-top: 15px; 
 }
@@ -323,11 +329,11 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     padding: 12px 15px; 
     border-radius: 10px; 
     border: 1px solid #f1eae2; 
-    box-shadow: none; /* Quitamos sombras pesadas si las hubiera */
+    box-shadow: none; 
 }
 
 .inc-title, .no-inc-title { 
-    font-size: 15px !important; /* Un punto más pequeño para equilibrar el peso visual */
+    font-size: 15px !important; 
     text-transform: uppercase; 
     font-weight: bold; 
     margin-bottom: 8px; 
@@ -375,7 +381,7 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .wizard-progress .line { height: 3px; width: 40px; background: #e0e0e0; transition: 0.3s; border-radius: 2px; }
     .wizard-progress .line.completed-line { background: var(--executive-dark); }
 
-    /* 1. Botones de Navegación (Se declaran ANTES para no sobreescribir la ocultación) */
+    /* 1. Botones de Navegación */
     .mobile-nav-buttons { display: flex; gap: 10px; margin-top: 25px; margin-bottom: 10px; }
     .btn-wizard { 
         flex: 1; padding: 14px; border-radius: 12px; font-family: 'Big Shoulders Text', sans-serif; 
@@ -385,10 +391,10 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .btn-wizard.next { background: var(--turquesa); color: var(--text); }
     .btn-wizard.prev { background: #e0e0e0; color: var(--text); }
 
-    /* 2. Ocultar pasos inactivos (Se declara DESPUÉS para que gane la pelea) */
+    /* 2. Ocultar pasos inactivos */
     .wizard-step { display: none; }
     .wizard-step.active { display: block; animation: fadeInWizard 0.4s ease forwards; }
-    .wizard-step.active.mobile-nav-buttons { display: flex; } /* Restaura el flex solo si está activo */
+    .wizard-step.active.mobile-nav-buttons { display: flex; } 
 
     @keyframes fadeInWizard { 
         from { opacity: 0; transform: translateY(10px); } 
@@ -431,25 +437,24 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
    MEDIA QUERY: Reglas para PC (Escritorio) - Layout Dashboard Clásico
    ========================================================================== */
 @media (min-width: 850px) {
-    .hero { height: 45vh !important; }
+    /* Mapeo cinemático nativo y ajuste de logo centrado superior */
+    .hero { aspect-ratio: 21 / 9; min-height: 460px; }
     #hero-logo-img.hero-logo-movil { display: none !important; }
-    
-    /* MODIFICACIÓN PC LOGO: Ocultamos el título estático de texto viejo */
     .hero-title-pc { display: none !important; } 
     
-    /* MODIFICACIÓN PC LOGO: Forzamos la ampliación responsiva del logotipo oficial */
     .hero-logo-hero {
         max-width: 330px !important;
         max-height: 30vh !important;
-        margin: -100px auto 0 auto;
+        margin: -40px auto 0 auto;
     }
     
-    .slide-foto { background-size: 100% 100% !important; background-position: top center !important; } 
+    .slide-foto { 
+        object-fit: cover; 
+        background-size: cover !important; 
+        background-position: center center !important; 
+    } 
      
-    /* 1. Romper las clases de "Paso a paso" para mostrar todo el contenido en PC */
     .wizard-step { display: block !important; } 
-     
-    /* 2. Ocultar elementos exclusivos de móvil (DEBE IR DESPUÉS para ganar prioridad) */
     .mobile-only, .mobile-nav-buttons, .circuit-only-btn { display: none !important; } 
 
     .container { margin: -100px auto 50px !important; padding: 30px; max-width: 1000px; transition: max-width 0.4s ease; } 
@@ -467,7 +472,6 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
     .container.modo-circuito-activo #viaha-col-configurador { display: block !important; grid-column: 2 !important; } 
     .container.modo-circuito-activo #viaha-col-cotizador { grid-column: 3 !important; } 
 
-    /* LÓGICA BLINDADA DE ISOLOGOS */
     .decoracion-flotante { display: block !important; z-index: 1 !important; } 
 
     .container.modo-circuito-activo ~ .decoracion-flotante {
