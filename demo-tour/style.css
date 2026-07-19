@@ -423,7 +423,11 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
    MEDIA QUERY: Reglas para PC (Escritorio) - Layout Dashboard Clásico
    ========================================================================== */
 @media (min-width: 850px) {
-    .hero { height: 45vh !important; }
+   .hero { 
+        height: 45vh !important; 
+        min-height: 350px !important; /* Protege pantallas muy bajas */
+        max-height: 500px !important; /* ¡EL CANDADO! Evita que el header se vuelva enorme en pantallas largas */
+    }
     #hero-logo-img.hero-logo-movil { display: none !important; }
     
     /* MODIFICACIÓN PC LOGO: Ocultamos el título estático de texto viejo */
@@ -436,7 +440,10 @@ body .flatpickr-input:hover, body .tour-picker:hover, body #nombre-cliente:hover
         margin: -100px auto 0 auto;
     }
     
-    .slide-foto { background-size: 100% 100% !important; background-position: top center !important; } 
+    .slide-foto { 
+        background-size: cover !important; /* ¡CAMBIO CLAVE! Cambiamos el 100% 100% estirado por cobertura fluida */
+        background-position: center center !important; /* Encuadra perfectamente al centro de la foto */
+    }
      
     /* 1. Romper las clases de "Paso a paso" para mostrar todo el contenido en PC */
     .wizard-step { display: block !important; } 
