@@ -767,9 +767,9 @@ function enviarWhatsApp() {
       let mensaje = "";
 
       if (modalidadActiva === 'single') {
-          mensaje = `¡Hola! Me interesa reservar un tour *PRIVADO* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n🌴 *Tour:* ${estadoAnaliticoFinal.tour}\n📍 *Ruta:* ${estadoAnaliticoFinal.ruta}\n✨ *Plus:* ${estadoAnaliticoFinal.pluses}\n🗣️ *Idioma:* ${idiomaTexto}\n📅 *Fecha:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos}\n👶 *Niños:* ${ninos}\n💰 *Total estimado:* ${total}\n\n¿Tienen disponibilidad?`;
+          mensaje = `¡Hola! Me interesa reservar un tour *PRIVADO* con *VIA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n🌴 *Tour:* ${estadoAnaliticoFinal.tour}\n📍 *Ruta:* ${estadoAnaliticoFinal.ruta}\n✨ *Plus:* ${estadoAnaliticoFinal.pluses}\n🗣️ *Idioma:* ${idiomaTexto}\n📅 *Fecha:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos}\n👶 *Niños:* ${ninos}\n💰 *Total estimado:* ${total}\n\n¿Tienen disponibilidad?`;
       } else {
-          mensaje = `¡Hola! Me interesa cotizar un *CIRCUITO PRIVADO MULTIDÍAS* con *VÍA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n📅 *Período:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos} | 👶 *Niños:* ${ninos}\n🗣️ *Idioma:* ${idiomaTexto}\n\n🗺️ *ITINERARIO PLANIFICADO:*`;
+          mensaje = `¡Hola! Me interesa cotizar un *CIRCUITO PRIVADO MULTIDÍAS* con *VIA HA' MÉXICO*:\n\n👤 *Nombre:* ${nombre}\n📅 *Período:* ${fechaSeleccionada}\n👥 *Adultos:* ${adultos} | 👶 *Niños:* ${ninos}\n🗣️ *Idioma:* ${idiomaTexto}\n\n🗺️ *ITINERARIO PLANIFICADO:*`;
           
           for (let i = 1; i <= diasCircuitoContador; i++) {
               const selectDia = document.querySelector(`.picker-circuito-destino[data-dia="${i}"]`);
