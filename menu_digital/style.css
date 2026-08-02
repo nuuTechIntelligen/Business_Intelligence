@@ -1,13 +1,16 @@
-/* CSS RESET & VARIABLES */
+/* ====================================================== */
+/* 1. CONFIGURACIÓN GLOBAL Y VARIABLES DE DISEÑO (CSS RESET)*/
+/* Define colores de marca, fuentes y comportamientos base*/
+/* ====================================================== */
 :root {
-    --primary-yellow: #FFC107;
-    --primary-orange: #FF5722;
-    --primary-red: #D32F2F;
-    --primary-green: #388E3C;
-    --dark-bg: #1A1A1A;
-    --card-bg: #FFFFFF;
-    --text-dark: #212121;
-    --text-muted: #666666;
+    --primary-yellow: #FFC107; /* Color dorado de acento */
+    --primary-orange: #FF5722; /* Naranja encendido principal */
+    --primary-red: #D32F2F;    /* Rojo picante para títulos y badges */
+    --primary-green: #388E3C;  /* Verde para los precios */
+    --dark-bg: #1A1A1A;       /* Fondo oscuro para footer */
+    --card-bg: #FFFFFF;        /* Fondo blanco de tarjetas */
+    --text-dark: #212121;      /* Color de texto legible principal */
+    --text-muted: #666666;    /* Color de textos secundarios */
     --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     --border-radius: 16px;
     --font-heading: 'Fredoka', cursive, sans-serif;
@@ -17,11 +20,11 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box; /* Garantiza que los paddings no alteren los anchos reales */
 }
 
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: smooth; /* Habilita el desplazamiento suave al hacer clic en secciones */
     font-size: 16px;
 }
 
@@ -30,7 +33,7 @@ body {
     background-color: #F8F9FA;
     color: var(--text-dark);
     line-height: 1.5;
-    padding-bottom: 90px; /* Para que la barra flotante no tape el contenido */
+    padding-bottom: 90px; /* Margen inferior para que la barra flotante de pedido no tape nada */
 }
 
 .container {
@@ -40,7 +43,9 @@ body {
     padding: 0 16px;
 }
 
-/* HERO SECTION (MOBILE FIRST) */
+/* ====================================================== */
+/* 2. PANTALLA HERO / BIENVENIDA                          */
+/* ====================================================== */
 .hero {
     position: relative;
     background: linear-gradient(135deg, #FF9800, #E65100);
@@ -102,7 +107,10 @@ body {
     transform: scale(0.96);
 }
 
-/* STICKY NAV / BOTONERA INTERACTIVA (Punto 2 & 3) */
+/* ====================================================== */
+/* 3. BARRA DE NAVEGACIÓN PEGAJOSA (STICKY)              */
+/* Mantiene los botones de menú visibles arriba al scroll */
+/* ====================================================== */
 .sticky-nav {
     position: sticky;
     top: 0;
@@ -112,6 +120,7 @@ body {
     padding: 10px 0;
 }
 
+/* Scroll horizontal continuo para adaptarse a pantallas móviles angostas */
 .nav-scroll-wrapper {
     display: flex;
     gap: 10px;
@@ -119,11 +128,11 @@ body {
     white-space: nowrap;
     padding: 5px 0;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none; /* Oculta barra de scroll en Firefox */
 }
 
 .nav-scroll-wrapper::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none; /* Oculta barra de scroll en Chrome/Safari */
 }
 
 .nav-btn {
@@ -146,14 +155,17 @@ body {
     box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
 }
 
-/* MENÚ SECCIONES Y TARJETAS */
+/* ====================================================== */
+/* 4. SECCIONES DE PRODUCTO Y TARJETAS (GRID LAYOUT)     */
+/* ====================================================== */
 .main-content {
     padding-top: 25px;
 }
 
 .menu-section {
     margin-bottom: 40px;
-    scroll-margin-top: 70px; /* Para desfasar el scroll pegajoso */
+    /* scroll-margin-top desfasa el punto de parada para que el menú pegajoso no tape el título de la sección */
+    scroll-margin-top: 70px; 
 }
 
 .section-header {
@@ -173,7 +185,7 @@ body {
     color: var(--text-muted);
 }
 
-/* GRID LAYOUT (MOBILE FIRST: 1 columna, PC: 2-3 columnas) */
+/* MOBILE FIRST: 1 columna por defecto en celulares */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr;
@@ -272,7 +284,9 @@ body {
     background-color: #E65100;
 }
 
-/* FOOTER */
+/* ====================================================== */
+/* 5. FOOTER Y BARRA FLOTANTE DE PEDIDO                   */
+/* ====================================================== */
 .footer {
     background: var(--dark-bg);
     color: white;
@@ -297,7 +311,7 @@ body {
     color: #777;
 }
 
-/* BARRA FLOTANTE DEL PEDIDO (Punto 4) */
+/* BARRA DEL PEDIDO FIJA EN EL PIE DE PANTALLA */
 .cart-floating-bar {
     position: fixed;
     bottom: 0;
@@ -311,6 +325,7 @@ body {
     justify-content: space-between;
     z-index: 1000;
     border-top: 2px solid var(--primary-yellow);
+    transition: transform 0.15s ease-in-out;
 }
 
 .cart-info {
@@ -356,14 +371,18 @@ body {
     z-index: 999;
 }
 
-/* MEDIA QUERIES PARA ADAPTACIÓN A PC / TABLET */
+/* ====================================================== */
+/* 6. MEDIA QUERIES (ADAPTACIÓN AUTOMÁTICA A TABLET Y PC) */
+/* ====================================================== */
 @media (min-width: 600px) {
+    /* En tablets muestra 2 columnas de tarjetas */
     .grid-container {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (min-width: 992px) {
+    /* En monitores de PC muestra 3 columnas de tarjetas */
     .grid-container {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -377,6 +396,6 @@ body {
     }
 
     .nav-scroll-wrapper {
-        justify-content: center;
+        justify-content: center; /* Centra los botones en PC */
     }
 }
