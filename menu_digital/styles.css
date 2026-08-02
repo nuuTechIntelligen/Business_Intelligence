@@ -15,14 +15,15 @@
     --logo-dark-border: #111111;
 
     /* Colores funcionales del sitio */
-    --primary-yellow: #FFC107; /* Color dorado de acento */
-    --primary-orange: #FF5722; /* Naranja encendido principal */
-    --primary-red: #D32F2F;    /* Rojo picante para botones/badges */
-    --primary-green: #388E3C;  /* Verde para los precios */
-    --dark-bg: #1A1A1A;       /* Fondo oscuro para footer */
-    --card-bg: #FFFFFF;        /* Fondo blanco de tarjetas */
-    --text-dark: #212121;      /* Color de texto legible principal */
-    --text-muted: #666666;    /* Color de textos secundarios */
+    --primary-yellow: #FFC107;
+    /* Reemplazamos el naranja original por el rosa fucsia del logo */
+    --primary-orange: var(--logo-pink); 
+    --primary-red: #D32F2F;
+    --primary-green: #388E3C;
+    --dark-bg: #1A1A1A;
+    --card-bg: #FFFFFF;
+    --text-dark: #212121;
+    --text-muted: #666666;
     --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     --border-radius: 16px;
     --font-heading: 'Fredoka', cursive, sans-serif;
@@ -58,15 +59,17 @@ body {
 /* ====================================================== */
 /* 2. PANTALLA HERO / BIENVENIDA CON IMAGEN DE LOGO       */
 /* ====================================================== */
+/* PANTALLA HERO / BIENVENIDA */
 .hero {
     position: relative;
-    background: linear-gradient(135deg, #FF9800, #E65100);
+    /* Degradado en tonos rosa fucsia a rojo intenso */
+    background: linear-gradient(135deg, #E91E63, #AD1457);
     color: white;
     padding: 40px 20px;
     text-align: center;
     border-bottom-left-radius: 24px;
     border-bottom-right-radius: 24px;
-    box-shadow: 0 6px 20px rgba(230, 81, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.35);
 }
 
 /* Contenedor del Logo y Subtítulo en el Encabezado */
@@ -320,7 +323,7 @@ body {
 }
 
 .btn-add:hover {
-    background-color: #E65100;
+    background-color: #C2185B; /* Rosa fucsia oscuro */
 }
 
 /* ====================================================== */
