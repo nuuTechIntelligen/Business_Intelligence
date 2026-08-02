@@ -55,14 +55,6 @@ body {
     padding: 0 16px;
 }
 
-.sub-logo {
-    display: block;
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    font-weight: 600;
-    color: var(--primary-yellow);
-}
-
 /* ====================================================== */
 /* 2. PANTALLA HERO / BIENVENIDA CON IMAGEN DE LOGO       */
 /* ====================================================== */
@@ -77,21 +69,33 @@ body {
     box-shadow: 0 6px 20px rgba(230, 81, 0, 0.3);
 }
 
-/* Contenedor e imagen del Logo en el Encabezado (Punto 2) */
+/* Contenedor del Logo y Subtítulo en el Encabezado */
 .logo-container {
     display: flex;
+    flex-direction: column; /* Alinea el subtítulo arriba y el logo abajo */
     justify-content: center;
     align-items: center;
     margin-bottom: 15px;
 }
 
+/* Estilos para el texto "FRITURAS Y BOTANAS" */
+.sub-logo {
+    display: block;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    font-weight: 700;
+    color: var(--primary-yellow);
+    text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
 .hero-logo-img {
     width: 100%;
-    max-width: 380px; /* Tamaño responsivo para celulares y PC */
+    max-width: 380px;
     height: auto;
     filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
 }
-
 .hero-tagline {
     font-size: 1rem;
     margin-bottom: 20px;
