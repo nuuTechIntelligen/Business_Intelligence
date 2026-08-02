@@ -1,1 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Engordadera | Frituras y Botanas</title>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
+    <!-- HERO / BIENVENIDA (Punto 1) -->
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <div class="logo-badge">
+                <span class="sub-logo">FRITURAS Y BOTANAS</span>
+                <h1 class="logo-title">LA ENGORDADERA</h1>
+            </div>
+            <p class="hero-tagline">🔥 ¡Las botanas más antojables, picantes y crujientes! 🔥</p>
+            <a href="#menu-nav" class="btn-primary glow-btn">
+                <i class="fa-solid fa-utensils"></i> Ver Menú Interactivo
+            </a>
+        </div>
+    </header>
+
+    <!-- BARRA DE NAVEGACIÓN PEGAJOSA Y BOTONERA (Puntos 2 y 3) -->
+    <nav class="sticky-nav" id="menu-nav">
+        <div class="container nav-container">
+            <div class="nav-scroll-wrapper">
+                <button class="nav-btn active" data-target="preparados">🌶️ Preparados</button>
+                <button class="nav-btn" data-target="chicharrones">🥓 Chicharrones</button>
+                <button class="nav-btn" data-target="dorilocos">🧀 Dorilocos & Frituras</button>
+                <button class="nav-btn" data-target="vasos">🥤 Vasos Locos</button>
+                <button class="nav-btn" data-target="bolsas">🍿 Bolsas de Fritura</button>
+                <button class="nav-btn" data-target="bebidas">🥤 Bebidas</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MENÚ PRINCIPAL POR SECCIONES -->
+    <main class="container main-content">
+
+        <!-- SECCIÓN 1: PREPARADOS Y CEVICHURROS -->
+        <section id="preparados" class="menu-section">
+            <div class="section-header">
+                <h2>🌶️ Preparados Especiales & Cueritos</h2>
+                <p>Nuestras especialidades con verdura fresca, cueritos, limón y salsas de la casa.</p>
+            </div>
+            <div class="grid-container">
+                
+                <div class="card">
+                    <div class="card-badge">¡El Favorito!</div>
+                    <div class="card-img-placeholder" style="background-image: url('images/chicharron_preparado.jpg');">
+                        <span>🥓</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Chicharrón Preparado</h3>
+                        <p class="card-desc">Placa de chicharrón crujiente con crema, col/repollo, jitomate, aguacate, cueritos y salsa especial.</p>
+                        <div class="card-footer">
+                            <span class="price">$45.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Chicharrón Preparado', 45)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-img-placeholder" style="background-image: url('images/cueritos_charola.jpg');">
+                        <span>🥗</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Cevichurros / Charola de Cueritos</h3>
+                        <p class="card-desc">Charola de cueritos preparados con pepino, jícama, limón, chile en polvo y salsa picante casera.</p>
+                        <div class="card-footer">
+                            <span class="price">$50.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Charola de Cueritos', 50)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-img-placeholder" style="background-image: url('images/almeja_preparada.jpg');">
+                        <span>📦</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Charola Mixta "La Engordadera"</h3>
+                        <p class="card-desc">Combinación de cueritos, cacahuates, fruta picada y variedad de frituras bañadas en salsa chamoy.</p>
+                        <div class="card-footer">
+                            <span class="price">$65.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Charola Mixta', 65)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: DORILOCOS & FRITURAS PREPARADAS -->
+        <section id="dorilocos" class="menu-section">
+            <div class="section-header">
+                <h2>🧀 Dorilocos y Bolsas Preparadas</h2>
+                <p>Tu bolsa de papas favorita abierta y preparada al gusto.</p>
+            </div>
+            <div class="grid-container">
+
+                <div class="card">
+                    <div class="card-badge">Más Vendido</div>
+                    <div class="card-img-placeholder" style="background-image: url('images/dorilocos.jpg');">
+                        <span>📐</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Dorilocos / Tostilocos</h3>
+                        <p class="card-desc">Bolsa de Doritos/Tostitos con cueritos, cacahuate japonés, pepino, jícama, limón, tajín y salsas.</p>
+                        <div class="card-footer">
+                            <span class="price">$55.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Dorilocos', 55)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-img-placeholder" style="background-image: url('images/bolsa_preparada.jpg');">
+                        <span>🥨</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Bolsa de Fritura Preparada</h3>
+                        <p class="card-desc">Aros, lagrimitas o churros en bolsa con verdura picada, limon, sal y salsa de tu elección.</p>
+                        <div class="card-footer">
+                            <span class="price">$35.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Bolsa Fritura Preparada', 35)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: VASOS LOCOS Y AROS CON SALSA -->
+        <section id="vasos" class="menu-section">
+            <div class="section-header">
+                <h2>🥤 Vasos Locos & Combinados</h2>
+                <p>Vasos colmados de sabor con churros serpiente, cacahuates y banderillas.</p>
+            </div>
+            <div class="grid-container">
+
+                <div class="card">
+                    <div class="card-badge font-hot">🔥 Estilo Vaso Loco</div>
+                    <div class="card-img-placeholder" style="background-image: url('images/vaso_loco.jpg');">
+                        <span>🥤</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Vaso Engordadero (1 Litro)</h3>
+                        <p class="card-desc">Pepino, jícama, cacahuate, churro largo chamoyado, gomitas y bañado en salsa negra casera.</p>
+                        <div class="card-footer">
+                            <span class="price">$60.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Vaso Engordadero 1L', 60)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-img-placeholder" style="background-image: url('images/aros_pretzel.jpg');">
+                        <span>🥨</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Bolsa de Aros / Pretzel con Chamoy</h3>
+                        <p class="card-desc">Frituras tipo pretzel bañadas en salsa chamoy de ciruela, tajín y un toque de limón.</p>
+                        <div class="card-footer">
+                            <span class="price">$30.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Aros Pretzel Chamoy', 30)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: BOLSAS DE FRITURAS Y BOTANAS AL MAYOREO/MENUDEO -->
+        <section id="bolsas" class="menu-section">
+            <div class="section-header">
+                <h2>🍿 Bolsas de Fritura por Variedad</h2>
+                <p>Elige tu botana seca preferida para llevar a casa.</p>
+            </div>
+            <div class="grid-container">
+
+                <div class="card">
+                    <div class="card-img-placeholder" style="background-image: url('images/exhibidor_botanas.jpg');">
+                        <span>🛍️</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Bolsa de Fritura Seca (Chica)</h3>
+                        <p class="card-desc">Aros de queso, churritos de chile, bolitas de queso, lagrimitas, palomitas o chicharrones.</p>
+                        <div class="card-footer">
+                            <span class="price">$20.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Bolsa Fritura Chica', 20)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-img-placeholder" style="background-image: url('images/exhibidor_botanas.jpg');">
+                        <span>🎒</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>Bolsa de Fritura Seca (Grande)</h3>
+                        <p class="card-desc">Cualquiera de nuestras variedades en presentación grande para compartir.</p>
+                        <div class="card-footer">
+                            <span class="price">$35.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Bolsa Fritura Grande', 35)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: BEBIDAS Y REFRESCANTES -->
+        <section id="bebidas" class="menu-section">
+            <div class="section-header">
+                <h2>🥤 Bebidas & Aguas Frescas</h2>
+                <p>Para acompañar el picante de tus botanas.</p>
+            </div>
+            <div class="grid-container">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Refrescos de Lata / Botella</h3>
+                        <p class="card-desc">Coca-Cola, Jarritos, Mundet, Sprite o Sangría bien fríos.</p>
+                        <div class="card-footer">
+                            <span class="price">$25.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Refresco', 25)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Agua Preparada / Rusas</h3>
+                        <p class="card-desc">Agua mineral con limón, sal, chile en polvo y escarchado de chamoy.</p>
+                        <div class="card-footer">
+                            <span class="price">$35.00</span>
+                            <button class="btn-add" onclick="agregarAlPedido('Rusa Escarchada', 35)">
+                                <i class="fa-solid fa-cart-plus"></i> Pedir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container text-center">
+            <h3>FRITURAS Y BOTANAS LA ENGORDADERA</h3>
+            <p>📍 ¡Atendiéndote con el mejor sabor y antojo!</p>
+            <p class="copyright">© 2026 La Engordadera - Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- BOTÓN Y BARRA FLOTANTE DE WHATSAPP (Punto 4) -->
+    <div class="cart-floating-bar" id="cartBar">
+        <div class="cart-info">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <span id="cartCount">0 productos</span> | <strong id="cartTotal">$0.00</strong>
+        </div>
+        <button class="btn-whatsapp" onclick="enviarPedidoWhatsApp()">
+            <i class="fa-brands fa-whatsapp"></i> Enviar Pedido
+        </button>
+    </div>
+
+    <!-- BOTÓN FLOTANTE DIRECTO WHATSAPP (Siempre visible) -->
+    <a href="#" class="wa-float-btn" onclick="enviarPedidoWhatsApp()" title="Pedir por WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="script.js"></script>
+</body>
+</html>
