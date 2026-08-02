@@ -55,6 +55,14 @@ body {
     padding: 0 16px;
 }
 
+.sub-logo {
+    display: block;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    font-weight: 600;
+    color: var(--primary-yellow);
+}
+
 /* ====================================================== */
 /* 2. PANTALLA HERO / BIENVENIDA CON IMAGEN DE LOGO       */
 /* ====================================================== */
@@ -88,14 +96,6 @@ body {
     font-size: 1rem;
     margin-bottom: 20px;
     font-weight: 600;
-}
-
-.sub-logo {
-    display: block;
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    font-weight: 600;
-    color: var(--primary-yellow);
 }
 
 .btn-primary {
