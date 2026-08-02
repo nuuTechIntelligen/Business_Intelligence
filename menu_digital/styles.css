@@ -3,9 +3,21 @@
 /* Define colores de marca, fuentes y comportamientos base*/
 /* ====================================================== */
 :root {
+    /* Paleta extraída del logo oficial "La Engordadera" */
+    --logo-yellow-border: #FFE800;
+    --logo-blue: #00A8E8;
+    --logo-orange: #F36C3D;
+    --logo-green: #7BC043;
+    --logo-purple: #703682;
+    --logo-red: #A31D24;
+    --logo-yellow: #FFCB05;
+    --logo-pink: #E91E63;
+    --logo-dark-border: #111111;
+
+    /* Colores funcionales del sitio */
     --primary-yellow: #FFC107; /* Color dorado de acento */
     --primary-orange: #FF5722; /* Naranja encendido principal */
-    --primary-red: #D32F2F;    /* Rojo picante para títulos y badges */
+    --primary-red: #D32F2F;    /* Rojo picante para botones/badges */
     --primary-green: #388E3C;  /* Verde para los precios */
     --dark-bg: #1A1A1A;       /* Fondo oscuro para footer */
     --card-bg: #FFFFFF;        /* Fondo blanco de tarjetas */
@@ -44,7 +56,7 @@ body {
 }
 
 /* ====================================================== */
-/* 2. PANTALLA HERO / BIENVENIDA                          */
+/* 2. PANTALLA HERO / BIENVENIDA CON IMAGEN DE LOGO       */
 /* ====================================================== */
 .hero {
     position: relative;
@@ -57,30 +69,19 @@ body {
     box-shadow: 0 6px 20px rgba(230, 81, 0, 0.3);
 }
 
-.logo-badge {
-    background: rgba(0, 0, 0, 0.25);
-    display: inline-block;
-    padding: 15px 25px;
-    border-radius: 20px;
-    backdrop-filter: blur(5px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+/* Contenedor e imagen del Logo en el Encabezado (Punto 2) */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 15px;
 }
 
-.sub-logo {
-    display: block;
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    font-weight: 600;
-    color: var(--primary-yellow);
-}
-
-.logo-title {
-    font-family: var(--font-heading);
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: #FFFFFF;
-    text-shadow: 2px 3px 0px #D32F2F, 4px 5px 0px #000;
+.hero-logo-img {
+    width: 100%;
+    max-width: 380px; /* Tamaño responsivo para celulares y PC */
+    height: auto;
+    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
 }
 
 .hero-tagline {
@@ -164,7 +165,7 @@ body {
 
 .menu-section {
     margin-bottom: 40px;
-    /* scroll-margin-top desfasa el punto de parada para que el menú pegajoso no tape el título de la sección */
+    /* scroll-margin-top desfasa el punto de parada para que el menú pegajoso no tape el título */
     scroll-margin-top: 70px; 
 }
 
@@ -174,10 +175,28 @@ body {
     padding-left: 12px;
 }
 
-.section-header h2 {
+/* EFECTO MULTICOLOR ESTILO LOGO (Punto 3) */
+.multicolor-text {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--primary-red);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    /* Degradado lineal por bloques para simular letras con colores de la paleta */
+    background: linear-gradient(
+        90deg, 
+        var(--logo-blue) 0% 12%, 
+        var(--logo-orange) 12% 25%, 
+        var(--logo-green) 25% 38%, 
+        var(--logo-purple) 38% 50%, 
+        var(--logo-red) 50% 63%, 
+        var(--logo-yellow) 63% 75%, 
+        var(--logo-pink) 75% 88%, 
+        var(--logo-blue) 88% 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Delineado interno oscuro tipo caricatura para dar lectura perfecta */
+    filter: drop-shadow(1px 1px 0px var(--logo-dark-border));
 }
 
 .section-header p {
@@ -389,10 +408,6 @@ body {
 
     .hero {
         padding: 60px 20px;
-    }
-
-    .logo-title {
-        font-size: 3rem;
     }
 
     .nav-scroll-wrapper {
