@@ -175,13 +175,14 @@ body {
     padding-left: 12px;
 }
 
-/* EFECTO MULTICOLOR ESTILO LOGO (Punto 3) */
+/* EFECTO MULTICOLOR ESTILO LOGO */
 .multicolor-text {
     font-family: var(--font-heading);
-    font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-    /* Degradado lineal por bloques para simular letras con colores de la paleta */
+    display: inline-block; /* Garantiza que el degradado se aplique correctamente al span */
+    
+    /* Degradado lineal por bloques con la paleta de tu logo */
     background: linear-gradient(
         90deg, 
         var(--logo-blue) 0% 12%, 
@@ -195,8 +196,15 @@ body {
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    /* Delineado interno oscuro tipo caricatura para dar lectura perfecta */
+    
+    /* Delineado interno oscuro para legibilidad */
     filter: drop-shadow(1px 1px 0px var(--logo-dark-border));
+}
+
+/* Regla para que al presionar o pasar el mouse sobre el botón, el texto resalte aún más */
+.nav-btn:hover .multicolor-text,
+.nav-btn.active .multicolor-text {
+    filter: drop-shadow(1px 1px 0px #000) brightness(1.1);
 }
 
 .section-header p {
