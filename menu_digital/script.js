@@ -76,7 +76,7 @@ function enviarPedidoWhatsApp() {
 }
 
 // ======================================================
-// 4. LÓGICA DE NAVEGACIÓN SUAVE Y MARCADOR DE BOTONES ACTIVOS
+// 4. LÓGICA DE NAVEGACIÓN SUAVE Y AUTOSCROLL DEL MENÚ
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     const navButtons = document.querySelectorAll('.nav-btn');
@@ -100,23 +100,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Detecta qué sección está visible al desplazar la pantalla manualmente (scroll)
+    // Detecta qué sección está visible al desplazar la pantalla (scroll) y mueve el menú de botones
     window.addEventListener('scroll', () => {
         let current = '';
         const sections = document.querySelectorAll('.menu-section');
 
         sections.forEach(section => {
-            const sectionTop = section.offsetTop - 100;
+            const sectionTop = section.offsetTop - 120; // Offset ideal para activación anticipada
             if (pageYOffset >= sectionTop) {
                 current = section.getAttribute('id');
             }
         });
 
-        // Marca como activo el botón cuya sección está viendo el usuario en el momento
+        // Marca como activo el botón cuya sección está en pantalla y desplaza la barra horizontalmente
         navButtons.forEach(btn => {
             btn.classList.remove('active');
             if (btn.getAttribute('data-target') === current) {
                 btn.classList.add('active');
+                
+                // Centra automáticamente el botón activo dentro de la barra deslizable
+                btn.scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'center',
+                    block: 'nearest'
+                });
             }
         });
     });
