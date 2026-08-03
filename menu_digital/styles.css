@@ -59,7 +59,6 @@ body {
 /* ====================================================== */
 /* 2. PANTALLA HERO / BIENVENIDA CON IMAGEN DE LOGO       */
 /* ====================================================== */
-/* PANTALLA HERO / BIENVENIDA */
 .hero {
     position: relative;
     /* Degradado en tonos rosa fucsia a rojo intenso */
@@ -99,6 +98,7 @@ body {
     height: auto;
     filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
 }
+
 .hero-tagline {
     font-size: 1rem;
     margin-bottom: 20px;
@@ -124,7 +124,7 @@ body {
 }
 
 /* ====================================================== */
-/* 3. BARRA DE NAVEGACIÓN PEGAJOSA (STICKY)              */
+/* 3. BARRA DE NAVEGACIÓN PEGAJOSA (STICKY)               */
 /* Mantiene los botones de menú visibles arriba al scroll */
 /* ====================================================== */
 .sticky-nav {
@@ -134,14 +134,16 @@ body {
     background: #FFFFFF; /* Fondo blanco limpio para la barra */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
     padding: 12px 0;
+    width: 100%;
 }
+
 /* Scroll horizontal continuo para adaptarse a pantallas móviles angostas */
 .nav-scroll-wrapper {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     overflow-x: auto;
     white-space: nowrap;
-    padding: 5px 0;
+    padding: 6px 16px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Oculta barra de scroll en Firefox */
 }
@@ -199,7 +201,7 @@ body {
 .menu-section {
     margin-bottom: 40px;
     /* scroll-margin-top desfasa el punto de parada para que el menú pegajoso no tape el título */
-    scroll-margin-top: 70px; 
+    scroll-margin-top: 80px; 
 }
 
 .section-header {
@@ -458,7 +460,11 @@ body {
         padding: 60px 20px;
     }
 
+    /* Corrección del menú en PC: envuelve y centra los botones holgadamente */
     .nav-scroll-wrapper {
-        justify-content: center; /* Centra los botones en PC */
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: visible;
+        padding: 10px 0;
     }
 }
