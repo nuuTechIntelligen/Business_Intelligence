@@ -120,8 +120,7 @@ body {
 }
 
 /* ====================================================== */
-/* 3. BARRA DE NAVEGACIÓN PEGAJOSA (STICKY)               */
-/* Mantiene los botones de menú visibles arriba al scroll */
+/* 3. BARRA DE NAVEGACIÓN FULL WIDTH (ANCHO COMPLETO 100%)*/
 /* ====================================================== */
 .sticky-nav {
     position: sticky;
@@ -138,7 +137,8 @@ body {
     gap: 12px;
     overflow-x: auto;
     white-space: nowrap;
-    padding: 6px 16px;
+    padding: 6px 20px;
+    width: 100%;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
@@ -150,7 +150,7 @@ body {
 .nav-btn {
     background: #222222; 
     border: 2px solid #333333;
-    padding: 10px 20px;
+    padding: 10px 22px;
     border-radius: 30px;
     font-family: var(--font-body);
     cursor: pointer;
@@ -183,7 +183,7 @@ body {
 }
 
 /* ====================================================== */
-/* CLASES DE COLOR POR SECCIÓN (UX MEJORADA)               */
+/* CLASES DE COLOR POR SECCIÓN (UX MEJORADA)              */
 /* ====================================================== */
 .color-green  { color: var(--logo-green); }
 .color-orange { color: var(--logo-orange); }
@@ -429,11 +429,13 @@ body {
         padding: 60px 20px;
     }
 
-    /* MENÚ EN PC: UNA SOLA FILA LIMPIA Y CENTRADA */
+    /* EN PC: EXPANSIÓN COMPLETA Y CENTRADO DE MENÚ */
     .nav-scroll-wrapper {
-        flex-wrap: nowrap;
+        display: flex;
         justify-content: center;
+        align-items: center;
+        flex-wrap: nowrap;
         overflow-x: auto;
-        padding: 10px 0;
+        padding: 10px 30px;
     }
 }
