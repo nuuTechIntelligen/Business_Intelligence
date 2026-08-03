@@ -165,6 +165,15 @@ body {
     flex-shrink: 0;
 }
 
+/* Delineado extra grueso sobre fondo claro */
+.nav-btn .multicolor-text {
+    filter: 
+        drop-shadow(1.5px 1.5px 0px #000) 
+        drop-shadow(-1.5px -1.5px 0px #000) 
+        drop-shadow(1.5px -1.5px 0px #000) 
+        drop-shadow(-1.5px 1.5px 0px #000);
+}
+
 .nav-btn.active, .nav-btn:hover {
     background-color: var(--primary-orange);
     color: #FFF;
