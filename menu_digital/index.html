@@ -26,7 +26,7 @@
     <header class="hero">
         <div class="hero-overlay"></div>
         <div class="container hero-content">
-           <div class="logo-container">
+            <div class="logo-container">
                 <span class="sub-logo">FRITURAS Y BOTANAS</span>
                 <img src="images/logo.png" alt="Frituras y Botanas La Engordadera" class="hero-logo-img">
             </div>
@@ -39,32 +39,32 @@
 
     <!-- ========================================== -->
     <!-- PUNTOS 2 Y 3: NAVEGACIÓN Y BOTONERA PEGAJOSA-->
-    <!-- Barra horizontal con scroll en móviles    -->
+    <!-- Cada sección con su color característico   -->
     <!-- ========================================== -->
     <nav class="sticky-nav" id="menu-nav">
-    <div class="container nav-container">
-        <div class="nav-scroll-wrapper">
-            <button class="nav-btn active" data-target="preparados">
-                🌶️ <span class="multicolor-text">Preparados</span>
-            </button>
-            <button class="nav-btn" data-target="chicharrones">
-                🥓 <span class="multicolor-text">Chicharrones</span>
-            </button>
-            <button class="nav-btn" data-target="dorilocos">
-                🧀 <span class="multicolor-text">Dorilocos & Frituras</span>
-            </button>
-            <button class="nav-btn" data-target="vasos">
-                🥤 <span class="multicolor-text">Vasos Locos</span>
-            </button>
-            <button class="nav-btn" data-target="bolsas">
-                🍿 <span class="multicolor-text">Bolsas de Fritura</span>
-            </button>
-            <button class="nav-btn" data-target="bebidas">
-                🥤 <span class="multicolor-text">Bebidas</span>
-            </button>
+        <div class="container nav-container">
+            <div class="nav-scroll-wrapper">
+                <button class="nav-btn active" data-target="preparados">
+                    🌶️ <span class="nav-btn-text color-green">Preparados</span>
+                </button>
+                <button class="nav-btn" data-target="chicharrones">
+                    🥓 <span class="nav-btn-text color-orange">Chicharrones</span>
+                </button>
+                <button class="nav-btn" data-target="dorilocos">
+                    🧀 <span class="nav-btn-text color-blue">Dorilocos & Frituras</span>
+                </button>
+                <button class="nav-btn" data-target="vasos">
+                    🥤 <span class="nav-btn-text color-purple">Vasos Locos</span>
+                </button>
+                <button class="nav-btn" data-target="bolsas">
+                    🍿 <span class="nav-btn-text color-pink">Bolsas de Fritura</span>
+                </button>
+                <button class="nav-btn" data-target="bebidas">
+                    🥤 <span class="nav-btn-text color-yellow">Bebidas</span>
+                </button>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <!-- ========================================== -->
     <!-- CONTENIDO PRINCIPAL: SECCIONES DEL MENÚ    -->
@@ -74,7 +74,7 @@
         <!-- SECCIÓN 1: PREPARADOS -->
         <section id="preparados" class="menu-section">
             <div class="section-header">
-                <h2>🌶️ Preparados Especiales & Cueritos</h2>
+                <h2>🌶️ <span class="section-title color-green">Preparados Especiales & Cueritos</span></h2>
                 <p>Nuestras especialidades con verdura fresca, cueritos, limón y salsas de la casa.</p>
             </div>
             <div class="grid-container">
@@ -88,7 +88,6 @@
                         <p class="card-desc">Placa de chicharrón crujiente con crema, col/repollo, jitomate, aguacate, cueritos y salsa especial.</p>
                         <div class="card-footer">
                             <span class="price">$45.00</span>
-                            <!-- Evento onclick dispara la función en JS para añadir al carrito -->
                             <button class="btn-add" onclick="agregarAlPedido('Chicharrón Preparado', 45)">
                                 <i class="fa-solid fa-cart-plus"></i> Pedir
                             </button>
@@ -130,10 +129,10 @@
             </div>
         </section>
 
-        <!-- SECCIÓN 2: CHICHARRONES (NUEVA SECCIÓN AGREGADA PARA CORREGIR LA NAVEGACIÓN) -->
+        <!-- SECCIÓN 2: CHICHARRONES -->
         <section id="chicharrones" class="menu-section">
             <div class="section-header">
-                <h2>🥓 Chicharrones de la Casa</h2>
+                <h2>🥓 <span class="section-title color-orange">Chicharrones de la Casa</span></h2>
                 <p>Las clásicas frituras de harina preparadas o secas para cualquier antojo.</p>
             </div>
             <div class="grid-container">
@@ -174,7 +173,7 @@
         <!-- SECCIÓN 3: DORILOCOS & FRITURAS PREPARADAS -->
         <section id="dorilocos" class="menu-section">
             <div class="section-header">
-                <h2>🧀 Dorilocos y Bolsas Preparadas</h2>
+                <h2>🧀 <span class="section-title color-blue">Dorilocos y Bolsas Preparadas</span></h2>
                 <p>Tu bolsa de papas favorita abierta y preparada al gusto.</p>
             </div>
             <div class="grid-container">
@@ -216,7 +215,7 @@
         <!-- SECCIÓN 4: VASOS LOCOS Y AROS -->
         <section id="vasos" class="menu-section">
             <div class="section-header">
-                <h2>🥤 Vasos Locos & Combinados</h2>
+                <h2>🥤 <span class="section-title color-purple">Vasos Locos & Combinados</span></h2>
                 <p>Vasos colmados de sabor con churros serpiente, cacahuates y banderillas.</p>
             </div>
             <div class="grid-container">
@@ -258,7 +257,7 @@
         <!-- SECCIÓN 5: BOLSAS DE FRITURAS SECA -->
         <section id="bolsas" class="menu-section">
             <div class="section-header">
-                <h2>🍿 Bolsas de Fritura por Variedad</h2>
+                <h2>🍿 <span class="section-title color-pink">Bolsas de Fritura por Variedad</span></h2>
                 <p>Elige tu botana seca preferida para llevar a casa.</p>
             </div>
             <div class="grid-container">
@@ -299,7 +298,7 @@
         <!-- SECCIÓN 6: BEBIDAS -->
         <section id="bebidas" class="menu-section">
             <div class="section-header">
-                <h2>🥤 Bebidas & Aguas Frescas</h2>
+                <h2>🥤 <span class="section-title color-yellow">Bebidas & Aguas Frescas</span></h2>
                 <p>Para acompañar el picante de tus botanas.</p>
             </div>
             <div class="grid-container">
@@ -349,7 +348,6 @@
     <div class="cart-floating-bar" id="cartBar">
         <div class="cart-info">
             <i class="fa-solid fa-basket-shopping"></i>
-            <!-- Se actualizan mediante JavaScript -->
             <span id="cartCount">0 productos</span> | <strong id="cartTotal">$0.00</strong>
         </div>
         <button class="btn-whatsapp" onclick="enviarPedidoWhatsApp()">
