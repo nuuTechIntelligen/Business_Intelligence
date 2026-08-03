@@ -199,14 +199,15 @@ body {
     padding-left: 12px;
 }
 
-/* EFECTO MULTICOLOR ESTILO LOGO */
+/* EFECTO MULTICOLOR CON MAYOR TAMAÑO Y ESPACIADO */
 .multicolor-text {
     font-family: var(--font-heading);
     font-weight: 700;
-    letter-spacing: 0.5px;
-    display: inline-block; /* Garantiza que el degradado se aplique correctamente al span */
+    font-size: 1.1rem; /* Aumentamos el tamaño de la fuente dentro de los botones */
+    letter-spacing: 1.5px; /* Separación amplia entre cada letra */
+    display: inline-block;
     
-    /* Degradado lineal por bloques con la paleta de tu logo */
+    /* Degradado multicolor de la paleta */
     background: linear-gradient(
         90deg, 
         var(--logo-blue) 0% 12%, 
@@ -221,8 +222,14 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     
-    /* Delineado interno oscuro para legibilidad */
+    /* Delineado interno de soporte */
     filter: drop-shadow(1px 1px 0px var(--logo-dark-border));
+}
+
+/* Para los títulos H2 mantenemos un tamaño más grande sin perder el espaciado */
+.section-header .multicolor-text {
+    font-size: 1.7rem;
+    letter-spacing: 2px;
 }
 
 /* Regla para que al presionar o pasar el mouse sobre el botón, el texto resalte aún más */
