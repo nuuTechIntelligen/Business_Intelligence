@@ -16,7 +16,6 @@
 
     /* Colores funcionales del sitio */
     --primary-yellow: #FFC107;
-    /* Reemplazamos el naranja original por el rosa fucsia del logo */
     --primary-orange: var(--logo-pink); 
     --primary-red: #D32F2F;
     --primary-green: #388E3C;
@@ -33,11 +32,11 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Garantiza que los paddings no alteren los anchos reales */
+    box-sizing: border-box;
 }
 
 html {
-    scroll-behavior: smooth; /* Habilita el desplazamiento suave al hacer clic en secciones */
+    scroll-behavior: smooth;
     font-size: 16px;
 }
 
@@ -46,7 +45,7 @@ body {
     background-color: #F8F9FA;
     color: var(--text-dark);
     line-height: 1.5;
-    padding-bottom: 90px; /* Margen inferior para que la barra flotante de pedido no tape nada */
+    padding-bottom: 90px;
 }
 
 .container {
@@ -61,7 +60,6 @@ body {
 /* ====================================================== */
 .hero {
     position: relative;
-    /* Degradado en tonos rosa fucsia a rojo intenso */
     background: linear-gradient(135deg, #E91E63, #AD1457);
     color: white;
     padding: 40px 20px;
@@ -71,16 +69,14 @@ body {
     box-shadow: 0 6px 20px rgba(233, 30, 99, 0.35);
 }
 
-/* Contenedor del Logo y Subtítulo en el Encabezado */
 .logo-container {
     display: flex;
-    flex-direction: column; /* Alinea el subtítulo arriba y el logo abajo */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-bottom: 15px;
 }
 
-/* Estilos para el texto "FRITURAS Y BOTANAS" */
 .sub-logo {
     display: block;
     font-size: 0.9rem;
@@ -131,13 +127,12 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: #FFFFFF; /* Fondo blanco limpio para la barra */
+    background: #FFFFFF;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
     padding: 12px 0;
     width: 100%;
 }
 
-/* Scroll horizontal continuo para adaptarse a pantallas móviles angostas */
 .nav-scroll-wrapper {
     display: flex;
     gap: 12px;
@@ -145,11 +140,11 @@ body {
     white-space: nowrap;
     padding: 6px 16px;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Oculta barra de scroll en Firefox */
+    scrollbar-width: none;
 }
 
 .nav-scroll-wrapper::-webkit-scrollbar {
-    display: none; /* Oculta barra de scroll en Chrome/Safari */
+    display: none;
 }
 
 .nav-btn {
@@ -166,29 +161,45 @@ body {
     gap: 8px;
 }
 
-/* Botón activo/seleccionado: Fondo negro profundo con borde amarillo del logo */
+/* Texto de botón base */
+.nav-btn-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+}
+
+/* Botón activo/seleccionado: Fondo negro con borde destacado */
 .nav-btn.active {
     background-color: #000000;
-    border-color: var(--logo-yellow-border); /* Borde amarillo brillante */
+    border-color: var(--logo-yellow-border);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
     transform: scale(1.04);
 }
 
-/* Delineado extra alrededor de cada letra para máxima lectura */
-.nav-btn .multicolor-text {
-    font-size: 1.1rem;
-    letter-spacing: 1.5px;
-    filter: 
-        drop-shadow(1px 1px 0px #000000) 
-        drop-shadow(-1px -1px 0px #000000) 
-        drop-shadow(1px -1px 0px #000000) 
-        drop-shadow(-1px 1px 0px #000000);
-}
-
-/* Efecto al pasar el cursor */
 .nav-btn:hover {
     border-color: var(--logo-pink);
     transform: translateY(-2px);
+}
+
+/* ====================================================== */
+/* CLASES DE COLOR POR SECCIÓN (UX MEJORADA)               */
+/* ====================================================== */
+.color-green  { color: var(--logo-green); }
+.color-orange { color: var(--logo-orange); }
+.color-blue   { color: var(--logo-blue); }
+.color-purple { color: var(--logo-purple); }
+.color-pink   { color: var(--logo-pink); }
+.color-yellow { color: var(--logo-yellow); }
+
+/* Estilos de títulos H2 por sección */
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    display: inline-block;
+    filter: drop-shadow(1px 1px 0px var(--logo-dark-border));
 }
 
 /* ====================================================== */
@@ -200,7 +211,6 @@ body {
 
 .menu-section {
     margin-bottom: 40px;
-    /* scroll-margin-top desfasa el punto de parada para que el menú pegajoso no tape el título */
     scroll-margin-top: 80px; 
 }
 
@@ -208,45 +218,6 @@ body {
     margin-bottom: 18px;
     border-left: 5px solid var(--primary-orange);
     padding-left: 12px;
-}
-
-/* EFECTO MULTICOLOR CON MAYOR TAMAÑO Y ESPACIADO */
-.multicolor-text {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 1.1rem; /* Aumentamos el tamaño de la fuente dentro de los botones */
-    letter-spacing: 1.5px; /* Separación amplia entre cada letra */
-    display: inline-block;
-    
-    /* Degradado multicolor de la paleta */
-    background: linear-gradient(
-        90deg, 
-        var(--logo-blue) 0% 12%, 
-        var(--logo-orange) 12% 25%, 
-        var(--logo-green) 25% 38%, 
-        var(--logo-purple) 38% 50%, 
-        var(--logo-red) 50% 63%, 
-        var(--logo-yellow) 63% 75%, 
-        var(--logo-pink) 75% 88%, 
-        var(--logo-blue) 88% 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    
-    /* Delineado interno de soporte */
-    filter: drop-shadow(1px 1px 0px var(--logo-dark-border));
-}
-
-/* Para los títulos H2 mantenemos un tamaño más grande sin perder el espaciado */
-.section-header .multicolor-text {
-    font-size: 1.7rem;
-    letter-spacing: 2px;
-}
-
-/* Regla para que al presionar o pasar el mouse sobre el botón, el texto resalte aún más */
-.nav-btn:hover .multicolor-text,
-.nav-btn.active .multicolor-text {
-    filter: drop-shadow(1px 1px 0px #000) brightness(1.1);
 }
 
 .section-header p {
@@ -350,7 +321,7 @@ body {
 }
 
 .btn-add:hover {
-    background-color: #C2185B; /* Rosa fucsia oscuro */
+    background-color: #C2185B;
 }
 
 /* ====================================================== */
@@ -441,17 +412,15 @@ body {
 }
 
 /* ====================================================== */
-/* 6. MEDIA QUERIES (ADAPTACIÓN AUTOMÁTICA A TABLET Y PC) */
+/* 6. MEDIA QUERIES (ADAPTACIÓN A TABLET Y PC)            */
 /* ====================================================== */
 @media (min-width: 600px) {
-    /* En tablets muestra 2 columnas de tarjetas */
     .grid-container {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (min-width: 992px) {
-    /* En monitores de PC muestra 3 columnas de tarjetas */
     .grid-container {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -460,11 +429,11 @@ body {
         padding: 60px 20px;
     }
 
-    /* Corrección del menú en PC: envuelve y centra los botones holgadamente */
+    /* MENÚ EN PC: UNA SOLA FILA LIMPIA Y CENTRADA */
     .nav-scroll-wrapper {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
-        overflow-x: visible;
+        overflow-x: auto;
         padding: 10px 0;
     }
 }
