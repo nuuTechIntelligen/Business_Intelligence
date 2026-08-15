@@ -1,9 +1,7 @@
 /* ====================================================== */
 /* 1. CONFIGURACIÓN GLOBAL Y VARIABLES DE DISEÑO (CSS RESET)*/
-/* Define colores de marca, fuentes y comportamientos base*/
 /* ====================================================== */
 :root {
-    /* Paleta extraída del logo oficial "La Engordadera" */
     --logo-yellow-border: #FFE800;
     --logo-blue: #00A8E8;
     --logo-orange: #F36C3D;
@@ -14,7 +12,6 @@
     --logo-pink: #E91E63;
     --logo-dark-border: #111111;
 
-    /* Colores funcionales del sitio */
     --primary-yellow: #FFC107;
     --primary-orange: var(--logo-pink); 
     --primary-red: #D32F2F;
@@ -55,9 +52,7 @@ body {
     padding: 0 16px;
 }
 
-/* ====================================================== */
-/* 2. PANTALLA HERO / BIENVENIDA CON IMAGEN DE LOGO       */
-/* ====================================================== */
+/* HERO */
 .hero {
     position: relative;
     background: linear-gradient(135deg, #E91E63, #AD1457);
@@ -120,7 +115,7 @@ body {
 }
 
 /* ====================================================== */
-/* 3. BARRA DE NAVEGACIÓN FULL WIDTH (ANCHO COMPLETO 100%)*/
+/* BARRA DE NAVEGACIÓN FULL WIDTH                         */
 /* ====================================================== */
 .sticky-nav {
     position: sticky;
@@ -161,7 +156,6 @@ body {
     gap: 8px;
 }
 
-/* Texto de botón base */
 .nav-btn-text {
     font-family: var(--font-heading);
     font-weight: 700;
@@ -169,7 +163,6 @@ body {
     letter-spacing: 1px;
 }
 
-/* Botón activo/seleccionado: Fondo negro con borde destacado */
 .nav-btn.active {
     background-color: #000000;
     border-color: var(--logo-yellow-border);
@@ -182,9 +175,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* ====================================================== */
-/* CLASES DE COLOR POR SECCIÓN (UX MEJORADA)              */
-/* ====================================================== */
+/* CLASES DE COLOR */
 .color-green  { color: var(--logo-green); }
 .color-orange { color: var(--logo-orange); }
 .color-blue   { color: var(--logo-blue); }
@@ -192,7 +183,6 @@ body {
 .color-pink   { color: var(--logo-pink); }
 .color-yellow { color: var(--logo-yellow); }
 
-/* Estilos de títulos H2 por sección */
 .section-title {
     font-family: var(--font-heading);
     font-size: 1.7rem;
@@ -203,7 +193,7 @@ body {
 }
 
 /* ====================================================== */
-/* 4. SECCIONES DE PRODUCTO Y TARJETAS (GRID LAYOUT)     */
+/* CONTENIDO Y TARJETAS                                   */
 /* ====================================================== */
 .main-content {
     padding-top: 25px;
@@ -225,7 +215,6 @@ body {
     color: var(--text-muted);
 }
 
-/* MOBILE FIRST: 1 columna por defecto en celulares */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr;
@@ -249,29 +238,38 @@ body {
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
 
-.card-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: var(--primary-red);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 20px;
-    z-index: 2;
-}
-
 .card-img-placeholder {
-    height: 180px;
+    height: 190px;
     background-color: #FFE0B2;
     background-size: cover;
     background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    color: var(--primary-orange);
+    position: relative;
+}
+
+/* PRODUCTO AGOTADO */
+.card.agotado {
+    opacity: 0.65;
+    filter: grayscale(0.85);
+}
+
+.badge-agotado {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #424242;
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+}
+
+.btn-add.disabled {
+    background-color: #888888;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .card-body {
@@ -312,20 +310,223 @@ body {
     background-color: var(--primary-orange);
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 20px;
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
 }
 
-.btn-add:hover {
-    background-color: #C2185B;
+.btn-add:active {
+    transform: scale(0.95);
 }
 
 /* ====================================================== */
-/* 5. FOOTER Y BARRA FLOTANTE DE PEDIDO                   */
+/* SPINNER Y ESTADO DE CARGA                              */
+/* ====================================================== */
+.loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #E0E0E0;
+    border-top: 5px solid var(--primary-orange);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ====================================================== */
+/* VENTANA FLOTANTE / MODAL INTERACTIVO                   */
+/* ====================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-card {
+    background: #FFFFFF;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    border-radius: 20px;
+    padding: 24px 20px;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+    animation: popUp 0.25s ease-out;
+}
+
+@keyframes popUp {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: #666;
+    cursor: pointer;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    padding-right: 30px;
+}
+
+.modal-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--text-dark);
+}
+
+.modal-price {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.modal-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+    border-bottom: 1px solid #EEE;
+    padding-bottom: 12px;
+}
+
+.modal-group {
+    margin-bottom: 18px;
+}
+
+.modal-group-title {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.amount-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #F3F4F6;
+    border: 2px solid #DDD;
+    border-radius: 12px;
+    padding: 6px 14px;
+    width: 160px;
+}
+
+.amount-input-wrapper span {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-right: 6px;
+}
+
+.input-amount {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    outline: none;
+}
+
+.options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.option-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #F3F4F6;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.option-chip input {
+    cursor: pointer;
+}
+
+.option-chip:hover {
+    border-color: var(--primary-orange);
+    background: #FFF0F5;
+}
+
+.modal-actions {
+    margin-top: 24px;
+}
+
+.btn-confirm-add {
+    width: 100%;
+    background: var(--primary-orange);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 30px;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+    transition: background 0.2s;
+}
+
+.btn-confirm-add:hover {
+    background: #C2185B;
+}
+
+/* ====================================================== */
+/* FOOTER Y CARRITO FLOTANTE                              */
 /* ====================================================== */
 .footer {
     background: var(--dark-bg);
@@ -351,7 +552,6 @@ body {
     color: #777;
 }
 
-/* BARRA DEL PEDIDO FIJA EN EL PIE DE PANTALLA */
 .cart-floating-bar {
     position: fixed;
     bottom: 0;
@@ -412,7 +612,7 @@ body {
 }
 
 /* ====================================================== */
-/* 6. MEDIA QUERIES (ADAPTACIÓN A TABLET Y PC)            */
+/* MEDIA QUERIES                                          */
 /* ====================================================== */
 @media (min-width: 600px) {
     .grid-container {
@@ -429,7 +629,6 @@ body {
         padding: 60px 20px;
     }
 
-    /* EN PC: EXPANSIÓN COMPLETA Y CENTRADO DE MENÚ */
     .nav-scroll-wrapper {
         display: flex;
         justify-content: center;
