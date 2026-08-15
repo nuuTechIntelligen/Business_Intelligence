@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Asegúrate de mantener tu ID
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -78,7 +78,6 @@ function renderizarMenu(productos) {
             const estaDisponible = String(prod.disponible).toUpperCase() === 'SI';
             const precioDisplay = prod.venta_por_monto === 'SI' ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-            // Toda la tarjeta lleva el evento onclick para abrir el modal
             cardsHTML += `
                 <div class="card ${!estaDisponible ? 'agotado' : ''}" onclick="manejarClicTarjeta(${prod.id}, ${estaDisponible})">
                     ${!estaDisponible ? '<div class="badge-agotado">Agotado</div>' : ''}
@@ -128,7 +127,7 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = prod.venta_por_monto === 'SI' ? '$20.00' : `$${parseFloat(prod.precio).toFixed(2)}`;
 
-    // Manejo de Venta por Monto con Pills Rápidas
+    // Manejo de Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
     if (prod.venta_por_monto === 'SI') {
         amountGroup.style.display = 'block';
@@ -138,19 +137,14 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Grupo Base (Radio buttons)
+    // Grupos de opciones con cuadrícula y buscador
     renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', prod.grupo_base_nombre, prod.grupo_base_opciones, 'radio', 'grupo_base');
-
-    // Grupo Ingredientes (Checkboxes)
     renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', prod.grupo_ingredientes_nombre, prod.grupo_ingredientes_opciones, 'checkbox', 'grupo_ing');
-
-    // Grupo Salsas (Radio buttons)
     renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', prod.grupo_salsas_nombre, prod.grupo_salsas_opciones, 'radio', 'grupo_salsa');
 
     document.getElementById('productModal').classList.add('active');
 }
 
-// Renderiza los botones de monto rápido ($20, $30, $50, $100, Otro)
 function renderizarPillsMonto() {
     const pillsContainer = document.getElementById('modalAmountPills');
     if (!pillsContainer) return;
@@ -172,7 +166,6 @@ function renderizarPillsMonto() {
         pillsContainer.appendChild(pill);
     });
 
-    // Opción "Otro monto"
     const pillOtro = document.createElement('button');
     pillOtro.type = 'button';
     pillOtro.className = `amount-pill ${!montosFrecuentes.includes(montoSeleccionadoActual) ? 'active' : ''}`;
@@ -188,7 +181,6 @@ function renderizarPillsMonto() {
     };
     pillsContainer.appendChild(pillOtro);
 
-    // Evento de escritura libre en el input
     const inputCustom = document.getElementById('modalCustomAmount');
     inputCustom.oninput = () => {
         const val = parseFloat(inputCustom.value) || 0;
@@ -200,7 +192,6 @@ function renderizarPillsMonto() {
 function actualizarClasesPills() {
     const pills = document.querySelectorAll('.amount-pill');
     pills.forEach(p => p.classList.remove('active'));
-    // Vuelve a pintar el activo
     pills.forEach(p => {
         if (p.textContent === `$${montoSeleccionadoActual}` || (p.textContent.includes('Otro') && document.getElementById('modalCustomWrapper').style.display === 'flex')) {
             p.classList.add('active');
@@ -222,8 +213,33 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     groupEl.style.display = 'block';
     titleEl.textContent = nombreGrupo || 'Selecciona tus opciones';
 
-    const opciones = opcionesTexto.split(',').map(o => o.trim());
+    const opciones = opcionesTexto.split(',').map(o => o.trim()).filter(o => o.length > 0);
     containerEl.innerHTML = '';
+
+    // Buscador automático si hay más de 8 opciones
+    let searchInput = groupEl.querySelector('.modal-search-input');
+    if (opciones.length > 8) {
+        if (!searchInput) {
+            searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'modal-search-input';
+            searchInput.placeholder = '🔍 Buscar opción... (ej. Cheto, Takis, Papa)';
+            groupEl.insertBefore(searchInput, containerEl);
+        }
+        searchInput.value = '';
+        searchInput.style.display = 'block';
+
+        searchInput.oninput = (e) => {
+            const query = e.target.value.toLowerCase();
+            const chips = containerEl.querySelectorAll('.option-chip');
+            chips.forEach(chip => {
+                const text = chip.querySelector('span').textContent.toLowerCase();
+                chip.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        };
+    } else if (searchInput) {
+        searchInput.style.display = 'none';
+    }
 
     opciones.forEach((op, index) => {
         const label = document.createElement('label');
