@@ -1,11 +1,12 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega aquí tu URL de SheetDB
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
 let productoSeleccionado = null;
+let montoSeleccionadoActual = 20;
 let carrito = [];
 
 // ======================================================
@@ -25,8 +26,10 @@ async function cargarMenuDesdeSheetDB() {
         iniciarNavegacionScroll();
     } catch (error) {
         console.error("Error al cargar datos desde SheetDB:", error);
-        document.getElementById('loadingState').innerHTML = `
-            <p style="color: red;">⚠️ Ocurrió un error al cargar el menú. Por favor recarga la página.</p>
+        document.getElementById('menu-sections-container').innerHTML = `
+            <div class="loading-state">
+                <p style="color: #D32F2F; font-weight: 700;">⚠️ No se pudo cargar el menú en este momento. Por favor recarga la página.</p>
+            </div>
         `;
     }
 }
@@ -63,7 +66,7 @@ function renderizarMenu(productos) {
         primeraCat = false;
     });
 
-    // 3. Renderizar Secciones de Productos
+    // 3. Renderizar Secciones de Productos en Cuadrícula
     sectionsContainer.innerHTML = '';
     Object.values(categorias).forEach(cat => {
         const section = document.createElement('section');
@@ -75,8 +78,9 @@ function renderizarMenu(productos) {
             const estaDisponible = String(prod.disponible).toUpperCase() === 'SI';
             const precioDisplay = prod.venta_por_monto === 'SI' ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
+            // Toda la tarjeta lleva el evento onclick para abrir el modal
             cardsHTML += `
-                <div class="card ${!estaDisponible ? 'agotado' : ''}">
+                <div class="card ${!estaDisponible ? 'agotado' : ''}" onclick="manejarClicTarjeta(${prod.id}, ${estaDisponible})">
                     ${!estaDisponible ? '<div class="badge-agotado">Agotado</div>' : ''}
                     <div class="card-img-placeholder" style="background-image: url('${prod.imagen || 'images/exhibidor_botanas.jpg'}');"></div>
                     <div class="card-body">
@@ -84,7 +88,7 @@ function renderizarMenu(productos) {
                         <p class="card-desc">${prod.descripcion || ''}</p>
                         <div class="card-footer">
                             <span class="price">${precioDisplay}</span>
-                            <button class="btn-add ${!estaDisponible ? 'disabled' : ''}" onclick="abrirModalPersonalizacion(${prod.id})">
+                            <button class="btn-add ${!estaDisponible ? 'disabled' : ''}">
                                 <i class="fa-solid fa-cart-plus"></i> ${estaDisponible ? 'Pedir' : 'Agotado'}
                             </button>
                         </div>
@@ -96,6 +100,7 @@ function renderizarMenu(productos) {
         section.innerHTML = `
             <div class="section-header">
                 <h2>${cat.emoji} <span class="section-title ${cat.color}">${cat.nombre}</span></h2>
+                <p>Elige tu botana favorita y personalízala a tu gusto.</p>
             </div>
             <div class="grid-container">
                 ${cardsHTML}
@@ -103,6 +108,11 @@ function renderizarMenu(productos) {
         `;
         sectionsContainer.appendChild(section);
     });
+}
+
+function manejarClicTarjeta(productoId, estaDisponible) {
+    if (!estaDisponible) return;
+    abrirModalPersonalizacion(productoId);
 }
 
 // ======================================================
@@ -116,13 +126,14 @@ function abrirModalPersonalizacion(productoId) {
 
     document.getElementById('modalProductTitle').textContent = prod.nombre;
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
-    document.getElementById('modalProductPrice').textContent = prod.venta_por_monto === 'SI' ? 'Monto Libre' : `$${parseFloat(prod.precio).toFixed(2)}`;
+    document.getElementById('modalProductPrice').textContent = prod.venta_por_monto === 'SI' ? '$20.00' : `$${parseFloat(prod.precio).toFixed(2)}`;
 
-    // Manejo de Venta por Monto
+    // Manejo de Venta por Monto con Pills Rápidas
     const amountGroup = document.getElementById('modalAmountGroup');
     if (prod.venta_por_monto === 'SI') {
         amountGroup.style.display = 'block';
-        document.getElementById('modalCustomAmount').value = prod.precio || 20;
+        montoSeleccionadoActual = parseFloat(prod.precio) || 20;
+        renderizarPillsMonto();
     } else {
         amountGroup.style.display = 'none';
     }
@@ -137,6 +148,64 @@ function abrirModalPersonalizacion(productoId) {
     renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', prod.grupo_salsas_nombre, prod.grupo_salsas_opciones, 'radio', 'grupo_salsa');
 
     document.getElementById('productModal').classList.add('active');
+}
+
+// Renderiza los botones de monto rápido ($20, $30, $50, $100, Otro)
+function renderizarPillsMonto() {
+    const pillsContainer = document.getElementById('modalAmountPills');
+    if (!pillsContainer) return;
+
+    const montosFrecuentes = [20, 30, 50, 100];
+    pillsContainer.innerHTML = '';
+
+    montosFrecuentes.forEach(monto => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = `amount-pill ${montoSeleccionadoActual === monto ? 'active' : ''}`;
+        pill.textContent = `$${monto}`;
+        pill.onclick = () => {
+            montoSeleccionadoActual = monto;
+            document.getElementById('modalCustomWrapper').style.display = 'none';
+            document.getElementById('modalProductPrice').textContent = `$${monto.toFixed(2)}`;
+            actualizarClasesPills();
+        };
+        pillsContainer.appendChild(pill);
+    });
+
+    // Opción "Otro monto"
+    const pillOtro = document.createElement('button');
+    pillOtro.type = 'button';
+    pillOtro.className = `amount-pill ${!montosFrecuentes.includes(montoSeleccionadoActual) ? 'active' : ''}`;
+    pillOtro.textContent = 'Otro ✏️';
+    pillOtro.onclick = () => {
+        const customWrapper = document.getElementById('modalCustomWrapper');
+        customWrapper.style.display = 'flex';
+        const inputCustom = document.getElementById('modalCustomAmount');
+        inputCustom.focus();
+        montoSeleccionadoActual = parseFloat(inputCustom.value) || 20;
+        document.getElementById('modalProductPrice').textContent = `$${montoSeleccionadoActual.toFixed(2)}`;
+        actualizarClasesPills();
+    };
+    pillsContainer.appendChild(pillOtro);
+
+    // Evento de escritura libre en el input
+    const inputCustom = document.getElementById('modalCustomAmount');
+    inputCustom.oninput = () => {
+        const val = parseFloat(inputCustom.value) || 0;
+        montoSeleccionadoActual = val;
+        document.getElementById('modalProductPrice').textContent = `$${val.toFixed(2)}`;
+    };
+}
+
+function actualizarClasesPills() {
+    const pills = document.querySelectorAll('.amount-pill');
+    pills.forEach(p => p.classList.remove('active'));
+    // Vuelve a pintar el activo
+    pills.forEach(p => {
+        if (p.textContent === `$${montoSeleccionadoActual}` || (p.textContent.includes('Otro') && document.getElementById('modalCustomWrapper').style.display === 'flex')) {
+            p.classList.add('active');
+        }
+    });
 }
 
 function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opcionesTexto, inputType, inputName) {
@@ -178,22 +247,17 @@ function confirmarAgregarAlCarrito() {
     let precioFinal = parseFloat(productoSeleccionado.precio || 0);
 
     if (productoSeleccionado.venta_por_monto === 'SI') {
-        const montoInput = parseFloat(document.getElementById('modalCustomAmount').value);
-        if (isNaN(montoInput) || montoInput <= 0) {
-            alert("Por favor ingresa un monto válido.");
+        if (isNaN(montoSeleccionadoActual) || montoSeleccionadoActual <= 0) {
+            alert("Por favor ingresa o selecciona un monto válido.");
             return;
         }
-        precioFinal = montoInput;
+        precioFinal = montoSeleccionadoActual;
     }
 
-    // Obtener elecciones
     const baseSeleccionada = document.querySelector('input[name="grupo_base"]:checked')?.value || '';
-    
     const ingredientesSeleccionados = Array.from(document.querySelectorAll('input[name="grupo_ing"]:checked')).map(cb => cb.value);
-    
     const salsaSeleccionada = document.querySelector('input[name="grupo_salsa"]:checked')?.value || '';
 
-    // Crear ítem de pedido personalizado
     carrito.push({
         nombre: productoSeleccionado.nombre,
         precio: precioFinal,
@@ -224,7 +288,7 @@ function actualizarBarraCarrito() {
 
 function enviarPedidoWhatsApp() {
     if (carrito.length === 0) {
-        alert("¡Tu pedido está vacío! Haz clic en 'Pedir' en cualquier botana para agregarla.");
+        alert("¡Tu pedido está vacío! Toca cualquier botana para prepararla y agregarla.");
         return;
     }
 
