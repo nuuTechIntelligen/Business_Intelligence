@@ -87,12 +87,13 @@
             <form id="modalForm" onsubmit="event.preventDefault(); confirmarAgregarAlCarrito();">
                 <!-- Contenedores para grupos de opciones dinámicas -->
                 <div id="modalAmountGroup" class="modal-group" style="display: none;">
-                    <label class="modal-group-title">💵 ¿De cuánto quieres tu botana en pesos?</label>
-                    <div class="amount-input-wrapper">
-                        <span>$</span>
-                        <input type="number" id="modalCustomAmount" min="10" step="5" value="20" class="input-amount">
-                    </div>
-                </div>
+    <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
+    <div class="amount-pills-grid" id="modalAmountPills"></div>
+    <div class="amount-input-wrapper" id="modalCustomWrapper">
+        <span>$</span>
+        <input type="number" id="modalCustomAmount" min="10" step="5" value="20" class="input-amount" placeholder="0.00">
+    </div>
+</div>
 
                 <div id="modalBaseGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title" id="modalBaseTitle">Selecciona tu Base</label>
