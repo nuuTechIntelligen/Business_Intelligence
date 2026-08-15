@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI"; // <-- Pega aquí tu URL de SheetDB
+const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega aquí tu URL de SheetDB
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
