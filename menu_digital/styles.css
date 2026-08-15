@@ -1,9 +1,7 @@
 /* ====================================================== */
 /* 1. CONFIGURACIÓN GLOBAL Y VARIABLES DE DISEÑO (CSS RESET)*/
-/* Define colores de marca, fuentes y comportamientos base*/
 /* ====================================================== */
 :root {
-    /* Paleta extraída del logo oficial "La Engordadera" */
     --logo-yellow-border: #FFE800;
     --logo-blue: #00A8E8;
     --logo-orange: #F36C3D;
@@ -14,7 +12,6 @@
     --logo-pink: #E91E63;
     --logo-dark-border: #111111;
 
-    /* Colores funcionales */
     --primary-yellow: #FFC107;
     --primary-orange: var(--logo-pink); 
     --primary-red: #D32F2F;
@@ -120,7 +117,7 @@ body {
 }
 
 /* ====================================================== */
-/* 3. BARRA DE NAVEGACIÓN FULL WIDTH (ANCHO COMPLETO 100%)*/
+/* 3. BARRA DE NAVEGACIÓN FULL WIDTH                      */
 /* ====================================================== */
 .sticky-nav {
     position: sticky;
@@ -180,7 +177,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* Clases de color por sección */
+/* Clases de color */
 .color-green  { color: var(--logo-green); }
 .color-orange { color: var(--logo-orange); }
 .color-blue   { color: var(--logo-blue); }
@@ -220,14 +217,12 @@ body {
     color: var(--text-muted);
 }
 
-/* 2 Columnas automáticas en Celulares */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
-/* TARJETA TOTALMENTE INTERACTIVA / CLIQUEABLE */
 .card {
     background: var(--card-bg);
     border-radius: var(--border-radius);
@@ -258,7 +253,6 @@ body {
     position: relative;
 }
 
-/* Estado Agotado */
 .card.agotado {
     opacity: 0.65;
     filter: grayscale(0.85);
@@ -373,7 +367,7 @@ body {
 }
 
 /* ====================================================== */
-/* 6. MODAL FLOTANTE Y SELECTOR DE MONTO RÁPIDO           */
+/* 6. MODAL FLOTANTE Y SELECTOR ESTRUCTURADO              */
 /* ====================================================== */
 .modal-overlay {
     position: fixed;
@@ -466,7 +460,24 @@ body {
     color: #222;
 }
 
-/* BOTONES DE SELECCIÓN DE MONTO RÁPIDO */
+/* Buscador de opciones largas */
+.modal-search-input {
+    width: 100%;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-family: var(--font-body);
+    margin-bottom: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.modal-search-input:focus {
+    border-color: var(--primary-orange);
+}
+
+/* Selector de monto en pesos */
 .amount-pills-grid {
     display: flex;
     flex-wrap: wrap;
@@ -499,7 +510,7 @@ body {
 }
 
 .amount-input-wrapper {
-    display: none; /* Se muestra si seleccionan "Otro" */
+    display: none;
     align-items: center;
     background: #F3F4F6;
     border: 2px solid #DDD;
@@ -527,33 +538,90 @@ body {
     outline: none;
 }
 
+/* Cuadrícula de 2 columnas simétricas con scroll */
 .options-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+    padding-bottom: 4px;
 }
 
+.options-grid::-webkit-scrollbar {
+    width: 5px;
+}
+.options-grid::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 10px;
+}
+
+/* Tarjeta táctil moderna */
 .option-chip {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: #F3F4F6;
+    justify-content: flex-start;
+    gap: 8px;
+    background: #FFFFFF;
     border: 1.5px solid #E5E7EB;
-    border-radius: 20px;
-    padding: 5px 11px;
+    border-radius: 12px;
+    padding: 8px 10px;
     font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     user-select: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 
 .option-chip input {
-    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #CBD5E1;
+    border-radius: 50%;
+    outline: none;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.option-chip input[type="checkbox"] {
+    border-radius: 4px;
 }
 
 .option-chip:hover {
     border-color: var(--primary-orange);
+    background: #FFF9FA;
+}
+
+.option-chip:has(input:checked) {
+    border-color: var(--primary-orange);
     background: #FFF0F5;
+    font-weight: 700;
+    color: #111111;
+    box-shadow: 0 2px 8px rgba(233, 30, 99, 0.15);
+}
+
+.option-chip input[type="radio"]:checked {
+    border-color: var(--primary-orange);
+    background-color: var(--primary-orange);
+    box-shadow: inset 0 0 0 3px #FFFFFF;
+}
+
+.option-chip input[type="checkbox"]:checked {
+    border-color: var(--primary-orange);
+    background-color: var(--primary-orange);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    background-size: 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.option-chip span {
+    white-space: normal;
+    line-height: 1.2;
 }
 
 .modal-actions {
