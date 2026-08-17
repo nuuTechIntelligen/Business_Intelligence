@@ -1329,16 +1329,39 @@ async function sendToAppsScript(payload) {
 }
 
 async function cargarDatosDesdeAPI() {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec") return;
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") return;
   try {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getDashboardData`);
     const data = await res.json();
+    
     if (data.vacantes && data.vacantes.length > 0) {
-      DB = data;
-      poblarSelects();
-      renderizarApp();
+      // Mapear vacantes asegurando compatibilidad con el pipeline y formatos numéricos
+      DB.vacantes = data.vacantes.map(v => {
+        let pipeline = { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
+        if (v.pipeline) {
+          try {
+            pipeline = typeof v.pipeline === "string" ? JSON.parse(v.pipeline) : v.pipeline;
+          } catch(e) {}
+        }
+        return {
+          ...v,
+          fee_pactado_total: Number(v.fee_pactado_total || 0),
+          monto_adelanto: Number(v.monto_adelanto || 0),
+          dias_garantia_pactados: Number(v.dias_garantia_pactados || 30),
+          pipeline: pipeline
+        };
+      });
     }
+
+    if (data.clientes && data.clientes.length > 0) DB.clientes = data.clientes;
+    if (data.servicios && data.servicios.length > 0) DB.servicios = data.servicios;
+    if (data.gastos) DB.gastos = data.gastos;
+    if (data.horas) DB.horas = data.horas;
+
+    poblarSelects();
+    renderizarApp();
+    console.log("✓ Datos sincronizados con Google Sheets:", DB.vacantes.length, "vacantes cargadas.");
   } catch (err) {
-    console.error("Error al obtener datos:", err);
+    console.error("Error al obtener datos desde Google Sheets:", err);
   }
 }
