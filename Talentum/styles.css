@@ -1,0 +1,33 @@
+/* Google Fonts & Material Symbols */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined.fill-1 {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.node-bg {
+    background-image: radial-gradient(circle at 2px 2px, #ffd700 1px, transparent 0);
+    background-size: 40px 40px;
+    opacity: 0.05;
+}
+
+.hero-gradient {
+    background: linear-gradient(135deg, #191c1d 0%, #2e3132 100%);
+}
+
+.glass-nav {
+    background: rgba(248, 249, 250, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Accesibilidad y transiciones */
+:focus-visible {
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
+}
