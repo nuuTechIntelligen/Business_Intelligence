@@ -273,8 +273,8 @@ function toggleFabMenu() {
 }
 
 function openModal(modalId) {
-  // Ocultar cualquier modal previo
-  document.querySelectorAll(".bottom-sheet").forEach(m => m.classList.remove("modal-active"));
+  // Limpiar cualquier modal previo
+  document.querySelectorAll(".bottom-sheet").forEach(m => m.classList.remove("modal-open"));
 
   activeModalSheet = document.getElementById(modalId);
   const backdrop = document.getElementById("modalBackdrop");
@@ -282,15 +282,15 @@ function openModal(modalId) {
   if (!activeModalSheet) return;
   
   backdrop.classList.remove("hidden");
-  requestAnimationFrame(() => {
+  setTimeout(() => {
     backdrop.classList.remove("opacity-0");
-    activeModalSheet.classList.add("modal-active");
-  });
+    activeModalSheet.classList.add("modal-open");
+  }, 10);
 }
 
 function closeModal() {
   if (activeModalSheet) {
-    activeModalSheet.classList.remove("modal-active");
+    activeModalSheet.classList.remove("modal-open");
     const backdrop = document.getElementById("modalBackdrop");
     backdrop.classList.add("opacity-0");
     setTimeout(() => {
