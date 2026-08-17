@@ -29,7 +29,7 @@ let DB = {
       candidato_contratado: "",
       dias_garantia_pactados: 60,
       garantia_aplicada: "No",
-      descripcion_perfil: "Perfil Senior con React, Node.js y Cloud."
+      descripcion_perfil: "• Sueldo: $35,000 netos\n• Stack: React, Node.js, AWS\n• Horario: L-V 9:00 a 18:00\n• Prestaciones superiores a las de ley."
     },
     {
       id_vacante: "VAC-102",
@@ -45,7 +45,7 @@ let DB = {
       candidato_contratado: "Roberto Sánchez",
       dias_garantia_pactados: 30,
       garantia_aplicada: "No",
-      descripcion_perfil: "Experiencia en inventarios y manejo de ERP."
+      descripcion_perfil: "• Sueldo: $18,000 brutos\n• Manejo indispensable de ERP SAP\n• Experiencia de 3 años con personal operativo a cargo."
     }
   ],
   gastos: [
@@ -83,9 +83,19 @@ function setupEventListeners() {
   document.getElementById("btnOpenModalVacante").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetVacante"); });
   document.getElementById("btnOpenModalHora").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetHora"); });
 
-  // Cerrar modales
+  // Cerrar modales desde backdrop o botones de cierre
   document.getElementById("modalBackdrop").addEventListener("click", closeModal);
-  document.querySelectorAll(".btn-close-modal").forEach(b => b.addEventListener("click", closeModal));
+  document.querySelectorAll(".btn-close-modal").forEach(b => {
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeModal();
+    });
+  });
+
+  // Cerrar con Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
 
   // Toggles de Nuevo Cliente y Nuevo Servicio
   document.getElementById("btnToggleNuevoCliente").addEventListener("click", () => {
@@ -104,14 +114,29 @@ function setupEventListeners() {
   document.getElementById("formVacante").addEventListener("submit", guardarVacante);
   document.getElementById("formContratar").addEventListener("submit", procesarContratacion);
 
-  // Acciones en Expediente
-  document.getElementById("btnExpedienteAgregarGasto").addEventListener("click", () => {
-    if (vacanteSeleccionadaExpediente) {
-      document.getElementById("modalGastoVacante").value = vacanteSeleccionadaExpediente.id_vacante;
-      openModal("modalSheetGasto");
-    }
+  // Gasto directo dentro del Expediente
+  document.getElementById("btnToggleGastoInline").addEventListener("click", () => {
+    document.getElementById("formGastoInline").classList.toggle("hidden");
   });
+  document.getElementById("btnCancelGastoInline").addEventListener("click", () => {
+    document.getElementById("formGastoInline").classList.add("hidden");
+  });
+  document.getElementById("formGastoInline").addEventListener("submit", guardarGastoInlineExpediente);
 
+  // Acordeón Perfil de Puesto
+  document.getElementById("btnTogglePerfilPuesto").addEventListener("click", togglePerfilPuesto);
+
+  // Observaciones inline
+  document.getElementById("btnEditarObservaciones").addEventListener("click", () => {
+    document.getElementById("inputObservaciones").value = vacanteSeleccionadaExpediente ? (vacanteSeleccionadaExpediente.descripcion_perfil || "") : "";
+    document.getElementById("boxEditObservaciones").classList.remove("hidden");
+  });
+  document.getElementById("btnCancelarObs").addEventListener("click", () => {
+    document.getElementById("boxEditObservaciones").classList.add("hidden");
+  });
+  document.getElementById("btnGuardarObs").addEventListener("click", guardarObservacionesInline);
+
+  // Acciones en Expediente
   document.getElementById("btnExpFinalizar").addEventListener("click", () => {
     if (vacanteSeleccionadaExpediente) {
       abrirModalContratar(vacanteSeleccionadaExpediente);
@@ -126,13 +151,7 @@ function setupEventListeners() {
     }
   });
 
-  document.getElementById("btnVerPerfilPuesto").addEventListener("click", () => {
-    if (vacanteSeleccionadaExpediente) {
-      alert(`Perfil de Puesto:\n\n${vacanteSeleccionadaExpediente.descripcion_perfil || 'Sin descripción detallada.'}`);
-    }
-  });
-
-  // Filtros
+  // Filtros rápidos
   document.getElementById("filterChipsContainer").addEventListener("click", (e) => {
     const btn = e.target.closest(".chip-filter");
     if (!btn) return;
@@ -201,7 +220,11 @@ function toggleFabMenu() {
 }
 
 function openModal(modalId) {
-  closeModal();
+  // Si ya hay un modal abierto diferente al que se abrirá, lo cerramos
+  if (activeModalSheet && activeModalSheet.id !== modalId) {
+    activeModalSheet.classList.add("translate-y-full");
+  }
+  
   activeModalSheet = document.getElementById(modalId);
   const backdrop = document.getElementById("modalBackdrop");
   
@@ -245,7 +268,6 @@ function actualizarValoresServicio() {
   }
 }
 
-// GUARDAR NUEVO SERVICIO EN CATÁLOGO
 function guardarNuevoServicio() {
   const nombre = document.getElementById("nuevoServicioNombre").value.trim();
   const dias = parseInt(document.getElementById("nuevoServicioGarantia").value) || 30;
@@ -457,6 +479,12 @@ function abrirExpediente(vacante) {
   document.getElementById("expCandidato").textContent = vacante.candidato_contratado || "No asignado aún";
   document.getElementById("expTipoServicio").textContent = servicio.nombre_servicio;
 
+  // Reset del acordeón de perfil de puesto
+  const boxPerfil = document.getElementById("boxDetallePerfilPuesto");
+  boxPerfil.classList.add("hidden");
+  boxPerfil.textContent = vacante.descripcion_perfil || "Sin descripción detallada del puesto.";
+  document.getElementById("btnPerfilPuestoText").textContent = "Ver Perfil de Puesto";
+
   // Panel Garantía
   document.getElementById("expGarantiaPactada").textContent = `${vacante.dias_garantia_pactados} días`;
   
@@ -471,12 +499,31 @@ function abrirExpediente(vacante) {
 
   const infoGarantia = calcularDiasGarantia(vacante);
   document.getElementById("expGarantiaEstatus").textContent = infoGarantia.texto;
+  document.getElementById("expObservaciones").textContent = vacante.descripcion_perfil ? (vacante.descripcion_perfil.slice(0, 100) + "...") : "Sin observaciones registradas.";
+  document.getElementById("boxEditObservaciones").classList.add("hidden");
 
   // Render Historial de Gastos
+  renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal);
+
+  // Ocultar formulario inline de gasto al abrir
+  document.getElementById("formGastoInline").classList.add("hidden");
+
+  // Botón finalizar visibilidad
+  const btnFinalizar = document.getElementById("btnExpFinalizar");
+  if (vacante.estatus_vacante === "Contratado") {
+    btnFinalizar.classList.add("hidden");
+  } else {
+    btnFinalizar.classList.remove("hidden");
+  }
+
+  openModal("modalExpediente");
+}
+
+function renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal) {
   const tableGastos = document.getElementById("expHistorialGastosTable");
   tableGastos.innerHTML = "";
 
-  if (gastosVacante.length === 0 && horasVacante.length === 0) {
+  if (gastosVacante.length === 0 && costoHoras === 0) {
     tableGastos.innerHTML = `<tr><td colspan="2" class="py-3 text-center text-slate-500 italic">No hay gastos registrados aún</td></tr>`;
   } else {
     gastosVacante.forEach(g => {
@@ -499,16 +546,70 @@ function abrirExpediente(vacante) {
   }
 
   document.getElementById("expHistorialTotalMonto").textContent = `$${inversionTotal.toLocaleString()}`;
+}
 
-  // Botón finalizar visibilidad
-  const btnFinalizar = document.getElementById("btnExpFinalizar");
-  if (vacante.estatus_vacante === "Contratado") {
-    btnFinalizar.classList.add("hidden");
+// GUARDAR GASTO DIRECTO INLINE EN LA MODAL DE EXPEDIENTE
+function guardarGastoInlineExpediente(e) {
+  e.preventDefault();
+  if (!vacanteSeleccionadaExpediente) return;
+
+  const categoria = document.getElementById("inlineGastoCategoria").value;
+  const monto = parseFloat(document.getElementById("inlineGastoMonto").value);
+
+  if (isNaN(monto) || monto <= 0) return;
+
+  const nuevoGasto = {
+    id_vacante: vacanteSeleccionadaExpediente.id_vacante,
+    categoria,
+    monto,
+    fecha_gasto: new Date().toISOString().split("T")[0]
+  };
+
+  DB.gastos.push(nuevoGasto);
+  document.getElementById("inlineGastoMonto").value = "";
+  document.getElementById("formGastoInline").classList.add("hidden");
+
+  // Refrescar expediente actual sin cerrarlo
+  abrirExpediente(vacanteSeleccionadaExpediente);
+  renderizarApp();
+
+  sendToAppsScript({
+    action: "create",
+    targetSheet: "GASTOS_INVERSION",
+    payload: [`GST-${Date.now()}`, vacanteSeleccionadaExpediente.id_vacante, categoria, monto, nuevoGasto.fecha_gasto]
+  });
+}
+
+function togglePerfilPuesto() {
+  const box = document.getElementById("boxDetallePerfilPuesto");
+  const btnText = document.getElementById("btnPerfilPuestoText");
+  const isHidden = box.classList.contains("hidden");
+
+  if (isHidden) {
+    box.classList.remove("hidden");
+    btnText.textContent = "Ocultar Perfil de Puesto";
   } else {
-    btnFinalizar.classList.remove("hidden");
+    box.classList.add("hidden");
+    btnText.textContent = "Ver Perfil de Puesto";
   }
+}
 
-  openModal("modalExpediente");
+function guardarObservacionesInline() {
+  if (!vacanteSeleccionadaExpediente) return;
+  const texto = document.getElementById("inputObservaciones").value.trim();
+  
+  vacanteSeleccionadaExpediente.descripcion_perfil = texto;
+  document.getElementById("expObservaciones").textContent = texto || "Sin observaciones registradas.";
+  document.getElementById("boxDetallePerfilPuesto").textContent = texto || "Sin descripción detallada del puesto.";
+  document.getElementById("boxEditObservaciones").classList.add("hidden");
+  renderizarApp();
+
+  sendToAppsScript({
+    action: "updateObservaciones",
+    targetSheet: "VACANTES",
+    id_vacante: vacanteSeleccionadaExpediente.id_vacante,
+    observaciones: texto
+  });
 }
 
 // ANALÍTICAS
@@ -632,7 +733,7 @@ async function procesarContratacion(e) {
   e.preventDefault();
   const idVacante = document.getElementById("modalContratarIdVacante").value;
   const fecha = document.getElementById("modalContratarFecha").value;
-  const candidato = document.getElementById("modalContratarNombreCandidato").value;
+  const candidato = document.getElementById("modalContratarNombreCandidato").value.trim();
 
   const vacante = DB.vacantes.find(v => String(v.id_vacante) === String(idVacante));
   if (vacante) {
@@ -648,7 +749,8 @@ async function procesarContratacion(e) {
     action: "updateContratacion",
     targetSheet: "VACANTES",
     id_vacante: idVacante,
-    fecha_contratacion: fecha
+    fecha_contratacion: fecha,
+    candidato_contratado: candidato
   });
 }
 
@@ -718,6 +820,8 @@ async function guardarVacante(e) {
   }
 
   const idVacante = `VAC-${Date.now().toString().slice(-4)}`;
+  const perfilTexto = document.getElementById("nuevaVacantePerfil").value.trim();
+
   const nuevaVacante = {
     id_vacante: idVacante,
     id_cliente: idCliente,
@@ -733,7 +837,7 @@ async function guardarVacante(e) {
     candidato_contratado: "",
     dias_garantia_pactados: parseInt(document.getElementById("nuevaVacanteGarantia").value),
     garantia_aplicada: "No",
-    descripcion_perfil: ""
+    descripcion_perfil: perfilTexto
   };
 
   DB.vacantes.unshift(nuevaVacante);
@@ -762,7 +866,7 @@ async function guardarVacante(e) {
       "",
       "",
       "No",
-      ""
+      nuevaVacante.descripcion_perfil
     ]
   });
 }
