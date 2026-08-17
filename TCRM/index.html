@@ -116,6 +116,22 @@
       </div>
     </div>
 
+    <!-- MÉTRICAS GLOBALES DEL PIPELINE DE RECLUTAMIENTO -->
+    <div class="grid grid-cols-3 gap-2">
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm text-center">
+        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Postulados Totales</span>
+        <p id="kpiTotalPostulados" class="text-base font-black text-indigo-600 mt-0.5">0</p>
+      </div>
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm text-center">
+        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Entrevistados</span>
+        <p id="kpiTotalEntrevistas" class="text-base font-black text-amber-600 mt-0.5">0</p>
+      </div>
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm text-center">
+        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Ternas Presentadas</span>
+        <p id="kpiTotalTernas" class="text-base font-black text-purple-600 mt-0.5">0</p>
+      </div>
+    </div>
+
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center gap-1.5 text-indigo-600 mb-1">
@@ -249,9 +265,29 @@
             <i class="ph ph-funnel font-bold text-sm"></i>
             <span>Embudo de Selección (Pipeline)</span>
           </div>
-          <span class="text-[10px] text-slate-400">Progreso de Candidatos</span>
+          <button id="btnEnviarReporteWhatsApp" class="px-2.5 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 rounded-lg text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1 transition-all">
+            <i class="ph ph-whatsapp-logo text-xs"></i> Enviar Reporte a Cliente
+          </button>
         </div>
+
+        <!-- BOTONES DEL PIPELINE -->
         <div id="pipelineContainer" class="grid grid-cols-5 gap-1.5 mt-3 text-center"></div>
+
+        <!-- RATIOS DE EFICIENCIA DE RECLUTAMIENTO -->
+        <div class="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-slate-800/80 text-center">
+          <div class="bg-[#0d131f] p-2 rounded-xl border border-slate-800">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Calificación</span>
+            <span id="ratioCalificacion" class="text-xs font-black text-indigo-400">0%</span>
+          </div>
+          <div class="bg-[#0d131f] p-2 rounded-xl border border-slate-800">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Efectividad Terna</span>
+            <span id="ratioTerna" class="text-xs font-black text-purple-400">0%</span>
+          </div>
+          <div class="bg-[#0d131f] p-2 rounded-xl border border-slate-800">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Costo / Entrevista</span>
+            <span id="ratioCostoEntrevista" class="text-xs font-black text-rose-400">$0</span>
+          </div>
+        </div>
       </div>
 
       <!-- PANELES DE INFORMACIÓN Y COBRANZA -->
