@@ -31,7 +31,7 @@
       </button>
     </div>
 
-    <!-- BUSCADOR (Solo visible en pestaña Vacantes) -->
+    <!-- BUSCADOR -->
     <div id="searchSection" class="mt-3 relative">
       <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-base"></i>
       <input 
@@ -42,7 +42,7 @@
       />
     </div>
 
-    <!-- FILTROS RÁPIDOS (Solo visible en pestaña Vacantes) -->
+    <!-- FILTROS RÁPIDOS -->
     <div class="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar pb-0.5" id="filterChipsContainer">
       <button data-filter="En Proceso" class="chip-filter px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-indigo-600 text-white shadow-sm transition-all">
         🔵 En Proceso
@@ -61,7 +61,6 @@
 
   <!-- VISTA 1: VACANTES / PROCESOS -->
   <section id="viewVacantes" class="tab-view block">
-    <!-- RESUMEN SUPERIOR RÁPIDO -->
     <section class="px-4 mt-3">
       <div class="grid grid-cols-2 gap-2.5">
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
@@ -81,7 +80,6 @@
 
   <!-- VISTA 2: FINANZAS Y ANALÍTICAS -->
   <section id="viewAnalytics" class="tab-view hidden px-4 mt-4 space-y-4">
-    <!-- CARD RESUMEN NETO -->
     <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden">
       <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
       <span class="text-xs font-semibold tracking-wider uppercase text-indigo-300">Utilidad Neta Real Acumulada</span>
@@ -106,7 +104,6 @@
       </div>
     </div>
 
-    <!-- EFICIENCIA DE PAUTA Y RENDIMIENTO -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center gap-1.5 text-indigo-600 mb-1">
@@ -123,24 +120,18 @@
           <span class="text-xs font-bold">Total Horas</span>
         </div>
         <p id="kpiHorasTotales" class="text-xl font-black text-slate-900 mt-1">0 hrs</p>
-        <span class="text-[10px] text-slate-400 font-medium">Invertidas en reclutamiento</span>
+        <span class="text-[10px] text-slate-400 font-medium">Invertidas en procesos</span>
       </div>
     </div>
 
-    <!-- DISTRIBUCIÓN DE GASTOS DIRECTOS -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Distribución de Gastos e Inversión</h3>
-      <div id="breakdownGastos" class="space-y-2.5">
-        <!-- Generado dinámicamente -->
-      </div>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Distribución de Gastos</h3>
+      <div id="breakdownGastos" class="space-y-2.5"></div>
     </div>
 
-    <!-- RENTABILIDAD POR CLIENTE -->
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
       <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Rentabilidad por Cliente</h3>
-      <div id="tablaRentabilidadClientes" class="space-y-3">
-        <!-- Generado dinámicamente -->
-      </div>
+      <div id="tablaRentabilidadClientes" class="space-y-3"></div>
     </div>
   </section>
 
@@ -174,7 +165,163 @@
   </nav>
 
   <!-- BACKDROP GENERAL -->
-  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL EXPEDIENTE COMPLETO (DARK LUXURY THEME) -->
+  <!-- ======================================================== -->
+  <div id="modalExpediente" class="fixed inset-0 md:inset-auto md:bottom-0 md:left-1/2 md:-translate-x-1/2 bg-[#0d131f] text-slate-100 z-50 transform translate-y-full bottom-sheet w-full max-w-xl mx-auto shadow-2xl border-t border-slate-800 flex flex-col h-[100dvh] md:h-[92vh] md:rounded-t-3xl overflow-hidden">
+    
+    <!-- CABECERA EXPEDIENTE -->
+    <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between bg-[#111827]">
+      <div>
+        <h2 id="expPuesto" class="text-base font-bold text-white tracking-wide">Desarrollador Fullstack</h2>
+        <p id="expSubtitulo" class="text-xs text-slate-400 mt-0.5">Empresa • Región</p>
+      </div>
+      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+        <i class="ph ph-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- CUERPO SCROLLEABLE EXPEDIENTE -->
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-4 no-scrollbar">
+      
+      <!-- 4 KPIS EN FILA -->
+      <div class="grid grid-cols-4 gap-2">
+        <div class="bg-[#151d30] border border-slate-800/80 p-2.5 rounded-2xl text-center">
+          <span id="expFee" class="text-xs sm:text-sm font-black text-amber-400 block">$0</span>
+          <span class="text-[9px] font-bold tracking-wider text-slate-400 uppercase">Fee Cobrado</span>
+        </div>
+        <div class="bg-[#151d30] border border-slate-800/80 p-2.5 rounded-2xl text-center">
+          <span id="expInversion" class="text-xs sm:text-sm font-black text-rose-400 block">$0</span>
+          <span class="text-[9px] font-bold tracking-wider text-slate-400 uppercase">Costo Inversión</span>
+        </div>
+        <div class="bg-[#151d30] border border-slate-800/80 p-2.5 rounded-2xl text-center">
+          <span id="expGanancia" class="text-xs sm:text-sm font-black text-emerald-400 block">$0</span>
+          <span class="text-[9px] font-bold tracking-wider text-slate-400 uppercase">Ganancia Neta</span>
+        </div>
+        <div class="bg-[#151d30] border border-slate-800/80 p-2.5 rounded-2xl text-center">
+          <span id="expDiasCierre" class="text-xs sm:text-sm font-black text-cyan-400 block">0 días</span>
+          <span class="text-[9px] font-bold tracking-wider text-slate-400 uppercase">Días Proceso</span>
+        </div>
+      </div>
+
+      <!-- DOS PANELES DE DETALLE -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- PANEL INFORMACIÓN DEL PROCESO -->
+        <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5 space-y-2.5">
+          <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold pb-1.5 border-b border-slate-800">
+            <i class="ph ph-info font-bold text-sm"></i>
+            <span>Información del Proceso</span>
+          </div>
+          
+          <div class="text-xs space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Estatus:</span>
+              <span id="expBadgeEstatus" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">En Proceso</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Fecha de Inicio:</span>
+              <span id="expFechaInicio" class="font-semibold text-slate-200">--</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Fecha Contratación:</span>
+              <span id="expFechaContratacion" class="font-semibold text-slate-200">En proceso</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Candidato Contratado:</span>
+              <span id="expCandidato" class="font-semibold text-cyan-400">No asignado aún</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Tipo de Servicio:</span>
+              <span id="expTipoServicio" class="font-semibold text-slate-200">Operativo</span>
+            </div>
+          </div>
+
+          <button id="btnVerPerfilPuesto" class="w-full mt-2 py-1.5 px-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 border border-amber-400/20 transition-all">
+            <i class="ph ph-file-text"></i> Ver Perfil de Puesto
+          </button>
+        </div>
+
+        <!-- PANEL GARANTÍA DEL SERVICIO -->
+        <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5 space-y-2.5">
+          <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold pb-1.5 border-b border-slate-800">
+            <i class="ph ph-shield-check font-bold text-sm"></i>
+            <span>Garantía del Servicio</span>
+          </div>
+
+          <div class="text-xs space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Tiempo Pactado:</span>
+              <span id="expGarantiaPactada" class="font-semibold text-slate-200">30 días</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Fecha Límite Garantía:</span>
+              <span id="expGarantiaLimite" class="font-semibold text-slate-200">N/A</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Estatus Garantía:</span>
+              <span id="expGarantiaEstatus" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">N/A</span>
+            </div>
+            <div class="pt-1">
+              <span class="text-slate-400 block mb-0.5">Observaciones:</span>
+              <p id="expObservaciones" class="text-[11px] text-slate-300 italic bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">Sin observaciones registradas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESGLOSE DE INVERSIÓN (HISTORIAL DE GASTOS) -->
+      <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
+            <i class="ph ph-receipt font-bold text-sm"></i>
+            <span>Desglose de Inversión (Historial)</span>
+          </div>
+          <button id="btnExpedienteAgregarGasto" class="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded-lg text-[10px] font-bold border border-indigo-500/30 flex items-center gap-1 transition-all">
+            <i class="ph ph-plus"></i> Cargar Gasto
+          </button>
+        </div>
+
+        <div class="mt-2 overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-800">
+                <th class="py-1.5">Concepto</th>
+                <th class="py-1.5 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody id="expHistorialGastosTable" class="divide-y divide-slate-800/60">
+              <!-- Render dinámico de filas -->
+            </tbody>
+            <tfoot>
+              <tr class="font-black text-slate-200 border-t border-slate-700">
+                <td class="pt-2 text-slate-400">Total Inversión</td>
+                <td id="expHistorialTotalMonto" class="pt-2 text-right text-rose-400">$0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BARRA INFERIOR DE ACCIONES -->
+    <div class="px-4 py-3 bg-[#111827] border-t border-slate-800 flex items-center justify-between gap-2">
+      <button id="btnExpEliminar" class="px-3 py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i class="ph ph-trash"></i> Eliminar
+      </button>
+
+      <div class="flex items-center gap-2">
+        <button id="btnExpFinalizar" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all">
+          <i class="ph ph-user-check-bold"></i> Finalizar Contratación
+        </button>
+        <button class="btn-close-modal px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL 1: REGISTRAR GASTO -->
   <div id="modalSheetGasto" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
@@ -193,7 +340,8 @@
           <label class="text-xs font-semibold text-slate-500">Categoría</label>
           <select id="modalGastoCategoria" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium">
             <option value="Facebook Ads">Facebook Ads</option>
-            <option value="LinkedIn">LinkedIn</option>
+            <option value="LinkedIn Promo">LinkedIn Promo</option>
+            <option value="Indeed Ads">Indeed Ads</option>
             <option value="Psicometría">Psicometría</option>
             <option value="Bolsas de Empleo">Bolsa de Empleo</option>
             <option value="Otros">Otros</option>
@@ -253,7 +401,7 @@
     </form>
   </div>
 
-  <!-- MODAL 3: NUEVA VACANTE / CLIENTE -->
+  <!-- MODAL 3: NUEVA VACANTE (CON ALTA DE CLIENTE Y SERVICIO) -->
   <div id="modalSheetVacante" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100 max-h-[90vh] overflow-y-auto">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
@@ -269,6 +417,7 @@
         </div>
       </div>
 
+      <!-- Sección condicional para nuevo cliente -->
       <div id="boxNuevoCliente" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">
         <span class="text-xs font-bold text-indigo-600">Datos de la Nueva Empresa</span>
         <input type="text" id="nuevoClienteNombre" placeholder="Razón Social / Nombre Comercial" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
@@ -283,26 +432,39 @@
         <input type="text" id="nuevaVacantePuesto" required placeholder="Ej. Gerente de Operaciones" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
       </div>
 
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Servicio Base</label>
-          <select id="modalVacanteServicio" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"></select>
+      <!-- Selector de Servicio + Botón para Crear Servicio -->
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Servicio de Catálogo</label>
+        <div class="flex gap-2 mt-1">
+          <select id="modalVacanteServicio" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"></select>
+          <button type="button" id="btnToggleNuevoServicio" class="px-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold border border-slate-200">+ Servicio</button>
         </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Días Garantía</label>
-          <input type="number" id="nuevaVacanteGarantia" required value="30" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+      </div>
+
+      <!-- Sección condicional para nuevo servicio -->
+      <div id="boxNuevoServicio" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">
+        <span class="text-xs font-bold text-indigo-600">Nuevo Servicio de Reclutamiento</span>
+        <input type="text" id="nuevoServicioNombre" placeholder="Nombre del Servicio (ej. Especializado)" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" id="nuevoServicioGarantia" placeholder="Días Garantía (ej. 45)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
+          <button type="button" id="btnGuardarNuevoServicio" class="bg-indigo-600 text-white rounded-lg text-xs font-bold py-2">Agregar al Catálogo</button>
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2">
         <div>
+          <label class="text-xs font-semibold text-slate-500">Días Garantía Pactados</label>
+          <input type="number" id="nuevaVacanteGarantia" required value="30" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+        </div>
+        <div>
           <label class="text-xs font-semibold text-slate-500">Fee Total Pactado ($)</label>
           <input type="number" id="nuevaVacanteFee" required placeholder="25000" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
         </div>
-        <div>
-          <label class="text-xs font-semibold text-slate-500">Monto Anticipo ($)</label>
-          <input type="number" id="nuevaVacanteAnticipo" required placeholder="12500" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
-        </div>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Monto Anticipo / Adelanto ($)</label>
+        <input type="number" id="nuevaVacanteAnticipo" required placeholder="12500" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
       </div>
 
       <button type="submit" class="mt-2 w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-md shadow-indigo-600/20 active:scale-98 transition-transform">
@@ -325,6 +487,16 @@
     <form id="formContratar" class="flex flex-col gap-3">
       <input type="hidden" id="modalContratarIdVacante" />
       
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Nombre del Candidato Seleccionado</label>
+        <input 
+          type="text" 
+          id="modalContratarNombreCandidato" 
+          placeholder="Ej. Juan Pérez" 
+          class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"
+        />
+      </div>
+
       <div>
         <label class="text-xs font-semibold text-slate-500">Fecha de Ingreso / Contratación</label>
         <input 
