@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Talentum Consultoría | Especialistas en Recursos Humanos</title>
+    <title>Talentum Consultoría | Especialistas en Capital Humano</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -106,43 +106,49 @@
                 <span class="hidden md:block font-display-lg text-headline-lg text-on-background">Talentum Consultoría</span>
             </a>
             <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-8">
+            <div class="hidden lg:flex items-center gap-7">
                 <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#nosotros">Nosotros</a>
+                <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#metodo">El Método</a>
+                <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#horeca">HORECA</a>
                 <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#servicios">Servicios</a>
                 <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#testimonios">Testimonios</a>
-                <button data-open-modal class="bg-on-background text-primary-container px-6 py-2 rounded-lg font-label-md text-label-md uppercase tracking-wider hover:scale-95 transition-transform active:scale-90 cursor-pointer">Agendar Cita</button>
+                <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#faq">FAQ</a>
+                <button data-open-modal class="bg-on-background text-primary-container px-5 py-2 rounded-lg font-label-md text-label-md uppercase tracking-wider hover:scale-95 transition-transform active:scale-90 cursor-pointer">Agendar Cita</button>
             </div>
             <!-- Mobile Menu Toggle -->
-            <button id="mobile-menu-toggle" class="md:hidden text-on-background p-2 focus:outline-none" aria-label="Abrir menú">
+            <button id="mobile-menu-toggle" class="lg:hidden text-on-background p-2 focus:outline-none" aria-label="Abrir menú">
                 <span class="material-symbols-outlined">menu</span>
             </button>
         </div>
         <!-- Mobile Nav Menu -->
-        <div class="hidden md:hidden bg-background border-b border-outline-variant/30 px-margin-mobile py-6 flex flex-col gap-4 shadow-lg" id="mobile-menu">
+        <div class="hidden lg:hidden bg-background border-b border-outline-variant/30 px-margin-mobile py-6 flex flex-col gap-3 shadow-lg" id="mobile-menu">
             <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#nosotros">Nosotros</a>
+            <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#metodo">El Método</a>
+            <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#horeca">HORECA</a>
             <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#servicios">Servicios</a>
             <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#testimonios">Testimonios</a>
+            <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#faq">Preguntas Frecuentes</a>
             <button data-open-modal class="text-left text-primary font-bold font-label-md text-label-md uppercase tracking-wider py-1 cursor-pointer">Agendar Cita</button>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 hero-gradient text-white overflow-hidden">
+    <section class="relative pt-32 pb-20 md:pt-48 md:pb-28 hero-gradient text-white overflow-hidden">
         <div class="absolute inset-0 node-bg"></div>
         <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div class="flex-1 space-y-8">
                 <div class="inline-block px-4 py-1 border border-primary-container/30 rounded-full bg-primary-container/10 text-primary-container font-label-md text-label-md uppercase tracking-widest">
-                    Expertos en Capital Humano
+                    Especialistas en Capital Humano | Zona Industrial Bajío
                 </div>
                 <h1 class="font-display-lg text-4xl md:text-display-lg leading-tight">
-                    Transformamos Organizaciones a través del <span class="text-primary-container italic">Talento Humano</span>
+                    Personas Correctas, <span class="text-primary-container italic">Resultados Reales.</span>
                 </h1>
                 <p class="text-secondary-fixed-dim font-body-lg text-body-lg max-w-xl">
-                    Consultoría especializada en reclutamiento y procesos de Recursos Humanos con un enfoque estratégico y profundamente humano.
+                    Reclutamiento asistido por IA y consultoría estratégica para estabilizar plantillas y asegurar la continuidad operativa de tu empresa hotelera, restaurantera e industrial.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                    <button data-open-modal class="bg-primary-container text-on-background px-8 py-4 rounded-lg font-bold text-center hover:scale-[1.02] transition-transform shadow-lg cursor-pointer">Iniciar Diagnóstico Gratuito</button>
-                    <a class="border border-white/20 hover:bg-white/5 px-8 py-4 rounded-lg font-bold text-center transition-colors" href="#servicios">Ver Servicios</a>
+                    <button data-open-modal class="bg-primary-container text-on-background px-8 py-4 rounded-lg font-bold text-center hover:scale-[1.02] transition-transform shadow-lg cursor-pointer">Diagnóstico Sin Costo</button>
+                    <a class="border border-white/20 hover:bg-white/5 px-8 py-4 rounded-lg font-bold text-center transition-colors" href="#metodo">Conoce el Método</a>
                 </div>
             </div>
             <div class="flex-1 w-full lg:w-1/2">
@@ -155,14 +161,36 @@
                     </div>
                     <div class="absolute -bottom-8 left-8 bg-white text-on-background p-4 rounded-xl shadow-xl hidden md:flex items-center gap-4 border-l-4 border-primary-container">
                         <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary">diversity_3</span>
+                            <span class="material-symbols-outlined text-primary">verified</span>
                         </div>
                         <div>
-                            <p class="font-bold text-sm">Consultoría Estratégica</p>
-                            <p class="text-xs text-secondary">Impacto organizacional real</p>
+                            <p class="font-bold text-sm">Garantía de 30 Días</p>
+                            <p class="text-xs text-secondary">Reposición de candidato sin costo</p>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Metrics Bar -->
+    <section class="bg-on-background border-y border-white/10 py-10 text-white">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="space-y-1">
+                <p class="font-display-lg text-3xl md:text-4xl text-primary-container">+10 Años</p>
+                <p class="font-label-md text-xs uppercase tracking-widest text-secondary-fixed-dim">Experiencia Sectorial</p>
+            </div>
+            <div class="space-y-1">
+                <p class="font-display-lg text-3xl md:text-4xl text-primary-container">30 Días</p>
+                <p class="font-label-md text-xs uppercase tracking-widest text-secondary-fixed-dim">Garantía de Reposición</p>
+            </div>
+            <div class="space-y-1">
+                <p class="font-display-lg text-3xl md:text-4xl text-primary-container">24/7</p>
+                <p class="font-label-md text-xs uppercase tracking-widest text-secondary-fixed-dim">Omnipresencia y Atención</p>
+            </div>
+            <div class="space-y-1">
+                <p class="font-display-lg text-3xl md:text-4xl text-primary-container">-50%</p>
+                <p class="font-label-md text-xs uppercase tracking-widest text-secondary-fixed-dim">Disminución de Rotación</p>
             </div>
         </div>
     </section>
@@ -174,11 +202,11 @@
                 <div class="relative group">
                     <div class="absolute -inset-4 bg-primary-container/10 rounded-xl transform -rotate-3 group-hover:rotate-0 transition-transform duration-500"></div>
                     <div class="relative overflow-hidden rounded-xl shadow-lg">
-                        <img alt="Yare Cuate - Líder de Consultoría en Talentum" class="w-full transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS0_CeVg_xKcpKjoVfeNoyxvh-big2BEGry_QHfOgdsC83D1ownCPWtVWCRd5rtI_-d_XSNkwm0TPPFtkFv1i3xDQozwGP__5Qq3vGYxMzoVR3o1xhvPjhq8kZkSbTUQHxnZqLbD5ElD7HDToVJQphK5_U1hje45AXoAjcg-LyJPXYKtkjpHzcVr4I7JigWtcQC2Fl97SV4gvb5XOe2nFas-ZrIrJyqPAcOaA2OJBpiQS9XshWJ6V3U9PyH-8qli5X-bk">
+                        <img alt="Yareli Caremi Cuate Ayala - Dirección General Talentum" class="w-full transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS0_CeVg_xKcpKjoVfeNoyxvh-big2BEGry_QHfOgdsC83D1ownCPWtVWCRd5rtI_-d_XSNkwm0TPPFtkFv1i3xDQozwGP__5Qq3vGYxMzoVR3o1xhvPjhq8kZkSbTUQHxnZqLbD5ElD7HDToVJQphK5_U1hje45AXoAjcg-LyJPXYKtkjpHzcVr4I7JigWtcQC2Fl97SV4gvb5XOe2nFas-ZrIrJyqPAcOaA2OJBpiQS9XshWJ6V3U9PyH-8qli5X-bk">
                     </div>
                     <div class="absolute bottom-6 right-6 bg-on-background text-white p-6 rounded-lg shadow-xl">
-                        <p class="font-display-lg text-xl">Yare Cuate</p>
-                        <p class="text-primary-container font-label-md text-label-md uppercase">Líder de Consultoría</p>
+                        <p class="font-display-lg text-xl">Yareli Caremi Cuate Ayala</p>
+                        <p class="text-primary-container font-label-md text-label-md uppercase">Dirección General</p>
                     </div>
                 </div>
                 <div class="space-y-8">
@@ -187,10 +215,10 @@
                     </h2>
                     <div class="space-y-6 text-secondary font-body-lg text-body-lg leading-relaxed">
                         <p>
-                            En Talentum Consultoría, entendemos que detrás de cada proceso, cada vacante y cada estrategia, hay personas con sueños y empresas con visiones que deben converger para el éxito mutuo.
+                            En Talentum Consultoría entendemos que detrás de cada proceso, cada vacante y cada estrategia, hay personas con sueños y empresas con visiones que deben converger para el éxito mutuo.
                         </p>
                         <p>
-                            Nuestra metodología se basa en la <strong>precisión analítica</strong> y la <strong>empatía organizacional</strong>. No solo buscamos llenar un puesto; construimos los cimientos del crecimiento de su empresa a través de una selección rigurosa y humana.
+                            No solo buscamos llenar un puesto; construimos los cimientos del crecimiento de su empresa a través de una selección rigurosa y humana que garantiza continuidad y estabilidad.
                         </p>
                         <ul class="space-y-4 pt-4">
                             <li class="flex items-center gap-3">
@@ -199,10 +227,163 @@
                             </li>
                             <li class="flex items-center gap-3">
                                 <span class="material-symbols-outlined fill-1 text-primary-container">check_circle</span>
-                                <span>Enfoque personalizado y diagnóstico real.</span>
+                                <span>Enfoque estratégico: entendemos tu operación, turnos y necesidades reales.</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="material-symbols-outlined fill-1 text-primary-container">check_circle</span>
+                                <span>Mapeo de viabilidad y seguimiento post-contratación.</span>
                             </li>
                         </ul>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: El Método Talentum (Zona Industrial & General) -->
+    <section class="py-24 md:py-32 bg-surface-container-low" id="metodo">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-primary font-label-md text-xs uppercase tracking-widest block mb-2 font-bold">Reclutamiento que construye industria</span>
+                <h2 class="font-display-lg text-3xl md:text-headline-lg mb-4">El Método Talentum</h2>
+                <div class="h-1 w-24 bg-primary-container mx-auto mb-6"></div>
+                <p class="text-secondary font-body-lg">Diseñado específicamente para estabilizar plantillas, optimizar la productividad y asegurar la continuidad operativa de tu planta o negocio.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-outline-variant/30 hover:border-primary-container transition-all hover:shadow-lg">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-4">
+                        <span class="material-symbols-outlined text-2xl">smart_toy</span>
+                    </div>
+                    <h3 class="font-display-lg text-lg font-bold mb-2">Perfiles que Sí Cumplen</h3>
+                    <p class="text-sm text-secondary">Filtrado estratégico asistido por Inteligencia Artificial para precisión técnica.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-outline-variant/30 hover:border-primary-container transition-all hover:shadow-lg">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-4">
+                        <span class="material-symbols-outlined text-2xl">trending_down</span>
+                    </div>
+                    <h3 class="font-display-lg text-lg font-bold mb-2">Menos Rotación</h3>
+                    <p class="text-sm text-secondary">Mapeo de viabilidad y seguimiento cercano post-contratación para asegurar permanencia.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border-2 border-primary-container bg-primary-container/5 hover:shadow-xl transition-all">
+                    <div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary mb-4">
+                        <span class="material-symbols-outlined text-2xl">verified_user</span>
+                    </div>
+                    <h3 class="font-display-lg text-lg font-bold mb-2">Garantía 30 Días</h3>
+                    <p class="text-sm text-secondary">Reposición sin costo si el candidato no permanece en el puesto acordado.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-outline-variant/30 hover:border-primary-container transition-all hover:shadow-lg">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-4">
+                        <span class="material-symbols-outlined text-2xl">speed</span>
+                    </div>
+                    <h3 class="font-display-lg text-lg font-bold mb-2">Agilidad & Calidad</h3>
+                    <p class="text-sm text-secondary">Procesos rápidos combinados con entrevistas a profundidad por competencias.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-outline-variant/30 hover:border-primary-container transition-all hover:shadow-lg">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-4">
+                        <span class="material-symbols-outlined text-2xl">factory</span>
+                    </div>
+                    <h3 class="font-display-lg text-lg font-bold mb-2">Foco Industrial</h3>
+                    <p class="text-sm text-secondary">Comprensión total de turnos rotativos, perfiles técnicos y necesidades en planta.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: Blindaje HORECA (Especialistas en Hospitalidad) -->
+    <section class="py-24 md:py-32 bg-white" id="horeca">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
+                <div class="lg:col-span-7 space-y-6">
+                    <span class="inline-block px-4 py-1 rounded-full bg-primary-container text-on-background font-label-md text-xs font-bold uppercase tracking-widest">
+                        Blindaje HORECA
+                    </span>
+                    <h2 class="font-display-lg text-3xl md:text-4xl text-on-background">
+                        ¿Tu negocio se quedó sin personal otra vez?
+                    </h2>
+                    <p class="text-secondary font-body-lg">
+                        Te ayudamos a cubrir tus vacantes críticas con <strong>velocidad, precisión y filtro de actitud</strong>, garantizando la continuidad operativa de tu restaurante, hotel o cafetería y protegiendo tu venta y la tranquilidad de tu equipo.
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                        <div class="border-l-2 border-primary-container pl-3">
+                            <p class="font-bold text-sm">Talento Adecuado</p>
+                            <p class="text-xs text-secondary">Filtro de vocación</p>
+                        </div>
+                        <div class="border-l-2 border-primary-container pl-3">
+                            <p class="font-bold text-sm">Cobertura Rápida</p>
+                            <p class="text-xs text-secondary">Respuesta inmediata</p>
+                        </div>
+                        <div class="border-l-2 border-primary-container pl-3">
+                            <p class="font-bold text-sm">Continuidad</p>
+                            <p class="text-xs text-secondary">Cero paros en sala</p>
+                        </div>
+                        <div class="border-l-2 border-primary-container pl-3">
+                            <p class="font-bold text-sm">Estabilidad</p>
+                            <p class="text-xs text-secondary">Menos rotación</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 bg-on-background text-white p-8 rounded-2xl shadow-xl">
+                    <p class="font-label-md text-xs uppercase tracking-widest text-primary-container mb-2 font-bold">Dirigido a:</p>
+                    <p class="font-display-lg text-xl mb-6">Gerentes, Directores y Dueños de Restaurantes, Hoteles y/o Cafeterías.</p>
+                    <div class="border-t border-white/10 pt-6">
+                        <p class="text-sm text-secondary-fixed-dim mb-4">Evita pérdidas en caja por mesas desatendidas o retrasos en cocina.</p>
+                        <button data-open-modal class="w-full bg-primary-container text-on-background font-bold py-3 rounded-lg hover:scale-[1.02] transition-transform text-sm uppercase tracking-wider cursor-pointer">Solicitar Blindaje HORECA</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desglose de perfiles HORECA -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-surface-container-lowest p-8 border border-outline-variant/30 rounded-xl hover:shadow-lg transition-all">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-2xl">room_service</span>
+                        </div>
+                        <h3 class="font-display-lg text-lg font-bold">Piso, Barra y Servicio</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-secondary">
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Meseros y Garroteros</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Host / Hostess</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Capitanes de Meseros</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Baristas y Bartenders</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Cajeros y Encargados de Turno</li>
+                    </ul>
+                </div>
+
+                <div class="bg-surface-container-lowest p-8 border border-outline-variant/30 rounded-xl hover:shadow-lg transition-all">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-2xl">restaurant</span>
+                        </div>
+                        <h3 class="font-display-lg text-lg font-bold">Cocina, Hotel y Mantenimiento</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-secondary">
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Cocineros y Ayudantes</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Lava Loza y Stewards</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Recepcionistas de Hotel</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Camaristas y Aux. de Limpieza</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Mantenimiento General</li>
+                    </ul>
+                </div>
+
+                <div class="bg-surface-container-lowest p-8 border border-outline-variant/30 rounded-xl hover:shadow-lg transition-all">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-2xl">badge</span>
+                        </div>
+                        <h3 class="font-display-lg text-lg font-bold">Cobertura Especializada</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-secondary">
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Perfiles Clave Gerenciales</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Posiciones de Difícil Cobertura</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Áreas Operativas y Administrativas</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>Chefs Ejecutivos y Sous Chefs</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -222,7 +403,7 @@
                     </div>
                     <h3 class="font-display-lg text-xl mb-4">Turismo &amp; HORECA</h3>
                     <p class="text-secondary font-body-md mb-8 flex-grow">Selección de personal para hoteles, restaurantes y empresas de servicios turísticos con altos estándares de calidad.</p>
-                    <a href="#contacto" class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</a>
+                    <a href="#horeca" class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</a>
                 </div>
                 <div class="bg-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full group rounded-lg">
                     <div class="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container text-on-background group-hover:bg-on-background group-hover:text-primary-container transition-colors">
@@ -230,7 +411,7 @@
                     </div>
                     <h3 class="font-display-lg text-xl mb-4">Sector Industrial</h3>
                     <p class="text-secondary font-body-md mb-8 flex-grow">Reclutamiento técnico y operativo especializado para plantas de producción y centros de distribución.</p>
-                    <a href="#contacto" class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</a>
+                    <a href="#metodo" class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</a>
                 </div>
                 <div class="bg-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full group rounded-lg">
                     <div class="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container text-on-background group-hover:bg-on-background group-hover:text-primary-container transition-colors">
@@ -282,10 +463,8 @@
                 </div>
             </div>
 
-            <!-- Contenedor del Carrusel -->
             <div class="overflow-hidden">
                 <div id="carousel-track" class="carousel-track -mx-4">
-                    <!-- Slide 1 -->
                     <div class="carousel-slide px-4">
                         <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm h-full flex flex-col justify-between">
                             <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
@@ -301,12 +480,11 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Slide 2 -->
                     <div class="carousel-slide px-4">
                         <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm h-full flex flex-col justify-between">
                             <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
                             <p class="font-body-lg text-lg mb-8 text-secondary">
-                                "Implementar los nuevos procesos de RRHH con Yare y su equipo transformó nuestro clima laboral en menos de 6 meses. La consultoría fue profesional, empática y muy práctica."
+                                "Implementar los nuevos procesos de RRHH con Yareli y su equipo transformó nuestro clima laboral en menos de 6 meses. La consultoría fue profesional, empática y muy práctica."
                             </p>
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-surface-dim rounded-full flex items-center justify-center font-bold text-on-surface">ML</div>
@@ -317,12 +495,11 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Slide 3 -->
                     <div class="carousel-slide px-4">
                         <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm h-full flex flex-col justify-between">
                             <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
                             <p class="font-body-lg text-lg mb-8 text-secondary">
-                                "Encontrar perfiles técnicos especializados solía tomarnos meses. Con Talentum reducimos el tiempo de contratación a la mitad y con candidatos de gran calidad humana."
+                                "El soporte en turnos rotativos y posiciones operativas para planta fue inmediato. Tienen un dominio real de la industria en Querétaro y el Bajío."
                             </p>
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-surface-dim rounded-full flex items-center justify-center font-bold text-on-surface">CG</div>
@@ -333,21 +510,48 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Slide 4 -->
-                    <div class="carousel-slide px-4">
-                        <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm h-full flex flex-col justify-between">
-                            <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
-                            <p class="font-body-lg text-lg mb-8 text-secondary">
-                                "Excelente acompañamiento en la estructuración de nuestros perfiles y tabuladores de sueldos. Se nota la experiencia y la cercanía en cada sesión de trabajo."
-                            </p>
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-surface-dim rounded-full flex items-center justify-center font-bold text-on-surface">SV</div>
-                                <div>
-                                    <p class="font-bold text-on-background not-italic">Sofía Valenzuela</p>
-                                    <p class="text-sm text-secondary not-italic">Directora de Finanzas - Cadena Gastronómica</p>
-                                </div>
-                            </div>
-                        </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Accordion Section -->
+    <section class="py-24 md:py-32 bg-surface-container-low" id="faq">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-primary font-label-md text-xs uppercase tracking-widest block mb-2 font-bold">Resolvemos tus dudas</span>
+                <h2 class="font-display-lg text-3xl md:text-headline-lg mb-4">Preguntas Frecuentes</h2>
+                <div class="h-1 w-24 bg-primary-container mx-auto"></div>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="faq-item bg-white rounded-xl border border-outline-variant/30 overflow-hidden">
+                    <button class="faq-header w-full p-6 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-bold text-base md:text-lg">¿Cómo funciona la Garantía de 30 Días?</span>
+                        <span class="material-symbols-outlined faq-icon transition-transform text-primary">expand_more</span>
+                    </button>
+                    <div class="faq-content px-6 pb-6 text-secondary text-sm md:text-base leading-relaxed">
+                        Si el candidato seleccionado no permanece en el puesto acordado o no cumple con el perfil durante los primeros 30 días, realizamos el proceso de reposición de la vacante sin ningún costo adicional para tu empresa.
+                    </div>
+                </div>
+
+                <div class="faq-item bg-white rounded-xl border border-outline-variant/30 overflow-hidden">
+                    <button class="faq-header w-full p-6 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-bold text-base md:text-lg">¿Qué incluye el Diagnóstico Sin Costo?</span>
+                        <span class="material-symbols-outlined faq-icon transition-transform text-primary">expand_more</span>
+                    </button>
+                    <div class="faq-content px-6 pb-6 text-secondary text-sm md:text-base leading-relaxed">
+                        Una sesión estratégica donde evaluamos los cuellos de botella de tu plantilla, índices de rotación, adecuación de perfiles y proponemos un plan de acción inmediato y a la medida de tu operación.
+                    </div>
+                </div>
+
+                <div class="faq-item bg-white rounded-xl border border-outline-variant/30 overflow-hidden">
+                    <button class="faq-header w-full p-6 text-left flex justify-between items-center focus:outline-none">
+                        <span class="font-bold text-base md:text-lg">¿Cuál es su cobertura geográfica?</span>
+                        <span class="material-symbols-outlined faq-icon transition-transform text-primary">expand_more</span>
+                    </button>
+                    <div class="faq-content px-6 pb-6 text-secondary text-sm md:text-base leading-relaxed">
+                        Nuestra base operativa se encuentra en Santiago de Querétaro, con cobertura presencial y virtual en toda la Zona Industrial del Bajío y proyectos HORECA a nivel nacional.
                     </div>
                 </div>
             </div>
@@ -359,27 +563,27 @@
         <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
                 <div class="space-y-8">
-                    <h2 class="font-display-lg text-4xl md:text-5xl">Solicite un Diagnóstico <span class="text-primary-container">Gratuito</span></h2>
+                    <h2 class="font-display-lg text-4xl md:text-5xl">Solicita un Diagnóstico <span class="text-primary-container">Sin Costo</span></h2>
                     <p class="text-secondary-fixed-dim font-body-lg text-xl">
-                        ¿Listo para llevar su equipo al siguiente nivel? Complete el formulario y uno de nuestros expertos se pondrá en contacto en menos de 24 horas.
+                        ¿Listo para proteger tu operación y estabilizar a tu equipo? Llena el formulario y te contactamos en menos de 24 horas.
                     </p>
-                    <div class="space-y-6 pt-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full border border-primary-container/30 flex items-center justify-center text-primary-container">
-                                <span class="material-symbols-outlined">mail</span>
-                            </div>
-                            <div>
-                                <p class="text-sm text-secondary-fixed-dim uppercase tracking-wider">Email</p>
-                                <p class="text-lg">contacto@talentum.com.mx</p>
-                            </div>
-                        </div>
+                    <div class="space-y-6 pt-4">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full border border-primary-container/30 flex items-center justify-center text-primary-container">
                                 <span class="material-symbols-outlined">call</span>
                             </div>
                             <div>
-                                <p class="text-sm text-secondary-fixed-dim uppercase tracking-wider">Teléfono</p>
-                                <p class="text-lg">+52 55 1234 5678</p>
+                                <p class="text-sm text-secondary-fixed-dim uppercase tracking-wider">Teléfono / WhatsApp</p>
+                                <p class="text-lg">442 796 5332</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full border border-primary-container/30 flex items-center justify-center text-primary-container">
+                                <span class="material-symbols-outlined">location_on</span>
+                            </div>
+                            <div>
+                                <p class="text-sm text-secondary-fixed-dim uppercase tracking-wider">Ubicación</p>
+                                <p class="text-lg">Av. Universidad Ote. 180, Centro. Querétaro, Qro.</p>
                             </div>
                         </div>
                     </div>
@@ -397,21 +601,20 @@
                             </div>
                         </div>
                         <div class="space-y-2">
-                            <label for="servicio" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Servicio de Interés</label>
+                            <label for="servicio" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Sector / Necesidad</label>
                             <select id="servicio" name="servicio" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all appearance-none bg-transparent">
-                                <option disabled selected value="">Seleccione un servicio</option>
-                                <option value="turismo">Empresas de Turismo</option>
-                                <option value="horeca">HORECA</option>
-                                <option value="industria">Industria</option>
-                                <option value="procesos">Procesos de RRHH</option>
-                                <option value="reclutamiento">Reclutamiento</option>
+                                <option disabled selected value="">Selecciona tu sector</option>
+                                <option value="horeca">Blindaje HORECA (Restaurantes, Bares, Hoteles)</option>
+                                <option value="industria">Zona Industrial Bajío (Planta, Almacén, Operativo)</option>
+                                <option value="procesos">Procesos de RRHH & Clima Laboral</option>
+                                <option value="reclutamiento">Reclutamiento 360° / Headhunting</option>
                             </select>
                         </div>
                         <div class="space-y-2">
-                            <label for="mensaje" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Mensaje</label>
-                            <textarea id="mensaje" name="mensaje" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all placeholder:text-surface-dim resize-none" placeholder="Cuéntenos sobre su necesidad..." rows="4"></textarea>
+                            <label for="mensaje" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Detalles de la vacante o necesidad</label>
+                            <textarea id="mensaje" name="mensaje" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all placeholder:text-surface-dim resize-none" placeholder="Cuéntanos cuántas posiciones o qué reto presentas..." rows="4"></textarea>
                         </div>
-                        <button class="w-full bg-on-background text-primary-container py-4 rounded-lg font-bold uppercase tracking-widest hover:scale-[1.01] active:scale-95 transition-all mt-4 cursor-pointer" type="submit">Enviar Solicitud</button>
+                        <button class="w-full bg-on-background text-primary-container py-4 rounded-lg font-bold uppercase tracking-widest hover:scale-[1.01] active:scale-95 transition-all mt-4 cursor-pointer" type="submit">Enviar por WhatsApp</button>
                     </form>
                 </div>
             </div>
@@ -426,8 +629,8 @@
             </button>
             <div class="mb-6">
                 <span class="text-primary font-label-md text-xs uppercase tracking-widest block mb-1 font-bold">Talentum Consultoría</span>
-                <h3 id="modal-title" class="font-display-lg text-2xl text-on-background">Agendar una Cita</h3>
-                <p class="text-sm text-secondary mt-1">Seleccione la fecha y modalidad preferida para su sesión de diagnóstico.</p>
+                <h3 id="modal-title" class="font-display-lg text-2xl text-on-background">Agendar Cita de Diagnóstico</h3>
+                <p class="text-sm text-secondary mt-1">Elige la fecha y modalidad preferida para tu sesión.</p>
             </div>
             <form id="modal-appointment-form" class="space-y-4">
                 <div>
@@ -447,12 +650,12 @@
                         <label for="modal-modalidad" class="font-label-md text-xs uppercase tracking-widest text-secondary block mb-1">Modalidad</label>
                         <select id="modal-modalidad" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-2 outline-none text-sm bg-transparent">
                             <option value="virtual">Virtual (Meet / Zoom)</option>
-                            <option value="presencial">Presencial</option>
+                            <option value="presencial">Presencial (Querétaro)</option>
                         </select>
                     </div>
                 </div>
                 <div class="pt-4">
-                    <button class="w-full bg-on-background text-primary-container py-3 rounded-lg font-bold uppercase tracking-widest hover:scale-[1.01] active:scale-95 transition-all text-sm cursor-pointer" type="submit">Confirmar Cita</button>
+                    <button class="w-full bg-on-background text-primary-container py-3 rounded-lg font-bold uppercase tracking-widest hover:scale-[1.01] active:scale-95 transition-all text-sm cursor-pointer" type="submit">Confirmar Cita en WhatsApp</button>
                 </div>
             </form>
         </div>
@@ -464,42 +667,41 @@
             <div class="space-y-6">
                 <img alt="Talentum Consultoría Logo" class="h-16 w-auto brightness-0 invert opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgQZW3wgxSDzmFoBaNS-WeBsOLAxTA1R2FspHoBAAMPgux-AQPieaZrU4W0RfOlJmC1hKiHhDKTM4wdcc9VxcWV7pVBFBfqCa7aRqgzLY8bcaNuHX7Ll22CvBE0fpmMwxnuQjpChuqJPyeBM-Aar1aRVwCl2zcLFWh7voEDhZ_sxU8bhVuy8hjKI4flL1vXp0WvX4tiTMgukPLel_isSVnliP-jV2UVovCar_tjjAABUQxuPAWo6qXL6mUUyXq5DNqPPw">
                 <p class="text-secondary-fixed-dim font-body-md">
-                    Líderes en consultoría de recursos humanos enfocada en resultados estratégicos y el bienestar del talento.
+                    Especialistas en Recursos Humanos y Reclutamiento Estratégico para el sector HORECA y la Zona Industrial Bajío.
                 </p>
                 <div class="flex gap-4">
-                    <a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-container hover:text-on-background transition-all" href="#" aria-label="Visitar LinkedIn">
+                    <a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-container hover:text-on-background transition-all" href="#" aria-label="LinkedIn">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
                     </a>
-                    <a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-container hover:text-on-background transition-all" href="#" aria-label="Visitar Instagram">
+                    <a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-container hover:text-on-background transition-all" href="#" aria-label="Instagram">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849s-.011 3.585-.069 4.85c-.149 3.222-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.849-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849s.012-3.584.07-4.849c.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.28.072-1.689.072-4.947s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
                     </a>
                 </div>
             </div>
             <div class="space-y-6">
-                <h4 class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Enlaces</h4>
+                <h4 class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Enlaces Rápidos</h4>
                 <ul class="space-y-3 font-body-md text-secondary-fixed-dim">
                     <li><a class="hover:text-primary-fixed transition-colors" href="#nosotros">Sobre Nosotros</a></li>
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#metodo">El Método Talentum</a></li>
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#horeca">Blindaje HORECA</a></li>
                     <li><a class="hover:text-primary-fixed transition-colors" href="#servicios">Servicios</a></li>
-                    <li><a class="hover:text-primary-fixed transition-colors" href="#">Privacidad</a></li>
-                    <li><a class="hover:text-primary-fixed transition-colors" href="#">Términos</a></li>
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#faq">Preguntas Frecuentes</a></li>
                 </ul>
             </div>
             <div class="space-y-6">
-                <h4 class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Newsletter</h4>
-                <p class="text-secondary-fixed-dim text-sm">Reciba insights mensuales sobre capital humano y tendencias laborales.</p>
-                <div class="flex gap-2">
-                    <input class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 flex-grow focus:outline-none focus:border-primary-container text-white" placeholder="Email" type="email">
-                    <button class="bg-primary-container text-on-background px-4 py-2 rounded-lg font-bold hover:brightness-105 transition-all"><span class="material-symbols-outlined align-middle">send</span></button>
-                </div>
+                <h4 class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Contacto Directo</h4>
+                <p class="text-secondary-fixed-dim text-sm">Av. Universidad Ote. 180, Centro. Santiago de Querétaro, Qro.</p>
+                <p class="text-primary-container font-bold text-sm">Tel: 442 796 5332</p>
+                <button data-open-modal class="w-full bg-primary-container text-on-background py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:scale-95 transition-transform cursor-pointer">Diagnóstico Sin Costo</button>
             </div>
         </div>
         <div class="mt-20 border-t border-outline/10 pt-10 text-center text-secondary-fixed-dim font-body-md text-sm">
-            © 2024 Talentum Consultoría. Especialistas en Recursos Humanos.
+            © 2026 Talentum Consultoría. Especialistas en Capital Humano.
         </div>
     </footer>
 
     <!-- Floating WhatsApp Button -->
-    <a href="https://wa.me/525512345678" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-transform duration-300 hover:scale-110 active:scale-95 border-2 border-primary-container bg-[#25D366]" aria-label="Contactar por WhatsApp">
+    <a href="https://wa.me/524427965332" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-transform duration-300 hover:scale-110 active:scale-95 border-2 border-primary-container bg-[#25D366]" aria-label="Contactar por WhatsApp">
         <svg class="w-8 h-8 fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
         </svg>
