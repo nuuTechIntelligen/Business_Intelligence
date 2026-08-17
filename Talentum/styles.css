@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 .material-symbols-outlined {
@@ -20,7 +20,7 @@
 }
 
 .glass-nav {
-    background: rgba(248, 249, 250, 0.85);
+    background: rgba(248, 249, 250, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -30,7 +30,7 @@
     outline-offset: 2px;
 }
 
-/* Transición suave para slides del carrusel */
+/* Carrusel de Testimonios */
 .carousel-track {
     display: flex;
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
@@ -47,7 +47,24 @@
     }
 }
 
-/* Animación del modal */
+/* Acordeón FAQ */
+.faq-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.35s ease;
+    opacity: 0;
+}
+
+.faq-item.active .faq-content {
+    max-height: 250px;
+    opacity: 1;
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+}
+
+/* Modal */
 .modal-backdrop {
     transition: opacity 0.3s ease;
 }
