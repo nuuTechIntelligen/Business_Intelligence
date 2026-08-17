@@ -87,11 +87,75 @@ let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
 
+// Helper seguro para asignar texto en elementos
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
 
+// Función robusta para parsear cualquier fecha que venga de Google Sheets o Inputs
+function parsearFechaSegura(fechaRaw) {
+  if (!fechaRaw) return null;
+  if (fechaRaw instanceof Date && !isNaN(fechaRaw.getTime())) {
+    const d = new Date(fechaRaw);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  
+  const str = String(fechaRaw).trim();
+  if (!str) return null;
+
+  // Si viene en formato YYYY-MM-DD o con tiempo YYYY-MM-DDTHH:mm:ss...
+  if (str.includes("-")) {
+    const soloFecha = str.split("T")[0];
+    const p = soloFecha.split("-");
+    if (p.length === 3) {
+      const year = parseInt(p[0], 10);
+      const month = parseInt(p[1], 10) - 1;
+      const day = parseInt(p[2], 10);
+      const d = new Date(year, month, day);
+      if (!isNaN(d.getTime())) {
+        d.setHours(0, 0, 0, 0);
+        return d;
+      }
+    }
+  }
+
+  // Si viene en formato DD/MM/YYYY
+  if (str.includes("/")) {
+    const p = str.split("/");
+    if (p.length === 3) {
+      const day = parseInt(p[0], 10);
+      const month = parseInt(p[1], 10) - 1;
+      const year = parseInt(p[2], 10);
+      const d = new Date(year, month, day);
+      if (!isNaN(d.getTime())) {
+        d.setHours(0, 0, 0, 0);
+        return d;
+      }
+    }
+  }
+
+  // Fallback nativo
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  return null;
+}
+
+// Formateador estándar YYYY-MM-DD para visualización
+function formatearFechaISO(dateObj) {
+  if (!dateObj || isNaN(dateObj.getTime())) return "N/A";
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// CONTROL DINÁMICO DEL PIPELINE CON PERSISTENCIA EN GOOGLE SHEETS
 window.cambiarPipeline = function(idVacante, etapa, delta) {
   const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
   if (v && v.pipeline) {
@@ -426,7 +490,6 @@ function renderizarApp() {
     const card = document.createElement("div");
     card.className = "bg-[#131B2B] rounded-2xl border border-slate-800/90 p-4 shadow-lg shadow-black/40 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all hover:border-amber-500/40";
     
-    // Indicador animado de estado
     const badgeEstatusHTML = v.estatus_vacante === 'En Proceso' ? `
       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
         <span class="relative flex h-2 w-2">
@@ -545,14 +608,13 @@ function renderizarApp() {
 }
 
 function calcularSlaProceso(vacante) {
-  if (!vacante.fecha_inicio_proceso) return { dias: 0, texto: "Sin fecha", color: "text-slate-400" };
+  const inicio = parsearFechaSegura(vacante.fecha_inicio_proceso);
+  if (!inicio) return { dias: 0, texto: "Sin fecha", color: "text-slate-400" };
+  
   const srv = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { sla_meta_dias: 20 };
   const meta = srv.sla_meta_dias || 20;
 
-  const p = vacante.fecha_inicio_proceso.split("-");
-  const inicio = new Date(p[0], p[1]-1, p[2]);
-  const fin = vacante.fecha_contratacion ? new Date(vacante.fecha_contratacion.split("-")[0], vacante.fecha_contratacion.split("-")[1]-1, vacante.fecha_contratacion.split("-")[2]) : new Date();
-  
+  const fin = vacante.fecha_contratacion ? (parsearFechaSegura(vacante.fecha_contratacion) || new Date()) : new Date();
   const transcurridos = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
 
   if (vacante.estatus_vacante === "Contratado") {
@@ -630,8 +692,12 @@ function abrirExpediente(vacante) {
     }
   }
 
-  setText("expFechaInicio", vacante.fecha_inicio_proceso || "--");
-  setText("expFechaContratacion", vacante.fecha_contratacion || "En proceso");
+  // Fechas parseadas de forma segura para evitar RangeError
+  const fechaInicioObj = parsearFechaSegura(vacante.fecha_inicio_proceso);
+  const fechaContratacionObj = parsearFechaSegura(vacante.fecha_contratacion);
+
+  setText("expFechaInicio", fechaInicioObj ? formatearFechaISO(fechaInicioObj) : "--");
+  setText("expFechaContratacion", fechaContratacionObj ? formatearFechaISO(fechaContratacionObj) : "En proceso");
   setText("expCandidato", vacante.candidato_contratado || "No asignado aún");
   setText("expTipoServicio", servicio.nombre_servicio);
 
@@ -655,11 +721,11 @@ function abrirExpediente(vacante) {
 
   setText("expGarantiaPactada", `${vacante.dias_garantia_pactados} días`);
   
-  if (vacante.fecha_contratacion) {
-    const p = vacante.fecha_contratacion.split("-");
-    const fc = new Date(p[0], p[1]-1, p[2]);
-    fc.setDate(fc.getDate() + Number(vacante.dias_garantia_pactados));
-    setText("expGarantiaLimite", fc.toISOString().split("T")[0]);
+  // Cálculo seguro de fecha límite de garantía
+  if (fechaContratacionObj) {
+    const fcLimite = new Date(fechaContratacionObj);
+    fcLimite.setDate(fcLimite.getDate() + Number(vacante.dias_garantia_pactados || 30));
+    setText("expGarantiaLimite", formatearFechaISO(fcLimite));
   } else {
     setText("expGarantiaLimite", "N/A");
   }
@@ -1181,15 +1247,14 @@ function limpiarTelefono(tel) {
 }
 
 function calcularDiasGarantia(vacante) {
-  if (!vacante.fecha_contratacion) return { diasRestantes: 0, texto: "Sin fecha", color: "text-slate-400" };
+  const contratacion = parsearFechaSegura(vacante.fecha_contratacion);
+  if (!contratacion) return { diasRestantes: 0, texto: "Sin fecha", color: "text-slate-400" };
   
-  const partes = String(vacante.fecha_contratacion).split("-");
-  const contratacion = new Date(partes[0], partes[1] - 1, partes[2]);
   const finGarantia = new Date(contratacion);
-  finGarantia.setDate(contratacion.getDate() + Number(vacante.dias_garantia_pactados));
+  finGarantia.setDate(contratacion.getDate() + Number(vacante.dias_garantia_pactados || 30));
   
   const hoy = new Date();
-  hoy.setHours(0,0,0,0);
+  hoy.setHours(0, 0, 0, 0);
   const diffTime = finGarantia - hoy;
   const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
