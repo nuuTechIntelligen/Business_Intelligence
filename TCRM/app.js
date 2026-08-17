@@ -10,9 +10,9 @@ let DB = {
     { id_cliente: "CLI-002", nombre_comercial: "Logística Bajío", region: "Bajío" }
   ],
   servicios: [
-    { id_servicio: "SRV-001", nombre_servicio: "Operativo", dias_garantia_defecto: 30 },
-    { id_servicio: "SRV-002", nombre_servicio: "Mandos Medios", dias_garantia_defecto: 60 },
-    { id_servicio: "SRV-003", nombre_servicio: "Headhunting", dias_garantia_defecto: 90 }
+    { id_servicio: "SRV-001", nombre_servicio: "Reclutamiento Operativo", dias_garantia_defecto: 30 },
+    { id_servicio: "SRV-002", nombre_servicio: "Mandos Medios / Especialistas", dias_garantia_defecto: 60 },
+    { id_servicio: "SRV-003", nombre_servicio: "Headhunting Directivo", dias_garantia_defecto: 90 }
   ],
   vacantes: [
     {
@@ -20,32 +20,38 @@ let DB = {
       id_cliente: "CLI-001",
       titulo_puesto: "Líder de Desarrollo Fullstack",
       region: "Querétaro",
+      id_servicio: "SRV-002",
       fee_pactado_total: 28000,
       monto_adelanto: 14000,
       fecha_inicio_proceso: "2026-08-05",
       estatus_vacante: "En Proceso",
       fecha_contratacion: "",
+      candidato_contratado: "",
       dias_garantia_pactados: 60,
-      garantia_aplicada: "No"
+      garantia_aplicada: "No",
+      descripcion_perfil: "Perfil Senior con React, Node.js y Cloud."
     },
     {
       id_vacante: "VAC-102",
       id_cliente: "CLI-002",
       titulo_puesto: "Coordinador de Almacén",
       region: "Bajío",
+      id_servicio: "SRV-001",
       fee_pactado_total: 16000,
       monto_adelanto: 8000,
       fecha_inicio_proceso: "2026-07-10",
       estatus_vacante: "Contratado",
       fecha_contratacion: "2026-08-01",
+      candidato_contratado: "Roberto Sánchez",
       dias_garantia_pactados: 30,
-      garantia_aplicada: "No"
+      garantia_aplicada: "No",
+      descripcion_perfil: "Experiencia en inventarios y manejo de ERP."
     }
   ],
   gastos: [
-    { id_vacante: "VAC-101", monto: 1250, categoria: "Facebook Ads" },
-    { id_vacante: "VAC-101", monto: 450, categoria: "Psicometría" },
-    { id_vacante: "VAC-102", monto: 600, categoria: "Facebook Ads" }
+    { id_vacante: "VAC-101", categoria: "Facebook Ads", monto: 1250, fecha_gasto: "2026-08-08" },
+    { id_vacante: "VAC-101", categoria: "Psicometría", monto: 450, fecha_gasto: "2026-08-10" },
+    { id_vacante: "VAC-102", categoria: "Facebook Ads", monto: 600, fecha_gasto: "2026-07-15" }
   ],
   horas: [
     { id_vacante: "VAC-101", horas_invertidas: 12, costo_por_hora: 150 },
@@ -56,6 +62,7 @@ let DB = {
 let currentTab = "vacantes";
 let filtroEstadoActual = "En Proceso";
 let activeModalSheet = null;
+let vacanteSeleccionadaExpediente = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
@@ -67,34 +74,65 @@ function setupEventListeners() {
   document.getElementById("btnReload").addEventListener("click", cargarDatosDesdeAPI);
   document.getElementById("inputSearch").addEventListener("input", renderizarApp);
   
-  // Navegación de Pestañas (Bottom Nav)
+  // Bottom Nav
   document.getElementById("navBtnVacantes").addEventListener("click", () => switchTab("vacantes"));
   document.getElementById("navBtnAnalytics").addEventListener("click", () => switchTab("analytics"));
 
-  // Menú FAB
+  // FAB
   document.getElementById("btnFab").addEventListener("click", toggleFabMenu);
   document.getElementById("btnOpenModalVacante").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetVacante"); });
   document.getElementById("btnOpenModalHora").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetHora"); });
 
-  // Cierre de Modales
+  // Cerrar modales
   document.getElementById("modalBackdrop").addEventListener("click", closeModal);
   document.querySelectorAll(".btn-close-modal").forEach(b => b.addEventListener("click", closeModal));
 
-  // Toggle sección nuevo cliente
+  // Toggles de Nuevo Cliente y Nuevo Servicio
   document.getElementById("btnToggleNuevoCliente").addEventListener("click", () => {
     document.getElementById("boxNuevoCliente").classList.toggle("hidden");
   });
+  document.getElementById("btnToggleNuevoServicio").addEventListener("click", () => {
+    document.getElementById("boxNuevoServicio").classList.toggle("hidden");
+  });
+  document.getElementById("btnGuardarNuevoServicio").addEventListener("click", guardarNuevoServicio);
 
-  // Selector dinámico de servicio en vacante
   document.getElementById("modalVacanteServicio").addEventListener("change", actualizarValoresServicio);
 
-  // Envío de Formularios
+  // Formularios
   document.getElementById("formGasto").addEventListener("submit", guardarGasto);
   document.getElementById("formHora").addEventListener("submit", guardarHora);
   document.getElementById("formVacante").addEventListener("submit", guardarVacante);
   document.getElementById("formContratar").addEventListener("submit", procesarContratacion);
 
-  // Filtros rápidos
+  // Acciones en Expediente
+  document.getElementById("btnExpedienteAgregarGasto").addEventListener("click", () => {
+    if (vacanteSeleccionadaExpediente) {
+      document.getElementById("modalGastoVacante").value = vacanteSeleccionadaExpediente.id_vacante;
+      openModal("modalSheetGasto");
+    }
+  });
+
+  document.getElementById("btnExpFinalizar").addEventListener("click", () => {
+    if (vacanteSeleccionadaExpediente) {
+      abrirModalContratar(vacanteSeleccionadaExpediente);
+    }
+  });
+
+  document.getElementById("btnExpEliminar").addEventListener("click", () => {
+    if (vacanteSeleccionadaExpediente && confirm(`¿Deseas eliminar la vacante ${vacanteSeleccionadaExpediente.titulo_puesto}?`)) {
+      DB.vacantes = DB.vacantes.filter(v => String(v.id_vacante) !== String(vacanteSeleccionadaExpediente.id_vacante));
+      closeModal();
+      renderizarApp();
+    }
+  });
+
+  document.getElementById("btnVerPerfilPuesto").addEventListener("click", () => {
+    if (vacanteSeleccionadaExpediente) {
+      alert(`Perfil de Puesto:\n\n${vacanteSeleccionadaExpediente.descripcion_perfil || 'Sin descripción detallada.'}`);
+    }
+  });
+
+  // Filtros
   document.getElementById("filterChipsContainer").addEventListener("click", (e) => {
     const btn = e.target.closest(".chip-filter");
     if (!btn) return;
@@ -109,7 +147,6 @@ function setupEventListeners() {
   });
 }
 
-// CONTROL DE PESTAÑAS (SWITCH TAB)
 function switchTab(tab) {
   currentTab = tab;
   const viewVacantes = document.getElementById("viewVacantes");
@@ -208,6 +245,33 @@ function actualizarValoresServicio() {
   }
 }
 
+// GUARDAR NUEVO SERVICIO EN CATÁLOGO
+function guardarNuevoServicio() {
+  const nombre = document.getElementById("nuevoServicioNombre").value.trim();
+  const dias = parseInt(document.getElementById("nuevoServicioGarantia").value) || 30;
+
+  if (!nombre) {
+    alert("Ingresa un nombre para el servicio");
+    return;
+  }
+
+  const idServicio = `SRV-${Date.now().toString().slice(-4)}`;
+  const nuevoSrv = { id_servicio: idServicio, nombre_servicio: nombre, dias_garantia_defecto: dias, porcentaje_fee_defecto: 1.0 };
+  
+  DB.servicios.push(nuevoSrv);
+  poblarSelects();
+  document.getElementById("modalVacanteServicio").value = idServicio;
+  document.getElementById("nuevaVacanteGarantia").value = dias;
+  document.getElementById("boxNuevoServicio").classList.add("hidden");
+  document.getElementById("nuevoServicioNombre").value = "";
+
+  sendToAppsScript({
+    action: "create",
+    targetSheet: "CAT_SERVICIOS",
+    payload: [idServicio, nombre, dias, 1.0]
+  });
+}
+
 function renderizarApp() {
   if (currentTab === "analytics") {
     renderizarAnaliticas();
@@ -252,7 +316,7 @@ function renderizarApp() {
     const infoGarantia = calcularDiasGarantia(v);
 
     const card = document.createElement("div");
-    card.className = "bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm relative overflow-hidden";
+    card.className = "bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99] transition-transform";
     
     card.innerHTML = `
       <div class="flex items-start justify-between gap-2">
@@ -307,32 +371,34 @@ function renderizarApp() {
             <i class="ph ph-check-circle"></i> Marcar Contratada
           </button>
         ` : ''}
-        ${v.estatus_vacante === 'Contratado' && infoGarantia.diasRestantes > 0 && v.garantia_aplicada === 'No' ? `
-          <button class="btn-card-garantia w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1 border border-amber-200">
-            <i class="ph ph-arrow-counter-clockwise"></i> Hacer Válida Garantía
-          </button>
-        ` : ''}
       </div>
     `;
 
-    card.querySelector(".btn-card-gasto").addEventListener("click", () => {
+    // Clic en la tarjeta abre el Expediente Completo
+    card.addEventListener("click", (e) => {
+      if (!e.target.closest("button")) {
+        abrirExpediente(v);
+      }
+    });
+
+    card.querySelector(".btn-card-gasto").addEventListener("click", (e) => {
+      e.stopPropagation();
       document.getElementById("modalGastoVacante").value = v.id_vacante;
       openModal("modalSheetGasto");
     });
 
-    card.querySelector(".btn-card-hora").addEventListener("click", () => {
+    card.querySelector(".btn-card-hora").addEventListener("click", (e) => {
+      e.stopPropagation();
       document.getElementById("modalHoraVacante").value = v.id_vacante;
       openModal("modalSheetHora");
     });
 
     const btnContratar = card.querySelector(".btn-card-contratar");
     if (btnContratar) {
-      btnContratar.addEventListener("click", () => abrirModalContratar(v));
-    }
-
-    const btnGarantia = card.querySelector(".btn-card-garantia");
-    if (btnGarantia) {
-      btnGarantia.addEventListener("click", () => aplicarGarantia(v.id_vacante));
+      btnContratar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        abrirModalContratar(v);
+      });
     }
 
     container.appendChild(card);
@@ -342,7 +408,110 @@ function renderizarApp() {
   document.getElementById("totalInversion").textContent = `$${totalGastos.toLocaleString()}`;
 }
 
-// RENDER DE ANALÍTICAS Y FINANZAS
+// ==========================================
+// EXPEDIENTE DETALLADO (MODAL OSCURA)
+// ==========================================
+function abrirExpediente(vacante) {
+  vacanteSeleccionadaExpediente = vacante;
+  const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General" };
+  const servicio = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { nombre_servicio: "Reclutamiento" };
+
+  // Gastos de esta vacante
+  const gastosVacante = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante));
+  const totalGastos = gastosVacante.reduce((sum, g) => sum + Number(g.monto || 0), 0);
+  
+  const horasVacante = DB.horas.filter(h => String(h.id_vacante) === String(vacante.id_vacante));
+  const costoHoras = horasVacante.reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
+
+  const inversionTotal = totalGastos + costoHoras;
+  const feeTotal = Number(vacante.fee_pactado_total || 0);
+  const gananciaNeta = feeTotal - inversionTotal;
+
+  // Días de proceso
+  let diasProceso = 0;
+  if (vacante.fecha_inicio_proceso) {
+    const p = vacante.fecha_inicio_proceso.split("-");
+    const inicio = new Date(p[0], p[1]-1, p[2]);
+    const fin = vacante.fecha_contratacion ? new Date(vacante.fecha_contratacion.split("-")[0], vacante.fecha_contratacion.split("-")[1]-1, vacante.fecha_contratacion.split("-")[2]) : new Date();
+    diasProceso = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
+  }
+
+  // Poblar datos superiores
+  document.getElementById("expPuesto").textContent = vacante.titulo_puesto;
+  document.getElementById("expSubtitulo").textContent = `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`;
+
+  document.getElementById("expFee").textContent = `$${feeTotal.toLocaleString()}`;
+  document.getElementById("expInversion").textContent = `$${inversionTotal.toLocaleString()}`;
+  document.getElementById("expGanancia").textContent = `$${gananciaNeta.toLocaleString()}`;
+  document.getElementById("expDiasCierre").textContent = `${diasProceso} días`;
+
+  // Panel Información
+  const badgeEstatus = document.getElementById("expBadgeEstatus");
+  badgeEstatus.textContent = vacante.estatus_vacante;
+  badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
+    ? "px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30"
+    : "px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+
+  document.getElementById("expFechaInicio").textContent = vacante.fecha_inicio_proceso || "--";
+  document.getElementById("expFechaContratacion").textContent = vacante.fecha_contratacion || "En proceso";
+  document.getElementById("expCandidato").textContent = vacante.candidato_contratado || "No asignado aún";
+  document.getElementById("expTipoServicio").textContent = servicio.nombre_servicio;
+
+  // Panel Garantía
+  document.getElementById("expGarantiaPactada").textContent = `${vacante.dias_garantia_pactados} días`;
+  
+  if (vacante.fecha_contratacion) {
+    const p = vacante.fecha_contratacion.split("-");
+    const fc = new Date(p[0], p[1]-1, p[2]);
+    fc.setDate(fc.getDate() + Number(vacante.dias_garantia_pactados));
+    document.getElementById("expGarantiaLimite").textContent = fc.toISOString().split("T")[0];
+  } else {
+    document.getElementById("expGarantiaLimite").textContent = "N/A";
+  }
+
+  const infoGarantia = calcularDiasGarantia(vacante);
+  document.getElementById("expGarantiaEstatus").textContent = infoGarantia.texto;
+
+  // Render Historial de Gastos
+  const tableGastos = document.getElementById("expHistorialGastosTable");
+  tableGastos.innerHTML = "";
+
+  if (gastosVacante.length === 0 && horasVacante.length === 0) {
+    tableGastos.innerHTML = `<tr><td colspan="2" class="py-3 text-center text-slate-500 italic">No hay gastos registrados aún</td></tr>`;
+  } else {
+    gastosVacante.forEach(g => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="py-2 text-slate-300">${g.categoria}</td>
+        <td class="py-2 text-right text-rose-400 font-bold">$${Number(g.monto).toLocaleString()}</td>
+      `;
+      tableGastos.appendChild(tr);
+    });
+
+    if (costoHoras > 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="py-2 text-slate-300">Horas de Consultoría</td>
+        <td class="py-2 text-right text-amber-400 font-bold">$${costoHoras.toLocaleString()}</td>
+      `;
+      tableGastos.appendChild(tr);
+    }
+  }
+
+  document.getElementById("expHistorialTotalMonto").textContent = `$${inversionTotal.toLocaleString()}`;
+
+  // Botón finalizar visibilidad
+  const btnFinalizar = document.getElementById("btnExpFinalizar");
+  if (vacante.estatus_vacante === "Contratado") {
+    btnFinalizar.classList.add("hidden");
+  } else {
+    btnFinalizar.classList.remove("hidden");
+  }
+
+  openModal("modalExpediente");
+}
+
+// ANALÍTICAS
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
   const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -454,6 +623,7 @@ function calcularDiasGarantia(vacante) {
 function abrirModalContratar(vacante) {
   document.getElementById("modalContratarIdVacante").value = vacante.id_vacante;
   document.getElementById("modalContratarTitulo").textContent = `${vacante.titulo_puesto}`;
+  document.getElementById("modalContratarNombreCandidato").value = vacante.candidato_contratado || "";
   document.getElementById("modalContratarFecha").value = new Date().toISOString().split("T")[0];
   openModal("modalSheetContratar");
 }
@@ -462,11 +632,13 @@ async function procesarContratacion(e) {
   e.preventDefault();
   const idVacante = document.getElementById("modalContratarIdVacante").value;
   const fecha = document.getElementById("modalContratarFecha").value;
+  const candidato = document.getElementById("modalContratarNombreCandidato").value;
 
   const vacante = DB.vacantes.find(v => String(v.id_vacante) === String(idVacante));
   if (vacante) {
     vacante.estatus_vacante = "Contratado";
     vacante.fecha_contratacion = fecha;
+    vacante.candidato_contratado = candidato;
   }
 
   closeModal();
@@ -487,7 +659,7 @@ async function guardarGasto(e) {
   const categoria = document.getElementById("modalGastoCategoria").value;
   const monto = parseFloat(document.getElementById("modalGastoMonto").value);
 
-  DB.gastos.push({ id_vacante: idVacante, categoria, monto });
+  DB.gastos.push({ id_vacante: idVacante, categoria, monto, fecha_gasto: new Date().toISOString().split('T')[0] });
   closeModal();
   document.getElementById("modalGastoMonto").value = "";
   renderizarApp();
@@ -520,7 +692,7 @@ async function guardarHora(e) {
   });
 }
 
-// PERSISTENCIA DE VACANTE Y CLIENTE
+// PERSISTENCIA DE VACANTE
 async function guardarVacante(e) {
   e.preventDefault();
   let idCliente = document.getElementById("modalVacanteCliente").value;
@@ -558,8 +730,10 @@ async function guardarVacante(e) {
     fecha_inicio_proceso: new Date().toISOString().split('T')[0],
     estatus_vacante: "En Proceso",
     fecha_contratacion: "",
+    candidato_contratado: "",
     dias_garantia_pactados: parseInt(document.getElementById("nuevaVacanteGarantia").value),
-    garantia_aplicada: "No"
+    garantia_aplicada: "No",
+    descripcion_perfil: ""
   };
 
   DB.vacantes.unshift(nuevaVacante);
@@ -591,22 +765,6 @@ async function guardarVacante(e) {
       ""
     ]
   });
-}
-
-function aplicarGarantia(idVacante) {
-  if (confirm("¿Confirmas aplicar la garantía de reposición para esta vacante?")) {
-    const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
-    if (v) {
-      v.garantia_aplicada = "Sí (En reposición)";
-      renderizarApp();
-      sendToAppsScript({
-        action: "updateGarantia",
-        targetSheet: "VACANTES",
-        id_vacante: idVacante,
-        nuevo_estatus_garantia: "Sí (En reposición)"
-      });
-    }
-  }
 }
 
 async function sendToAppsScript(payload) {
