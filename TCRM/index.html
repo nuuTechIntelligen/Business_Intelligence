@@ -178,8 +178,8 @@
         <h2 id="expPuesto" class="text-base font-bold text-white tracking-wide">Desarrollador Fullstack</h2>
         <p id="expSubtitulo" class="text-xs text-slate-400 mt-0.5">Empresa • Región</p>
       </div>
-      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-        <i class="ph ph-x text-lg"></i>
+      <button class="btn-close-modal w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white transition-colors active:scale-95" aria-label="Cerrar modal">
+        <i class="ph ph-x text-lg pointer-events-none"></i>
       </button>
     </div>
 
@@ -238,9 +238,13 @@
             </div>
           </div>
 
-          <button id="btnVerPerfilPuesto" class="w-full mt-2 py-1.5 px-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 border border-amber-400/20 transition-all">
-            <i class="ph ph-file-text"></i> Ver Perfil de Puesto
+          <!-- BOTÓN Y ACORDEÓN INLINE DEL PERFIL DE PUESTO -->
+          <button id="btnTogglePerfilPuesto" class="w-full mt-2 py-1.5 px-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 border border-amber-400/20 transition-all">
+            <i class="ph ph-file-text"></i> <span id="btnPerfilPuestoText">Ver Perfil de Puesto</span>
           </button>
+          <div id="boxDetallePerfilPuesto" class="hidden mt-2 p-2.5 rounded-xl bg-[#0d131f] border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed">
+            <!-- Texto del perfil -->
+          </div>
         </div>
 
         <!-- PANEL GARANTÍA DEL SERVICIO -->
@@ -264,24 +268,63 @@
               <span id="expGarantiaEstatus" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">N/A</span>
             </div>
             <div class="pt-1">
-              <span class="text-slate-400 block mb-0.5">Observaciones:</span>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-slate-400 block text-xs">Observaciones:</span>
+                <button id="btnEditarObservaciones" class="text-[10px] text-amber-400 hover:underline flex items-center gap-0.5">
+                  <i class="ph ph-pencil-simple"></i> Editar
+                </button>
+              </div>
               <p id="expObservaciones" class="text-[11px] text-slate-300 italic bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">Sin observaciones registradas.</p>
+              
+              <!-- Formulario inline para guardar observaciones -->
+              <div id="boxEditObservaciones" class="hidden mt-1.5 space-y-1.5">
+                <textarea id="inputObservaciones" rows="2" class="w-full bg-[#0d131f] border border-slate-700 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-amber-400" placeholder="Escribe observaciones aquí..."></textarea>
+                <div class="flex justify-end gap-1.5">
+                  <button id="btnCancelarObs" type="button" class="px-2 py-1 bg-slate-800 text-slate-300 text-[10px] rounded-lg">Cancelar</button>
+                  <button id="btnGuardarObs" type="button" class="px-2.5 py-1 bg-amber-500 text-slate-950 font-bold text-[10px] rounded-lg">Guardar</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- DESGLOSE DE INVERSIÓN (HISTORIAL DE GASTOS) -->
+      <!-- DESGLOSE DE INVERSIÓN (HISTORIAL DE GASTOS CON ALTA DIRECTA) -->
       <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5">
         <div class="flex items-center justify-between pb-2 border-b border-slate-800">
           <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
             <i class="ph ph-receipt font-bold text-sm"></i>
             <span>Desglose de Inversión (Historial)</span>
           </div>
-          <button id="btnExpedienteAgregarGasto" class="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded-lg text-[10px] font-bold border border-indigo-500/30 flex items-center gap-1 transition-all">
+          <button id="btnToggleGastoInline" class="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded-lg text-[10px] font-bold border border-indigo-500/30 flex items-center gap-1 transition-all">
             <i class="ph ph-plus"></i> Cargar Gasto
           </button>
         </div>
+
+        <!-- FORMULARIO DIRECTO INLINE DE GASTO EN MODAL -->
+        <form id="formGastoInline" class="hidden mt-3 p-3 bg-[#0d131f] border border-indigo-500/30 rounded-xl space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-semibold text-slate-400">Concepto / Categoría</label>
+              <select id="inlineGastoCategoria" class="w-full mt-0.5 bg-[#151d30] border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200 outline-none">
+                <option value="Facebook Ads">Facebook Ads</option>
+                <option value="LinkedIn Promo">LinkedIn Promo</option>
+                <option value="Indeed Ads">Indeed Ads</option>
+                <option value="Psicometría">Psicometría</option>
+                <option value="Bolsas de Empleo">Bolsa de Empleo</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] font-semibold text-slate-400">Monto ($)</label>
+              <input type="number" step="0.01" id="inlineGastoMonto" required placeholder="0.00" class="w-full mt-0.5 bg-[#151d30] border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200 outline-none" />
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-1">
+            <button type="button" id="btnCancelGastoInline" class="px-2.5 py-1 bg-slate-800 text-slate-300 text-xs rounded-lg font-medium">Cancelar</button>
+            <button type="submit" class="px-3 py-1 bg-indigo-600 text-white text-xs rounded-lg font-bold shadow-sm">Agregar Gasto</button>
+          </div>
+        </form>
 
         <div class="mt-2 overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -323,12 +366,14 @@
     </div>
   </div>
 
-  <!-- MODAL 1: REGISTRAR GASTO -->
+  <!-- MODAL 1: REGISTRAR GASTO (DESDE EL FEED O FAB) -->
   <div id="modalSheetGasto" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Registrar Gasto / Inversión</h2>
-      <button class="btn-close-modal text-slate-400 p-1"><i class="ph ph-x text-xl"></i></button>
+      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 p-1" aria-label="Cerrar modal">
+        <i class="ph ph-x text-lg pointer-events-none"></i>
+      </button>
     </div>
     <form id="formGasto" class="flex flex-col gap-3">
       <div>
@@ -363,7 +408,9 @@
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Registrar Horas de Consultoría</h2>
-      <button class="btn-close-modal text-slate-400 p-1"><i class="ph ph-x text-xl"></i></button>
+      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 p-1" aria-label="Cerrar modal">
+        <i class="ph ph-x text-lg pointer-events-none"></i>
+      </button>
     </div>
     <form id="formHora" class="flex flex-col gap-3">
       <div>
@@ -401,12 +448,14 @@
     </form>
   </div>
 
-  <!-- MODAL 3: NUEVA VACANTE (CON ALTA DE CLIENTE Y SERVICIO) -->
+  <!-- MODAL 3: NUEVA VACANTE -->
   <div id="modalSheetVacante" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100 max-h-[90vh] overflow-y-auto">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Alta de Nueva Vacante</h2>
-      <button class="btn-close-modal text-slate-400 p-1"><i class="ph ph-x text-xl"></i></button>
+      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 p-1" aria-label="Cerrar modal">
+        <i class="ph ph-x text-lg pointer-events-none"></i>
+      </button>
     </div>
     <form id="formVacante" class="flex flex-col gap-3">
       <div>
@@ -417,7 +466,6 @@
         </div>
       </div>
 
-      <!-- Sección condicional para nuevo cliente -->
       <div id="boxNuevoCliente" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">
         <span class="text-xs font-bold text-indigo-600">Datos de la Nueva Empresa</span>
         <input type="text" id="nuevoClienteNombre" placeholder="Razón Social / Nombre Comercial" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
@@ -432,7 +480,6 @@
         <input type="text" id="nuevaVacantePuesto" required placeholder="Ej. Gerente de Operaciones" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
       </div>
 
-      <!-- Selector de Servicio + Botón para Crear Servicio -->
       <div>
         <label class="text-xs font-semibold text-slate-500">Servicio de Catálogo</label>
         <div class="flex gap-2 mt-1">
@@ -441,7 +488,6 @@
         </div>
       </div>
 
-      <!-- Sección condicional para nuevo servicio -->
       <div id="boxNuevoServicio" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">
         <span class="text-xs font-bold text-indigo-600">Nuevo Servicio de Reclutamiento</span>
         <input type="text" id="nuevoServicioNombre" placeholder="Nombre del Servicio (ej. Especializado)" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
@@ -467,6 +513,11 @@
         <input type="number" id="nuevaVacanteAnticipo" required placeholder="12500" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
       </div>
 
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Perfil / Requisitos del Puesto</label>
+        <textarea id="nuevaVacantePerfil" rows="3" placeholder="Sueldo base ofrecido, prestaciones, horario, requisitos clave..." class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"></textarea>
+      </div>
+
       <button type="submit" class="mt-2 w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-md shadow-indigo-600/20 active:scale-98 transition-transform">
         Dar de Alta Vacante
       </button>
@@ -481,7 +532,9 @@
         <h2 class="text-base font-bold text-slate-900">Confirmar Contratación</h2>
         <p id="modalContratarTitulo" class="text-xs text-slate-500 font-medium"></p>
       </div>
-      <button class="btn-close-modal text-slate-400 p-1"><i class="ph ph-x text-xl"></i></button>
+      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 p-1" aria-label="Cerrar modal">
+        <i class="ph ph-x text-lg pointer-events-none"></i>
+      </button>
     </div>
     
     <form id="formContratar" class="flex flex-col gap-3">
@@ -492,6 +545,7 @@
         <input 
           type="text" 
           id="modalContratarNombreCandidato" 
+          required
           placeholder="Ej. Juan Pérez" 
           class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"
         />
@@ -509,7 +563,7 @@
       </div>
 
       <button type="submit" class="mt-2 w-full py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-600/20 active:scale-98 transition-transform flex items-center justify-center gap-2">
-        <i class="ph ph-check-circle-bold text-lg"></i> Marcar como Contratada
+        <i class="ph ph-check-circle-bold text-lg"></i> Confirmar y Guardar Contratación
       </button>
     </form>
   </div>
