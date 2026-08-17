@@ -1,8 +1,9 @@
 /**
  * CRM Talentum - Lógica de Control Operativo y Financiero
+ * Paleta de Colores Talentum + Microanimaciones UX
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   clientes: [
@@ -86,13 +87,11 @@ let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
 
-// Helper seguro para asignar texto en elementos
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
 
-// CONTROL DINÁMICO DEL PIPELINE CON PERSISTENCIA EN GOOGLE SHEETS
 window.cambiarPipeline = function(idVacante, etapa, delta) {
   const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
   if (v && v.pipeline) {
@@ -212,11 +211,9 @@ function setupEventListeners() {
     if (!btn) return;
     filtroEstadoActual = btn.getAttribute("data-filter");
     document.querySelectorAll(".chip-filter").forEach(b => {
-      b.classList.remove("chip-active", "bg-indigo-600", "text-white", "shadow-sm");
-      b.classList.add("chip-inactive");
+      b.className = "chip-filter px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-[#131B2B] text-slate-300 border border-slate-800 hover:border-slate-700 transition-all";
     });
-    btn.classList.remove("chip-inactive");
-    btn.classList.add("chip-active");
+    btn.className = "chip-filter px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-md shadow-amber-500/20 transition-all";
     renderizarApp();
   });
 }
@@ -236,7 +233,7 @@ function switchTab(tab) {
   const btnClientes = document.getElementById("navBtnClientes");
 
   [btnVacantes, btnAnalytics, btnClientes].forEach(b => {
-    b.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
+    b.className = "nav-item flex flex-col items-center gap-1 text-slate-500 font-semibold hover:text-slate-300 transition-colors";
   });
 
   if (tab === "vacantes") {
@@ -246,8 +243,8 @@ function switchTab(tab) {
     searchSection.classList.remove("hidden");
     filterChips.classList.remove("hidden");
     fabContainer.classList.remove("hidden");
-    headerSubtext.textContent = "Control de Procesos";
-    btnVacantes.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
+    headerSubtext.textContent = "Control de Procesos & Executive Search";
+    btnVacantes.className = "nav-item flex flex-col items-center gap-1 text-amber-400 font-bold transition-colors";
     renderizarApp();
   } else if (tab === "analytics") {
     viewVacantes.classList.add("hidden");
@@ -256,8 +253,8 @@ function switchTab(tab) {
     searchSection.classList.add("hidden");
     filterChips.classList.add("hidden");
     fabContainer.classList.add("hidden");
-    headerSubtext.textContent = "Métricas Financieras";
-    btnAnalytics.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
+    headerSubtext.textContent = "Métricas Financieras & ROAS";
+    btnAnalytics.className = "nav-item flex flex-col items-center gap-1 text-amber-400 font-bold transition-colors";
     renderizarAnaliticas();
   } else if (tab === "clientes") {
     viewVacantes.classList.add("hidden");
@@ -266,8 +263,8 @@ function switchTab(tab) {
     searchSection.classList.add("hidden");
     filterChips.classList.add("hidden");
     fabContainer.classList.add("hidden");
-    headerSubtext.textContent = "Directorio de Clientes";
-    btnClientes.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
+    headerSubtext.textContent = "Directorio de Clientes & Contacto";
+    btnClientes.className = "nav-item flex flex-col items-center gap-1 text-amber-400 font-bold transition-colors";
     renderizarDirectorioClientes();
   }
 }
@@ -280,11 +277,11 @@ function toggleFabMenu() {
   if (isHidden) {
     menu.classList.remove("hidden");
     menu.classList.add("flex");
-    icon.className = "ph ph-x-bold";
+    icon.className = "ph ph-x-bold font-black";
   } else {
     menu.classList.add("hidden");
     menu.classList.remove("flex");
-    icon.className = "ph ph-plus-bold";
+    icon.className = "ph ph-plus-bold font-black";
   }
 }
 
@@ -348,13 +345,7 @@ function guardarNuevoServicio() {
   }
 
   const idServicio = `SRV-${Date.now().toString().slice(-4)}`;
-  const nuevoSrv = { 
-    id_servicio: idServicio, 
-    nombre_servicio: nombre, 
-    dias_garantia_defecto: dias, 
-    porcentaje_fee_defecto: 1.0,
-    sla_meta_dias: 20 
-  };
+  const nuevoSrv = { id_servicio: idServicio, nombre_servicio: nombre, dias_garantia_defecto: dias, sla_meta_dias: 20 };
   
   DB.servicios.push(nuevoSrv);
   poblarSelects();
@@ -363,7 +354,6 @@ function guardarNuevoServicio() {
   document.getElementById("boxNuevoServicio").classList.add("hidden");
   document.getElementById("nuevoServicioNombre").value = "";
 
-  // Envía las 5 columnas en orden exacto a Google Sheets
   sendToAppsScript({
     action: "create",
     targetSheet: "CAT_SERVICIOS",
@@ -434,71 +424,87 @@ function renderizarApp() {
     const infoSla = calcularSlaProceso(v);
 
     const card = document.createElement("div");
-    card.className = "bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99] transition-transform";
+    card.className = "bg-[#131B2B] rounded-2xl border border-slate-800/90 p-4 shadow-lg shadow-black/40 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all hover:border-amber-500/40";
     
+    // Indicador animado de estado
+    const badgeEstatusHTML = v.estatus_vacante === 'En Proceso' ? `
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+        </span>
+        En Proceso
+      </span>
+    ` : `
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+        <i class="ph ph-check-circle-bold text-xs"></i>
+        Contratado
+      </span>
+    `;
+
     card.innerHTML = `
       <div class="flex items-start justify-between gap-2">
         <div>
-          <span class="text-[11px] font-bold tracking-wide uppercase text-indigo-600">${cliente.nombre_comercial}</span>
-          <h3 class="text-sm font-bold text-slate-900 leading-tight mt-0.5">${v.titulo_puesto}</h3>
+          <span class="text-[11px] font-bold tracking-wider uppercase text-amber-400/90 block">${cliente.nombre_comercial}</span>
+          <h3 class="text-sm font-bold text-white font-serif leading-tight mt-0.5">${v.titulo_puesto}</h3>
         </div>
         <div class="flex flex-col items-end gap-1">
-          <span class="text-[11px] px-2 py-0.5 rounded-md font-semibold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
-            ${v.estatus_vacante}
-          </span>
+          ${badgeEstatusHTML}
           ${saldoPendiente > 0 ? `
-            <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-rose-50 text-rose-600 border border-rose-200">
+            <span class="text-[9px] px-2 py-0.5 rounded font-bold bg-rose-950/40 text-rose-300 border border-rose-800/40">
               Saldo: $${saldoPendiente.toLocaleString()}
             </span>
           ` : `
-            <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-50 text-emerald-600">
+            <span class="text-[9px] px-2 py-0.5 rounded font-bold bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
               ✓ Pagado
             </span>
           `}
         </div>
       </div>
 
-      <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
-        <span><i class="ph ph-map-pin"></i> ${v.region || 'N/A'}</span>
-        <span><i class="ph ph-clock"></i> ${totalHoras} hrs</span>
-        <span class="${infoSla.color} font-semibold"><i class="ph ph-timer"></i> ${infoSla.texto}</span>
+      <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
+        <span><i class="ph ph-map-pin text-amber-400"></i> ${v.region || 'N/A'}</span>
+        <span><i class="ph ph-clock text-amber-400"></i> ${totalHoras} hrs</span>
+        <span class="${infoSla.color} font-semibold flex items-center gap-1">
+          <i class="ph ph-timer"></i> ${infoSla.texto}
+        </span>
       </div>
 
       ${v.estatus_vacante === 'Contratado' ? `
-        <div class="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+        <div class="mt-3 p-2.5 rounded-xl bg-[#0F1626] border border-slate-800 flex items-center justify-between text-xs">
           <div class="flex items-center gap-1.5">
-            <i class="ph ph-shield-check text-base ${infoGarantia.color}"></i>
-            <span class="font-medium text-slate-700">Garantía (${v.dias_garantia_pactados}d):</span>
+            <i class="ph ph-shield-check text-base text-amber-400"></i>
+            <span class="font-medium text-slate-300">Garantía (${v.dias_garantia_pactados}d):</span>
           </div>
           <span class="font-bold ${infoGarantia.color}">${infoGarantia.texto}</span>
         </div>
       ` : ''}
 
-      <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 text-center">
+      <div class="mt-3 pt-3 border-t border-slate-800 grid grid-cols-3 gap-1 text-center">
         <div>
-          <span class="text-[10px] text-slate-400 font-semibold block">FEE TOTAL</span>
-          <span class="text-xs font-bold text-slate-800">$${Number(v.fee_pactado_total).toLocaleString()}</span>
+          <span class="text-[10px] text-slate-400 font-semibold block uppercase">Fee Total</span>
+          <span class="text-xs font-bold text-amber-300">$${Number(v.fee_pactado_total).toLocaleString()}</span>
         </div>
         <div>
-          <span class="text-[10px] text-slate-400 font-semibold block">INVERTIDO</span>
-          <span class="text-xs font-bold text-rose-500">$${costoTotal.toLocaleString()}</span>
+          <span class="text-[10px] text-slate-400 font-semibold block uppercase">Invertido</span>
+          <span class="text-xs font-bold text-rose-400">$${costoTotal.toLocaleString()}</span>
         </div>
         <div>
-          <span class="text-[10px] text-slate-400 font-semibold block">MARGEN</span>
-          <span class="text-xs font-black ${margenPorcentaje >= 40 ? 'text-emerald-600' : 'text-amber-500'}">${margenPorcentaje}%</span>
+          <span class="text-[10px] text-slate-400 font-semibold block uppercase">Margen</span>
+          <span class="text-xs font-black ${margenPorcentaje >= 40 ? 'text-emerald-400' : 'text-amber-400'}">${margenPorcentaje}%</span>
         </div>
       </div>
 
       <div class="mt-3.5 flex flex-wrap gap-2">
-        <button class="btn-card-gasto flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1">
-          <i class="ph ph-receipt"></i> + Gasto
+        <button class="btn-card-gasto flex-1 py-2 bg-[#162032] hover:bg-[#1A2438] text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1">
+          <i class="ph ph-receipt text-amber-400"></i> + Gasto
         </button>
-        <button class="btn-card-hora flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1">
-          <i class="ph ph-clock"></i> + Horas
+        <button class="btn-card-hora flex-1 py-2 bg-[#162032] hover:bg-[#1A2438] text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1">
+          <i class="ph ph-clock text-amber-400"></i> + Horas
         </button>
         ${v.estatus_vacante === 'En Proceso' ? `
-          <button class="btn-card-contratar w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1 border border-emerald-200">
-            <i class="ph ph-check-circle"></i> Marcar Contratada
+          <button class="btn-card-contratar w-full py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1 shadow-md shadow-emerald-600/20">
+            <i class="ph ph-check-circle-bold text-sm"></i> Marcar Contratada
           </button>
         ` : ''}
       </div>
@@ -550,12 +556,12 @@ function calcularSlaProceso(vacante) {
   const transcurridos = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
 
   if (vacante.estatus_vacante === "Contratado") {
-    return { dias: transcurridos, texto: `Cerrada en ${transcurridos}d (Meta ${meta}d)`, color: transcurridos <= meta ? "text-emerald-600" : "text-amber-500" };
+    return { dias: transcurridos, texto: `Cerrada en ${transcurridos}d`, color: transcurridos <= meta ? "text-emerald-400" : "text-amber-400" };
   }
 
-  if (transcurridos > meta) return { dias: transcurridos, texto: `${transcurridos}d (SLA Excedido)`, color: "text-rose-500" };
-  if (transcurridos >= meta - 3) return { dias: transcurridos, texto: `${transcurridos}/${meta}d (Por vencer SLA)`, color: "text-amber-500" };
-  return { dias: transcurridos, texto: `${transcurridos}/${meta}d SLA`, color: "text-cyan-600" };
+  if (transcurridos > meta) return { dias: transcurridos, texto: `${transcurridos}d (SLA Excedido)`, color: "text-rose-400" };
+  if (transcurridos >= meta - 3) return { dias: transcurridos, texto: `${transcurridos}/${meta}d (Por vencer)`, color: "text-amber-400" };
+  return { dias: transcurridos, texto: `${transcurridos}/${meta}d SLA`, color: "text-cyan-400" };
 }
 
 // ==========================================
@@ -593,7 +599,7 @@ function abrirExpediente(vacante) {
         </a>
       ` : ''}
       ${cliente.contacto_email ? `
-        <a href="mailto:${cliente.contacto_email}?subject=Seguimiento:%20${encodeURIComponent(vacante.titulo_puesto)}" class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs hover:bg-indigo-500/30">
+        <a href="mailto:${cliente.contacto_email}?subject=Seguimiento:%20${encodeURIComponent(vacante.titulo_puesto)}" class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs hover:bg-amber-500/30">
           <i class="ph ph-envelope"></i>
         </a>
       ` : ''}
@@ -609,10 +615,19 @@ function abrirExpediente(vacante) {
 
   const badgeEstatus = document.getElementById("expBadgeEstatus");
   if (badgeEstatus) {
-    badgeEstatus.textContent = vacante.estatus_vacante;
-    badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
-      ? "px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30"
-      : "px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+    if (vacante.estatus_vacante === "En Proceso") {
+      badgeEstatus.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <i class="ph ph-circle-notch animate-spin text-amber-400"></i> En Proceso
+        </span>
+      `;
+    } else {
+      badgeEstatus.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          <i class="ph ph-check-circle-bold text-emerald-400"></i> Contratado
+        </span>
+      `;
+    }
   }
 
   setText("expFechaInicio", vacante.fecha_inicio_proceso || "--");
@@ -691,25 +706,24 @@ function renderPipelineVacante(vacante) {
 
   const p = vacante.pipeline;
   const etapas = [
-    { key: "postulados", label: "Postulados", color: "text-indigo-400" },
+    { key: "postulados", label: "Postulados", color: "text-amber-400" },
     { key: "filtro", label: "Filtro Tel.", color: "text-cyan-400" },
-    { key: "entrevistas", label: "Entrevistas", color: "text-amber-400" },
+    { key: "entrevistas", label: "Entrevistas", color: "text-amber-300" },
     { key: "terna", label: "En Terna", color: "text-purple-400" },
     { key: "oferta", label: "Oferta", color: "text-emerald-400" }
   ];
 
   container.innerHTML = etapas.map(e => `
-    <div class="p-2 rounded-xl bg-[#0d131f] border border-slate-800 flex flex-col items-center">
+    <div class="p-2 rounded-xl bg-[#0F1626] border border-slate-800 flex flex-col items-center">
       <span class="text-xs font-black ${e.color}">${p[e.key] || 0}</span>
       <span class="text-[9px] font-bold text-slate-400 mt-0.5 leading-none">${e.label}</span>
       <div class="flex gap-1 mt-1.5">
-        <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">-</button>
-        <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">+</button>
+        <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="btn-pipeline-action w-4 h-4 rounded bg-[#162032] text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">-</button>
+        <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="btn-pipeline-action w-4 h-4 rounded bg-[#162032] text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">+</button>
       </div>
     </div>
   `).join("");
 
-  // Ratios de Eficiencia
   const tasaCalificacion = (p.postulados > 0) ? Math.round((p.filtro / p.postulados) * 100) : 0;
   const efectividadTerna = (p.terna > 0) ? Math.round((p.oferta / p.terna) * 100) : 0;
   
@@ -721,7 +735,6 @@ function renderPipelineVacante(vacante) {
   setText("ratioCostoEntrevista", costoPorEntrevista > 0 ? `$${costoPorEntrevista}` : "$0");
 }
 
-// GENERAR Y ENVIAR REPORTE POR WHATSAPP AL CLIENTE
 function enviarReportePipelineWhatsApp() {
   if (!vacanteSeleccionadaExpediente) return;
   const v = vacanteSeleccionadaExpediente;
@@ -798,7 +811,8 @@ function reactivarPorGarantia() {
         "",
         vacanteReposicion.dias_garantia_pactados,
         "", "", "No",
-        vacanteReposicion.descripcion_perfil
+        vacanteReposicion.descripcion_perfil,
+        JSON.stringify(vacanteReposicion.pipeline)
       ]
     });
   }
@@ -901,7 +915,6 @@ function guardarObservacionesInline() {
   });
 }
 
-// ANALÍTICAS Y SALUD DEL PIPELINE GLOBAL
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
   const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -913,7 +926,6 @@ function renderizarAnaliticas() {
   const margenGlobalPorcentaje = totalFacturado > 0 ? Math.round((utilidadNetaTotal / totalFacturado) * 100) : 0;
   const roas = totalGastosPauta > 0 ? (totalFacturado / totalGastosPauta).toFixed(1) : "N/A";
 
-  // Métricas del pipeline global
   const totalPostulados = DB.vacantes.reduce((sum, v) => sum + Number(v.pipeline ? v.pipeline.postulados || 0 : 0), 0);
   const totalEntrevistas = DB.vacantes.reduce((sum, v) => sum + Number(v.pipeline ? v.pipeline.entrevistas || 0 : 0), 0);
   const totalTernas = DB.vacantes.reduce((sum, v) => sum + Number(v.pipeline ? v.pipeline.terna || 0 : 0), 0);
@@ -950,12 +962,12 @@ function renderizarAnaliticas() {
 
       const row = document.createElement("div");
       row.innerHTML = `
-        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+        <div class="flex justify-between text-xs font-semibold text-slate-300 mb-1">
           <span>${cat}</span>
-          <span>$${monto.toLocaleString()} <span class="text-slate-400 font-normal">(${pct}%)</span></span>
+          <span>$${monto.toLocaleString()} <span class="text-slate-500 font-normal">(${pct}%)</span></span>
         </div>
-        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-          <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div>
+        <div class="w-full bg-[#0B0F17] rounded-full h-2 overflow-hidden border border-slate-800">
+          <div class="bg-gradient-to-r from-amber-500 to-amber-400 h-2 rounded-full" style="width: ${pct}%"></div>
         </div>
       `;
       containerBreakdown.appendChild(row);
@@ -989,46 +1001,46 @@ function renderizarAnaliticas() {
     const isOpen = clienteAbiertoDetalle === c.id_cliente;
 
     const card = document.createElement("div");
-    card.className = "rounded-2xl bg-slate-50 border border-slate-200/80 overflow-hidden transition-all duration-200 shadow-sm";
+    card.className = "rounded-2xl bg-[#0F1626] border border-slate-800 overflow-hidden transition-all duration-200 shadow-sm";
     
     card.innerHTML = `
-      <div class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors" data-client-id="${c.id_cliente}">
+      <div class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#162032] transition-colors" data-client-id="${c.id_cliente}">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xs">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center justify-center font-black text-xs">
             ${c.nombre_comercial.slice(0,2).toUpperCase()}
           </div>
           <div>
-            <h4 class="text-xs font-bold text-slate-900 leading-tight">${c.nombre_comercial}</h4>
-            <span class="text-[11px] text-slate-500">${vacantesCliente.length} vacante(s) • Facturado: $${facturadoCliente.toLocaleString()}</span>
+            <h4 class="text-xs font-bold text-white font-serif leading-tight">${c.nombre_comercial}</h4>
+            <span class="text-[11px] text-slate-400">${vacantesCliente.length} vacante(s) • Facturado: $${facturadoCliente.toLocaleString()}</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <div class="text-right">
-            <span class="text-xs font-black ${netoCliente >= 0 ? 'text-emerald-600' : 'text-rose-500'}">+$${netoCliente.toLocaleString()}</span>
-            <span class="text-[10px] font-bold block text-slate-400">${margenCliente}% neto</span>
+            <span class="text-xs font-black ${netoCliente >= 0 ? 'text-emerald-400' : 'text-rose-400'}">+$${netoCliente.toLocaleString()}</span>
+            <span class="text-[10px] font-bold block text-slate-500">${margenCliente}% neto</span>
           </div>
-          <i class="ph ${isOpen ? 'ph-caret-up-bold' : 'ph-caret-down-bold'} text-slate-400 text-sm transition-transform"></i>
+          <i class="ph ${isOpen ? 'ph-caret-up-bold' : 'ph-caret-down-bold'} text-amber-400 text-sm transition-transform"></i>
         </div>
       </div>
 
-      <div class="${isOpen ? 'block' : 'hidden'} px-3.5 pb-3.5 pt-1 border-t border-slate-200/60 space-y-3 bg-white">
-        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+      <div class="${isOpen ? 'block' : 'hidden'} px-3.5 pb-3.5 pt-1 border-t border-slate-800 space-y-3 bg-[#0B0F17]">
+        <div class="p-2.5 rounded-xl bg-[#0F1626] border border-slate-800 flex items-center justify-between">
           <div>
-            <span class="text-[10px] text-slate-400 font-semibold block">CONTACTO PRINCIPAL</span>
-            <span class="text-xs font-bold text-slate-800">${c.contacto_nombre || 'No asignado'}</span>
-            <span class="text-[11px] text-slate-500 block">${c.contacto_whatsapp || 'Sin WhatsApp'} ${c.contacto_email ? '• ' + c.contacto_email : ''}</span>
+            <span class="text-[10px] text-slate-400 font-semibold block uppercase">Contacto Principal</span>
+            <span class="text-xs font-bold text-slate-200">${c.contacto_nombre || 'No asignado'}</span>
+            <span class="text-[11px] text-slate-400 block">${c.contacto_whatsapp || 'Sin WhatsApp'} ${c.contacto_email ? '• ' + c.contacto_email : ''}</span>
           </div>
           <div class="flex items-center gap-1.5">
             ${c.contacto_whatsapp ? `
-              <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar WhatsApp">
+              <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar WhatsApp">
                 <i class="ph ph-whatsapp-logo"></i>
               </a>
-              <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Llamar">
+              <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-sm shadow-sm active:scale-95" title="Llamar">
                 <i class="ph ph-phone"></i>
               </a>
             ` : ''}
             ${c.contacto_email ? `
-              <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar Correo">
+              <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar Correo">
                 <i class="ph ph-envelope"></i>
               </a>
             ` : ''}
@@ -1036,17 +1048,17 @@ function renderizarAnaliticas() {
         </div>
 
         <div class="grid grid-cols-3 gap-2 text-center pt-1">
-          <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="p-2 rounded-xl bg-[#0F1626] border border-slate-800">
             <span class="text-[9px] font-bold text-slate-400 uppercase block">Pauta Ads</span>
-            <span class="text-xs font-bold text-rose-500">$${gastosPautaCliente.toLocaleString()}</span>
+            <span class="text-xs font-bold text-rose-400">$${gastosPautaCliente.toLocaleString()}</span>
           </div>
-          <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="p-2 rounded-xl bg-[#0F1626] border border-slate-800">
             <span class="text-[9px] font-bold text-slate-400 uppercase block">Horas ($)</span>
-            <span class="text-xs font-bold text-amber-600">${totalHorasCliente}h ($${costoHorasCliente.toLocaleString()})</span>
+            <span class="text-xs font-bold text-amber-300">${totalHorasCliente}h ($${costoHorasCliente.toLocaleString()})</span>
           </div>
-          <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="p-2 rounded-xl bg-[#0F1626] border border-slate-800">
             <span class="text-[9px] font-bold text-slate-400 uppercase block">ROAS</span>
-            <span class="text-xs font-black text-indigo-600">${roasCliente === 'N/A' ? 'N/A' : roasCliente + 'x'}</span>
+            <span class="text-xs font-black text-amber-400">${roasCliente === 'N/A' ? 'N/A' : roasCliente + 'x'}</span>
           </div>
         </div>
 
@@ -1061,19 +1073,19 @@ function renderizarAnaliticas() {
               const margenV = v.fee_pactado_total > 0 ? Math.round((netoV / v.fee_pactado_total) * 100) : 0;
 
               return `
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                <div class="p-2.5 rounded-xl bg-[#0F1626] border border-slate-800 flex items-center justify-between text-xs">
                   <div>
                     <div class="flex items-center gap-1.5">
-                      <span class="font-bold text-slate-800">${v.titulo_puesto}</span>
-                      <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                      <span class="font-bold text-white font-serif">${v.titulo_puesto}</span>
+                      <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">
                         ${v.estatus_vacante}
                       </span>
                     </div>
                     <span class="text-[10px] text-slate-400">Fee: $${Number(v.fee_pactado_total).toLocaleString()} | Invertido: $${totalInvV.toLocaleString()}</span>
                   </div>
                   <div class="text-right">
-                    <span class="font-black text-xs ${netoV >= 0 ? 'text-emerald-600' : 'text-rose-500'}">+$${netoV.toLocaleString()}</span>
-                    <span class="text-[9px] font-bold text-slate-400 block">${margenV}%</span>
+                    <span class="font-black text-xs ${netoV >= 0 ? 'text-emerald-400' : 'text-rose-400'}">+$${netoV.toLocaleString()}</span>
+                    <span class="text-[9px] font-bold text-slate-500 block">${margenV}%</span>
                   </div>
                 </div>
               `;
@@ -1104,57 +1116,57 @@ function renderizarDirectorioClientes() {
     const cerradas = vacantesCliente.filter(v => v.estatus_vacante === "Contratado").length;
 
     const card = document.createElement("div");
-    card.className = "p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3";
+    card.className = "p-4 bg-[#131B2B] rounded-2xl border border-slate-800 space-y-3 shadow-lg shadow-black/30";
     
     card.innerHTML = `
       <div class="flex items-start justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 flex items-center justify-center font-bold text-sm shadow-md shadow-amber-500/20 font-serif">
             ${c.nombre_comercial.slice(0,2).toUpperCase()}
           </div>
           <div>
-            <h3 class="text-sm font-bold text-slate-900 leading-tight">${c.nombre_comercial}</h3>
-            <span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+            <h3 class="text-sm font-bold text-white font-serif leading-tight">${c.nombre_comercial}</h3>
+            <span class="text-xs text-amber-400/80 flex items-center gap-1 mt-0.5">
               <i class="ph ph-map-pin"></i> ${c.region || 'Sin región'}
             </span>
           </div>
         </div>
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
           ${c.estatus || 'Activo'}
         </span>
       </div>
 
-      <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1">
+      <div class="p-3 bg-[#0F1626] rounded-xl text-xs space-y-1.5 border border-slate-800">
         <div class="flex justify-between">
           <span class="text-slate-400">Contacto:</span>
-          <span class="font-bold text-slate-700">${c.contacto_nombre || 'No registrado'}</span>
+          <span class="font-bold text-slate-200">${c.contacto_nombre || 'No registrado'}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">WhatsApp / Tel:</span>
-          <span class="font-semibold text-slate-700">${c.contacto_whatsapp || 'Sin número'}</span>
+          <span class="font-semibold text-amber-300">${c.contacto_whatsapp || 'Sin número'}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">Correo:</span>
-          <span class="font-semibold text-slate-700">${c.contacto_email || 'Sin correo'}</span>
+          <span class="font-semibold text-slate-300">${c.contacto_email || 'Sin correo'}</span>
         </div>
-        <div class="flex justify-between pt-1 border-t border-slate-200/60">
+        <div class="flex justify-between pt-1.5 border-t border-slate-800">
           <span class="text-slate-400">Vacantes:</span>
-          <span class="font-bold text-indigo-600">${activas} activas / ${cerradas} cubiertas</span>
+          <span class="font-bold text-amber-400">${activas} activas / ${cerradas} cubiertas</span>
         </div>
       </div>
 
       <div class="flex items-center gap-2 pt-1">
         ${c.contacto_whatsapp ? `
-          <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-transform">
+          <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-transform">
             <i class="ph ph-whatsapp-logo text-base"></i> WhatsApp
           </a>
-          <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="px-3.5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-transform" title="Llamar">
-            <i class="ph ph-phone text-base"></i>
+          <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="px-3.5 py-2.5 bg-[#162032] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 border border-slate-700/60 active:scale-95 transition-transform" title="Llamar">
+            <i class="ph ph-phone text-base text-cyan-400"></i>
           </a>
         ` : ''}
         ${c.contacto_email ? `
-          <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="px-3.5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-transform" title="Enviar correo">
-            <i class="ph ph-envelope text-base"></i>
+          <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="px-3.5 py-2.5 bg-[#162032] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 border border-slate-700/60 active:scale-95 transition-transform" title="Enviar correo">
+            <i class="ph ph-envelope text-base text-amber-400"></i>
           </a>
         ` : ''}
       </div>
@@ -1181,10 +1193,10 @@ function calcularDiasGarantia(vacante) {
   const diffTime = finGarantia - hoy;
   const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  if (vacante.garantia_aplicada !== "No") return { diasRestantes: 0, texto: "Consumida", color: "text-purple-600" };
-  if (diasRestantes <= 0) return { diasRestantes: 0, texto: "Vencida", color: "text-rose-500" };
-  if (diasRestantes <= 15) return { diasRestantes, texto: `${diasRestantes}d (Por vencer)`, color: "text-amber-500" };
-  return { diasRestantes, texto: `${diasRestantes}d restantes`, color: "text-emerald-600" };
+  if (vacante.garantia_aplicada !== "No") return { diasRestantes: 0, texto: "Consumida", color: "text-purple-400" };
+  if (diasRestantes <= 0) return { diasRestantes: 0, texto: "Vencida", color: "text-rose-400" };
+  if (diasRestantes <= 15) return { diasRestantes, texto: `${diasRestantes}d (Por vencer)`, color: "text-amber-400" };
+  return { diasRestantes, texto: `${diasRestantes}d restantes`, color: "text-emerald-400" };
 }
 
 function abrirModalContratar(vacante) {
