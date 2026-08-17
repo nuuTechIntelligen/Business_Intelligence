@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Número oficial de Talentum (formato internacional sin signos ni espacios)
+    const TALENTUM_PHONE = '525512345678';
+
     // ==========================================
     // 1. Menú Móvil
     // ==========================================
@@ -62,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const getSlidesPerView = () => window.innerWidth >= 768 ? 2 : 1;
         const getMaxIndex = () => Math.max(0, slides.length - getSlidesPerView());
 
-        // Generar puntos indicadores
         const updateDots = () => {
             if (!dotsContainer) return;
             dotsContainer.innerHTML = '';
@@ -148,37 +150,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // 5. Envío Funcional de Formularios (Feedback)
+    // 5. Redirección a WhatsApp con Mensajes Formateados
     // ==========================================
-    const handleFormSubmit = (formId, successMsg) => {
-        const form = document.getElementById(formId);
-        if (!form) return;
 
-        form.addEventListener('submit', (e) => {
+    // Formulario de Contacto / Diagnóstico General
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn ? submitBtn.innerText : '';
+            
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const servicioSelect = document.getElementById('servicio');
+            const servicioText = servicioSelect.options[servicioSelect.selectedIndex].text;
+            const mensaje = document.getElementById('mensaje').value.trim();
 
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = 'Enviando...';
-            }
+            const textoMensaje = `*¡Hola, Talentum Consultoría!* 👋\n\n` +
+                `Me gustaría solicitar un *Diagnóstico Gratuito* con los siguientes datos:\n\n` +
+                `👤 *Nombre:* ${nombre}\n` +
+                `✉️ *Correo:* ${email}\n` +
+                `💼 *Servicio de interés:* ${servicioText}\n` +
+                `📝 *Mensaje/Necesidad:* ${mensaje}`;
 
-            // Simulación de envío
-            setTimeout(() => {
-                form.reset();
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = originalText;
-                }
-                alert(successMsg);
-                if (formId === 'modal-appointment-form') {
-                    closeModal();
-                }
-            }, 800);
+            const urlWhatsApp = `https://wa.me/${TALENTUM_PHONE}?text=${encodeURIComponent(textoMensaje)}`;
+            
+            window.open(urlWhatsApp, '_blank');
+            contactForm.reset();
         });
-    };
+    }
 
-    handleFormSubmit('contact-form', '¡Gracias por contactar a Talentum! Un asesor se comunicará contigo en breve.');
-    handleFormSubmit('modal-appointment-form', '¡Cita solicitada exitosamente! Nos pondremos en contacto para confirmar el horario.');
+    // Formulario del Modal de Cita
+    const modalAppointmentForm = document.getElementById('modal-appointment-form');
+    if (modalAppointmentForm) {
+        modalAppointmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const nombre = document.getElementById('modal-nombre').value.trim();
+            const email = document.getElementById('modal-email').value.trim();
+            const fecha = document.getElementById('modal-fecha').value;
+            const modalidadSelect = document.getElementById('modal-modalidad');
+            const modalidadText = modalidadSelect.options[modalidadSelect.selectedIndex].text;
+
+            const textoMensaje = `*¡Hola, Talentum Consultoría!* 👋\n\n` +
+                `Deseo *Agendar una Cita* de diagnóstico:\n\n` +
+                `👤 *Nombre:* ${nombre}\n` +
+                `✉️ *Correo:* ${email}\n` +
+                `📅 *Fecha propuesta:* ${fecha}\n` +
+                `💻 *Modalidad:* ${modalidadText}`;
+
+            const urlWhatsApp = `https://wa.me/${TALENTUM_PHONE}?text=${encodeURIComponent(textoMensaje)}`;
+            
+            window.open(urlWhatsApp, '_blank');
+            modalAppointmentForm.reset();
+            closeModal();
+        });
+    }
 });
