@@ -30,7 +30,7 @@
     outline-offset: 2px;
 }
 
-/* Carrusel de Testimonios */
+/* Carrusel dinámico de Testimonios */
 .carousel-track {
     display: flex;
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
@@ -64,11 +64,7 @@
     transform: rotate(180deg);
 }
 
-/* Modal */
-.modal-backdrop {
-    transition: opacity 0.3s ease;
-}
-
+/* Animaciones de Modal */
 .modal-content {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
