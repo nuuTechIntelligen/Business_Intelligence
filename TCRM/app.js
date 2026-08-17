@@ -3,7 +3,7 @@
  * Paleta de Colores Talentum + Microanimaciones UX
  */
 
-const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
 
 let DB = {
   clientes: [
