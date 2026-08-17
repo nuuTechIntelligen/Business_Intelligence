@@ -1,0 +1,41 @@
+/* Optimizaciones táctiles y de vista nativa móvil */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  overscroll-behavior-y: contain;
+}
+
+/* Ocultar barras de desplazamiento manteniendo el scroll táctil */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animación y transición suave del Bottom Sheet */
+.bottom-sheet {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Estado activo para chips de filtro */
+.chip-active {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.chip-inactive {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+.chip-inactive:hover {
+  background-color: #e2e8f0 !important;
+}
