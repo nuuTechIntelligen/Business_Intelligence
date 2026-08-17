@@ -17,8 +17,21 @@ body {
   scrollbar-width: none;
 }
 
+/* Transición suave para todos los modales */
 .bottom-sheet {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-in-out;
+  transform: translateY(105%) !important;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Clase forzada para mostrar el modal */
+.bottom-sheet.modal-active {
+  transform: translateY(0%) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
 }
 
 .chip-active {
