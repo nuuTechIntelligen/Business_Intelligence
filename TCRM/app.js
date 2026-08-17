@@ -371,23 +371,6 @@ function guardarNuevoServicio() {
   });
 }
 
-  const idServicio = `SRV-${Date.now().toString().slice(-4)}`;
-  const nuevoSrv = { id_servicio: idServicio, nombre_servicio: nombre, dias_garantia_defecto: dias, sla_meta_dias: 20 };
-  
-  DB.servicios.push(nuevoSrv);
-  poblarSelects();
-  document.getElementById("modalVacanteServicio").value = idServicio;
-  document.getElementById("nuevaVacanteGarantia").value = dias;
-  document.getElementById("boxNuevoServicio").classList.add("hidden");
-  document.getElementById("nuevoServicioNombre").value = "";
-
-  sendToAppsScript({
-    action: "create",
-    targetSheet: "CAT_SERVICIOS",
-    payload: [idServicio, nombre, dias, 1.0]
-  });
-}
-
 function renderizarApp() {
   if (currentTab === "analytics") {
     renderizarAnaliticas();
