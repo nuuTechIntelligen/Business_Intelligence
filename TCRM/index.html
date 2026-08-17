@@ -198,12 +198,12 @@
   </nav>
 
   <!-- BACKDROP GENERAL -->
-  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
   <!-- ======================================================== -->
-  <!-- MODAL EXPEDIENTE COMPLETO DARK THEME -->
+  <!-- MODAL EXPEDIENTE COMPLETO (DARK THEME) -->
   <!-- ======================================================== -->
-  <div id="modalExpediente" class="fixed inset-x-0 bottom-0 bg-[#0d131f] text-slate-100 z-50 transform translate-y-full bottom-sheet w-full max-w-2xl mx-auto shadow-2xl border-t border-slate-800 flex flex-col h-[94vh] rounded-t-3xl overflow-hidden">
+  <div id="modalExpediente" class="fixed inset-x-0 bottom-0 bg-[#0d131f] text-slate-100 z-50 bottom-sheet w-full max-w-2xl mx-auto shadow-2xl border-t border-slate-800 flex flex-col h-[94vh] rounded-t-3xl overflow-hidden">
     
     <!-- CABECERA EXPEDIENTE -->
     <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between bg-[#111827]">
@@ -214,7 +214,7 @@
           <div id="expAccionesContactoHeader" class="flex items-center gap-1.5 ml-1"></div>
         </div>
       </div>
-      <button class="btn-close-modal w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white transition-colors active:scale-95">
+      <button class="btn-close-modal w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white transition-colors active:scale-95" aria-label="Cerrar modal">
         <i class="ph ph-x text-lg pointer-events-none"></i>
       </button>
     </div>
@@ -416,7 +416,7 @@
   </div>
 
   <!-- MODAL 1: REGISTRAR GASTO -->
-  <div id="modalSheetGasto" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
+  <div id="modalSheetGasto" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl p-5 z-50 bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Registrar Gasto / Inversión</h2>
@@ -453,7 +453,7 @@
   </div>
 
   <!-- MODAL 2: REGISTRAR HORAS -->
-  <div id="modalSheetHora" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
+  <div id="modalSheetHora" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl p-5 z-50 bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Registrar Horas de Consultoría</h2>
@@ -498,7 +498,7 @@
   </div>
 
   <!-- MODAL 3: NUEVA VACANTE -->
-  <div id="modalSheetVacante" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100 max-h-[90vh] overflow-y-auto">
+  <div id="modalSheetVacante" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl p-5 z-50 bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100 max-h-[90vh] overflow-y-auto">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Alta de Nueva Vacante</h2>
@@ -588,7 +588,7 @@
   </div>
 
   <!-- MODAL 4: MARCAR COMO CONTRATADA -->
-  <div id="modalSheetContratar" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
+  <div id="modalSheetContratar" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl p-5 z-50 bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <div>
@@ -637,7 +637,7 @@
   </div>
 
   <!-- MODAL 5: NUEVO CLIENTE DIRECTO -->
-  <div id="modalSheetNuevoClienteDirecto" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
+  <div id="modalSheetNuevoClienteDirecto" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl p-5 z-50 bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-base font-bold text-slate-900">Alta de Nuevo Cliente</h2>
