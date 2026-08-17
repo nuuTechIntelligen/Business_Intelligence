@@ -1314,22 +1314,25 @@ function guardarClienteDirecto(e) {
 }
 
 async function sendToAppsScript(payload) {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec") return;
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") {
+    console.warn("⚠️ APPS_SCRIPT_URL no configurada.");
+    return;
+  }
   try {
-    await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
       mode: "no-cors"
     });
-    console.log("✓ Sincronizado con Apps Script:", payload.action);
+    console.log("✓ Petición enviada a Google Sheets:", payload.action, payload.targetSheet);
   } catch (err) {
-    console.error("Error al sincronizar con Apps Script:", err);
+    console.error("❌ Error al sincronizar con Apps Script:", err);
   }
 }
 
 async function cargarDatosDesdeAPI() {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec") return;
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") return;
   try {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getDashboardData`);
     const data = await res.json();
