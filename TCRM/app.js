@@ -6,8 +6,24 @@ const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   clientes: [
-    { id_cliente: "CLI-001", nombre_comercial: "TechSolutions MX", region: "Querétaro" },
-    { id_cliente: "CLI-002", nombre_comercial: "Logística Bajío", region: "Bajío" }
+    { 
+      id_cliente: "CLI-001", 
+      nombre_comercial: "TechSolutions MX", 
+      region: "Querétaro", 
+      contacto_nombre: "Ing. Carlos Mendoza", 
+      contacto_whatsapp: "4421234567", 
+      contacto_email: "cmendoza@techsolutions.mx",
+      estatus: "Activo" 
+    },
+    { 
+      id_cliente: "CLI-002", 
+      nombre_comercial: "Logística Bajío", 
+      region: "Bajío", 
+      contacto_nombre: "Lic. Laura Morales", 
+      contacto_whatsapp: "4429876543", 
+      contacto_email: "rh@logisticabajio.com",
+      estatus: "Activo" 
+    }
   ],
   servicios: [
     { id_servicio: "SRV-001", nombre_servicio: "Reclutamiento Operativo", dias_garantia_defecto: 30 },
@@ -78,13 +94,15 @@ function setupEventListeners() {
   // Bottom Nav
   document.getElementById("navBtnVacantes").addEventListener("click", () => switchTab("vacantes"));
   document.getElementById("navBtnAnalytics").addEventListener("click", () => switchTab("analytics"));
+  document.getElementById("navBtnClientes").addEventListener("click", () => switchTab("clientes"));
 
   // FAB
   document.getElementById("btnFab").addEventListener("click", toggleFabMenu);
   document.getElementById("btnOpenModalVacante").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetVacante"); });
   document.getElementById("btnOpenModalHora").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetHora"); });
+  document.getElementById("btnOpenModalNuevoClienteDirecto").addEventListener("click", () => openModal("modalSheetNuevoClienteDirecto"));
 
-  // Cerrar modales desde backdrop o botones de cierre
+  // Cerrar modales
   document.getElementById("modalBackdrop").addEventListener("click", closeModal);
   document.querySelectorAll(".btn-close-modal").forEach(b => {
     b.addEventListener("click", (e) => {
@@ -93,7 +111,6 @@ function setupEventListeners() {
     });
   });
 
-  // Cerrar con Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
   });
@@ -114,6 +131,7 @@ function setupEventListeners() {
   document.getElementById("formHora").addEventListener("submit", guardarHora);
   document.getElementById("formVacante").addEventListener("submit", guardarVacante);
   document.getElementById("formContratar").addEventListener("submit", procesarContratacion);
+  document.getElementById("formClienteDirecto").addEventListener("submit", guardarClienteDirecto);
 
   // Gasto directo dentro del Expediente
   document.getElementById("btnToggleGastoInline").addEventListener("click", () => {
@@ -171,6 +189,7 @@ function switchTab(tab) {
   currentTab = tab;
   const viewVacantes = document.getElementById("viewVacantes");
   const viewAnalytics = document.getElementById("viewAnalytics");
+  const viewClientes = document.getElementById("viewClientes");
   const searchSection = document.getElementById("searchSection");
   const filterChips = document.getElementById("filterChipsContainer");
   const headerSubtext = document.getElementById("headerSubtext");
@@ -178,29 +197,43 @@ function switchTab(tab) {
 
   const btnVacantes = document.getElementById("navBtnVacantes");
   const btnAnalytics = document.getElementById("navBtnAnalytics");
+  const btnClientes = document.getElementById("navBtnClientes");
+
+  // Reset clases nav
+  [btnVacantes, btnAnalytics, btnClientes].forEach(b => {
+    b.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
+  });
 
   if (tab === "vacantes") {
     viewVacantes.classList.remove("hidden");
     viewAnalytics.classList.add("hidden");
+    viewClientes.classList.add("hidden");
     searchSection.classList.remove("hidden");
     filterChips.classList.remove("hidden");
     fabContainer.classList.remove("hidden");
     headerSubtext.textContent = "Control de Procesos";
-
     btnVacantes.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
-    btnAnalytics.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
     renderizarApp();
-  } else {
+  } else if (tab === "analytics") {
     viewVacantes.classList.add("hidden");
     viewAnalytics.classList.remove("hidden");
+    viewClientes.classList.add("hidden");
     searchSection.classList.add("hidden");
     filterChips.classList.add("hidden");
     fabContainer.classList.add("hidden");
     headerSubtext.textContent = "Métricas Financieras";
-
-    btnVacantes.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
     btnAnalytics.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
     renderizarAnaliticas();
+  } else if (tab === "clientes") {
+    viewVacantes.classList.add("hidden");
+    viewAnalytics.classList.add("hidden");
+    viewClientes.classList.remove("hidden");
+    searchSection.classList.add("hidden");
+    filterChips.classList.add("hidden");
+    fabContainer.classList.add("hidden");
+    headerSubtext.textContent = "Directorio de Clientes";
+    btnClientes.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
+    renderizarDirectorioClientes();
   }
 }
 
@@ -297,6 +330,10 @@ function guardarNuevoServicio() {
 function renderizarApp() {
   if (currentTab === "analytics") {
     renderizarAnaliticas();
+    return;
+  }
+  if (currentTab === "clientes") {
+    renderizarDirectorioClientes();
     return;
   }
 
@@ -396,7 +433,6 @@ function renderizarApp() {
       </div>
     `;
 
-    // Clic en la tarjeta abre el Expediente Completo
     card.addEventListener("click", (e) => {
       if (!e.target.closest("button")) {
         abrirExpediente(v);
@@ -435,7 +471,7 @@ function renderizarApp() {
 // ==========================================
 function abrirExpediente(vacante) {
   vacanteSeleccionadaExpediente = vacante;
-  const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General" };
+  const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General", contacto_whatsapp: "" };
   const servicio = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { nombre_servicio: "Reclutamiento" };
 
   const gastosVacante = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante));
@@ -458,6 +494,24 @@ function abrirExpediente(vacante) {
 
   document.getElementById("expPuesto").textContent = vacante.titulo_puesto;
   document.getElementById("expSubtitulo").textContent = `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`;
+
+  // Botones de contacto rápido en la cabecera del expediente
+  const headerAcciones = document.getElementById("expAccionesContactoHeader");
+  headerAcciones.innerHTML = `
+    ${cliente.contacto_whatsapp ? `
+      <a href="https://wa.me/52${limpiarTelefono(cliente.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(cliente.contacto_nombre || cliente.nombre_comercial)},%20te%20contacto%20sobre%20la%20vacante%20de%20${encodeURIComponent(vacante.titulo_puesto)}" target="_blank" class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs hover:bg-emerald-500/30">
+        <i class="ph ph-whatsapp-logo"></i>
+      </a>
+      <a href="tel:${limpiarTelefono(cliente.contacto_whatsapp)}" class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs hover:bg-cyan-500/30">
+        <i class="ph ph-phone"></i>
+      </a>
+    ` : ''}
+    ${cliente.contacto_email ? `
+      <a href="mailto:${cliente.contacto_email}?subject=Seguimiento:%20${encodeURIComponent(vacante.titulo_puesto)}" class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs hover:bg-indigo-500/30">
+        <i class="ph ph-envelope"></i>
+      </a>
+    ` : ''}
+  `;
 
   document.getElementById("expFee").textContent = `$${feeTotal.toLocaleString()}`;
   document.getElementById("expInversion").textContent = `$${inversionTotal.toLocaleString()}`;
@@ -601,7 +655,7 @@ function guardarObservacionesInline() {
 }
 
 // ========================================================
-// ANALÍTICAS Y RENTABILIDAD CON ACORDEÓN DETALLADO
+// ANALÍTICAS Y RENTABILIDAD CON CONTACTO DIRECTO
 // ========================================================
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
@@ -622,7 +676,6 @@ function renderizarAnaliticas() {
   document.getElementById("kpiRoas").textContent = roas === "N/A" ? "N/A" : `${roas}x`;
   document.getElementById("kpiHorasTotales").textContent = `${totalHorasCantidad} hrs`;
 
-  // Desglose de Gastos
   const containerBreakdown = document.getElementById("breakdownGastos");
   containerBreakdown.innerHTML = "";
 
@@ -653,7 +706,7 @@ function renderizarAnaliticas() {
     containerBreakdown.appendChild(row);
   });
 
-  // ACORDEÓN DETALLADO DE RENTABILIDAD POR CLIENTE
+  // ACORDEÓN DE CLIENTES CON ACCIONES DE CONTACTO
   const containerClientes = document.getElementById("tablaRentabilidadClientes");
   containerClientes.innerHTML = "";
 
@@ -682,7 +735,6 @@ function renderizarAnaliticas() {
     const card = document.createElement("div");
     card.className = "rounded-2xl bg-slate-50 border border-slate-200/80 overflow-hidden transition-all duration-200 shadow-sm";
     
-    // Encabezado del Acordeón
     card.innerHTML = `
       <div class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors" data-client-id="${c.id_cliente}">
         <div class="flex items-center gap-2.5">
@@ -703,11 +755,37 @@ function renderizarAnaliticas() {
         </div>
       </div>
 
-      <!-- CUERPO DESPLEGABLE CON DETALLE 360 -->
+      <!-- CUERPO DESPLEGABLE CON ACCIONES DIRECTAS -->
       <div class="${isOpen ? 'block' : 'hidden'} px-3.5 pb-3.5 pt-1 border-t border-slate-200/60 space-y-3 bg-white">
         
-        <!-- MINI MÉTRICAS DEL CLIENTE -->
-        <div class="grid grid-cols-3 gap-2 text-center pt-2">
+        <!-- FICHA DE CONTACTO RÁPIDO -->
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 font-semibold block">CONTACTO PRINCIPAL</span>
+            <span class="text-xs font-bold text-slate-800">${c.contacto_nombre || 'No asignado'}</span>
+            <span class="text-[11px] text-slate-500 block">${c.contacto_whatsapp || 'Sin WhatsApp'} ${c.contacto_email ? '• ' + c.contacto_email : ''}</span>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN RÁPIDA -->
+          <div class="flex items-center gap-1.5">
+            ${c.contacto_whatsapp ? `
+              <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar WhatsApp">
+                <i class="ph ph-whatsapp-logo"></i>
+              </a>
+              <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Llamar">
+                <i class="ph ph-phone"></i>
+              </a>
+            ` : ''}
+            ${c.contacto_email ? `
+              <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar Correo">
+                <i class="ph ph-envelope"></i>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- MINI KPIS -->
+        <div class="grid grid-cols-3 gap-2 text-center pt-1">
           <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
             <span class="text-[9px] font-bold text-slate-400 uppercase block">Pauta Ads</span>
             <span class="text-xs font-bold text-rose-500">$${gastosPautaCliente.toLocaleString()}</span>
@@ -722,7 +800,7 @@ function renderizarAnaliticas() {
           </div>
         </div>
 
-        <!-- LISTADO DE PROCESOS/VACANTES INDIVIDUALES -->
+        <!-- LISTADO DE PROCESOS -->
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Desglose por Proceso</span>
           <div class="space-y-1.5">
@@ -757,7 +835,6 @@ function renderizarAnaliticas() {
       </div>
     `;
 
-    // Toggle del acordeón al hacer clic
     card.querySelector("[data-client-id]").addEventListener("click", () => {
       clienteAbiertoDetalle = (clienteAbiertoDetalle === c.id_cliente) ? null : c.id_cliente;
       renderizarAnaliticas();
@@ -765,6 +842,84 @@ function renderizarAnaliticas() {
 
     containerClientes.appendChild(card);
   });
+}
+
+// ========================================================
+// VISTA: DIRECTORIO COMPLETO DE CLIENTES
+// ========================================================
+function renderizarDirectorioClientes() {
+  const container = document.getElementById("directorioClientesContainer");
+  container.innerHTML = "";
+
+  DB.clientes.forEach(c => {
+    const vacantesCliente = DB.vacantes.filter(v => String(v.id_cliente) === String(c.id_cliente));
+    const activas = vacantesCliente.filter(v => v.estatus_vacante === "En Proceso").length;
+    const cerradas = vacantesCliente.filter(v => v.estatus_vacante === "Contratado").length;
+
+    const card = document.createElement("div");
+    card.className = "p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3";
+    
+    card.innerHTML = `
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            ${c.nombre_comercial.slice(0,2).toUpperCase()}
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 leading-tight">${c.nombre_comercial}</h3>
+            <span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <i class="ph ph-map-pin"></i> ${c.region || 'Sin región'}
+            </span>
+          </div>
+        </div>
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          ${c.estatus || 'Activo'}
+        </span>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Contacto:</span>
+          <span class="font-bold text-slate-700">${c.contacto_nombre || 'No registrado'}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">WhatsApp / Tel:</span>
+          <span class="font-semibold text-slate-700">${c.contacto_whatsapp || 'Sin número'}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Correo:</span>
+          <span class="font-semibold text-slate-700">${c.contacto_email || 'Sin correo'}</span>
+        </div>
+        <div class="flex justify-between pt-1 border-t border-slate-200/60">
+          <span class="text-slate-400">Vacantes:</span>
+          <span class="font-bold text-indigo-600">${activas} activas / ${cerradas} cubiertas</span>
+        </div>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN RÁPIDA -->
+      <div class="flex items-center gap-2 pt-1">
+        ${c.contacto_whatsapp ? `
+          <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-transform">
+            <i class="ph ph-whatsapp-logo text-base"></i> WhatsApp
+          </a>
+          <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="px-3.5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-transform" title="Llamar">
+            <i class="ph ph-phone text-base"></i>
+          </a>
+        ` : ''}
+        ${c.contacto_email ? `
+          <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="px-3.5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1 active:scale-95 transition-transform" title="Enviar correo">
+            <i class="ph ph-envelope text-base"></i>
+          </a>
+        ` : ''}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function limpiarTelefono(tel) {
+  return String(tel || '').replace(/\D/g, '');
 }
 
 function calcularDiasGarantia(vacante) {
@@ -869,16 +1024,26 @@ async function guardarVacante(e) {
   const boxNuevoCliente = document.getElementById("boxNuevoCliente");
   if (!boxNuevoCliente.classList.contains("hidden")) {
     const nombreCliente = document.getElementById("nuevoClienteNombre").value;
+    const contacto = document.getElementById("nuevoClienteContacto").value;
     region = document.getElementById("nuevoClienteRegion").value || "Querétaro";
     const wa = document.getElementById("nuevoClienteWhatsApp").value;
+    const email = document.getElementById("nuevoClienteEmail").value;
     
     idCliente = `CLI-${Date.now().toString().slice(-4)}`;
-    DB.clientes.push({ id_cliente: idCliente, nombre_comercial: nombreCliente, region, contacto_whatsapp: wa });
+    DB.clientes.push({ 
+      id_cliente: idCliente, 
+      nombre_comercial: nombreCliente, 
+      region, 
+      contacto_nombre: contacto, 
+      contacto_whatsapp: wa, 
+      contacto_email: email, 
+      estatus: "Activo" 
+    });
 
     sendToAppsScript({
       action: "create",
       targetSheet: "CLIENTES",
-      payload: [idCliente, nombreCliente, region, "", wa, "Activo"]
+      payload: [idCliente, nombreCliente, region, contacto, wa, "Activo", email]
     });
   } else {
     const c = DB.clientes.find(item => String(item.id_cliente) === String(idCliente));
@@ -934,6 +1099,39 @@ async function guardarVacante(e) {
       "No",
       nuevaVacante.descripcion_perfil
     ]
+  });
+}
+
+// GUARDAR CLIENTE DIRECTO (DESDE MODAL 5)
+function guardarClienteDirecto(e) {
+  e.preventDefault();
+  const nombre = document.getElementById("clienteDirectoNombre").value.trim();
+  const contacto = document.getElementById("clienteDirectoContacto").value.trim();
+  const region = document.getElementById("clienteDirectoRegion").value.trim() || "Querétaro";
+  const wa = document.getElementById("clienteDirectoWhatsApp").value.trim();
+  const email = document.getElementById("clienteDirectoEmail").value.trim();
+
+  const idCliente = `CLI-${Date.now().toString().slice(-4)}`;
+  const nuevoCliente = {
+    id_cliente: idCliente,
+    nombre_comercial: nombre,
+    region,
+    contacto_nombre: contacto,
+    contacto_whatsapp: wa,
+    contacto_email: email,
+    estatus: "Activo"
+  };
+
+  DB.clientes.push(nuevoCliente);
+  closeModal();
+  document.getElementById("formClienteDirecto").reset();
+  poblarSelects();
+  renderizarDirectorioClientes();
+
+  sendToAppsScript({
+    action: "create",
+    targetSheet: "CLIENTES",
+    payload: [idCliente, nombre, region, contacto, wa, "Activo", email]
   });
 }
 
