@@ -4,8 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Talentum CRM</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans pb-28">
@@ -126,7 +130,7 @@
     </form>
   </div>
 
-  <!-- MODAL 2: REGISTRAR HORAS (TIME TRACKING) -->
+  <!-- MODAL 2: REGISTRAR HORAS -->
   <div id="modalSheetHora" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
@@ -185,7 +189,6 @@
         </div>
       </div>
 
-      <!-- Sección condicional para nuevo cliente -->
       <div id="boxNuevoCliente" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">
         <span class="text-xs font-bold text-indigo-600">Datos de la Nueva Empresa</span>
         <input type="text" id="nuevoClienteNombre" placeholder="Razón Social / Nombre Comercial" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
@@ -203,7 +206,7 @@
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-xs font-semibold text-slate-500">Servicio Base</label>
-          <select id="modalVacanteServicio" onchange="actualizarValoresServicio()" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"></select>
+          <select id="modalVacanteServicio" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium"></select>
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-500">Días Garantía</label>
@@ -228,7 +231,7 @@
     </form>
   </div>
 
-  <!-- MODAL: MARCAR COMO CONTRATADA -->
+  <!-- MODAL 4: MARCAR COMO CONTRATADA -->
   <div id="modalSheetContratar" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
