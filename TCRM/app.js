@@ -2,13 +2,17 @@
  * CRM Talentum - Lógica de Control Operativo y Financiero
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
-// Base de datos reactiva en memoria / Demo inicial
 let DB = {
   clientes: [
     { id_cliente: "CLI-001", nombre_comercial: "TechSolutions MX", region: "Querétaro" },
     { id_cliente: "CLI-002", nombre_comercial: "Logística Bajío", region: "Bajío" }
+  ],
+  servicios: [
+    { id_servicio: "SRV-001", nombre_servicio: "Operativo", dias_garantia_defecto: 30 },
+    { id_servicio: "SRV-002", nombre_servicio: "Mandos Medios", dias_garantia_defecto: 60 },
+    { id_servicio: "SRV-003", nombre_servicio: "Headhunting", dias_garantia_defecto: 90 }
   ],
   vacantes: [
     {
@@ -50,27 +54,41 @@ let DB = {
 };
 
 let filtroEstadoActual = "En Proceso";
+let activeModalSheet = null;
 
-// Inicialización de la aplicación
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
-  poblarSelectVacantes();
+  poblarSelects();
   renderizarApp();
 });
 
 function setupEventListeners() {
   document.getElementById("btnReload").addEventListener("click", cargarDatosDesdeAPI);
   document.getElementById("inputSearch").addEventListener("input", renderizarApp);
-  document.getElementById("btnFab").addEventListener("click", abrirModalGasto);
-  document.getElementById("btnCloseModal").addEventListener("click", cerrarModalGasto);
-  document.getElementById("modalBackdrop").addEventListener("click", cerrarModalGasto);
-  document.getElementById("formGasto").addEventListener("submit", guardarGasto);
+  
+  // FAB Toggle
+  document.getElementById("btnFab").addEventListener("click", toggleFabMenu);
+  document.getElementById("btnOpenModalVacante").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetVacante"); });
+  document.getElementById("btnOpenModalHora").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetHora"); });
 
-  // Delegación de eventos para chips de filtro
+  // Cerrar modales
+  document.getElementById("modalBackdrop").addEventListener("click", closeModal);
+  document.querySelectorAll(".btn-close-modal").forEach(b => b.addEventListener("click", closeModal));
+
+  // Toggle sección nuevo cliente
+  document.getElementById("btnToggleNuevoCliente").addEventListener("click", () => {
+    document.getElementById("boxNuevoCliente").classList.toggle("hidden");
+  });
+
+  // Envío de formularios
+  document.getElementById("formGasto").addEventListener("submit", guardarGasto);
+  document.getElementById("formHora").addEventListener("submit", guardarHora);
+  document.getElementById("formVacante").addEventListener("submit", guardarVacante);
+
+  // Filtros rápidos
   document.getElementById("filterChipsContainer").addEventListener("click", (e) => {
     const btn = e.target.closest(".chip-filter");
     if (!btn) return;
-    
     filtroEstadoActual = btn.getAttribute("data-filter");
     document.querySelectorAll(".chip-filter").forEach(b => {
       b.classList.remove("chip-active", "bg-indigo-600", "text-white", "shadow-sm");
@@ -78,9 +96,69 @@ function setupEventListeners() {
     });
     btn.classList.remove("chip-inactive");
     btn.classList.add("chip-active");
-
     renderizarApp();
   });
+}
+
+function toggleFabMenu() {
+  const menu = document.getElementById("fabMenu");
+  const icon = document.getElementById("fabIcon");
+  const isHidden = menu.classList.contains("hidden");
+  
+  if (isHidden) {
+    menu.classList.remove("hidden");
+    menu.classList.add("flex");
+    icon.className = "ph ph-x-bold";
+  } else {
+    menu.classList.add("hidden");
+    menu.classList.remove("flex");
+    icon.className = "ph ph-plus-bold";
+  }
+}
+
+function openModal(modalId) {
+  closeModal();
+  activeModalSheet = document.getElementById(modalId);
+  const backdrop = document.getElementById("modalBackdrop");
+  
+  backdrop.classList.remove("hidden");
+  setTimeout(() => {
+    backdrop.classList.remove("opacity-0");
+    activeModalSheet.classList.remove("translate-y-full");
+  }, 10);
+}
+
+function closeModal() {
+  if (activeModalSheet) {
+    activeModalSheet.classList.add("translate-y-full");
+    document.getElementById("modalBackdrop").classList.add("opacity-0");
+    setTimeout(() => {
+      document.getElementById("modalBackdrop").classList.add("hidden");
+      activeModalSheet = null;
+    }, 300);
+  }
+}
+
+function poblarSelects() {
+  const selectGasto = document.getElementById("modalGastoVacante");
+  const selectHora = document.getElementById("modalHoraVacante");
+  const optionsVacantes = DB.vacantes.map(v => `<option value="${v.id_vacante}">${v.titulo_puesto}</option>`).join("");
+  selectGasto.innerHTML = optionsVacantes;
+  selectHora.innerHTML = optionsVacantes;
+
+  const selectClientes = document.getElementById("modalVacanteCliente");
+  selectClientes.innerHTML = DB.clientes.map(c => `<option value="${c.id_cliente}">${c.nombre_comercial}</option>`).join("");
+
+  const selectServicios = document.getElementById("modalVacanteServicio");
+  selectServicios.innerHTML = DB.servicios.map(s => `<option value="${s.id_servicio}">${s.nombre_servicio}</option>`).join("");
+}
+
+function actualizarValoresServicio() {
+  const srvId = document.getElementById("modalVacanteServicio").value;
+  const srv = DB.servicios.find(s => s.id_servicio === srvId);
+  if (srv) {
+    document.getElementById("nuevaVacanteGarantia").value = srv.dias_garantia_defecto;
+  }
 }
 
 function renderizarApp() {
@@ -98,7 +176,6 @@ function renderizarApp() {
                         v.region.toLowerCase().includes(searchVal);
 
     if (!matchSearch) return false;
-
     if (filtroEstadoActual === "Todas") return true;
     if (filtroEstadoActual === "En Proceso") return v.estatus_vacante === "En Proceso";
     if (filtroEstadoActual === "Contratado") return v.estatus_vacante === "Contratado";
@@ -108,10 +185,10 @@ function renderizarApp() {
 
   vacantesFiltradas.forEach(v => {
     const cliente = DB.clientes.find(c => c.id_cliente === v.id_cliente) || { nombre_comercial: "Cliente General" };
-    
-    // Cálculo financiero por vacante
     const gastosVacante = DB.gastos.filter(g => g.id_vacante === v.id_vacante).reduce((sum, g) => sum + Number(g.monto), 0);
-    const costoHoras = DB.horas.filter(h => h.id_vacante === v.id_vacante).reduce((sum, h) => sum + (Number(h.horas_invertidas) * Number(h.costo_por_hora)), 0);
+    const horasVacante = DB.horas.filter(h => h.id_vacante === v.id_vacante);
+    const totalHoras = horasVacante.reduce((sum, h) => sum + Number(h.horas_invertidas), 0);
+    const costoHoras = horasVacante.reduce((sum, h) => sum + (Number(h.horas_invertidas) * Number(h.costo_por_hora)), 0);
     
     const costoTotal = gastosVacante + costoHoras;
     const margenNeto = Number(v.fee_pactado_total) - costoTotal;
@@ -122,7 +199,6 @@ function renderizarApp() {
 
     const infoGarantia = calcularDiasGarantia(v);
 
-    // Componente Tarjeta
     const card = document.createElement("div");
     card.className = "bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm relative overflow-hidden";
     
@@ -139,7 +215,7 @@ function renderizarApp() {
 
       <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
         <span><i class="ph ph-map-pin"></i> ${v.region}</span>
-        <span><i class="ph ph-calendar"></i> Inicio: ${v.fecha_inicio_proceso}</span>
+        <span><i class="ph ph-clock"></i> ${totalHoras} hrs</span>
       </div>
 
       ${v.estatus_vacante === 'Contratado' ? `
@@ -152,7 +228,6 @@ function renderizarApp() {
         </div>
       ` : ''}
 
-      <!-- Desglose Financiero -->
       <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 text-center">
         <div>
           <span class="text-[10px] text-slate-400 font-semibold block">FEE TOTAL</span>
@@ -168,25 +243,25 @@ function renderizarApp() {
         </div>
       </div>
 
-      <!-- Acciones Rápidas -->
       <div class="mt-3.5 flex gap-2">
-        <button data-action="gasto" data-id="${v.id_vacante}" class="btn-card-gasto flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1">
+        <button data-id="${v.id_vacante}" class="btn-card-gasto flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1">
           <i class="ph ph-receipt"></i> + Gasto
         </button>
-        ${v.estatus_vacante === 'Contratado' && infoGarantia.diasRestantes > 0 && v.garantia_aplicada === 'No' ? `
-          <button data-action="garantia" data-id="${v.id_vacante}" class="btn-card-garantia flex-1 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1 border border-amber-200">
-            <i class="ph ph-arrow-counter-clockwise"></i> Garantía
-          </button>
-        ` : ''}
+        <button data-id="${v.id_vacante}" class="btn-card-hora flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 active:scale-95 transition-all flex items-center justify-center gap-1">
+          <i class="ph ph-clock"></i> + Horas
+        </button>
       </div>
     `;
 
-    // Asignar listeners a los botones de la tarjeta
-    card.querySelector(".btn-card-gasto").addEventListener("click", () => abrirModalGastoPara(v.id_vacante));
-    const btnGarantia = card.querySelector(".btn-card-garantia");
-    if (btnGarantia) {
-      btnGarantia.addEventListener("click", () => aplicarGarantia(v.id_vacante));
-    }
+    card.querySelector(".btn-card-gasto").addEventListener("click", () => {
+      document.getElementById("modalGastoVacante").value = v.id_vacante;
+      openModal("modalSheetGasto");
+    });
+
+    card.querySelector(".btn-card-hora").addEventListener("click", () => {
+      document.getElementById("modalHoraVacante").value = v.id_vacante;
+      openModal("modalSheetHora");
+    });
 
     container.appendChild(card);
   });
@@ -197,96 +272,142 @@ function renderizarApp() {
 
 function calcularDiasGarantia(vacante) {
   if (!vacante.fecha_contratacion) return { diasRestantes: 0, texto: "Sin fecha", color: "text-slate-400" };
-  
   const contratacion = new Date(vacante.fecha_contratacion);
   const finGarantia = new Date(contratacion);
   finGarantia.setDate(contratacion.getDate() + Number(vacante.dias_garantia_pactados));
   
-  const hoy = new Date();
-  const diffTime = finGarantia - hoy;
+  const diffTime = finGarantia - new Date();
   const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  if (vacante.garantia_aplicada !== "No") {
-    return { diasRestantes: 0, texto: "Garantía Consumida", color: "text-purple-600" };
-  }
-  if (diasRestantes <= 0) {
-    return { diasRestantes: 0, texto: "Vencida", color: "text-rose-500" };
-  }
-  if (diasRestantes <= 15) {
-    return { diasRestantes, texto: `${diasRestantes} días (Por vencer)`, color: "text-amber-500" };
-  }
-  return { diasRestantes, texto: `${diasRestantes} días restantes`, color: "text-emerald-600" };
+  if (vacante.garantia_aplicada !== "No") return { diasRestantes: 0, texto: "Consumida", color: "text-purple-600" };
+  if (diasRestantes <= 0) return { diasRestantes: 0, texto: "Vencida", color: "text-rose-500" };
+  if (diasRestantes <= 15) return { diasRestantes, texto: `${diasRestantes}d (Vence pronto)`, color: "text-amber-500" };
+  return { diasRestantes, texto: `${diasRestantes}d restantes`, color: "text-emerald-600" };
 }
 
-function poblarSelectVacantes() {
-  const select = document.getElementById("modalVacanteSelect");
-  select.innerHTML = DB.vacantes.map(v => `<option value="${v.id_vacante}">${v.titulo_puesto}</option>`).join("");
-}
-
-// CONTROL DEL BOTTOM SHEET
-function abrirModalGasto() {
-  const backdrop = document.getElementById("modalBackdrop");
-  const sheet = document.getElementById("modalSheet");
-  backdrop.classList.remove("hidden");
-  setTimeout(() => {
-    backdrop.classList.remove("opacity-0");
-    sheet.classList.remove("translate-y-full");
-  }, 10);
-}
-
-function abrirModalGastoPara(idVacante) {
-  document.getElementById("modalVacanteSelect").value = idVacante;
-  abrirModalGasto();
-}
-
-function cerrarModalGasto() {
-  const backdrop = document.getElementById("modalBackdrop");
-  const sheet = document.getElementById("modalSheet");
-  backdrop.classList.add("opacity-0");
-  sheet.classList.add("translate-y-full");
-  setTimeout(() => {
-    backdrop.classList.add("hidden");
-  }, 300);
-}
-
+// PERSISTENCIA DE GASTO
 async function guardarGasto(e) {
   e.preventDefault();
-  const idVacante = document.getElementById("modalVacanteSelect").value;
-  const categoria = document.getElementById("modalCategoria").value;
-  const monto = parseFloat(document.getElementById("modalMonto").value);
+  const idVacante = document.getElementById("modalGastoVacante").value;
+  const categoria = document.getElementById("modalGastoCategoria").value;
+  const monto = parseFloat(document.getElementById("modalGastoMonto").value);
 
-  // Registro en estado local para reflejo inmediato en UI
   DB.gastos.push({ id_vacante: idVacante, categoria, monto });
-  
-  cerrarModalGasto();
-  document.getElementById("modalMonto").value = "";
+  closeModal();
+  document.getElementById("modalGastoMonto").value = "";
   renderizarApp();
 
-  // Sincronización asíncrona con Apps Script
-  if (APPS_SCRIPT_URL !== "TU_APPS_SCRIPT_URL_AQUI") {
-    try {
-      await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-          action: "create",
-          targetSheet: "GASTOS_INVERSION",
-          payload: [`GST-${Date.now()}`, idVacante, categoria, monto, new Date().toISOString()]
-        })
-      });
-    } catch (err) {
-      console.error("Error guardando en Google Sheets:", err);
-    }
-  }
+  sendToAppsScript({
+    action: "create",
+    targetSheet: "GASTOS_INVERSION",
+    payload: [`GST-${Date.now()}`, idVacante, categoria, monto, new Date().toISOString().split('T')[0]]
+  });
 }
 
-function aplicarGarantia(idVacante) {
-  if (confirm("¿Confirmas aplicar la garantía de reposición para esta vacante?")) {
-    const v = DB.vacantes.find(item => item.id_vacante === idVacante);
-    if (v) {
-      v.garantia_aplicada = "Sí (En reposición)";
-      renderizarApp();
-    }
+// PERSISTENCIA DE HORAS (TIME TRACKING)
+async function guardarHora(e) {
+  e.preventDefault();
+  const idVacante = document.getElementById("modalHoraVacante").value;
+  const consultor = document.getElementById("modalHoraConsultor").value;
+  const horas_invertidas = parseFloat(document.getElementById("modalHoraCantidad").value);
+  const costo_por_hora = parseFloat(document.getElementById("modalHoraCosto").value);
+  const etapa = document.getElementById("modalHoraEtapa").value;
+
+  DB.horas.push({ id_vacante: idVacante, consultor, horas_invertidas, costo_por_hora, etapa });
+  closeModal();
+  document.getElementById("modalHoraCantidad").value = "";
+  renderizarApp();
+
+  sendToAppsScript({
+    action: "create",
+    targetSheet: "REGISTRO_HORAS",
+    payload: [`TIM-${Date.now()}`, idVacante, consultor, horas_invertidas, costo_por_hora, etapa]
+  });
+}
+
+// PERSISTENCIA DE VACANTE Y CLIENTE
+async function guardarVacante(e) {
+  e.preventDefault();
+  let idCliente = document.getElementById("modalVacanteCliente").value;
+  let region = "Querétaro";
+
+  const boxNuevoCliente = document.getElementById("boxNuevoCliente");
+  if (!boxNuevoCliente.classList.contains("hidden")) {
+    const nombreCliente = document.getElementById("nuevoClienteNombre").value;
+    region = document.getElementById("nuevoClienteRegion").value || "Querétaro";
+    const wa = document.getElementById("nuevoClienteWhatsApp").value;
+    
+    idCliente = `CLI-${Date.now().toString().slice(-4)}`;
+    DB.clientes.push({ id_cliente: idCliente, nombre_comercial: nombreCliente, region, contacto_whatsapp: wa });
+
+    sendToAppsScript({
+      action: "create",
+      targetSheet: "CLIENTES",
+      payload: [idCliente, nombreCliente, region, "", wa, "Activo"]
+    });
+  } else {
+    const c = DB.clientes.find(item => item.id_cliente === idCliente);
+    if (c) region = c.region;
+  }
+
+  const idVacante = `VAC-${Date.now().toString().slice(-4)}`;
+  const nuevaVacante = {
+    id_vacante: idVacante,
+    id_cliente: idCliente,
+    titulo_puesto: document.getElementById("nuevaVacantePuesto").value,
+    region: region,
+    id_servicio: document.getElementById("modalVacanteServicio").value,
+    sueldo_base_perfil: 0,
+    fee_pactado_total: parseFloat(document.getElementById("nuevaVacanteFee").value),
+    monto_adelanto: parseFloat(document.getElementById("nuevaVacanteAnticipo").value),
+    fecha_inicio_proceso: new Date().toISOString().split('T')[0],
+    estatus_vacante: "En Proceso",
+    fecha_contratacion: "",
+    dias_garantia_pactados: parseInt(document.getElementById("nuevaVacanteGarantia").value),
+    garantia_aplicada: "No"
+  };
+
+  DB.vacantes.unshift(nuevaVacante);
+  closeModal();
+  document.getElementById("formVacante").reset();
+  boxNuevoCliente.classList.add("hidden");
+  poblarSelects();
+  renderizarApp();
+
+  sendToAppsScript({
+    action: "create",
+    targetSheet: "VACANTES",
+    payload: [
+      nuevaVacante.id_vacante,
+      nuevaVacante.id_cliente,
+      nuevaVacante.titulo_puesto,
+      nuevaVacante.region,
+      nuevaVacante.id_servicio,
+      nuevaVacante.sueldo_base_perfil,
+      nuevaVacante.fee_pactado_total,
+      nuevaVacante.monto_adelanto,
+      nuevaVacante.fecha_inicio_proceso,
+      nuevaVacante.estatus_vacante,
+      "",
+      nuevaVacante.dias_garantia_pactados,
+      "",
+      "",
+      "No",
+      ""
+    ]
+  });
+}
+
+async function sendToAppsScript(payload) {
+  if (APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") return;
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error("Error al sincronizar con Apps Script:", err);
   }
 }
 
@@ -295,8 +416,8 @@ async function cargarDatosDesdeAPI() {
   try {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getDashboardData`);
     const data = await res.json();
-    DB = data;
-    poblarSelectVacantes();
+    if (data.vacantes) DB = data;
+    poblarSelects();
     renderizarApp();
   } catch (err) {
     console.error("Error al obtener datos:", err);
