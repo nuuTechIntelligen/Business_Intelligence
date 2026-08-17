@@ -2,7 +2,7 @@
  * CRM Talentum - Lógica de Control Operativo y Financiero
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   clientes: [
@@ -86,7 +86,7 @@ let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
 
-// Exponer globalmente para listeners en el HTML dinámico
+// Exponer globalmente la función del embudo
 window.cambiarPipeline = function(idVacante, etapa, delta) {
   const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
   if (v && v.pipeline) {
@@ -273,26 +273,28 @@ function toggleFabMenu() {
 }
 
 function openModal(modalId) {
-  if (activeModalSheet && activeModalSheet.id !== modalId) {
-    activeModalSheet.classList.add("translate-y-full");
-  }
-  
+  // Ocultar cualquier modal previo
+  document.querySelectorAll(".bottom-sheet").forEach(m => m.classList.remove("modal-active"));
+
   activeModalSheet = document.getElementById(modalId);
   const backdrop = document.getElementById("modalBackdrop");
+
+  if (!activeModalSheet) return;
   
   backdrop.classList.remove("hidden");
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     backdrop.classList.remove("opacity-0");
-    activeModalSheet.classList.remove("translate-y-full");
-  }, 10);
+    activeModalSheet.classList.add("modal-active");
+  });
 }
 
 function closeModal() {
   if (activeModalSheet) {
-    activeModalSheet.classList.add("translate-y-full");
-    document.getElementById("modalBackdrop").classList.add("opacity-0");
+    activeModalSheet.classList.remove("modal-active");
+    const backdrop = document.getElementById("modalBackdrop");
+    backdrop.classList.add("opacity-0");
     setTimeout(() => {
-      document.getElementById("modalBackdrop").classList.add("hidden");
+      backdrop.classList.add("hidden");
       activeModalSheet = null;
     }, 300);
   }
@@ -659,8 +661,8 @@ function renderPipelineVacante(vacante) {
       <span class="text-xs font-black ${e.color}">${vacante.pipeline[e.key] || 0}</span>
       <span class="text-[9px] font-bold text-slate-400 mt-0.5 leading-none">${e.label}</span>
       <div class="flex gap-1 mt-1.5">
-        <button onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">-</button>
-        <button onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">+</button>
+        <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">-</button>
+        <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">+</button>
       </div>
     </div>
   `).join("");
