@@ -63,6 +63,7 @@ let currentTab = "vacantes";
 let filtroEstadoActual = "En Proceso";
 let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
+let clienteAbiertoDetalle = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
@@ -220,7 +221,6 @@ function toggleFabMenu() {
 }
 
 function openModal(modalId) {
-  // Si ya hay un modal abierto diferente al que se abrirá, lo cerramos
   if (activeModalSheet && activeModalSheet.id !== modalId) {
     activeModalSheet.classList.add("translate-y-full");
   }
@@ -438,7 +438,6 @@ function abrirExpediente(vacante) {
   const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General" };
   const servicio = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { nombre_servicio: "Reclutamiento" };
 
-  // Gastos de esta vacante
   const gastosVacante = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante));
   const totalGastos = gastosVacante.reduce((sum, g) => sum + Number(g.monto || 0), 0);
   
@@ -449,7 +448,6 @@ function abrirExpediente(vacante) {
   const feeTotal = Number(vacante.fee_pactado_total || 0);
   const gananciaNeta = feeTotal - inversionTotal;
 
-  // Días de proceso
   let diasProceso = 0;
   if (vacante.fecha_inicio_proceso) {
     const p = vacante.fecha_inicio_proceso.split("-");
@@ -458,7 +456,6 @@ function abrirExpediente(vacante) {
     diasProceso = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
   }
 
-  // Poblar datos superiores
   document.getElementById("expPuesto").textContent = vacante.titulo_puesto;
   document.getElementById("expSubtitulo").textContent = `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`;
 
@@ -467,7 +464,6 @@ function abrirExpediente(vacante) {
   document.getElementById("expGanancia").textContent = `$${gananciaNeta.toLocaleString()}`;
   document.getElementById("expDiasCierre").textContent = `${diasProceso} días`;
 
-  // Panel Información
   const badgeEstatus = document.getElementById("expBadgeEstatus");
   badgeEstatus.textContent = vacante.estatus_vacante;
   badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
@@ -479,13 +475,11 @@ function abrirExpediente(vacante) {
   document.getElementById("expCandidato").textContent = vacante.candidato_contratado || "No asignado aún";
   document.getElementById("expTipoServicio").textContent = servicio.nombre_servicio;
 
-  // Reset del acordeón de perfil de puesto
   const boxPerfil = document.getElementById("boxDetallePerfilPuesto");
   boxPerfil.classList.add("hidden");
   boxPerfil.textContent = vacante.descripcion_perfil || "Sin descripción detallada del puesto.";
   document.getElementById("btnPerfilPuestoText").textContent = "Ver Perfil de Puesto";
 
-  // Panel Garantía
   document.getElementById("expGarantiaPactada").textContent = `${vacante.dias_garantia_pactados} días`;
   
   if (vacante.fecha_contratacion) {
@@ -502,13 +496,9 @@ function abrirExpediente(vacante) {
   document.getElementById("expObservaciones").textContent = vacante.descripcion_perfil ? (vacante.descripcion_perfil.slice(0, 100) + "...") : "Sin observaciones registradas.";
   document.getElementById("boxEditObservaciones").classList.add("hidden");
 
-  // Render Historial de Gastos
   renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal);
-
-  // Ocultar formulario inline de gasto al abrir
   document.getElementById("formGastoInline").classList.add("hidden");
 
-  // Botón finalizar visibilidad
   const btnFinalizar = document.getElementById("btnExpFinalizar");
   if (vacante.estatus_vacante === "Contratado") {
     btnFinalizar.classList.add("hidden");
@@ -548,7 +538,6 @@ function renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTot
   document.getElementById("expHistorialTotalMonto").textContent = `$${inversionTotal.toLocaleString()}`;
 }
 
-// GUARDAR GASTO DIRECTO INLINE EN LA MODAL DE EXPEDIENTE
 function guardarGastoInlineExpediente(e) {
   e.preventDefault();
   if (!vacanteSeleccionadaExpediente) return;
@@ -569,7 +558,6 @@ function guardarGastoInlineExpediente(e) {
   document.getElementById("inlineGastoMonto").value = "";
   document.getElementById("formGastoInline").classList.add("hidden");
 
-  // Refrescar expediente actual sin cerrarlo
   abrirExpediente(vacanteSeleccionadaExpediente);
   renderizarApp();
 
@@ -612,7 +600,9 @@ function guardarObservacionesInline() {
   });
 }
 
-// ANALÍTICAS
+// ========================================================
+// ANALÍTICAS Y RENTABILIDAD CON ACORDEÓN DETALLADO
+// ========================================================
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
   const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -663,7 +653,7 @@ function renderizarAnaliticas() {
     containerBreakdown.appendChild(row);
   });
 
-  // Rentabilidad por Cliente
+  // ACORDEÓN DETALLADO DE RENTABILIDAD POR CLIENTE
   const containerClientes = document.getElementById("tablaRentabilidadClientes");
   containerClientes.innerHTML = "";
 
@@ -674,29 +664,105 @@ function renderizarAnaliticas() {
     const facturadoCliente = vacantesCliente.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
     const idsVacantes = vacantesCliente.map(v => String(v.id_vacante));
 
-    const gastosCliente = DB.gastos
+    const gastosPautaCliente = DB.gastos
       .filter(g => idsVacantes.includes(String(g.id_vacante)))
       .reduce((sum, g) => sum + Number(g.monto || 0), 0);
 
-    const horasCliente = DB.horas
-      .filter(h => idsVacantes.includes(String(h.id_vacante)))
-      .reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
+    const horasClienteArr = DB.horas.filter(h => idsVacantes.includes(String(h.id_vacante)));
+    const totalHorasCliente = horasClienteArr.reduce((sum, h) => sum + Number(h.horas_invertidas || 0), 0);
+    const costoHorasCliente = horasClienteArr.reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
 
-    const netoCliente = facturadoCliente - (gastosCliente + horasCliente);
+    const inversionTotalCliente = gastosPautaCliente + costoHorasCliente;
+    const netoCliente = facturadoCliente - inversionTotalCliente;
     const margenCliente = facturadoCliente > 0 ? Math.round((netoCliente / facturadoCliente) * 100) : 0;
+    const roasCliente = gastosPautaCliente > 0 ? (facturadoCliente / gastosPautaCliente).toFixed(1) : "N/A";
+
+    const isOpen = clienteAbiertoDetalle === c.id_cliente;
 
     const card = document.createElement("div");
-    card.className = "p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between";
+    card.className = "rounded-2xl bg-slate-50 border border-slate-200/80 overflow-hidden transition-all duration-200 shadow-sm";
+    
+    // Encabezado del Acordeón
     card.innerHTML = `
-      <div>
-        <h4 class="text-xs font-bold text-slate-900">${c.nombre_comercial}</h4>
-        <span class="text-[11px] text-slate-500">${vacantesCliente.length} proceso(s) | Facturado: $${facturadoCliente.toLocaleString()}</span>
+      <div class="p-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors" data-client-id="${c.id_cliente}">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xs">
+            ${c.nombre_comercial.slice(0,2).toUpperCase()}
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-900 leading-tight">${c.nombre_comercial}</h4>
+            <span class="text-[11px] text-slate-500">${vacantesCliente.length} vacante(s) • Facturado: $${facturadoCliente.toLocaleString()}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="text-right">
+            <span class="text-xs font-black ${netoCliente >= 0 ? 'text-emerald-600' : 'text-rose-500'}">+$${netoCliente.toLocaleString()}</span>
+            <span class="text-[10px] font-bold block text-slate-400">${margenCliente}% neto</span>
+          </div>
+          <i class="ph ${isOpen ? 'ph-caret-up-bold' : 'ph-caret-down-bold'} text-slate-400 text-sm transition-transform"></i>
+        </div>
       </div>
-      <div class="text-right">
-        <span class="text-xs font-black ${netoCliente >= 0 ? 'text-emerald-600' : 'text-rose-500'}">+$${netoCliente.toLocaleString()}</span>
-        <span class="text-[10px] font-bold block text-slate-400">${margenCliente}% neto</span>
+
+      <!-- CUERPO DESPLEGABLE CON DETALLE 360 -->
+      <div class="${isOpen ? 'block' : 'hidden'} px-3.5 pb-3.5 pt-1 border-t border-slate-200/60 space-y-3 bg-white">
+        
+        <!-- MINI MÉTRICAS DEL CLIENTE -->
+        <div class="grid grid-cols-3 gap-2 text-center pt-2">
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Pauta Ads</span>
+            <span class="text-xs font-bold text-rose-500">$${gastosPautaCliente.toLocaleString()}</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">Horas ($)</span>
+            <span class="text-xs font-bold text-amber-600">${totalHorasCliente}h ($${costoHorasCliente.toLocaleString()})</span>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-[9px] font-bold text-slate-400 uppercase block">ROAS</span>
+            <span class="text-xs font-black text-indigo-600">${roasCliente === 'N/A' ? 'N/A' : roasCliente + 'x'}</span>
+          </div>
+        </div>
+
+        <!-- LISTADO DE PROCESOS/VACANTES INDIVIDUALES -->
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Desglose por Proceso</span>
+          <div class="space-y-1.5">
+            ${vacantesCliente.map(v => {
+              const gastosV = DB.gastos.filter(g => String(g.id_vacante) === String(v.id_vacante)).reduce((s, g) => s + Number(g.monto || 0), 0);
+              const horasV = DB.horas.filter(h => String(h.id_vacante) === String(v.id_vacante)).reduce((s, h) => s + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
+              const totalInvV = gastosV + horasV;
+              const netoV = Number(v.fee_pactado_total || 0) - totalInvV;
+              const margenV = v.fee_pactado_total > 0 ? Math.round((netoV / v.fee_pactado_total) * 100) : 0;
+
+              return `
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-slate-800">${v.titulo_puesto}</span>
+                      <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                        ${v.estatus_vacante}
+                      </span>
+                    </div>
+                    <span class="text-[10px] text-slate-400">Fee: $${Number(v.fee_pactado_total).toLocaleString()} | Invertido: $${totalInvV.toLocaleString()}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="font-black text-xs ${netoV >= 0 ? 'text-emerald-600' : 'text-rose-500'}">+$${netoV.toLocaleString()}</span>
+                    <span class="text-[9px] font-bold text-slate-400 block">${margenV}%</span>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
       </div>
     `;
+
+    // Toggle del acordeón al hacer clic
+    card.querySelector("[data-client-id]").addEventListener("click", () => {
+      clienteAbiertoDetalle = (clienteAbiertoDetalle === c.id_cliente) ? null : c.id_cliente;
+      renderizarAnaliticas();
+    });
+
     containerClientes.appendChild(card);
   });
 }
