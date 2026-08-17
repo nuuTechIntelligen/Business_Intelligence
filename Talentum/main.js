@@ -1,6 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Teléfono oficial de Talentum Consultoría
+    // Número oficial de Talentum Consultoría
     const TALENTUM_PHONE = '524427965332';
+
+    // =======================================================
+    // GESTOR CENTRALIZADO DE TESTIMONIOS
+    // Agrega, edita o elimina elementos directamente de esta lista
+    // =======================================================
+    const testimoniosData = [
+        {
+            iniciales: "DR",
+            nombre: "Daniel Ramírez",
+            puesto: "Director General - Resort Pacífico",
+            comentario: "La precisión con la que Talentum seleccionó a nuestro equipo gerencial para la nueva apertura hotelera superó todas las expectativas. Entienden perfectamente el ritmo del sector HORECA."
+        },
+        {
+            iniciales: "ML",
+            nombre: "Mariana López",
+            puesto: "Gerente de RH - Industrial del Bajío",
+            comentario: "Implementar los nuevos procesos de RRHH con Yareli y su equipo transformó nuestro clima laboral en menos de 6 meses. La consultoría fue profesional, empática y muy práctica."
+        },
+        {
+            iniciales: "CG",
+            nombre: "Carlos Gutiérrez",
+            puesto: "Director de Operaciones - Grupo Logístico",
+            comentario: "El soporte en turnos rotativos y posiciones operativas para planta fue inmediato. Tienen un dominio real de la industria en Querétaro y el Bajío."
+        },
+        {
+            iniciales: "SV",
+            nombre: "Sofía Valenzuela",
+            puesto: "Directora de Finanzas - Cadena Gastronómica",
+            comentario: "Excelente acompañamiento en la estructuración de perfiles y tabuladores de sueldos. Se nota la experiencia y cercanía en cada sesión de trabajo."
+        }
+    ];
 
     // ==========================================
     // 1. Menú Móvil
@@ -51,19 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // 3. Carrusel de Testimonios
+    // 3. Renderizado y Control del Carrusel
     // ==========================================
     const track = document.getElementById('carousel-track');
     const prevBtn = document.getElementById('prev-testimonio');
     const nextBtn = document.getElementById('next-testimonio');
     const dotsContainer = document.getElementById('carousel-dots');
-    
-    if (track && prevBtn && nextBtn) {
-        const slides = track.querySelectorAll('.carousel-slide');
-        let currentIndex = 0;
 
+    if (track && prevBtn && nextBtn) {
+        // Inyección dinámica de HTML
+        track.innerHTML = testimoniosData.map(item => `
+            <div class="carousel-slide px-4">
+                <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm h-full flex flex-col justify-between">
+                    <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
+                    <p class="font-body-lg text-lg mb-8 text-secondary">
+                        "${item.comentario}"
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-surface-dim rounded-full flex items-center justify-center font-bold text-on-surface select-none">${item.iniciales}</div>
+                        <div>
+                            <p class="font-bold text-on-background not-italic">${item.nombre}</p>
+                            <p class="text-sm text-secondary not-italic">${item.puesto}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        let currentIndex = 0;
         const getSlidesPerView = () => window.innerWidth >= 768 ? 2 : 1;
-        const getMaxIndex = () => Math.max(0, slides.length - getSlidesPerView());
+        const getMaxIndex = () => Math.max(0, testimoniosData.length - getSlidesPerView());
 
         const updateDots = () => {
             if (!dotsContainer) return;
