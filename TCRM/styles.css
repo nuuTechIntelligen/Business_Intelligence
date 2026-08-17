@@ -36,7 +36,6 @@ body {
   background-color: #e2e8f0 !important;
 }
 
-/* Transición suave entre pestañas */
 .tab-view {
   animation: fadeIn 0.2s ease-in-out;
 }
