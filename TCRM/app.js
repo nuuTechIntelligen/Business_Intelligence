@@ -2,7 +2,7 @@
  * CRM Talentum - Lógica de Control Operativo y Financiero
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   clientes: [
@@ -53,6 +53,7 @@ let DB = {
   ]
 };
 
+let currentTab = "vacantes";
 let filtroEstadoActual = "En Proceso";
 let activeModalSheet = null;
 
@@ -66,6 +67,10 @@ function setupEventListeners() {
   document.getElementById("btnReload").addEventListener("click", cargarDatosDesdeAPI);
   document.getElementById("inputSearch").addEventListener("input", renderizarApp);
   
+  // Navegación de Pestañas (Bottom Nav)
+  document.getElementById("navBtnVacantes").addEventListener("click", () => switchTab("vacantes"));
+  document.getElementById("navBtnAnalytics").addEventListener("click", () => switchTab("analytics"));
+
   // Menú FAB
   document.getElementById("btnFab").addEventListener("click", toggleFabMenu);
   document.getElementById("btnOpenModalVacante").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetVacante"); });
@@ -102,6 +107,44 @@ function setupEventListeners() {
     btn.classList.add("chip-active");
     renderizarApp();
   });
+}
+
+// CONTROL DE PESTAÑAS (SWITCH TAB)
+function switchTab(tab) {
+  currentTab = tab;
+  const viewVacantes = document.getElementById("viewVacantes");
+  const viewAnalytics = document.getElementById("viewAnalytics");
+  const searchSection = document.getElementById("searchSection");
+  const filterChips = document.getElementById("filterChipsContainer");
+  const headerSubtext = document.getElementById("headerSubtext");
+  const fabContainer = document.getElementById("fabContainer");
+
+  const btnVacantes = document.getElementById("navBtnVacantes");
+  const btnAnalytics = document.getElementById("navBtnAnalytics");
+
+  if (tab === "vacantes") {
+    viewVacantes.classList.remove("hidden");
+    viewAnalytics.classList.add("hidden");
+    searchSection.classList.remove("hidden");
+    filterChips.classList.remove("hidden");
+    fabContainer.classList.remove("hidden");
+    headerSubtext.textContent = "Control de Procesos";
+
+    btnVacantes.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
+    btnAnalytics.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
+    renderizarApp();
+  } else {
+    viewVacantes.classList.add("hidden");
+    viewAnalytics.classList.remove("hidden");
+    searchSection.classList.add("hidden");
+    filterChips.classList.add("hidden");
+    fabContainer.classList.add("hidden");
+    headerSubtext.textContent = "Métricas Financieras";
+
+    btnVacantes.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
+    btnAnalytics.className = "nav-item flex flex-col items-center gap-1 text-indigo-600 font-bold transition-colors";
+    renderizarAnaliticas();
+  }
 }
 
 function toggleFabMenu() {
@@ -166,6 +209,11 @@ function actualizarValoresServicio() {
 }
 
 function renderizarApp() {
+  if (currentTab === "analytics") {
+    renderizarAnaliticas();
+    return;
+  }
+
   const container = document.getElementById("vacantesContainer");
   const searchVal = document.getElementById("inputSearch").value.toLowerCase().trim();
   container.innerHTML = "";
@@ -267,7 +315,6 @@ function renderizarApp() {
       </div>
     `;
 
-    // Asignación de eventos en botones de tarjeta
     card.querySelector(".btn-card-gasto").addEventListener("click", () => {
       document.getElementById("modalGastoVacante").value = v.id_vacante;
       openModal("modalSheetGasto");
@@ -295,6 +342,95 @@ function renderizarApp() {
   document.getElementById("totalInversion").textContent = `$${totalGastos.toLocaleString()}`;
 }
 
+// RENDER DE ANALÍTICAS Y FINANZAS
+function renderizarAnaliticas() {
+  const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
+  const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
+  const totalHorasHH = DB.horas.reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
+  const totalHorasCantidad = DB.horas.reduce((sum, h) => sum + Number(h.horas_invertidas || 0), 0);
+
+  const costoTotalGeneral = totalGastosPauta + totalHorasHH;
+  const utilidadNetaTotal = totalFacturado - costoTotalGeneral;
+  const margenGlobalPorcentaje = totalFacturado > 0 ? Math.round((utilidadNetaTotal / totalFacturado) * 100) : 0;
+  const roas = totalGastosPauta > 0 ? (totalFacturado / totalGastosPauta).toFixed(1) : "N/A";
+
+  document.getElementById("kpiUtilidadNeta").textContent = `$${utilidadNetaTotal.toLocaleString()}`;
+  document.getElementById("kpiMargenGlobal").textContent = `${margenGlobalPorcentaje}% Margen`;
+  document.getElementById("kpiFacturadoTotal").textContent = `$${totalFacturado.toLocaleString()}`;
+  document.getElementById("kpiGastoPautaTotal").textContent = `$${totalGastosPauta.toLocaleString()}`;
+  document.getElementById("kpiCostoHorasTotal").textContent = `$${totalHorasHH.toLocaleString()}`;
+  document.getElementById("kpiRoas").textContent = roas === "N/A" ? "N/A" : `${roas}x`;
+  document.getElementById("kpiHorasTotales").textContent = `${totalHorasCantidad} hrs`;
+
+  // Desglose de Gastos
+  const containerBreakdown = document.getElementById("breakdownGastos");
+  containerBreakdown.innerHTML = "";
+
+  const categorias = {};
+  DB.gastos.forEach(g => {
+    categorias[g.categoria] = (categorias[g.categoria] || 0) + Number(g.monto);
+  });
+  if (totalHorasHH > 0) {
+    categorias["Horas de Consultoría"] = totalHorasHH;
+  }
+
+  const granTotalInvertido = totalGastosPauta + totalHorasHH;
+
+  Object.keys(categorias).forEach(cat => {
+    const monto = categorias[cat];
+    const pct = granTotalInvertido > 0 ? Math.round((monto / granTotalInvertido) * 100) : 0;
+
+    const row = document.createElement("div");
+    row.innerHTML = `
+      <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+        <span>${cat}</span>
+        <span>$${monto.toLocaleString()} <span class="text-slate-400 font-normal">(${pct}%)</span></span>
+      </div>
+      <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+        <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div>
+      </div>
+    `;
+    containerBreakdown.appendChild(row);
+  });
+
+  // Rentabilidad por Cliente
+  const containerClientes = document.getElementById("tablaRentabilidadClientes");
+  containerClientes.innerHTML = "";
+
+  DB.clientes.forEach(c => {
+    const vacantesCliente = DB.vacantes.filter(v => String(v.id_cliente) === String(c.id_cliente));
+    if (vacantesCliente.length === 0) return;
+
+    const facturadoCliente = vacantesCliente.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
+    const idsVacantes = vacantesCliente.map(v => String(v.id_vacante));
+
+    const gastosCliente = DB.gastos
+      .filter(g => idsVacantes.includes(String(g.id_vacante)))
+      .reduce((sum, g) => sum + Number(g.monto || 0), 0);
+
+    const horasCliente = DB.horas
+      .filter(h => idsVacantes.includes(String(h.id_vacante)))
+      .reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
+
+    const netoCliente = facturadoCliente - (gastosCliente + horasCliente);
+    const margenCliente = facturadoCliente > 0 ? Math.round((netoCliente / facturadoCliente) * 100) : 0;
+
+    const card = document.createElement("div");
+    card.className = "p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between";
+    card.innerHTML = `
+      <div>
+        <h4 class="text-xs font-bold text-slate-900">${c.nombre_comercial}</h4>
+        <span class="text-[11px] text-slate-500">${vacantesCliente.length} proceso(s) | Facturado: $${facturadoCliente.toLocaleString()}</span>
+      </div>
+      <div class="text-right">
+        <span class="text-xs font-black ${netoCliente >= 0 ? 'text-emerald-600' : 'text-rose-500'}">+$${netoCliente.toLocaleString()}</span>
+        <span class="text-[10px] font-bold block text-slate-400">${margenCliente}% neto</span>
+      </div>
+    `;
+    containerClientes.appendChild(card);
+  });
+}
+
 function calcularDiasGarantia(vacante) {
   if (!vacante.fecha_contratacion) return { diasRestantes: 0, texto: "Sin fecha", color: "text-slate-400" };
   
@@ -314,7 +450,7 @@ function calcularDiasGarantia(vacante) {
   return { diasRestantes, texto: `${diasRestantes}d restantes`, color: "text-emerald-600" };
 }
 
-// CONTROL DE MODAL CONTRATAR
+// MODAL CONTRATAR
 function abrirModalContratar(vacante) {
   document.getElementById("modalContratarIdVacante").value = vacante.id_vacante;
   document.getElementById("modalContratarTitulo").textContent = `${vacante.titulo_puesto}`;
@@ -363,7 +499,7 @@ async function guardarGasto(e) {
   });
 }
 
-// PERSISTENCIA DE HORAS (TIME TRACKING)
+// PERSISTENCIA DE HORAS
 async function guardarHora(e) {
   e.preventDefault();
   const idVacante = document.getElementById("modalHoraVacante").value;
