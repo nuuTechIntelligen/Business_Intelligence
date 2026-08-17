@@ -26,9 +26,9 @@ let DB = {
     }
   ],
   servicios: [
-    { id_servicio: "SRV-001", nombre_servicio: "Reclutamiento Operativo", dias_garantia_defecto: 30 },
-    { id_servicio: "SRV-002", nombre_servicio: "Mandos Medios / Especialistas", dias_garantia_defecto: 60 },
-    { id_servicio: "SRV-003", nombre_servicio: "Headhunting Directivo", dias_garantia_defecto: 90 }
+    { id_servicio: "SRV-001", nombre_servicio: "Reclutamiento Operativo", dias_garantia_defecto: 30, sla_meta_dias: 15 },
+    { id_servicio: "SRV-002", nombre_servicio: "Mandos Medios / Especialistas", dias_garantia_defecto: 60, sla_meta_dias: 25 },
+    { id_servicio: "SRV-003", nombre_servicio: "Headhunting Directivo", dias_garantia_defecto: 90, sla_meta_dias: 40 }
   ],
   vacantes: [
     {
@@ -39,13 +39,15 @@ let DB = {
       id_servicio: "SRV-002",
       fee_pactado_total: 28000,
       monto_adelanto: 14000,
+      saldo_liquidado: "No",
       fecha_inicio_proceso: "2026-08-05",
       estatus_vacante: "En Proceso",
       fecha_contratacion: "",
       candidato_contratado: "",
       dias_garantia_pactados: 60,
       garantia_aplicada: "No",
-      descripcion_perfil: "• Sueldo: $35,000 netos\n• Stack: React, Node.js, AWS\n• Horario: L-V 9:00 a 18:00\n• Prestaciones superiores a las de ley."
+      descripcion_perfil: "• Sueldo: $35,000 netos\n• Stack: React, Node.js, AWS\n• Horario: L-V 9:00 a 18:00\n• Prestaciones superiores a las de ley.",
+      pipeline: { postulados: 18, filtro: 9, entrevistas: 5, terna: 3, oferta: 1 }
     },
     {
       id_vacante: "VAC-102",
@@ -55,13 +57,15 @@ let DB = {
       id_servicio: "SRV-001",
       fee_pactado_total: 16000,
       monto_adelanto: 8000,
+      saldo_liquidado: "Sí",
       fecha_inicio_proceso: "2026-07-10",
       estatus_vacante: "Contratado",
       fecha_contratacion: "2026-08-01",
       candidato_contratado: "Roberto Sánchez",
       dias_garantia_pactados: 30,
       garantia_aplicada: "No",
-      descripcion_perfil: "• Sueldo: $18,000 brutos\n• Manejo indispensable de ERP SAP\n• Experiencia de 3 años con personal operativo a cargo."
+      descripcion_perfil: "• Sueldo: $18,000 brutos\n• Manejo indispensable de ERP SAP\n• Experiencia de 3 años con personal operativo a cargo.",
+      pipeline: { postulados: 24, filtro: 12, entrevistas: 6, terna: 3, oferta: 1 }
     }
   ],
   gastos: [
@@ -77,6 +81,7 @@ let DB = {
 
 let currentTab = "vacantes";
 let filtroEstadoActual = "En Proceso";
+let filtroRegionActual = "Todas";
 let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
@@ -90,6 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
 function setupEventListeners() {
   document.getElementById("btnReload").addEventListener("click", cargarDatosDesdeAPI);
   document.getElementById("inputSearch").addEventListener("input", renderizarApp);
+  document.getElementById("selectFiltroRegion").addEventListener("change", (e) => {
+    filtroRegionActual = e.target.value;
+    renderizarApp();
+  });
   
   // Bottom Nav
   document.getElementById("navBtnVacantes").addEventListener("click", () => switchTab("vacantes"));
@@ -162,6 +171,8 @@ function setupEventListeners() {
     }
   });
 
+  document.getElementById("btnExpGarantiaReactivar").addEventListener("click", reactivarPorGarantia);
+
   document.getElementById("btnExpEliminar").addEventListener("click", () => {
     if (vacanteSeleccionadaExpediente && confirm(`¿Deseas eliminar la vacante ${vacanteSeleccionadaExpediente.titulo_puesto}?`)) {
       DB.vacantes = DB.vacantes.filter(v => String(v.id_vacante) !== String(vacanteSeleccionadaExpediente.id_vacante));
@@ -199,7 +210,6 @@ function switchTab(tab) {
   const btnAnalytics = document.getElementById("navBtnAnalytics");
   const btnClientes = document.getElementById("navBtnClientes");
 
-  // Reset clases nav
   [btnVacantes, btnAnalytics, btnClientes].forEach(b => {
     b.className = "nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors";
   });
@@ -311,7 +321,7 @@ function guardarNuevoServicio() {
   }
 
   const idServicio = `SRV-${Date.now().toString().slice(-4)}`;
-  const nuevoSrv = { id_servicio: idServicio, nombre_servicio: nombre, dias_garantia_defecto: dias, porcentaje_fee_defecto: 1.0 };
+  const nuevoSrv = { id_servicio: idServicio, nombre_servicio: nombre, dias_garantia_defecto: dias, sla_meta_dias: 20 };
   
   DB.servicios.push(nuevoSrv);
   poblarSelects();
@@ -343,6 +353,7 @@ function renderizarApp() {
 
   let totalFees = 0;
   let totalGastos = 0;
+  let totalPorCobrarGlobal = 0;
 
   const vacantesFiltradas = DB.vacantes.filter(v => {
     const cliente = DB.clientes.find(c => String(c.id_cliente) === String(v.id_cliente));
@@ -351,10 +362,22 @@ function renderizarApp() {
                         (v.region && v.region.toLowerCase().includes(searchVal));
 
     if (!matchSearch) return false;
+
+    // Filtro por Región
+    if (filtroRegionActual !== "Todas") {
+      const reg = (v.region || (cliente ? cliente.region : "")).toLowerCase();
+      if (!reg.includes(filtroRegionActual.toLowerCase())) return false;
+    }
+
+    // Filtro por Estado
     if (filtroEstadoActual === "Todas") return true;
     if (filtroEstadoActual === "En Proceso") return v.estatus_vacante === "En Proceso";
     if (filtroEstadoActual === "Contratado") return v.estatus_vacante === "Contratado";
     if (filtroEstadoActual === "Garantia") return v.estatus_vacante === "Contratado" && calcularDiasGarantia(v).diasRestantes > 0;
+    if (filtroEstadoActual === "Cobranza") {
+      const saldo = Number(v.fee_pactado_total || 0) - Number(v.monto_adelanto || 0);
+      return v.saldo_liquidado !== "Sí" && saldo > 0;
+    }
     return true;
   });
 
@@ -369,10 +392,14 @@ function renderizarApp() {
     const margenNeto = Number(v.fee_pactado_total) - costoTotal;
     const margenPorcentaje = v.fee_pactado_total > 0 ? Math.round((margenNeto / v.fee_pactado_total) * 100) : 0;
 
+    const saldoPendiente = (v.saldo_liquidado === "Sí") ? 0 : Math.max(0, Number(v.fee_pactado_total || 0) - Number(v.monto_adelanto || 0));
+    if (saldoPendiente > 0) totalPorCobrarGlobal += saldoPendiente;
+
     if (v.estatus_vacante === "En Proceso") totalFees += Number(v.fee_pactado_total);
     totalGastos += gastosVacante;
 
     const infoGarantia = calcularDiasGarantia(v);
+    const infoSla = calcularSlaProceso(v);
 
     const card = document.createElement("div");
     card.className = "bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.99] transition-transform";
@@ -383,14 +410,26 @@ function renderizarApp() {
           <span class="text-[11px] font-bold tracking-wide uppercase text-indigo-600">${cliente.nombre_comercial}</span>
           <h3 class="text-sm font-bold text-slate-900 leading-tight mt-0.5">${v.titulo_puesto}</h3>
         </div>
-        <span class="text-[11px] px-2 py-0.5 rounded-md font-semibold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
-          ${v.estatus_vacante}
-        </span>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[11px] px-2 py-0.5 rounded-md font-semibold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+            ${v.estatus_vacante}
+          </span>
+          ${saldoPendiente > 0 ? `
+            <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-rose-50 text-rose-600 border border-rose-200">
+              Saldo: $${saldoPendiente.toLocaleString()}
+            </span>
+          ` : `
+            <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-50 text-emerald-600">
+              ✓ Pagado
+            </span>
+          `}
+        </div>
       </div>
 
       <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
         <span><i class="ph ph-map-pin"></i> ${v.region || 'N/A'}</span>
         <span><i class="ph ph-clock"></i> ${totalHoras} hrs</span>
+        <span class="${infoSla.color} font-semibold"><i class="ph ph-timer"></i> ${infoSla.texto}</span>
       </div>
 
       ${v.estatus_vacante === 'Contratado' ? `
@@ -463,7 +502,29 @@ function renderizarApp() {
   });
 
   document.getElementById("totalFeesActivos").textContent = `$${totalFees.toLocaleString()}`;
+  document.getElementById("totalPorCobrar").textContent = `$${totalPorCobrarGlobal.toLocaleString()}`;
   document.getElementById("totalInversion").textContent = `$${totalGastos.toLocaleString()}`;
+}
+
+// CÁLCULO DE SLA / TIME TO FILL
+function calcularSlaProceso(vacante) {
+  if (!vacante.fecha_inicio_proceso) return { dias: 0, texto: "Sin fecha", color: "text-slate-400" };
+  const srv = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { sla_meta_dias: 20 };
+  const meta = srv.sla_meta_dias || 20;
+
+  const p = vacante.fecha_inicio_proceso.split("-");
+  const inicio = new Date(p[0], p[1]-1, p[2]);
+  const fin = vacante.fecha_contratacion ? new Date(vacante.fecha_contratacion.split("-")[0], vacante.fecha_contratacion.split("-")[1]-1, vacante.fecha_contratacion.split("-")[2]) : new Date();
+  
+  const transcurridos = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
+
+  if (vacante.estatus_vacante === "Contratado") {
+    return { dias: transcurridos, texto: `Cerrada en ${transcurridos}d (Meta ${meta}d)`, color: transcurridos <= meta ? "text-emerald-600" : "text-amber-500" };
+  }
+
+  if (transcurridos > meta) return { dias: transcurridos, texto: `${transcurridos}d (SLA Excedido)`, color: "text-rose-500" };
+  if (transcurridos >= meta - 3) return { dias: transcurridos, texto: `${transcurridos}/${meta}d (Por vencer SLA)`, color: "text-amber-500" };
+  return { dias: transcurridos, texto: `${transcurridos}/${meta}d SLA`, color: "text-cyan-600" };
 }
 
 // ==========================================
@@ -472,7 +533,7 @@ function renderizarApp() {
 function abrirExpediente(vacante) {
   vacanteSeleccionadaExpediente = vacante;
   const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General", contacto_whatsapp: "" };
-  const servicio = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { nombre_servicio: "Reclutamiento" };
+  const servicio = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { nombre_servicio: "Reclutamiento", sla_meta_dias: 20 };
 
   const gastosVacante = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante));
   const totalGastos = gastosVacante.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -484,18 +545,12 @@ function abrirExpediente(vacante) {
   const feeTotal = Number(vacante.fee_pactado_total || 0);
   const gananciaNeta = feeTotal - inversionTotal;
 
-  let diasProceso = 0;
-  if (vacante.fecha_inicio_proceso) {
-    const p = vacante.fecha_inicio_proceso.split("-");
-    const inicio = new Date(p[0], p[1]-1, p[2]);
-    const fin = vacante.fecha_contratacion ? new Date(vacante.fecha_contratacion.split("-")[0], vacante.fecha_contratacion.split("-")[1]-1, vacante.fecha_contratacion.split("-")[2]) : new Date();
-    diasProceso = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
-  }
+  const infoSla = calcularSlaProceso(vacante);
 
   document.getElementById("expPuesto").textContent = vacante.titulo_puesto;
   document.getElementById("expSubtitulo").textContent = `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`;
 
-  // Botones de contacto rápido en la cabecera del expediente
+  // Contacto rápido en la cabecera
   const headerAcciones = document.getElementById("expAccionesContactoHeader");
   headerAcciones.innerHTML = `
     ${cliente.contacto_whatsapp ? `
@@ -516,8 +571,12 @@ function abrirExpediente(vacante) {
   document.getElementById("expFee").textContent = `$${feeTotal.toLocaleString()}`;
   document.getElementById("expInversion").textContent = `$${inversionTotal.toLocaleString()}`;
   document.getElementById("expGanancia").textContent = `$${gananciaNeta.toLocaleString()}`;
-  document.getElementById("expDiasCierre").textContent = `${diasProceso} días`;
+  document.getElementById("expSlaStatus").textContent = `${infoSla.dias} días`;
 
+  // Render del Pipeline de Candidatos
+  renderPipelineVacante(vacante);
+
+  // Panel Información
   const badgeEstatus = document.getElementById("expBadgeEstatus");
   badgeEstatus.textContent = vacante.estatus_vacante;
   badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
@@ -533,6 +592,14 @@ function abrirExpediente(vacante) {
   boxPerfil.classList.add("hidden");
   boxPerfil.textContent = vacante.descripcion_perfil || "Sin descripción detallada del puesto.";
   document.getElementById("btnPerfilPuestoText").textContent = "Ver Perfil de Puesto";
+
+  // Cobranza y Garantía
+  const anticipo = Number(vacante.monto_adelanto || 0);
+  const saldo = (vacante.saldo_liquidado === "Sí") ? 0 : Math.max(0, feeTotal - anticipo);
+
+  document.getElementById("expCobranzaAnticipo").textContent = `$${anticipo.toLocaleString()}`;
+  document.getElementById("expCobranzaSaldo").textContent = saldo === 0 ? "✓ Liquidado (100%)" : `$${saldo.toLocaleString()} pendiente`;
+  document.getElementById("expCobranzaSaldo").className = saldo === 0 ? "font-bold text-emerald-400" : "font-bold text-amber-400";
 
   document.getElementById("expGarantiaPactada").textContent = `${vacante.dias_garantia_pactados} días`;
   
@@ -553,14 +620,116 @@ function abrirExpediente(vacante) {
   renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal);
   document.getElementById("formGastoInline").classList.add("hidden");
 
+  // Control de botones de acción
   const btnFinalizar = document.getElementById("btnExpFinalizar");
+  const btnReactivarGarantia = document.getElementById("btnExpGarantiaReactivar");
+
   if (vacante.estatus_vacante === "Contratado") {
     btnFinalizar.classList.add("hidden");
+    if (infoGarantia.diasRestantes > 0 && vacante.garantia_aplicada === "No") {
+      btnReactivarGarantia.classList.remove("hidden");
+    } else {
+      btnReactivarGarantia.classList.add("hidden");
+    }
   } else {
     btnFinalizar.classList.remove("hidden");
+    btnReactivarGarantia.classList.add("hidden");
   }
 
   openModal("modalExpediente");
+}
+
+// RENDER Y CONTROL DEL PIPELINE DE CANDIDATOS
+function renderPipelineVacante(vacante) {
+  if (!vacante.pipeline) {
+    vacante.pipeline = { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
+  }
+
+  const container = document.getElementById("pipelineContainer");
+  const etapas = [
+    { key: "postulados", label: "Postulados", color: "text-indigo-400" },
+    { key: "filtro", label: "Filtro Tel.", color: "text-cyan-400" },
+    { key: "entrevistas", label: "Entrevistas", color: "text-amber-400" },
+    { key: "terna", label: "En Terna", color: "text-purple-400" },
+    { key: "oferta", label: "Oferta", color: "text-emerald-400" }
+  ];
+
+  container.innerHTML = etapas.map(e => `
+    <div class="p-2 rounded-xl bg-[#0d131f] border border-slate-800 flex flex-col items-center">
+      <span class="text-xs font-black ${e.color}">${vacante.pipeline[e.key] || 0}</span>
+      <span class="text-[9px] font-bold text-slate-400 mt-0.5 leading-none">${e.label}</span>
+      <div class="flex gap-1 mt-1.5">
+        <button onclick="cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700">-</button>
+        <button onclick="cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700">+</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function cambiarPipeline(idVacante, etapa, delta) {
+  const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
+  if (v && v.pipeline) {
+    v.pipeline[etapa] = Math.max(0, (v.pipeline[etapa] || 0) + delta);
+    renderPipelineVacante(v);
+  }
+}
+
+// APLICAR REPOSICIÓN POR GARANTÍA
+function reactivarPorGarantia() {
+  if (!vacanteSeleccionadaExpediente) return;
+  if (confirm(`¿Confirmas aplicar reposición de garantía para la vacante ${vacanteSeleccionadaExpediente.titulo_puesto}? Esto abrirá un nuevo proceso con Fee $0 manteniendo el historial.`)) {
+    vacanteSeleccionadaExpediente.garantia_aplicada = "Sí (En reposición)";
+
+    const idNueva = `VAC-${Date.now().toString().slice(-4)}`;
+    const vacanteReposicion = {
+      id_vacante: idNueva,
+      id_cliente: vacanteSeleccionadaExpediente.id_cliente,
+      titulo_puesto: `${vacanteSeleccionadaExpediente.titulo_puesto} (Reposición)`,
+      region: vacanteSeleccionadaExpediente.region,
+      id_servicio: vacanteSeleccionadaExpediente.id_servicio,
+      fee_pactado_total: 0,
+      monto_adelanto: 0,
+      saldo_liquidado: "Sí",
+      fecha_inicio_proceso: new Date().toISOString().split("T")[0],
+      estatus_vacante: "En Proceso",
+      fecha_contratacion: "",
+      candidato_contratado: "",
+      dias_garantia_pactados: vacanteSeleccionadaExpediente.dias_garantia_pactados,
+      garantia_aplicada: "No",
+      descripcion_perfil: `Proceso de reposición derivado de ${vacanteSeleccionadaExpediente.id_vacante}.\n${vacanteSeleccionadaExpediente.descripcion_perfil}`,
+      pipeline: { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 }
+    };
+
+    DB.vacantes.unshift(vacanteReposicion);
+    closeModal();
+    renderizarApp();
+
+    sendToAppsScript({
+      action: "updateGarantia",
+      targetSheet: "VACANTES",
+      id_vacante: vacanteSeleccionadaExpediente.id_vacante,
+      nuevo_estatus_garantia: "Sí (En reposición)"
+    });
+
+    sendToAppsScript({
+      action: "create",
+      targetSheet: "VACANTES",
+      payload: [
+        vacanteReposicion.id_vacante,
+        vacanteReposicion.id_cliente,
+        vacanteReposicion.titulo_puesto,
+        vacanteReposicion.region,
+        vacanteReposicion.id_servicio,
+        0, 0, 0,
+        vacanteReposicion.fecha_inicio_proceso,
+        "En Proceso",
+        "",
+        vacanteReposicion.dias_garantia_pactados,
+        "", "", "No",
+        vacanteReposicion.descripcion_perfil
+      ]
+    });
+  }
 }
 
 function renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal) {
@@ -654,9 +823,7 @@ function guardarObservacionesInline() {
   });
 }
 
-// ========================================================
-// ANALÍTICAS Y RENTABILIDAD CON CONTACTO DIRECTO
-// ========================================================
+// ANALÍTICAS
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
   const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -706,7 +873,6 @@ function renderizarAnaliticas() {
     containerBreakdown.appendChild(row);
   });
 
-  // ACORDEÓN DE CLIENTES CON ACCIONES DE CONTACTO
   const containerClientes = document.getElementById("tablaRentabilidadClientes");
   containerClientes.innerHTML = "";
 
@@ -755,18 +921,13 @@ function renderizarAnaliticas() {
         </div>
       </div>
 
-      <!-- CUERPO DESPLEGABLE CON ACCIONES DIRECTAS -->
       <div class="${isOpen ? 'block' : 'hidden'} px-3.5 pb-3.5 pt-1 border-t border-slate-200/60 space-y-3 bg-white">
-        
-        <!-- FICHA DE CONTACTO RÁPIDO -->
         <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
           <div>
             <span class="text-[10px] text-slate-400 font-semibold block">CONTACTO PRINCIPAL</span>
             <span class="text-xs font-bold text-slate-800">${c.contacto_nombre || 'No asignado'}</span>
             <span class="text-[11px] text-slate-500 block">${c.contacto_whatsapp || 'Sin WhatsApp'} ${c.contacto_email ? '• ' + c.contacto_email : ''}</span>
           </div>
-
-          <!-- BOTONES DE ACCIÓN RÁPIDA -->
           <div class="flex items-center gap-1.5">
             ${c.contacto_whatsapp ? `
               <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar WhatsApp">
@@ -784,7 +945,6 @@ function renderizarAnaliticas() {
           </div>
         </div>
 
-        <!-- MINI KPIS -->
         <div class="grid grid-cols-3 gap-2 text-center pt-1">
           <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
             <span class="text-[9px] font-bold text-slate-400 uppercase block">Pauta Ads</span>
@@ -800,7 +960,6 @@ function renderizarAnaliticas() {
           </div>
         </div>
 
-        <!-- LISTADO DE PROCESOS -->
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Desglose por Proceso</span>
           <div class="space-y-1.5">
@@ -844,9 +1003,6 @@ function renderizarAnaliticas() {
   });
 }
 
-// ========================================================
-// VISTA: DIRECTORIO COMPLETO DE CLIENTES
-// ========================================================
 function renderizarDirectorioClientes() {
   const container = document.getElementById("directorioClientesContainer");
   container.innerHTML = "";
@@ -896,7 +1052,6 @@ function renderizarDirectorioClientes() {
         </div>
       </div>
 
-      <!-- BOTONES DE ACCIÓN RÁPIDA -->
       <div class="flex items-center gap-2 pt-1">
         ${c.contacto_whatsapp ? `
           <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-transform">
@@ -955,12 +1110,14 @@ async function procesarContratacion(e) {
   const idVacante = document.getElementById("modalContratarIdVacante").value;
   const fecha = document.getElementById("modalContratarFecha").value;
   const candidato = document.getElementById("modalContratarNombreCandidato").value.trim();
+  const liquidar = document.getElementById("checkLiquidarSaldo").checked;
 
   const vacante = DB.vacantes.find(v => String(v.id_vacante) === String(idVacante));
   if (vacante) {
     vacante.estatus_vacante = "Contratado";
     vacante.fecha_contratacion = fecha;
     vacante.candidato_contratado = candidato;
+    if (liquidar) vacante.saldo_liquidado = "Sí";
   }
 
   closeModal();
@@ -971,7 +1128,8 @@ async function procesarContratacion(e) {
     targetSheet: "VACANTES",
     id_vacante: idVacante,
     fecha_contratacion: fecha,
-    candidato_contratado: candidato
+    candidato_contratado: candidato,
+    saldo_liquidado: liquidar ? "Sí" : "No"
   });
 }
 
@@ -1019,13 +1177,13 @@ async function guardarHora(e) {
 async function guardarVacante(e) {
   e.preventDefault();
   let idCliente = document.getElementById("modalVacanteCliente").value;
-  let region = "Querétaro";
+  let region = document.getElementById("nuevaVacanteRegionSelect").value || "Querétaro";
 
   const boxNuevoCliente = document.getElementById("boxNuevoCliente");
   if (!boxNuevoCliente.classList.contains("hidden")) {
     const nombreCliente = document.getElementById("nuevoClienteNombre").value;
     const contacto = document.getElementById("nuevoClienteContacto").value;
-    region = document.getElementById("nuevoClienteRegion").value || "Querétaro";
+    region = document.getElementById("nuevoClienteRegion").value || region;
     const wa = document.getElementById("nuevoClienteWhatsApp").value;
     const email = document.getElementById("nuevoClienteEmail").value;
     
@@ -1045,9 +1203,6 @@ async function guardarVacante(e) {
       targetSheet: "CLIENTES",
       payload: [idCliente, nombreCliente, region, contacto, wa, "Activo", email]
     });
-  } else {
-    const c = DB.clientes.find(item => String(item.id_cliente) === String(idCliente));
-    if (c) region = c.region;
   }
 
   const idVacante = `VAC-${Date.now().toString().slice(-4)}`;
@@ -1062,13 +1217,15 @@ async function guardarVacante(e) {
     sueldo_base_perfil: 0,
     fee_pactado_total: parseFloat(document.getElementById("nuevaVacanteFee").value),
     monto_adelanto: parseFloat(document.getElementById("nuevaVacanteAnticipo").value),
+    saldo_liquidado: "No",
     fecha_inicio_proceso: new Date().toISOString().split('T')[0],
     estatus_vacante: "En Proceso",
     fecha_contratacion: "",
     candidato_contratado: "",
     dias_garantia_pactados: parseInt(document.getElementById("nuevaVacanteGarantia").value),
     garantia_aplicada: "No",
-    descripcion_perfil: perfilTexto
+    descripcion_perfil: perfilTexto,
+    pipeline: { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 }
   };
 
   DB.vacantes.unshift(nuevaVacante);
@@ -1102,7 +1259,7 @@ async function guardarVacante(e) {
   });
 }
 
-// GUARDAR CLIENTE DIRECTO (DESDE MODAL 5)
+// GUARDAR CLIENTE DIRECTO
 function guardarClienteDirecto(e) {
   e.preventDefault();
   const nombre = document.getElementById("clienteDirectoNombre").value.trim();
