@@ -2,7 +2,7 @@
  * CRM Talentum - Lógica de Control Operativo y Financiero
  */
 
-const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
 
 let DB = {
   clientes: [
@@ -85,6 +85,12 @@ let filtroRegionActual = "Todas";
 let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
+
+// Función helper segura para asignar texto sin errores de null
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
 
 // Exponer globalmente la función del embudo
 window.cambiarPipeline = function(idVacante, etapa, delta) {
@@ -273,7 +279,6 @@ function toggleFabMenu() {
 }
 
 function openModal(modalId) {
-  // Limpiar cualquier modal previo
   document.querySelectorAll(".bottom-sheet").forEach(m => m.classList.remove("modal-open"));
 
   activeModalSheet = document.getElementById(modalId);
@@ -304,21 +309,22 @@ function poblarSelects() {
   const selectGasto = document.getElementById("modalGastoVacante");
   const selectHora = document.getElementById("modalHoraVacante");
   const optionsVacantes = DB.vacantes.map(v => `<option value="${v.id_vacante}">${v.titulo_puesto}</option>`).join("");
-  selectGasto.innerHTML = optionsVacantes;
-  selectHora.innerHTML = optionsVacantes;
+  if (selectGasto) selectGasto.innerHTML = optionsVacantes;
+  if (selectHora) selectHora.innerHTML = optionsVacantes;
 
   const selectClientes = document.getElementById("modalVacanteCliente");
-  selectClientes.innerHTML = DB.clientes.map(c => `<option value="${c.id_cliente}">${c.nombre_comercial}</option>`).join("");
+  if (selectClientes) selectClientes.innerHTML = DB.clientes.map(c => `<option value="${c.id_cliente}">${c.nombre_comercial}</option>`).join("");
 
   const selectServicios = document.getElementById("modalVacanteServicio");
-  selectServicios.innerHTML = DB.servicios.map(s => `<option value="${s.id_servicio}">${s.nombre_servicio}</option>`).join("");
+  if (selectServicios) selectServicios.innerHTML = DB.servicios.map(s => `<option value="${s.id_servicio}">${s.nombre_servicio}</option>`).join("");
 }
 
 function actualizarValoresServicio() {
   const srvId = document.getElementById("modalVacanteServicio").value;
   const srv = DB.servicios.find(s => s.id_servicio === srvId);
   if (srv) {
-    document.getElementById("nuevaVacanteGarantia").value = srv.dias_garantia_defecto;
+    const el = document.getElementById("nuevaVacanteGarantia");
+    if (el) el.value = srv.dias_garantia_defecto;
   }
 }
 
@@ -510,9 +516,9 @@ function renderizarApp() {
     container.appendChild(card);
   });
 
-  document.getElementById("totalFeesActivos").textContent = `$${totalFees.toLocaleString()}`;
-  document.getElementById("totalPorCobrar").textContent = `$${totalPorCobrarGlobal.toLocaleString()}`;
-  document.getElementById("totalInversion").textContent = `$${totalGastos.toLocaleString()}`;
+  setText("totalFeesActivos", `$${totalFees.toLocaleString()}`);
+  setText("totalPorCobrar", `$${totalPorCobrarGlobal.toLocaleString()}`);
+  setText("totalInversion", `$${totalGastos.toLocaleString()}`);
 }
 
 function calcularSlaProceso(vacante) {
@@ -555,88 +561,104 @@ function abrirExpediente(vacante) {
 
   const infoSla = calcularSlaProceso(vacante);
 
-  document.getElementById("expPuesto").textContent = vacante.titulo_puesto;
-  document.getElementById("expSubtitulo").textContent = `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`;
+  setText("expPuesto", vacante.titulo_puesto);
+  setText("expSubtitulo", `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`);
 
   const headerAcciones = document.getElementById("expAccionesContactoHeader");
-  headerAcciones.innerHTML = `
-    ${cliente.contacto_whatsapp ? `
-      <a href="https://wa.me/52${limpiarTelefono(cliente.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(cliente.contacto_nombre || cliente.nombre_comercial)},%20te%20contacto%20sobre%20la%20vacante%20de%20${encodeURIComponent(vacante.titulo_puesto)}" target="_blank" class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs hover:bg-emerald-500/30">
-        <i class="ph ph-whatsapp-logo"></i>
-      </a>
-      <a href="tel:${limpiarTelefono(cliente.contacto_whatsapp)}" class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs hover:bg-cyan-500/30">
-        <i class="ph ph-phone"></i>
-      </a>
-    ` : ''}
-    ${cliente.contacto_email ? `
-      <a href="mailto:${cliente.contacto_email}?subject=Seguimiento:%20${encodeURIComponent(vacante.titulo_puesto)}" class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs hover:bg-indigo-500/30">
-        <i class="ph ph-envelope"></i>
-      </a>
-    ` : ''}
-  `;
+  if (headerAcciones) {
+    headerAcciones.innerHTML = `
+      ${cliente.contacto_whatsapp ? `
+        <a href="https://wa.me/52${limpiarTelefono(cliente.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(cliente.contacto_nombre || cliente.nombre_comercial)},%20te%20contacto%20sobre%20la%20vacante%20de%20${encodeURIComponent(vacante.titulo_puesto)}" target="_blank" class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs hover:bg-emerald-500/30">
+          <i class="ph ph-whatsapp-logo"></i>
+        </a>
+        <a href="tel:${limpiarTelefono(cliente.contacto_whatsapp)}" class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs hover:bg-cyan-500/30">
+          <i class="ph ph-phone"></i>
+        </a>
+      ` : ''}
+      ${cliente.contacto_email ? `
+        <a href="mailto:${cliente.contacto_email}?subject=Seguimiento:%20${encodeURIComponent(vacante.titulo_puesto)}" class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs hover:bg-indigo-500/30">
+          <i class="ph ph-envelope"></i>
+        </a>
+      ` : ''}
+    `;
+  }
 
-  document.getElementById("expFee").textContent = `$${feeTotal.toLocaleString()}`;
-  document.getElementById("expInversion").textContent = `$${inversionTotal.toLocaleString()}`;
-  document.getElementById("expGanancia").textContent = `$${gananciaNeta.toLocaleString()}`;
-  document.getElementById("expSlaStatus").textContent = `${infoSla.dias} días`;
+  setText("expFee", `$${feeTotal.toLocaleString()}`);
+  setText("expInversion", `$${inversionTotal.toLocaleString()}`);
+  setText("expGanancia", `$${gananciaNeta.toLocaleString()}`);
+  setText("expSlaStatus", `${infoSla.dias} días`);
 
   renderPipelineVacante(vacante);
 
   const badgeEstatus = document.getElementById("expBadgeEstatus");
-  badgeEstatus.textContent = vacante.estatus_vacante;
-  badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
-    ? "px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30"
-    : "px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+  if (badgeEstatus) {
+    badgeEstatus.textContent = vacante.estatus_vacante;
+    badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
+      ? "px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30"
+      : "px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+  }
 
-  document.getElementById("expFechaInicio").textContent = vacante.fecha_inicio_proceso || "--";
-  document.getElementById("expFechaContratacion").textContent = vacante.fecha_contratacion || "En proceso";
-  document.getElementById("expCandidato").textContent = vacante.candidato_contratado || "No asignado aún";
-  document.getElementById("expTipoServicio").textContent = servicio.nombre_servicio;
+  setText("expFechaInicio", vacante.fecha_inicio_proceso || "--");
+  setText("expFechaContratacion", vacante.fecha_contratacion || "En proceso");
+  setText("expCandidato", vacante.candidato_contratado || "No asignado aún");
+  setText("expTipoServicio", servicio.nombre_servicio);
 
   const boxPerfil = document.getElementById("boxDetallePerfilPuesto");
-  boxPerfil.classList.add("hidden");
-  boxPerfil.textContent = vacante.descripcion_perfil || "Sin descripción detallada del puesto.";
-  document.getElementById("btnPerfilPuestoText").textContent = "Ver Perfil de Puesto";
+  if (boxPerfil) {
+    boxPerfil.classList.add("hidden");
+    boxPerfil.textContent = vacante.descripcion_perfil || "Sin descripción detallada del puesto.";
+  }
+  setText("btnPerfilPuestoText", "Ver Perfil de Puesto");
 
   const anticipo = Number(vacante.monto_adelanto || 0);
   const saldo = (vacante.saldo_liquidado === "Sí") ? 0 : Math.max(0, feeTotal - anticipo);
 
-  document.getElementById("expCobranzaAnticipo").textContent = `$${anticipo.toLocaleString()}`;
-  document.getElementById("expCobranzaSaldo").textContent = saldo === 0 ? "✓ Liquidado (100%)" : `$${saldo.toLocaleString()} pendiente`;
-  document.getElementById("expCobranzaSaldo").className = saldo === 0 ? "font-bold text-emerald-400" : "font-bold text-amber-400";
+  setText("expCobranzaAnticipo", `$${anticipo.toLocaleString()}`);
+  
+  const elSaldo = document.getElementById("expCobranzaSaldo");
+  if (elSaldo) {
+    elSaldo.textContent = saldo === 0 ? "✓ Liquidado (100%)" : `$${saldo.toLocaleString()} pendiente`;
+    elSaldo.className = saldo === 0 ? "font-bold text-emerald-400" : "font-bold text-amber-400";
+  }
 
-  document.getElementById("expGarantiaPactada").textContent = `${vacante.dias_garantia_pactados} días`;
+  setText("expGarantiaPactada", `${vacante.dias_garantia_pactados} días`);
   
   if (vacante.fecha_contratacion) {
     const p = vacante.fecha_contratacion.split("-");
     const fc = new Date(p[0], p[1]-1, p[2]);
     fc.setDate(fc.getDate() + Number(vacante.dias_garantia_pactados));
-    document.getElementById("expGarantiaLimite").textContent = fc.toISOString().split("T")[0];
+    setText("expGarantiaLimite", fc.toISOString().split("T")[0]);
   } else {
-    document.getElementById("expGarantiaLimite").textContent = "N/A";
+    setText("expGarantiaLimite", "N/A");
   }
 
   const infoGarantia = calcularDiasGarantia(vacante);
-  document.getElementById("expGarantiaEstatus").textContent = infoGarantia.texto;
-  document.getElementById("expObservaciones").textContent = vacante.descripcion_perfil ? (vacante.descripcion_perfil.slice(0, 100) + "...") : "Sin observaciones registradas.";
-  document.getElementById("boxEditObservaciones").classList.add("hidden");
+  setText("expGarantiaEstatus", infoGarantia.texto);
+  setText("expObservaciones", vacante.descripcion_perfil ? (vacante.descripcion_perfil.slice(0, 100) + "...") : "Sin observaciones registradas.");
+  
+  const boxEditObs = document.getElementById("boxEditObservaciones");
+  if (boxEditObs) boxEditObs.classList.add("hidden");
 
   renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal);
-  document.getElementById("formGastoInline").classList.add("hidden");
+  
+  const formGastoIn = document.getElementById("formGastoInline");
+  if (formGastoIn) formGastoIn.classList.add("hidden");
 
   const btnFinalizar = document.getElementById("btnExpFinalizar");
   const btnReactivarGarantia = document.getElementById("btnExpGarantiaReactivar");
 
   if (vacante.estatus_vacante === "Contratado") {
-    btnFinalizar.classList.add("hidden");
-    if (infoGarantia.diasRestantes > 0 && vacante.garantia_aplicada === "No") {
-      btnReactivarGarantia.classList.remove("hidden");
-    } else {
-      btnReactivarGarantia.classList.add("hidden");
+    if (btnFinalizar) btnFinalizar.classList.add("hidden");
+    if (btnReactivarGarantia) {
+      if (infoGarantia.diasRestantes > 0 && vacante.garantia_aplicada === "No") {
+        btnReactivarGarantia.classList.remove("hidden");
+      } else {
+        btnReactivarGarantia.classList.add("hidden");
+      }
     }
   } else {
-    btnFinalizar.classList.remove("hidden");
-    btnReactivarGarantia.classList.add("hidden");
+    if (btnFinalizar) btnFinalizar.classList.remove("hidden");
+    if (btnReactivarGarantia) btnReactivarGarantia.classList.add("hidden");
   }
 
   openModal("modalExpediente");
@@ -648,6 +670,8 @@ function renderPipelineVacante(vacante) {
   }
 
   const container = document.getElementById("pipelineContainer");
+  if (!container) return;
+
   const etapas = [
     { key: "postulados", label: "Postulados", color: "text-indigo-400" },
     { key: "filtro", label: "Filtro Tel.", color: "text-cyan-400" },
@@ -727,6 +751,7 @@ function reactivarPorGarantia() {
 
 function renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal) {
   const tableGastos = document.getElementById("expHistorialGastosTable");
+  if (!tableGastos) return;
   tableGastos.innerHTML = "";
 
   if (gastosVacante.length === 0 && costoHoras === 0) {
@@ -751,7 +776,7 @@ function renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTot
     }
   }
 
-  document.getElementById("expHistorialTotalMonto").textContent = `$${inversionTotal.toLocaleString()}`;
+  setText("expHistorialTotalMonto", `$${inversionTotal.toLocaleString()}`);
 }
 
 function guardarGastoInlineExpediente(e) {
@@ -787,25 +812,30 @@ function guardarGastoInlineExpediente(e) {
 function togglePerfilPuesto() {
   const box = document.getElementById("boxDetallePerfilPuesto");
   const btnText = document.getElementById("btnPerfilPuestoText");
+  if (!box) return;
   const isHidden = box.classList.contains("hidden");
 
   if (isHidden) {
     box.classList.remove("hidden");
-    btnText.textContent = "Ocultar Perfil de Puesto";
+    if (btnText) btnText.textContent = "Ocultar Perfil de Puesto";
   } else {
     box.classList.add("hidden");
-    btnText.textContent = "Ver Perfil de Puesto";
+    if (btnText) btnText.textContent = "Ver Perfil de Puesto";
   }
 }
 
 function guardarObservacionesInline() {
   if (!vacanteSeleccionadaExpediente) return;
-  const texto = document.getElementById("inputObservaciones").value.trim();
+  const input = document.getElementById("inputObservaciones");
+  const texto = input ? input.value.trim() : "";
   
   vacanteSeleccionadaExpediente.descripcion_perfil = texto;
-  document.getElementById("expObservaciones").textContent = texto || "Sin observaciones registradas.";
-  document.getElementById("boxDetallePerfilPuesto").textContent = texto || "Sin descripción detallada del puesto.";
-  document.getElementById("boxEditObservaciones").classList.add("hidden");
+  setText("expObservaciones", texto || "Sin observaciones registradas.");
+  setText("boxDetallePerfilPuesto", texto || "Sin descripción detallada del puesto.");
+  
+  const boxEdit = document.getElementById("boxEditObservaciones");
+  if (boxEdit) boxEdit.classList.add("hidden");
+  
   renderizarApp();
 
   sendToAppsScript({
@@ -827,45 +857,48 @@ function renderizarAnaliticas() {
   const margenGlobalPorcentaje = totalFacturado > 0 ? Math.round((utilidadNetaTotal / totalFacturado) * 100) : 0;
   const roas = totalGastosPauta > 0 ? (totalFacturado / totalGastosPauta).toFixed(1) : "N/A";
 
-  document.getElementById("kpiUtilidadNeta").textContent = `$${utilidadNetaTotal.toLocaleString()}`;
-  document.getElementById("kpiMargenGlobal").textContent = `${margenGlobalPorcentaje}% Margen`;
-  document.getElementById("kpiFacturadoTotal").textContent = `$${totalFacturado.toLocaleString()}`;
-  document.getElementById("kpiGastoPautaTotal").textContent = `$${totalGastosPauta.toLocaleString()}`;
-  document.getElementById("kpiCostoHorasTotal").textContent = `$${totalHorasHH.toLocaleString()}`;
-  document.getElementById("kpiRoas").textContent = roas === "N/A" ? "N/A" : `${roas}x`;
-  document.getElementById("kpiHorasTotales").textContent = `${totalHorasCantidad} hrs`;
+  setText("kpiUtilidadNeta", `$${utilidadNetaTotal.toLocaleString()}`);
+  setText("kpiMargenGlobal", `${margenGlobalPorcentaje}% Margen`);
+  setText("kpiFacturadoTotal", `$${totalFacturado.toLocaleString()}`);
+  setText("kpiGastoPautaTotal", `$${totalGastosPauta.toLocaleString()}`);
+  setText("kpiCostoHorasTotal", `$${totalHorasHH.toLocaleString()}`);
+  setText("kpiRoas", roas === "N/A" ? "N/A" : `${roas}x`);
+  setText("kpiHorasTotales", `${totalHorasCantidad} hrs`);
 
   const containerBreakdown = document.getElementById("breakdownGastos");
-  containerBreakdown.innerHTML = "";
+  if (containerBreakdown) {
+    containerBreakdown.innerHTML = "";
 
-  const categorias = {};
-  DB.gastos.forEach(g => {
-    categorias[g.categoria] = (categorias[g.categoria] || 0) + Number(g.monto);
-  });
-  if (totalHorasHH > 0) {
-    categorias["Horas de Consultoría"] = totalHorasHH;
+    const categorias = {};
+    DB.gastos.forEach(g => {
+      categorias[g.categoria] = (categorias[g.categoria] || 0) + Number(g.monto);
+    });
+    if (totalHorasHH > 0) {
+      categorias["Horas de Consultoría"] = totalHorasHH;
+    }
+
+    const granTotalInvertido = totalGastosPauta + totalHorasHH;
+
+    Object.keys(categorias).forEach(cat => {
+      const monto = categorias[cat];
+      const pct = granTotalInvertido > 0 ? Math.round((monto / granTotalInvertido) * 100) : 0;
+
+      const row = document.createElement("div");
+      row.innerHTML = `
+        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+          <span>${cat}</span>
+          <span>$${monto.toLocaleString()} <span class="text-slate-400 font-normal">(${pct}%)</span></span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div>
+        </div>
+      `;
+      containerBreakdown.appendChild(row);
+    });
   }
 
-  const granTotalInvertido = totalGastosPauta + totalHorasHH;
-
-  Object.keys(categorias).forEach(cat => {
-    const monto = categorias[cat];
-    const pct = granTotalInvertido > 0 ? Math.round((monto / granTotalInvertido) * 100) : 0;
-
-    const row = document.createElement("div");
-    row.innerHTML = `
-      <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-        <span>${cat}</span>
-        <span>$${monto.toLocaleString()} <span class="text-slate-400 font-normal">(${pct}%)</span></span>
-      </div>
-      <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-        <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div>
-      </div>
-    `;
-    containerBreakdown.appendChild(row);
-  });
-
   const containerClientes = document.getElementById("tablaRentabilidadClientes");
+  if (!containerClientes) return;
   containerClientes.innerHTML = "";
 
   DB.clientes.forEach(c => {
@@ -997,6 +1030,7 @@ function renderizarAnaliticas() {
 
 function renderizarDirectorioClientes() {
   const container = document.getElementById("directorioClientesContainer");
+  if (!container) return;
   container.innerHTML = "";
 
   DB.clientes.forEach(c => {
@@ -1090,7 +1124,7 @@ function calcularDiasGarantia(vacante) {
 
 function abrirModalContratar(vacante) {
   document.getElementById("modalContratarIdVacante").value = vacante.id_vacante;
-  document.getElementById("modalContratarTitulo").textContent = `${vacante.titulo_puesto}`;
+  setText("modalContratarTitulo", `${vacante.titulo_puesto}`);
   document.getElementById("modalContratarNombreCandidato").value = vacante.candidato_contratado || "";
   document.getElementById("modalContratarFecha").value = new Date().toISOString().split("T")[0];
   openModal("modalSheetContratar");
