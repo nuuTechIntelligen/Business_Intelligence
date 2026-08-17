@@ -6,6 +6,12 @@ body {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   overscroll-behavior-y: contain;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #0B0F17;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -19,7 +25,7 @@ body {
 
 /* Modales y Bottom Sheets con animación suave */
 .bottom-sheet {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-in-out;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-in-out;
   transform: translateY(105%) !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -33,26 +39,37 @@ body {
   visibility: visible !important;
 }
 
-.chip-active {
-  background-color: #4f46e5 !important;
-  color: #ffffff !important;
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+/* Microanimaciones para estados de vacante */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.chip-inactive {
-  background-color: #f1f5f9 !important;
-  color: #475569 !important;
+.animate-spin-slow {
+  animation: spinSlow 3s linear infinite;
 }
 
-.chip-inactive:hover {
-  background-color: #e2e8f0 !important;
+@keyframes pulseGold {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
 }
 
+.animate-pulse-gold {
+  animation: pulseGold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Rebote sutil en botones del embudo al hacer click */
+.btn-pipeline-action:active {
+  transform: scale(0.85);
+  transition: transform 0.1s ease;
+}
+
+/* Transición suave entre pestañas */
 .tab-view {
-  animation: fadeIn 0.2s ease-in-out;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
