@@ -86,6 +86,15 @@ let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
 
+// Exponer globalmente para listeners en el HTML dinámico
+window.cambiarPipeline = function(idVacante, etapa, delta) {
+  const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
+  if (v && v.pipeline) {
+    v.pipeline[etapa] = Math.max(0, (v.pipeline[etapa] || 0) + delta);
+    renderPipelineVacante(v);
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   poblarSelects();
@@ -363,13 +372,11 @@ function renderizarApp() {
 
     if (!matchSearch) return false;
 
-    // Filtro por Región
     if (filtroRegionActual !== "Todas") {
       const reg = (v.region || (cliente ? cliente.region : "")).toLowerCase();
       if (!reg.includes(filtroRegionActual.toLowerCase())) return false;
     }
 
-    // Filtro por Estado
     if (filtroEstadoActual === "Todas") return true;
     if (filtroEstadoActual === "En Proceso") return v.estatus_vacante === "En Proceso";
     if (filtroEstadoActual === "Contratado") return v.estatus_vacante === "Contratado";
@@ -506,7 +513,6 @@ function renderizarApp() {
   document.getElementById("totalInversion").textContent = `$${totalGastos.toLocaleString()}`;
 }
 
-// CÁLCULO DE SLA / TIME TO FILL
 function calcularSlaProceso(vacante) {
   if (!vacante.fecha_inicio_proceso) return { dias: 0, texto: "Sin fecha", color: "text-slate-400" };
   const srv = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { sla_meta_dias: 20 };
@@ -550,7 +556,6 @@ function abrirExpediente(vacante) {
   document.getElementById("expPuesto").textContent = vacante.titulo_puesto;
   document.getElementById("expSubtitulo").textContent = `${cliente.nombre_comercial} • Región ${vacante.region || cliente.region}`;
 
-  // Contacto rápido en la cabecera
   const headerAcciones = document.getElementById("expAccionesContactoHeader");
   headerAcciones.innerHTML = `
     ${cliente.contacto_whatsapp ? `
@@ -573,10 +578,8 @@ function abrirExpediente(vacante) {
   document.getElementById("expGanancia").textContent = `$${gananciaNeta.toLocaleString()}`;
   document.getElementById("expSlaStatus").textContent = `${infoSla.dias} días`;
 
-  // Render del Pipeline de Candidatos
   renderPipelineVacante(vacante);
 
-  // Panel Información
   const badgeEstatus = document.getElementById("expBadgeEstatus");
   badgeEstatus.textContent = vacante.estatus_vacante;
   badgeEstatus.className = vacante.estatus_vacante === "En Proceso" 
@@ -593,7 +596,6 @@ function abrirExpediente(vacante) {
   boxPerfil.textContent = vacante.descripcion_perfil || "Sin descripción detallada del puesto.";
   document.getElementById("btnPerfilPuestoText").textContent = "Ver Perfil de Puesto";
 
-  // Cobranza y Garantía
   const anticipo = Number(vacante.monto_adelanto || 0);
   const saldo = (vacante.saldo_liquidado === "Sí") ? 0 : Math.max(0, feeTotal - anticipo);
 
@@ -620,7 +622,6 @@ function abrirExpediente(vacante) {
   renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTotal);
   document.getElementById("formGastoInline").classList.add("hidden");
 
-  // Control de botones de acción
   const btnFinalizar = document.getElementById("btnExpFinalizar");
   const btnReactivarGarantia = document.getElementById("btnExpGarantiaReactivar");
 
@@ -639,7 +640,6 @@ function abrirExpediente(vacante) {
   openModal("modalExpediente");
 }
 
-// RENDER Y CONTROL DEL PIPELINE DE CANDIDATOS
 function renderPipelineVacante(vacante) {
   if (!vacante.pipeline) {
     vacante.pipeline = { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
@@ -659,22 +659,13 @@ function renderPipelineVacante(vacante) {
       <span class="text-xs font-black ${e.color}">${vacante.pipeline[e.key] || 0}</span>
       <span class="text-[9px] font-bold text-slate-400 mt-0.5 leading-none">${e.label}</span>
       <div class="flex gap-1 mt-1.5">
-        <button onclick="cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700">-</button>
-        <button onclick="cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700">+</button>
+        <button onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">-</button>
+        <button onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', 1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">+</button>
       </div>
     </div>
   `).join("");
 }
 
-function cambiarPipeline(idVacante, etapa, delta) {
-  const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
-  if (v && v.pipeline) {
-    v.pipeline[etapa] = Math.max(0, (v.pipeline[etapa] || 0) + delta);
-    renderPipelineVacante(v);
-  }
-}
-
-// APLICAR REPOSICIÓN POR GARANTÍA
 function reactivarPorGarantia() {
   if (!vacanteSeleccionadaExpediente) return;
   if (confirm(`¿Confirmas aplicar reposición de garantía para la vacante ${vacanteSeleccionadaExpediente.titulo_puesto}? Esto abrirá un nuevo proceso con Fee $0 manteniendo el historial.`)) {
@@ -823,7 +814,6 @@ function guardarObservacionesInline() {
   });
 }
 
-// ANALÍTICAS
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
   const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -1096,7 +1086,6 @@ function calcularDiasGarantia(vacante) {
   return { diasRestantes, texto: `${diasRestantes}d restantes`, color: "text-emerald-600" };
 }
 
-// MODAL CONTRATAR
 function abrirModalContratar(vacante) {
   document.getElementById("modalContratarIdVacante").value = vacante.id_vacante;
   document.getElementById("modalContratarTitulo").textContent = `${vacante.titulo_puesto}`;
@@ -1133,7 +1122,6 @@ async function procesarContratacion(e) {
   });
 }
 
-// PERSISTENCIA DE GASTO
 async function guardarGasto(e) {
   e.preventDefault();
   const idVacante = document.getElementById("modalGastoVacante").value;
@@ -1152,7 +1140,6 @@ async function guardarGasto(e) {
   });
 }
 
-// PERSISTENCIA DE HORAS
 async function guardarHora(e) {
   e.preventDefault();
   const idVacante = document.getElementById("modalHoraVacante").value;
@@ -1173,7 +1160,6 @@ async function guardarHora(e) {
   });
 }
 
-// PERSISTENCIA DE VACANTE
 async function guardarVacante(e) {
   e.preventDefault();
   let idCliente = document.getElementById("modalVacanteCliente").value;
@@ -1259,7 +1245,6 @@ async function guardarVacante(e) {
   });
 }
 
-// GUARDAR CLIENTE DIRECTO
 function guardarClienteDirecto(e) {
   e.preventDefault();
   const nombre = document.getElementById("clienteDirectoNombre").value.trim();
