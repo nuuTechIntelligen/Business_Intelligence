@@ -1,1 +1,433 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Talentum Consultoría | Especialistas en Recursos Humanos</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#705e00",
+                        "tertiary-fixed-dim": "#ebc333",
+                        "primary-container": "#ffd700",
+                        "on-tertiary-fixed": "#231b00",
+                        "on-primary-fixed": "#221b00",
+                        "surface-container-high": "#e7e8e9",
+                        "on-background": "#191c1d",
+                        "error-container": "#ffdad6",
+                        "primary": "#705d00",
+                        "inverse-primary": "#e9c400",
+                        "on-tertiary-fixed-variant": "#564500",
+                        "on-secondary-fixed-variant": "#474747",
+                        "secondary-container": "#e2e2e2",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-primary-fixed-variant": "#544600",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#e9c400",
+                        "on-tertiary-container": "#735c00",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#e2e2e2",
+                        "surface": "#f8f9fa",
+                        "tertiary": "#725c00",
+                        "on-surface": "#191c1d",
+                        "inverse-surface": "#2e3132",
+                        "on-secondary-container": "#646464",
+                        "secondary": "#5e5e5e",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-tint": "#705d00",
+                        "tertiary-fixed": "#ffe082",
+                        "surface-bright": "#f8f9fa",
+                        "outline": "#7e775f",
+                        "tertiary-container": "#ffd64a",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9fa",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#ffe16d",
+                        "surface-container-low": "#f3f4f5",
+                        "outline-variant": "#d0c6ab",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#4d4732",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "surface-dim": "#d9dadb",
+                        "surface-container": "#edeeef"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "container-max": "1280px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px",
+                        "unit": "8px"
+                    },
+                    fontFamily: {
+                        "label-md": ["JetBrains Mono", "monospace"],
+                        "headline-lg-mobile": ["Playfair Display", "serif"],
+                        "headline-lg": ["Playfair Display", "serif"],
+                        "body-md": ["Work Sans", "sans-serif"],
+                        "body-lg": ["Work Sans", "sans-serif"],
+                        "display-lg": ["Playfair Display", "serif"]
+                    },
+                    fontSize: {
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container">
 
+    <!-- TopNavBar -->
+    <nav class="fixed top-0 w-full z-50 border-b border-outline-variant/30 glass-nav" aria-label="Navegación principal">
+        <div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
+            <a href="#" class="flex items-center gap-4 focus:outline-none">
+                <img alt="Talentum Consultoría Logo" class="h-10 md:h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqlwYzJPAX4_AGgTLKJ303FYXJtkHU8XiitQxQtG9s5n5gVIWCfFULuD7l0NWxQQMEl62iN2Qinp4gJ2EhFuQspo8qhhSYsf_q1UUp3LcZDBmzkZ03R5yIzgSW4Lu9rSdXLae5sUuFU461Uh-7c1U_WCKsIPTWQC7Wcar3fNPek1IewzGFgw1CDu5FImUTwWwrXXakWFT6PcCwJ5r6Lvwo4vESOR_sGrIofDCUXLsI1aN2Ib479tMcY9qm7ySyAMxHgwo">
+                <span class="hidden md:block font-display-lg text-headline-lg text-on-background">Talentum Consultoría</span>
+            </a>
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#nosotros">Nosotros</a>
+                <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#servicios">Servicios</a>
+                <a class="text-secondary hover:text-primary transition-colors font-label-md text-label-md uppercase tracking-wider" href="#testimonios">Testimonios</a>
+                <a class="bg-on-background text-primary-container px-6 py-2 rounded-lg font-label-md text-label-md uppercase tracking-wider hover:scale-95 transition-transform active:scale-90" href="#contacto">Agendar Cita</a>
+            </div>
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-menu-toggle" class="md:hidden text-on-background p-2 focus:outline-none" aria-label="Abrir menú">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <!-- Mobile Nav Menu -->
+        <div class="hidden md:hidden bg-background border-b border-outline-variant/30 px-margin-mobile py-6 flex flex-col gap-4 shadow-lg" id="mobile-menu">
+            <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#nosotros">Nosotros</a>
+            <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#servicios">Servicios</a>
+            <a class="text-secondary font-label-md text-label-md uppercase tracking-wider py-1" href="#testimonios">Testimonios</a>
+            <a class="text-primary font-bold font-label-md text-label-md uppercase tracking-wider py-1" href="#contacto">Agendar Cita</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 hero-gradient text-white overflow-hidden">
+        <div class="absolute inset-0 node-bg"></div>
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+            <div class="flex-1 space-y-8">
+                <div class="inline-block px-4 py-1 border border-primary-container/30 rounded-full bg-primary-container/10 text-primary-container font-label-md text-label-md uppercase tracking-widest">
+                    Expertos en Capital Humano
+                </div>
+                <h1 class="font-display-lg text-4xl md:text-display-lg leading-tight">
+                    Transformamos Organizaciones a través del <span class="text-primary-container italic">Talento Humano</span>
+                </h1>
+                <p class="text-secondary-fixed-dim font-body-lg text-body-lg max-w-xl">
+                    Consultoría especializada en reclutamiento y procesos de Recursos Humanos con un enfoque estratégico y profundamente humano.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <a class="bg-primary-container text-on-background px-8 py-4 rounded-lg font-bold text-center hover:scale-[1.02] transition-transform shadow-lg" href="#contacto">Iniciar Diagnóstico Gratuito</a>
+                    <a class="border border-white/20 hover:bg-white/5 px-8 py-4 rounded-lg font-bold text-center transition-colors" href="#servicios">Ver Servicios</a>
+                </div>
+            </div>
+            <div class="flex-1 w-full lg:w-1/2">
+                <div class="relative group">
+                    <div class="absolute -top-6 -left-6 w-32 h-32 border-t-4 border-l-4 border-primary-container/40 rounded-tl-3xl"></div>
+                    <div class="absolute -bottom-6 -right-6 w-32 h-32 border-b-4 border-r-4 border-primary-container/40 rounded-br-3xl"></div>
+                    <div class="relative overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
+                        <img alt="Reunión profesional de consultoría en recursos humanos" class="w-full h-auto object-cover aspect-video lg:aspect-[4/3]" src="https://lh3.googleusercontent.com/aida/AP1WRLt_mQSTotbq2owEhNLob7lVZyXroA-YE44w4X4EAdj5RdphU1Qg0OYDgYV72haBIIMu1a7GG_MGeAa2pDE8umoPdzPRWWjiwXuAdeFADgGWJxMNqzjyEtjNiiCt8-j6ecaIMXn3wIPTaNgdX7pHpg_XzxQrJfA7FLXXUayKrPDsD3qXuP9-mBl1vYVTVCgP2PxOliCpddFRAsdvqaOObwx4fswBckauLFFRWaQLkD_PBSahwRkYCTys8kFb">
+                        <div class="absolute inset-0 bg-gradient-to-t from-on-background/60 to-transparent pointer-events-none"></div>
+                    </div>
+                    <div class="absolute -bottom-8 left-8 bg-white text-on-background p-4 rounded-xl shadow-xl hidden md:flex items-center gap-4 border-l-4 border-primary-container">
+                        <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">diversity_3</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">Consultoría Estratégica</p>
+                            <p class="text-xs text-secondary">Impacto organizacional real</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nosotros Section -->
+    <section class="py-24 md:py-32 bg-white" id="nosotros">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="relative group">
+                    <div class="absolute -inset-4 bg-primary-container/10 rounded-xl transform -rotate-3 group-hover:rotate-0 transition-transform duration-500"></div>
+                    <div class="relative overflow-hidden rounded-xl shadow-lg">
+                        <img alt="Yare Cuate - Líder de Consultoría en Talentum" class="w-full transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS0_CeVg_xKcpKjoVfeNoyxvh-big2BEGry_QHfOgdsC83D1ownCPWtVWCRd5rtI_-d_XSNkwm0TPPFtkFv1i3xDQozwGP__5Qq3vGYxMzoVR3o1xhvPjhq8kZkSbTUQHxnZqLbD5ElD7HDToVJQphK5_U1hje45AXoAjcg-LyJPXYKtkjpHzcVr4I7JigWtcQC2Fl97SV4gvb5XOe2nFas-ZrIrJyqPAcOaA2OJBpiQS9XshWJ6V3U9PyH-8qli5X-bk">
+                    </div>
+                    <div class="absolute bottom-6 right-6 bg-on-background text-white p-6 rounded-lg shadow-xl">
+                        <p class="font-display-lg text-xl">Yare Cuate</p>
+                        <p class="text-primary-container font-label-md text-label-md uppercase">Líder de Consultoría</p>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <h2 class="font-display-lg text-3xl md:text-headline-lg text-on-background border-l-4 border-primary-container pl-6">
+                        Nuestro Compromiso es el Factor Humano
+                    </h2>
+                    <div class="space-y-6 text-secondary font-body-lg text-body-lg leading-relaxed">
+                        <p>
+                            En Talentum Consultoría, entendemos que detrás de cada proceso, cada vacante y cada estrategia, hay personas con sueños y empresas con visiones que deben converger para el éxito mutuo.
+                        </p>
+                        <p>
+                            Nuestra metodología se basa en la <strong>precisión analítica</strong> y la <strong>empatía organizacional</strong>. No solo buscamos llenar un puesto; construimos los cimientos del crecimiento de su empresa a través de una selección rigurosa y humana.
+                        </p>
+                        <ul class="space-y-4 pt-4">
+                            <li class="flex items-center gap-3">
+                                <span class="material-symbols-outlined fill-1 text-primary-container">check_circle</span>
+                                <span>Más de 10 años de experiencia en el sector HORECA e Industrial.</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="material-symbols-outlined fill-1 text-primary-container">check_circle</span>
+                                <span>Enfoque personalizado y diagnóstico real.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 md:py-32 bg-surface-container-low relative" id="servicios">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="text-center mb-20">
+                <h2 class="font-display-lg text-3xl md:text-headline-lg mb-4">Soluciones Especializadas</h2>
+                <div class="h-1 w-24 bg-primary-container mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full group rounded-lg">
+                    <div class="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container text-on-background group-hover:bg-on-background group-hover:text-primary-container transition-colors">
+                        <span class="material-symbols-outlined">hotel</span>
+                    </div>
+                    <h3 class="font-display-lg text-xl mb-4">Turismo &amp; HORECA</h3>
+                    <p class="text-secondary font-body-md mb-8 flex-grow">Selección de personal para hoteles, restaurantes y empresas de servicios turísticos con altos estándares de calidad.</p>
+                    <span class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</span>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full group rounded-lg">
+                    <div class="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container text-on-background group-hover:bg-on-background group-hover:text-primary-container transition-colors">
+                        <span class="material-symbols-outlined">factory</span>
+                    </div>
+                    <h3 class="font-display-lg text-xl mb-4">Sector Industrial</h3>
+                    <p class="text-secondary font-body-md mb-8 flex-grow">Reclutamiento técnico y operativo especializado para plantas de producción y centros de distribución.</p>
+                    <span class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</span>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full group rounded-lg">
+                    <div class="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container text-on-background group-hover:bg-on-background group-hover:text-primary-container transition-colors">
+                        <span class="material-symbols-outlined">settings_suggest</span>
+                    </div>
+                    <h3 class="font-display-lg text-xl mb-4">Procesos de RRHH</h3>
+                    <p class="text-secondary font-body-md mb-8 flex-grow">Auditoría, manuales de procesos, estructuras salariales y optimización del clima organizacional.</p>
+                    <span class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</span>
+                </div>
+                <!-- Card 4 -->
+                <div class="bg-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full lg:col-span-1 group rounded-lg">
+                    <div class="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container text-on-background group-hover:bg-on-background group-hover:text-primary-container transition-colors">
+                        <span class="material-symbols-outlined">person_search</span>
+                    </div>
+                    <h3 class="font-display-lg text-xl mb-4">Reclutamiento 360°</h3>
+                    <p class="text-secondary font-body-md mb-8 flex-grow">Gestión integral de vacantes, desde el perfilamiento hasta el onboarding del nuevo talento.</p>
+                    <span class="font-label-md text-label-md uppercase text-primary font-bold tracking-wider group-hover:translate-x-1 transition-transform inline-block">Ver más →</span>
+                </div>
+                <!-- Featured Bento-style Card -->
+                <div class="bg-on-background text-white p-8 border-b-4 border-primary-container hover:shadow-2xl transition-all duration-300 flex flex-col h-full md:col-span-2 relative overflow-hidden rounded-lg">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                        <span class="material-symbols-outlined text-8xl">partner_exchange</span>
+                    </div>
+                    <h3 class="font-display-lg text-2xl mb-4 text-primary-container">Socio Estratégico</h3>
+                    <p class="text-secondary-fixed-dim font-body-lg mb-8 flex-grow">Nos convertimos en una extensión de su departamento de RRHH, brindando soporte continuo y asesoría legal-laboral para asegurar que su equipo sea su mayor ventaja competitiva.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-label-md uppercase">Asesoría Legal</span>
+                        <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-label-md uppercase">Headhunting</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios Section -->
+    <section class="py-24 md:py-32 bg-white overflow-hidden" id="testimonios">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div>
+                    <span class="text-primary font-label-md text-label-md uppercase tracking-widest block mb-2 font-bold">Historias de Éxito</span>
+                    <h2 class="font-display-lg text-3xl md:text-headline-lg">Lo que dicen nuestros clientes</h2>
+                </div>
+                <div class="flex gap-4">
+                    <button id="prev-testimonio" class="p-3 border border-outline rounded-full hover:bg-surface-container-high transition-colors focus:outline-none" aria-label="Testimonio anterior">
+                        <span class="material-symbols-outlined align-middle">arrow_back</span>
+                    </button>
+                    <button id="next-testimonio" class="p-3 bg-on-background text-white rounded-full hover:bg-primary transition-colors focus:outline-none" aria-label="Siguiente testimonio">
+                        <span class="material-symbols-outlined align-middle">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12" id="testimonios-container">
+                <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm">
+                    <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
+                    <p class="font-body-lg text-lg mb-8 text-secondary">
+                        "La precisión con la que Talentum seleccionó a nuestro equipo gerencial para la nueva apertura hotelera superó todas las expectativas. Entienden perfectamente el ritmo del sector HORECA."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-surface-dim rounded-full flex items-center justify-center font-bold text-on-surface">DR</div>
+                        <div>
+                            <p class="font-bold text-on-background not-italic">Daniel Ramírez</p>
+                            <p class="text-sm text-secondary not-italic">Director General - Resort Pacífico</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-10 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl italic relative shadow-sm">
+                    <span class="material-symbols-outlined absolute top-8 right-10 text-6xl text-primary-container opacity-20 select-none">format_quote</span>
+                    <p class="font-body-lg text-lg mb-8 text-secondary">
+                        "Implementar los nuevos procesos de RRHH con Yare y su equipo transformó nuestro clima laboral en menos de 6 meses. La consultoría fue profesional, empática y muy práctica."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-surface-dim rounded-full flex items-center justify-center font-bold text-on-surface">ML</div>
+                        <div>
+                            <p class="font-bold text-on-background not-italic">Mariana López</p>
+                            <p class="text-sm text-secondary not-italic">Gerente de RH - Industrial del Bajío</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto Section -->
+    <section class="py-24 md:py-32 bg-on-background text-white relative" id="contacto">
+        <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                <div class="space-y-8">
+                    <h2 class="font-display-lg text-4xl md:text-5xl">Solicite un Diagnóstico <span class="text-primary-container">Gratuito</span></h2>
+                    <p class="text-secondary-fixed-dim font-body-lg text-xl">
+                        ¿Listo para llevar su equipo al siguiente nivel? Complete el formulario y uno de nuestros expertos se pondrá en contacto en menos de 24 horas.
+                    </p>
+                    <div class="space-y-6 pt-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full border border-primary-container/30 flex items-center justify-center text-primary-container">
+                                <span class="material-symbols-outlined">mail</span>
+                            </div>
+                            <div>
+                                <p class="text-sm text-secondary-fixed-dim uppercase tracking-wider">Email</p>
+                                <p class="text-lg">contacto@talentum.com.mx</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full border border-primary-container/30 flex items-center justify-center text-primary-container">
+                                <span class="material-symbols-outlined">call</span>
+                            </div>
+                            <div>
+                                <p class="text-sm text-secondary-fixed-dim uppercase tracking-wider">Teléfono</p>
+                                <p class="text-lg">+52 55 1234 5678</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 md:p-12 text-on-background shadow-2xl">
+                    <form id="contact-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="nombre" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Nombre Completo</label>
+                                <input id="nombre" name="nombre" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all placeholder:text-surface-dim" placeholder="Ej. Juan Pérez" type="text">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="email" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Correo Corporativo</label>
+                                <input id="email" name="email" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all placeholder:text-surface-dim" placeholder="juan@empresa.com" type="email">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="servicio" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Servicio de Interés</label>
+                            <select id="servicio" name="servicio" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all appearance-none bg-transparent">
+                                <option disabled selected value="">Seleccione un servicio</option>
+                                <option value="turismo">Empresas de Turismo</option>
+                                <option value="horeca">HORECA</option>
+                                <option value="industria">Industria</option>
+                                <option value="procesos">Procesos de RRHH</option>
+                                <option value="reclutamiento">Reclutamiento</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="mensaje" class="font-label-md text-xs uppercase tracking-widest text-secondary block">Mensaje</label>
+                            <textarea id="mensaje" name="mensaje" required class="w-full border-b border-outline-variant focus:border-primary-container focus:ring-0 px-0 py-3 outline-none transition-all placeholder:text-surface-dim resize-none" placeholder="Cuéntenos sobre su necesidad..." rows="4"></textarea>
+                        </div>
+                        <button class="w-full bg-on-background text-primary-container py-4 rounded-lg font-bold uppercase tracking-widest hover:scale-[1.01] active:scale-95 transition-all mt-4" type="submit">Enviar Solicitud</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-on-background dark:bg-surface-container-lowest border-t border-outline/20 pt-20 pb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+            <div class="space-y-6">
+                <img alt="Talentum Consultoría Logo" class="h-16 w-auto brightness-0 invert opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgQZW3wgxSDzmFoBaNS-WeBsOLAxTA1R2FspHoBAAMPgux-AQPieaZrU4W0RfOlJmC1hKiHhDKTM4wdcc9VxcWV7pVBFBfqCa7aRqgzLY8bcaNuHX7Ll22CvBE0fpmMwxnuQjpChuqJPyeBM-Aar1aRVwCl2zcLFWh7voEDhZ_sxU8bhVuy8hjKI4flL1vXp0WvX4tiTMgukPLel_isSVnliP-jV2UVovCar_tjjAABUQxuPAWo6qXL6mUUyXq5DNqPPw">
+                <p class="text-secondary-fixed-dim font-body-md">
+                    Líderes en consultoría de recursos humanos enfocada en resultados estratégicos y el bienestar del talento.
+                </p>
+                <div class="flex gap-4">
+                    <a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-container hover:text-on-background transition-all" href="#" aria-label="Visitar LinkedIn">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+                    </a>
+                    <a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary-container hover:text-on-background transition-all" href="#" aria-label="Visitar Instagram">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849s-.011 3.585-.069 4.85c-.149 3.222-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.849-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849s.012-3.584.07-4.849c.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.28.072-1.689.072-4.947s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <h4 class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Enlaces</h4>
+                <ul class="space-y-3 font-body-md text-secondary-fixed-dim">
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#nosotros">Sobre Nosotros</a></li>
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#servicios">Servicios</a></li>
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#">Privacidad</a></li>
+                    <li><a class="hover:text-primary-fixed transition-colors" href="#">Términos</a></li>
+                </ul>
+            </div>
+            <div class="space-y-6">
+                <h4 class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Newsletter</h4>
+                <p class="text-secondary-fixed-dim text-sm">Reciba insights mensuales sobre capital humano y tendencias laborales.</p>
+                <div class="flex gap-2">
+                    <input class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 flex-grow focus:outline-none focus:border-primary-container text-white" placeholder="Email" type="email">
+                    <button class="bg-primary-container text-on-background px-4 py-2 rounded-lg font-bold hover:brightness-105 transition-all"><span class="material-symbols-outlined align-middle">send</span></button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-20 border-t border-outline/10 pt-10 text-center text-secondary-fixed-dim font-body-md text-sm">
+            © 2024 Talentum Consultoría. Especialistas en Recursos Humanos.
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/525512345678" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-transform duration-300 hover:scale-110 active:scale-95 border-2 border-primary-container bg-[#25D366]" aria-label="Contactar por WhatsApp">
+        <svg class="w-8 h-8 fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
+        </svg>
+    </a>
+
+    <!-- Custom JavaScript -->
+    <script src="main.js"></script>
+</body>
+</html>
