@@ -399,15 +399,22 @@ async function guardarVacante(e) {
 }
 
 async function sendToAppsScript(payload) {
-  if (APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") return;
+  if (APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI" || !APPS_SCRIPT_URL.startsWith("http")) {
+    console.warn("⚠️ APPS_SCRIPT_URL no está configurada correctamente.");
+    return;
+  }
+
   try {
-    await fetch(APPS_SCRIPT_URL, {
+    const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(payload)
+      // text/plain evita que el navegador haga preflight OPTIONS que GAS no soporta
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      mode: "no-cors" // Permite completar el envío a GAS sin bloqueos de CORS
     });
+    console.log("✓ Petición enviada a Google Apps Script:", payload);
   } catch (err) {
-    console.error("Error al sincronizar con Apps Script:", err);
+    console.error("❌ Error enviando datos a Google Sheets:", err);
   }
 }
 
