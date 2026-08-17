@@ -130,8 +130,28 @@
     </div>
 
     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Rentabilidad por Cliente</h3>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Rentabilidad por Cliente</h3>
+        <span class="text-[10px] text-slate-400 italic">Toca para ver contacto y vacantes</span>
+      </div>
       <div id="tablaRentabilidadClientes" class="space-y-3"></div>
+    </div>
+  </section>
+
+  <!-- VISTA 3: DIRECTORIO DE CLIENTES -->
+  <section id="viewClientes" class="tab-view hidden px-4 mt-4 space-y-3">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-base font-bold text-slate-900">Directorio de Clientes</h2>
+        <span class="text-xs text-slate-500">Acciones de contacto directo</span>
+      </div>
+      <button id="btnOpenModalNuevoClienteDirecto" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-transform flex items-center gap-1">
+        <i class="ph ph-plus"></i> Nuevo Cliente
+      </button>
+    </div>
+
+    <div id="directorioClientesContainer" class="space-y-3 mt-3">
+      <!-- Listado de clientes -->
     </div>
   </section>
 
@@ -162,28 +182,35 @@
       <i class="ph ph-chart-pie-slice text-xl"></i>
       <span class="text-[10px]">Finanzas</span>
     </button>
+    <button id="navBtnClientes" class="nav-item flex flex-col items-center gap-1 text-slate-400 font-semibold hover:text-slate-600 transition-colors">
+      <i class="ph ph-buildings text-xl"></i>
+      <span class="text-[10px]">Clientes</span>
+    </button>
   </nav>
 
   <!-- BACKDROP GENERAL -->
   <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
-  <!-- ======================================================== -->
   <!-- MODAL EXPEDIENTE COMPLETO (DARK LUXURY THEME) -->
-  <!-- ======================================================== -->
   <div id="modalExpediente" class="fixed inset-0 md:inset-auto md:bottom-0 md:left-1/2 md:-translate-x-1/2 bg-[#0d131f] text-slate-100 z-50 transform translate-y-full bottom-sheet w-full max-w-xl mx-auto shadow-2xl border-t border-slate-800 flex flex-col h-[100dvh] md:h-[92vh] md:rounded-t-3xl overflow-hidden">
     
     <!-- CABECERA EXPEDIENTE -->
     <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between bg-[#111827]">
       <div>
         <h2 id="expPuesto" class="text-base font-bold text-white tracking-wide">Desarrollador Fullstack</h2>
-        <p id="expSubtitulo" class="text-xs text-slate-400 mt-0.5">Empresa • Región</p>
+        <div class="flex items-center gap-2 mt-0.5">
+          <p id="expSubtitulo" class="text-xs text-slate-400">Empresa • Región</p>
+          <div id="expAccionesContactoHeader" class="flex items-center gap-1.5 ml-1">
+            <!-- Botones rápidos de contacto con la empresa -->
+          </div>
+        </div>
       </div>
       <button class="btn-close-modal w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 hover:text-white transition-colors active:scale-95" aria-label="Cerrar modal">
         <i class="ph ph-x text-lg pointer-events-none"></i>
       </button>
     </div>
 
-    <!-- CUERPO SCROLLEABLE EXPEDIENTE -->
+    <!-- CUERPO EXPEDIENTE -->
     <div class="flex-1 overflow-y-auto px-4 py-4 space-y-4 no-scrollbar">
       
       <!-- 4 KPIS EN FILA -->
@@ -238,13 +265,10 @@
             </div>
           </div>
 
-          <!-- BOTÓN Y ACORDEÓN INLINE DEL PERFIL DE PUESTO -->
           <button id="btnTogglePerfilPuesto" class="w-full mt-2 py-1.5 px-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 border border-amber-400/20 transition-all">
             <i class="ph ph-file-text"></i> <span id="btnPerfilPuestoText">Ver Perfil de Puesto</span>
           </button>
-          <div id="boxDetallePerfilPuesto" class="hidden mt-2 p-2.5 rounded-xl bg-[#0d131f] border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed">
-            <!-- Texto del perfil -->
-          </div>
+          <div id="boxDetallePerfilPuesto" class="hidden mt-2 p-2.5 rounded-xl bg-[#0d131f] border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed"></div>
         </div>
 
         <!-- PANEL GARANTÍA DEL SERVICIO -->
@@ -276,7 +300,6 @@
               </div>
               <p id="expObservaciones" class="text-[11px] text-slate-300 italic bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">Sin observaciones registradas.</p>
               
-              <!-- Formulario inline para guardar observaciones -->
               <div id="boxEditObservaciones" class="hidden mt-1.5 space-y-1.5">
                 <textarea id="inputObservaciones" rows="2" class="w-full bg-[#0d131f] border border-slate-700 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-amber-400" placeholder="Escribe observaciones aquí..."></textarea>
                 <div class="flex justify-end gap-1.5">
@@ -289,7 +312,7 @@
         </div>
       </div>
 
-      <!-- DESGLOSE DE INVERSIÓN (HISTORIAL DE GASTOS CON ALTA DIRECTA) -->
+      <!-- DESGLOSE DE INVERSIÓN (HISTORIAL) -->
       <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5">
         <div class="flex items-center justify-between pb-2 border-b border-slate-800">
           <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold">
@@ -301,7 +324,6 @@
           </button>
         </div>
 
-        <!-- FORMULARIO DIRECTO INLINE DE GASTO EN MODAL -->
         <form id="formGastoInline" class="hidden mt-3 p-3 bg-[#0d131f] border border-indigo-500/30 rounded-xl space-y-2">
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -334,9 +356,7 @@
                 <th class="py-1.5 text-right">Monto</th>
               </tr>
             </thead>
-            <tbody id="expHistorialGastosTable" class="divide-y divide-slate-800/60">
-              <!-- Render dinámico de filas -->
-            </tbody>
+            <tbody id="expHistorialGastosTable" class="divide-y divide-slate-800/60"></tbody>
             <tfoot>
               <tr class="font-black text-slate-200 border-t border-slate-700">
                 <td class="pt-2 text-slate-400">Total Inversión</td>
@@ -366,7 +386,7 @@
     </div>
   </div>
 
-  <!-- MODAL 1: REGISTRAR GASTO (DESDE EL FEED O FAB) -->
+  <!-- MODAL 1: REGISTRAR GASTO -->
   <div id="modalSheetGasto" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
     <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
@@ -470,8 +490,12 @@
         <span class="text-xs font-bold text-indigo-600">Datos de la Nueva Empresa</span>
         <input type="text" id="nuevoClienteNombre" placeholder="Razón Social / Nombre Comercial" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
         <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="nuevoClienteContacto" placeholder="Persona de Contacto" class="bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
           <input type="text" id="nuevoClienteRegion" placeholder="Región (ej. Querétaro)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
-          <input type="text" id="nuevoClienteWhatsApp" placeholder="WhatsApp Contacto" class="bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="tel" id="nuevoClienteWhatsApp" placeholder="WhatsApp / Tel (10 dígitos)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
+          <input type="email" id="nuevoClienteEmail" placeholder="Correo electrónico" class="bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none" />
         </div>
       </div>
 
@@ -564,6 +588,46 @@
 
       <button type="submit" class="mt-2 w-full py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-600/20 active:scale-98 transition-transform flex items-center justify-center gap-2">
         <i class="ph ph-check-circle-bold text-lg"></i> Confirmar y Guardar Contratación
+      </button>
+    </form>
+  </div>
+
+  <!-- MODAL 5: REGISTRAR NUEVO CLIENTE (DESDE PESTAÑA CLIENTES) -->
+  <div id="modalSheetNuevoClienteDirecto" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-50 transform translate-y-full bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-100">
+    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-base font-bold text-slate-900">Alta de Nuevo Cliente</h2>
+      <button class="btn-close-modal w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 p-1" aria-label="Cerrar modal">
+        <i class="ph ph-x text-lg pointer-events-none"></i>
+      </button>
+    </div>
+    <form id="formClienteDirecto" class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Nombre Comercial / Razón Social</label>
+        <input type="text" id="clienteDirectoNombre" required placeholder="Ej. InnovaTech México" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Persona de Contacto</label>
+          <input type="text" id="clienteDirectoContacto" placeholder="Ej. Lic. Claudia Ruíz" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Región / Ciudad</label>
+          <input type="text" id="clienteDirectoRegion" placeholder="Ej. Querétaro" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">WhatsApp / Teléfono</label>
+          <input type="tel" id="clienteDirectoWhatsApp" required placeholder="4421234567" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Correo Electrónico</label>
+          <input type="email" id="clienteDirectoEmail" placeholder="contacto@empresa.com" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-indigo-500 font-medium" />
+        </div>
+      </div>
+      <button type="submit" class="mt-2 w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-md shadow-indigo-600/20 active:scale-98 transition-transform">
+        Guardar Cliente
       </button>
     </form>
   </div>
