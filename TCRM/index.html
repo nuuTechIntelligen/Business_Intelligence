@@ -203,7 +203,7 @@
   <!-- ======================================================== -->
   <!-- MODAL EXPEDIENTE COMPLETO DARK THEME -->
   <!-- ======================================================== -->
-  <div id="modalExpediente" class="fixed inset-0 md:inset-auto md:bottom-0 md:left-1/2 md:-translate-x-1/2 bg-[#0d131f] text-slate-100 z-50 transform translate-y-full bottom-sheet w-full max-w-xl mx-auto shadow-2xl border-t border-slate-800 flex flex-col h-[100dvh] md:h-[94vh] md:rounded-t-3xl overflow-hidden">
+  <div id="modalExpediente" class="fixed inset-x-0 bottom-0 bg-[#0d131f] text-slate-100 z-50 transform translate-y-full bottom-sheet w-full max-w-2xl mx-auto shadow-2xl border-t border-slate-800 flex flex-col h-[94vh] rounded-t-3xl overflow-hidden">
     
     <!-- CABECERA EXPEDIENTE -->
     <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between bg-[#111827]">
@@ -237,12 +237,12 @@
           <span class="text-[9px] font-bold tracking-wider text-slate-400 uppercase">Neto Real</span>
         </div>
         <div class="bg-[#151d30] border border-slate-800/80 p-2.5 rounded-2xl text-center">
-          <span id="expSlaStatus" class="text-xs sm:text-sm font-black text-cyan-400 block">0d (SLA)</span>
+          <span id="expSlaStatus" class="text-xs sm:text-sm font-black text-cyan-400 block">0 días</span>
           <span class="text-[9px] font-bold tracking-wider text-slate-400 uppercase">Time to Fill</span>
         </div>
       </div>
 
-      <!-- EMBUDO DE SELECCIÓN (PIPELINE DE CANDIDATOS) -->
+      <!-- EMBUDO DE SELECCIÓN (PIPELINE) -->
       <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5">
         <div class="flex items-center justify-between pb-2 border-b border-slate-800">
           <div class="flex items-center gap-1.5 text-indigo-400 text-xs font-bold">
@@ -251,15 +251,13 @@
           </div>
           <span class="text-[10px] text-slate-400">Progreso de Candidatos</span>
         </div>
-        <div id="pipelineContainer" class="grid grid-cols-5 gap-1.5 mt-3 text-center">
-          <!-- Render dinámico del pipeline -->
-        </div>
+        <div id="pipelineContainer" class="grid grid-cols-5 gap-1.5 mt-3 text-center"></div>
       </div>
 
       <!-- PANELES DE INFORMACIÓN Y COBRANZA -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         
-        <!-- PANEL INFORMACIÓN DEL PROCESO -->
+        <!-- INFORMACIÓN DEL PROCESO -->
         <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5 space-y-2.5">
           <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold pb-1.5 border-b border-slate-800">
             <i class="ph ph-info font-bold text-sm"></i>
@@ -295,7 +293,7 @@
           <div id="boxDetallePerfilPuesto" class="hidden mt-2 p-2.5 rounded-xl bg-[#0d131f] border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed"></div>
         </div>
 
-        <!-- PANEL GARANTÍA & COBRANZA -->
+        <!-- GARANTÍA & COBRANZA -->
         <div class="bg-[#151d30] border border-slate-800/80 rounded-2xl p-3.5 space-y-2.5">
           <div class="flex items-center gap-1.5 text-amber-400 text-xs font-bold pb-1.5 border-b border-slate-800">
             <i class="ph ph-shield-check font-bold text-sm"></i>
