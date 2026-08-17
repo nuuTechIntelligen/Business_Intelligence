@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Número oficial de Talentum (formato internacional sin signos ni espacios)
-    const TALENTUM_PHONE = '525512345678';
+    const TALENTUM_PHONE = '524411403186';
 
     // ==========================================
     // 1. Menú Móvil
