@@ -2,7 +2,7 @@
  * CRM Talentum - Lógica de Control Operativo y Financiero
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   clientes: [
@@ -86,18 +86,26 @@ let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
 
-// Función helper segura para asignar texto sin errores de null
+// Helper seguro para asignar texto en elementos
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
 
-// Exponer globalmente la función del embudo
+// CONTROL DINÁMICO DEL PIPELINE CON PERSISTENCIA EN GOOGLE SHEETS
 window.cambiarPipeline = function(idVacante, etapa, delta) {
   const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
   if (v && v.pipeline) {
     v.pipeline[etapa] = Math.max(0, (v.pipeline[etapa] || 0) + delta);
     renderPipelineVacante(v);
+    renderizarAnaliticas();
+
+    sendToAppsScript({
+      action: "updatePipeline",
+      targetSheet: "VACANTES",
+      id_vacante: idVacante,
+      pipeline: v.pipeline
+    });
   }
 };
 
@@ -187,6 +195,8 @@ function setupEventListeners() {
   });
 
   document.getElementById("btnExpGarantiaReactivar").addEventListener("click", reactivarPorGarantia);
+
+  document.getElementById("btnEnviarReporteWhatsApp").addEventListener("click", enviarReportePipelineWhatsApp);
 
   document.getElementById("btnExpEliminar").addEventListener("click", () => {
     if (vacanteSeleccionadaExpediente && confirm(`¿Deseas eliminar la vacante ${vacanteSeleccionadaExpediente.titulo_puesto}?`)) {
@@ -672,6 +682,7 @@ function renderPipelineVacante(vacante) {
   const container = document.getElementById("pipelineContainer");
   if (!container) return;
 
+  const p = vacante.pipeline;
   const etapas = [
     { key: "postulados", label: "Postulados", color: "text-indigo-400" },
     { key: "filtro", label: "Filtro Tel.", color: "text-cyan-400" },
@@ -682,7 +693,7 @@ function renderPipelineVacante(vacante) {
 
   container.innerHTML = etapas.map(e => `
     <div class="p-2 rounded-xl bg-[#0d131f] border border-slate-800 flex flex-col items-center">
-      <span class="text-xs font-black ${e.color}">${vacante.pipeline[e.key] || 0}</span>
+      <span class="text-xs font-black ${e.color}">${p[e.key] || 0}</span>
       <span class="text-[9px] font-bold text-slate-400 mt-0.5 leading-none">${e.label}</span>
       <div class="flex gap-1 mt-1.5">
         <button type="button" onclick="window.cambiarPipeline('${vacante.id_vacante}', '${e.key}', -1)" class="w-4 h-4 rounded bg-slate-800 text-slate-300 text-[10px] flex items-center justify-center hover:bg-slate-700 active:scale-90">-</button>
@@ -690,6 +701,43 @@ function renderPipelineVacante(vacante) {
       </div>
     </div>
   `).join("");
+
+  // Ratios de Eficiencia
+  const tasaCalificacion = (p.postulados > 0) ? Math.round((p.filtro / p.postulados) * 100) : 0;
+  const efectividadTerna = (p.terna > 0) ? Math.round((p.oferta / p.terna) * 100) : 0;
+  
+  const gastosAds = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante) && g.categoria.includes("Ads")).reduce((s, g) => s + Number(g.monto || 0), 0);
+  const costoPorEntrevista = (p.entrevistas > 0 && gastosAds > 0) ? Math.round(gastosAds / p.entrevistas) : 0;
+
+  setText("ratioCalificacion", `${tasaCalificacion}%`);
+  setText("ratioTerna", `${efectividadTerna}%`);
+  setText("ratioCostoEntrevista", costoPorEntrevista > 0 ? `$${costoPorEntrevista}` : "$0");
+}
+
+// GENERAR Y ENVIAR REPORTE POR WHATSAPP AL CLIENTE
+function enviarReportePipelineWhatsApp() {
+  if (!vacanteSeleccionadaExpediente) return;
+  const v = vacanteSeleccionadaExpediente;
+  const cliente = DB.clientes.find(c => String(c.id_cliente) === String(v.id_cliente));
+  const wa = cliente ? limpiarTelefono(cliente.contacto_whatsapp) : "";
+
+  const p = v.pipeline || { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
+  const nombreContacto = cliente ? (cliente.contacto_nombre || cliente.nombre_comercial) : "estimado cliente";
+
+  const mensaje = `👋 Hola ${nombreContacto}, te comparto el estatus actualizado de la vacante *${v.titulo_puesto}* en Talentum:%0A%0A` +
+    `📊 *Avance del Proceso:*%0A` +
+    `• 📥 *Postulados recibidos:* ${p.postulados || 0}%0A` +
+    `• 📞 *Filtros telefónicos:* ${p.filtro || 0}%0A` +
+    `• 👥 *Entrevistas realizadas:* ${p.entrevistas || 0}%0A` +
+    `• 📑 *Candidatos en terna:* ${p.terna || 0}%0A` +
+    `• 🎯 *Oferta / Finalista:* ${p.oferta || 0}%0A%0A` +
+    `Quedo a tu disposición para cualquier duda. ¡Excelente día!`;
+
+  if (wa) {
+    window.open(`https://wa.me/52${wa}?text=${mensaje}`, "_blank");
+  } else {
+    alert("Este cliente no tiene registrado un número de WhatsApp.");
+  }
 }
 
 function reactivarPorGarantia() {
@@ -846,6 +894,7 @@ function guardarObservacionesInline() {
   });
 }
 
+// ANALÍTICAS Y SALUD DEL PIPELINE GLOBAL
 function renderizarAnaliticas() {
   const totalFacturado = DB.vacantes.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
   const totalGastosPauta = DB.gastos.reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -857,6 +906,11 @@ function renderizarAnaliticas() {
   const margenGlobalPorcentaje = totalFacturado > 0 ? Math.round((utilidadNetaTotal / totalFacturado) * 100) : 0;
   const roas = totalGastosPauta > 0 ? (totalFacturado / totalGastosPauta).toFixed(1) : "N/A";
 
+  // Métricas del pipeline global
+  const totalPostulados = DB.vacantes.reduce((sum, v) => sum + Number(v.pipeline ? v.pipeline.postulados || 0 : 0), 0);
+  const totalEntrevistas = DB.vacantes.reduce((sum, v) => sum + Number(v.pipeline ? v.pipeline.entrevistas || 0 : 0), 0);
+  const totalTernas = DB.vacantes.reduce((sum, v) => sum + Number(v.pipeline ? v.pipeline.terna || 0 : 0), 0);
+
   setText("kpiUtilidadNeta", `$${utilidadNetaTotal.toLocaleString()}`);
   setText("kpiMargenGlobal", `${margenGlobalPorcentaje}% Margen`);
   setText("kpiFacturadoTotal", `$${totalFacturado.toLocaleString()}`);
@@ -864,6 +918,10 @@ function renderizarAnaliticas() {
   setText("kpiCostoHorasTotal", `$${totalHorasHH.toLocaleString()}`);
   setText("kpiRoas", roas === "N/A" ? "N/A" : `${roas}x`);
   setText("kpiHorasTotales", `${totalHorasCantidad} hrs`);
+
+  setText("kpiTotalPostulados", totalPostulados.toLocaleString());
+  setText("kpiTotalEntrevistas", totalEntrevistas.toLocaleString());
+  setText("kpiTotalTernas", totalTernas.toLocaleString());
 
   const containerBreakdown = document.getElementById("breakdownGastos");
   if (containerBreakdown) {
@@ -1276,7 +1334,8 @@ async function guardarVacante(e) {
       "",
       "",
       "No",
-      nuevaVacante.descripcion_perfil
+      nuevaVacante.descripcion_perfil,
+      JSON.stringify(nuevaVacante.pipeline)
     ]
   });
 }
@@ -1314,20 +1373,17 @@ function guardarClienteDirecto(e) {
 }
 
 async function sendToAppsScript(payload) {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") {
-    console.warn("⚠️ APPS_SCRIPT_URL no configurada.");
-    return;
-  }
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "TU_APPS_SCRIPT_URL_AQUI") return;
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
+    await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
       mode: "no-cors"
     });
-    console.log("✓ Petición enviada a Google Sheets:", payload.action, payload.targetSheet);
+    console.log("✓ Sincronizado con Apps Script:", payload.action);
   } catch (err) {
-    console.error("❌ Error al sincronizar con Apps Script:", err);
+    console.error("Error al sincronizar con Apps Script:", err);
   }
 }
 
@@ -1338,7 +1394,6 @@ async function cargarDatosDesdeAPI() {
     const data = await res.json();
     
     if (data.vacantes && data.vacantes.length > 0) {
-      // Mapear vacantes asegurando compatibilidad con el pipeline y formatos numéricos
       DB.vacantes = data.vacantes.map(v => {
         let pipeline = { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
         if (v.pipeline) {
@@ -1363,7 +1418,6 @@ async function cargarDatosDesdeAPI() {
 
     poblarSelects();
     renderizarApp();
-    console.log("✓ Datos sincronizados con Google Sheets:", DB.vacantes.length, "vacantes cargadas.");
   } catch (err) {
     console.error("Error al obtener datos desde Google Sheets:", err);
   }
