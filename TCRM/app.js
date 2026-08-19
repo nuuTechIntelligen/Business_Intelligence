@@ -1,9 +1,10 @@
 /**
  * CRM Talentum - Lógica de Control Operativo y Financiero
  * Mapeo y Lectura Robusta de Datos desde Google Sheets
+ * Soporte Completo para +Región en Clientes y Vacantes
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   regiones: [
@@ -184,7 +185,7 @@ function setupEventListeners() {
   });
   document.getElementById("btnGuardarNuevoServicio").addEventListener("click", guardarNuevoServicio);
 
-  // Toggles de Nueva Región
+  // 1. Toggle & Guardar Nueva Región para Vacante
   document.getElementById("btnToggleNuevaRegion").addEventListener("click", () => {
     document.getElementById("boxNuevaRegion").classList.toggle("hidden");
   });
@@ -192,12 +193,27 @@ function setupEventListeners() {
     guardarNuevaRegion("inputNuevaRegionNombre", "boxNuevaRegion", "nuevaVacanteRegionSelect");
   });
 
+  // 2. Toggle & Guardar Nueva Región para Cliente Directo
   document.getElementById("btnToggleNuevaRegionCliente").addEventListener("click", () => {
     document.getElementById("boxNuevaRegionCliente").classList.toggle("hidden");
   });
   document.getElementById("btnGuardarNuevaRegionCliente").addEventListener("click", () => {
     guardarNuevaRegion("inputNuevaRegionNombreCliente", "boxNuevaRegionCliente", "clienteDirectoRegionSelect");
   });
+
+  // 3. Toggle & Guardar Nueva Región para Cliente Inline dentro de Vacante
+  const btnToggleRegCliInline = document.getElementById("btnToggleNuevaRegionClienteInline");
+  if (btnToggleRegCliInline) {
+    btnToggleRegCliInline.addEventListener("click", () => {
+      document.getElementById("boxNuevaRegionClienteInline").classList.toggle("hidden");
+    });
+  }
+  const btnGuardarRegCliInline = document.getElementById("btnGuardarNuevaRegionClienteInline");
+  if (btnGuardarRegCliInline) {
+    btnGuardarRegCliInline.addEventListener("click", () => {
+      guardarNuevaRegion("inputNuevaRegionNombreClienteInline", "boxNuevaRegionClienteInline", "nuevoClienteRegionSelect");
+    });
+  }
 
   document.getElementById("modalVacanteServicio").addEventListener("change", actualizarValoresServicio);
 
@@ -1431,6 +1447,12 @@ async function guardarVacante(e) {
   document.getElementById("formVacante").reset();
   boxNuevoCliente.classList.add("hidden");
   
+  const boxRegCliInline = document.getElementById("boxNuevaRegionClienteInline");
+  if (boxRegCliInline) boxRegCliInline.classList.add("hidden");
+  
+  const boxRegVac = document.getElementById("boxNuevaRegion");
+  if (boxRegVac) boxRegVac.classList.add("hidden");
+
   if (inputFechaInicio) inputFechaInicio.value = new Date().toISOString().split("T")[0];
 
   poblarSelects();
@@ -1484,6 +1506,10 @@ function guardarClienteDirecto(e) {
   DB.clientes.push(nuevoCliente);
   closeModal();
   document.getElementById("formClienteDirecto").reset();
+  
+  const boxRegCli = document.getElementById("boxNuevaRegionCliente");
+  if (boxRegCli) boxRegCli.classList.add("hidden");
+
   poblarSelects();
   renderizarDirectorioClientes();
 
