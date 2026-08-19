@@ -23,7 +23,7 @@ body {
   scrollbar-width: none;
 }
 
-/* Modales y Bottom Sheets con animación suave */
+/* Modales y Bottom Sheets */
 .bottom-sheet {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-in-out;
   transform: translateY(105%) !important;
@@ -39,7 +39,6 @@ body {
   visibility: visible !important;
 }
 
-/* Microanimaciones para estados de vacante */
 @keyframes spinSlow {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -58,13 +57,11 @@ body {
   animation: pulseGold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Rebote sutil en botones del embudo al hacer click */
 .btn-pipeline-action:active {
   transform: scale(0.85);
   transition: transform 0.1s ease;
 }
 
-/* Transición suave entre pestañas */
 .tab-view {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
