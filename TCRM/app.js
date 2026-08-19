@@ -1,9 +1,10 @@
 /**
  * CRM Talentum - Lógica de Control Operativo y Financiero
  * Catálogo Dinámico Unificado de Regiones (CAT_REGIONES)
+ * Íconos Phosphor Corregidos y Animación FAB
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   regiones: [
@@ -376,11 +377,11 @@ function toggleFabMenu() {
   if (isHidden) {
     menu.classList.remove("hidden");
     menu.classList.add("flex");
-    icon.className = "ph ph-x-bold font-black";
+    icon.className = "ph-bold ph-x transition-transform duration-300 rotate-90 text-2xl";
   } else {
     menu.classList.add("hidden");
     menu.classList.remove("flex");
-    icon.className = "ph ph-plus-bold font-black";
+    icon.className = "ph-bold ph-plus transition-transform duration-300 rotate-0 text-2xl";
   }
 }
 
@@ -412,29 +413,24 @@ function closeModal() {
 }
 
 function poblarSelects() {
-  // Vacantes
   const selectGasto = document.getElementById("modalGastoVacante");
   const selectHora = document.getElementById("modalHoraVacante");
   const optionsVacantes = DB.vacantes.map(v => `<option value="${v.id_vacante}">${v.titulo_puesto}</option>`).join("");
   if (selectGasto) selectGasto.innerHTML = optionsVacantes;
   if (selectHora) selectHora.innerHTML = optionsVacantes;
 
-  // Clientes
   const selectClientes = document.getElementById("modalVacanteCliente");
   if (selectClientes) selectClientes.innerHTML = DB.clientes.map(c => `<option value="${c.id_cliente}">${c.nombre_comercial}</option>`).join("");
 
-  // Servicios
   const selectServicios = document.getElementById("modalVacanteServicio");
   if (selectServicios) selectServicios.innerHTML = DB.servicios.map(s => `<option value="${s.id_servicio}">${s.nombre_servicio}</option>`).join("");
 
-  // Regiones en todos los selectores
   poblarSelectoresRegiones();
 }
 
 function poblarSelectoresRegiones() {
   const optionsRegiones = DB.regiones.map(r => `<option value="${r.nombre_region}">${r.nombre_region}</option>`).join("");
 
-  // Filtro superior
   const selectFiltroReg = document.getElementById("selectFiltroRegion");
   if (selectFiltroReg) {
     const prevVal = selectFiltroReg.value || "Todas";
@@ -442,15 +438,12 @@ function poblarSelectoresRegiones() {
     selectFiltroReg.value = prevVal;
   }
 
-  // Selector en Modal Vacante
   const selectRegVacante = document.getElementById("nuevaVacanteRegionSelect");
   if (selectRegVacante) selectRegVacante.innerHTML = optionsRegiones;
 
-  // Selector en Modal Cliente Directo
   const selectRegCliente = document.getElementById("clienteDirectoRegionSelect");
   if (selectRegCliente) selectRegCliente.innerHTML = optionsRegiones;
 
-  // Selector en Cliente Inline dentro de Vacante
   const selectRegClienteInline = document.getElementById("nuevoClienteRegionSelect");
   if (selectRegClienteInline) selectRegClienteInline.innerHTML = optionsRegiones;
 }
@@ -464,7 +457,6 @@ function guardarNuevaRegion(inputId, boxId, targetSelectId) {
     return;
   }
 
-  // Evitar duplicados por nombre
   const existe = DB.regiones.find(r => r.nombre_region.toLowerCase() === nombre.toLowerCase());
   let idRegion = existe ? existe.id_region : `REG-${Date.now().toString().slice(-4)}`;
 
@@ -598,7 +590,7 @@ function renderizarApp() {
       </span>
     ` : `
       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-        <i class="ph ph-check-circle-bold text-xs"></i>
+        <i class="ph-bold ph-check-circle text-xs"></i>
         Contratado
       </span>
     `;
@@ -624,17 +616,17 @@ function renderizarApp() {
       </div>
 
       <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
-        <span><i class="ph ph-map-pin text-amber-400"></i> ${v.region || 'N/A'}</span>
-        <span><i class="ph ph-clock text-amber-400"></i> ${totalHoras} hrs</span>
+        <span><i class="ph-bold ph-map-pin text-amber-400"></i> ${v.region || 'N/A'}</span>
+        <span><i class="ph-bold ph-clock text-amber-400"></i> ${totalHoras} hrs</span>
         <span class="${infoSla.color} font-semibold flex items-center gap-1">
-          <i class="ph ph-timer"></i> ${infoSla.texto}
+          <i class="ph-bold ph-timer"></i> ${infoSla.texto}
         </span>
       </div>
 
       ${v.estatus_vacante === 'Contratado' ? `
         <div class="mt-3 p-2.5 rounded-xl bg-[#0F1626] border border-slate-800 flex items-center justify-between text-xs">
           <div class="flex items-center gap-1.5">
-            <i class="ph ph-shield-check text-base text-amber-400"></i>
+            <i class="ph-bold ph-shield-check text-base text-amber-400"></i>
             <span class="font-medium text-slate-300">Garantía (${v.dias_garantia_pactados}d):</span>
           </div>
           <span class="font-bold ${infoGarantia.color}">${infoGarantia.texto}</span>
@@ -658,14 +650,14 @@ function renderizarApp() {
 
       <div class="mt-3.5 flex flex-wrap gap-2">
         <button class="btn-card-gasto flex-1 py-2 bg-[#162032] hover:bg-[#1A2438] text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1">
-          <i class="ph ph-receipt text-amber-400"></i> + Gasto
+          <i class="ph-bold ph-receipt text-amber-400"></i> + Gasto
         </button>
         <button class="btn-card-hora flex-1 py-2 bg-[#162032] hover:bg-[#1A2438] text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1">
-          <i class="ph ph-clock text-amber-400"></i> + Horas
+          <i class="ph-bold ph-clock text-amber-400"></i> + Horas
         </button>
         ${v.estatus_vacante === 'En Proceso' ? `
           <button class="btn-card-contratar w-full py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1 shadow-md shadow-emerald-600/20">
-            <i class="ph ph-check-circle-bold text-sm"></i> Marcar Contratada
+            <i class="ph-bold ph-check-circle text-sm"></i> Marcar Contratada
           </button>
         ` : ''}
       </div>
@@ -749,15 +741,15 @@ function abrirExpediente(vacante) {
     headerAcciones.innerHTML = `
       ${cliente.contacto_whatsapp ? `
         <a href="https://wa.me/52${limpiarTelefono(cliente.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(cliente.contacto_nombre || cliente.nombre_comercial)},%20te%20contacto%20sobre%20la%20vacante%20de%20${encodeURIComponent(vacante.titulo_puesto)}" target="_blank" class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs hover:bg-emerald-500/30">
-          <i class="ph ph-whatsapp-logo"></i>
+          <i class="ph-bold ph-whatsapp-logo"></i>
         </a>
         <a href="tel:${limpiarTelefono(cliente.contacto_whatsapp)}" class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs hover:bg-cyan-500/30">
-          <i class="ph ph-phone"></i>
+          <i class="ph-bold ph-phone"></i>
         </a>
       ` : ''}
       ${cliente.contacto_email ? `
         <a href="mailto:${cliente.contacto_email}?subject=Seguimiento:%20${encodeURIComponent(vacante.titulo_puesto)}" class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs hover:bg-amber-500/30">
-          <i class="ph ph-envelope"></i>
+          <i class="ph-bold ph-envelope"></i>
         </a>
       ` : ''}
     `;
@@ -775,13 +767,13 @@ function abrirExpediente(vacante) {
     if (vacante.estatus_vacante === "En Proceso") {
       badgeEstatus.innerHTML = `
         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-          <i class="ph ph-circle-notch animate-spin text-amber-400"></i> En Proceso
+          <i class="ph-bold ph-circle-notch animate-spin text-amber-400"></i> En Proceso
         </span>
       `;
     } else {
       badgeEstatus.innerHTML = `
         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-          <i class="ph ph-check-circle-bold text-emerald-400"></i> Contratado
+          <i class="ph-bold ph-check-circle text-emerald-400"></i> Contratado
         </span>
       `;
     }
@@ -1178,7 +1170,7 @@ function renderizarAnaliticas() {
             <span class="text-xs font-black ${netoCliente >= 0 ? 'text-emerald-400' : 'text-rose-400'}">+$${netoCliente.toLocaleString()}</span>
             <span class="text-[10px] font-bold block text-slate-500">${margenCliente}% neto</span>
           </div>
-          <i class="ph ${isOpen ? 'ph-caret-up-bold' : 'ph-caret-down-bold'} text-amber-400 text-sm transition-transform"></i>
+          <i class="ph-bold ${isOpen ? 'ph-caret-up' : 'ph-caret-down'} text-amber-400 text-sm transition-transform"></i>
         </div>
       </div>
 
@@ -1192,15 +1184,15 @@ function renderizarAnaliticas() {
           <div class="flex items-center gap-1.5">
             ${c.contacto_whatsapp ? `
               <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar WhatsApp">
-                <i class="ph ph-whatsapp-logo"></i>
+                <i class="ph-bold ph-whatsapp-logo"></i>
               </a>
               <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-sm shadow-sm active:scale-95" title="Llamar">
-                <i class="ph ph-phone"></i>
+                <i class="ph-bold ph-phone"></i>
               </a>
             ` : ''}
             ${c.contacto_email ? `
               <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm shadow-sm active:scale-95" title="Enviar Correo">
-                <i class="ph ph-envelope"></i>
+                <i class="ph-bold ph-envelope"></i>
               </a>
             ` : ''}
           </div>
@@ -1286,7 +1278,7 @@ function renderizarDirectorioClientes() {
           <div>
             <h3 class="text-sm font-bold text-white font-serif leading-tight">${c.nombre_comercial}</h3>
             <span class="text-xs text-amber-400/80 flex items-center gap-1 mt-0.5">
-              <i class="ph ph-map-pin"></i> ${c.region || 'Sin región'}
+              <i class="ph-bold ph-map-pin"></i> ${c.region || 'Sin región'}
             </span>
           </div>
         </div>
@@ -1317,15 +1309,15 @@ function renderizarDirectorioClientes() {
       <div class="flex items-center gap-2 pt-1">
         ${c.contacto_whatsapp ? `
           <a href="https://wa.me/52${limpiarTelefono(c.contacto_whatsapp)}?text=Hola%20${encodeURIComponent(c.contacto_nombre || c.nombre_comercial)},%20te%20saludo%20de%20Talentum" target="_blank" class="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-transform">
-            <i class="ph ph-whatsapp-logo text-base"></i> WhatsApp
+            <i class="ph-bold ph-whatsapp-logo text-base"></i> WhatsApp
           </a>
           <a href="tel:${limpiarTelefono(c.contacto_whatsapp)}" class="px-3.5 py-2.5 bg-[#162032] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 border border-slate-700/60 active:scale-95 transition-transform" title="Llamar">
-            <i class="ph ph-phone text-base text-cyan-400"></i>
+            <i class="ph-bold ph-phone text-base text-cyan-400"></i>
           </a>
         ` : ''}
         ${c.contacto_email ? `
           <a href="mailto:${c.contacto_email}?subject=Seguimiento%20Talentum" class="px-3.5 py-2.5 bg-[#162032] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 border border-slate-700/60 active:scale-95 transition-transform" title="Enviar correo">
-            <i class="ph ph-envelope text-base text-amber-400"></i>
+            <i class="ph-bold ph-envelope text-base text-amber-400"></i>
           </a>
         ` : ''}
       </div>
