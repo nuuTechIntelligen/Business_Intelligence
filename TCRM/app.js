@@ -1,7 +1,6 @@
 /**
  * CRM Talentum - Lógica de Control Operativo y Financiero
- * Catálogo Dinámico Unificado de Regiones (CAT_REGIONES)
- * Íconos Phosphor Corregidos y Animación FAB
+ * Mapeo y Lectura Robusta de Datos desde Google Sheets
  */
 
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
@@ -13,78 +12,15 @@ let DB = {
     { id_region: "REG-003", nombre_region: "Bajío" },
     { id_region: "REG-004", nombre_region: "Remoto" }
   ],
-  clientes: [
-    { 
-      id_cliente: "CLI-001", 
-      nombre_comercial: "TechSolutions MX", 
-      region: "Querétaro", 
-      contacto_nombre: "Ing. Carlos Mendoza", 
-      contacto_whatsapp: "4421234567", 
-      contacto_email: "cmendoza@techsolutions.mx",
-      estatus: "Activo" 
-    },
-    { 
-      id_cliente: "CLI-002", 
-      nombre_comercial: "Logística Bajío", 
-      region: "Bajío", 
-      contacto_nombre: "Lic. Laura Morales", 
-      contacto_whatsapp: "4429876543", 
-      contacto_email: "rh@logisticabajio.com",
-      estatus: "Activo" 
-    }
-  ],
+  clientes: [],
   servicios: [
     { id_servicio: "SRV-001", nombre_servicio: "Reclutamiento Operativo", dias_garantia_defecto: 30, sla_meta_dias: 15 },
     { id_servicio: "SRV-002", nombre_servicio: "Mandos Medios / Especialistas", dias_garantia_defecto: 60, sla_meta_dias: 25 },
     { id_servicio: "SRV-003", nombre_servicio: "Headhunting Directivo", dias_garantia_defecto: 90, sla_meta_dias: 40 }
   ],
-  vacantes: [
-    {
-      id_vacante: "VAC-101",
-      id_cliente: "CLI-001",
-      titulo_puesto: "Líder de Desarrollo Fullstack",
-      region: "Querétaro",
-      id_servicio: "SRV-002",
-      fee_pactado_total: 28000,
-      monto_adelanto: 14000,
-      saldo_liquidado: "No",
-      fecha_inicio_proceso: "2026-08-05",
-      estatus_vacante: "En Proceso",
-      fecha_contratacion: "",
-      candidato_contratado: "",
-      dias_garantia_pactados: 60,
-      garantia_aplicada: "No",
-      descripcion_perfil: "• Sueldo: $35,000 netos\n• Stack: React, Node.js, AWS\n• Horario: L-V 9:00 a 18:00\n• Prestaciones superiores a las de ley.",
-      pipeline: { postulados: 18, filtro: 9, entrevistas: 5, terna: 3, oferta: 1 }
-    },
-    {
-      id_vacante: "VAC-102",
-      id_cliente: "CLI-002",
-      titulo_puesto: "Coordinador de Almacén",
-      region: "Bajío",
-      id_servicio: "SRV-001",
-      fee_pactado_total: 16000,
-      monto_adelanto: 8000,
-      saldo_liquidado: "Sí",
-      fecha_inicio_proceso: "2026-07-10",
-      estatus_vacante: "Contratado",
-      fecha_contratacion: "2026-08-01",
-      candidato_contratado: "Roberto Sánchez",
-      dias_garantia_pactados: 30,
-      garantia_aplicada: "No",
-      descripcion_perfil: "• Sueldo: $18,000 brutos\n• Manejo indispensable de ERP SAP\n• Experiencia de 3 años con personal operativo a cargo.",
-      pipeline: { postulados: 24, filtro: 12, entrevistas: 6, terna: 3, oferta: 1 }
-    }
-  ],
-  gastos: [
-    { id_vacante: "VAC-101", categoria: "Facebook Ads", monto: 1250, fecha_gasto: "2026-08-08" },
-    { id_vacante: "VAC-101", categoria: "Psicometría", monto: 450, fecha_gasto: "2026-08-10" },
-    { id_vacante: "VAC-102", categoria: "Facebook Ads", monto: 600, fecha_gasto: "2026-07-15" }
-  ],
-  horas: [
-    { id_vacante: "VAC-101", horas_invertidas: 12, costo_por_hora: 150 },
-    { id_vacante: "VAC-102", horas_invertidas: 8, costo_por_hora: 150 }
-  ]
+  vacantes: [],
+  gastos: [],
+  horas: []
 };
 
 let currentTab = "vacantes";
@@ -157,7 +93,7 @@ function formatearFechaISO(dateObj) {
 }
 
 window.cambiarPipeline = function(idVacante, etapa, delta) {
-  const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
+  const v = DB.vacantes.find(item => String(item.id_vacante).trim() === String(idVacante).trim());
   if (v && v.pipeline) {
     v.pipeline[etapa] = Math.max(0, (v.pipeline[etapa] || 0) + delta);
     renderPipelineVacante(v);
@@ -172,7 +108,14 @@ window.cambiarPipeline = function(idVacante, etapa, delta) {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+// Inicio seguro del ciclo de vida
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+function initApp() {
   setupEventListeners();
   poblarSelects();
   
@@ -182,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   cargarDatosDesdeAPI();
-});
+}
 
 function setupEventListeners() {
   document.getElementById("btnReload").addEventListener("click", cargarDatosDesdeAPI);
@@ -223,9 +166,9 @@ function setupEventListeners() {
     if (e.key === "Escape") closeModal();
   });
 
-  // Sincronizar región sugerida al cambiar de cliente en el modal de vacante
+  // Sincronizar región sugerida al cambiar de cliente
   document.getElementById("modalVacanteCliente").addEventListener("change", (e) => {
-    const cli = DB.clientes.find(c => String(c.id_cliente) === String(e.target.value));
+    const cli = DB.clientes.find(c => String(c.id_cliente).trim() === String(e.target.value).trim());
     if (cli && cli.region) {
       const selectReg = document.getElementById("nuevaVacanteRegionSelect");
       if (selectReg) selectReg.value = cli.region;
@@ -299,7 +242,7 @@ function setupEventListeners() {
 
   document.getElementById("btnExpEliminar").addEventListener("click", () => {
     if (vacanteSeleccionadaExpediente && confirm(`¿Deseas eliminar la vacante ${vacanteSeleccionadaExpediente.titulo_puesto}?`)) {
-      DB.vacantes = DB.vacantes.filter(v => String(v.id_vacante) !== String(vacanteSeleccionadaExpediente.id_vacante));
+      DB.vacantes = DB.vacantes.filter(v => String(v.id_vacante).trim() !== String(vacanteSeleccionadaExpediente.id_vacante).trim());
       closeModal();
       renderizarApp();
     }
@@ -534,44 +477,46 @@ function renderizarApp() {
   let totalPorCobrarGlobal = 0;
 
   const vacantesFiltradas = DB.vacantes.filter(v => {
-    const cliente = DB.clientes.find(c => String(c.id_cliente) === String(v.id_cliente));
-    const matchSearch = v.titulo_puesto.toLowerCase().includes(searchVal) || 
-                        (cliente && cliente.nombre_comercial.toLowerCase().includes(searchVal)) ||
-                        (v.region && v.region.toLowerCase().includes(searchVal));
+    const cliente = DB.clientes.find(c => String(c.id_cliente).trim() === String(v.id_cliente).trim());
+    const matchSearch = String(v.titulo_puesto || "").toLowerCase().includes(searchVal) || 
+                        (cliente && String(cliente.nombre_comercial || "").toLowerCase().includes(searchVal)) ||
+                        (v.region && String(v.region).toLowerCase().includes(searchVal));
 
     if (!matchSearch) return false;
 
     if (filtroRegionActual !== "Todas") {
-      const reg = (v.region || (cliente ? cliente.region : "")).toLowerCase();
+      const reg = String(v.region || (cliente ? cliente.region : "")).toLowerCase();
       if (!reg.includes(filtroRegionActual.toLowerCase())) return false;
     }
 
+    const estatusLimpio = String(v.estatus_vacante || "").trim().toLowerCase();
+
     if (filtroEstadoActual === "Todas") return true;
-    if (filtroEstadoActual === "En Proceso") return v.estatus_vacante === "En Proceso";
-    if (filtroEstadoActual === "Contratado") return v.estatus_vacante === "Contratado";
-    if (filtroEstadoActual === "Garantia") return v.estatus_vacante === "Contratado" && calcularDiasGarantia(v).diasRestantes > 0;
+    if (filtroEstadoActual === "En Proceso") return estatusLimpio === "en proceso";
+    if (filtroEstadoActual === "Contratado") return estatusLimpio === "contratado";
+    if (filtroEstadoActual === "Garantia") return estatusLimpio === "contratado" && calcularDiasGarantia(v).diasRestantes > 0;
     if (filtroEstadoActual === "Cobranza") {
       const saldo = Number(v.fee_pactado_total || 0) - Number(v.monto_adelanto || 0);
-      return v.saldo_liquidado !== "Sí" && saldo > 0;
+      return String(v.saldo_liquidado).trim().toLowerCase() !== "sí" && saldo > 0;
     }
     return true;
   });
 
   vacantesFiltradas.forEach(v => {
-    const cliente = DB.clientes.find(c => String(c.id_cliente) === String(v.id_cliente)) || { nombre_comercial: "Cliente General" };
-    const gastosVacante = DB.gastos.filter(g => String(g.id_vacante) === String(v.id_vacante)).reduce((sum, g) => sum + Number(g.monto), 0);
-    const horasVacante = DB.horas.filter(h => String(h.id_vacante) === String(v.id_vacante));
-    const totalHoras = horasVacante.reduce((sum, h) => sum + Number(h.horas_invertidas), 0);
-    const costoHoras = horasVacante.reduce((sum, h) => sum + (Number(h.horas_invertidas) * Number(h.costo_por_hora)), 0);
+    const cliente = DB.clientes.find(c => String(c.id_cliente).trim() === String(v.id_cliente).trim()) || { nombre_comercial: "Cliente General" };
+    const gastosVacante = DB.gastos.filter(g => String(g.id_vacante).trim() === String(v.id_vacante).trim()).reduce((sum, g) => sum + Number(g.monto || 0), 0);
+    const horasVacante = DB.horas.filter(h => String(h.id_vacante).trim() === String(v.id_vacante).trim());
+    const totalHoras = horasVacante.reduce((sum, h) => sum + Number(h.horas_invertidas || 0), 0);
+    const costoHoras = horasVacante.reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
     
     const costoTotal = gastosVacante + costoHoras;
-    const margenNeto = Number(v.fee_pactado_total) - costoTotal;
+    const margenNeto = Number(v.fee_pactado_total || 0) - costoTotal;
     const margenPorcentaje = v.fee_pactado_total > 0 ? Math.round((margenNeto / v.fee_pactado_total) * 100) : 0;
 
-    const saldoPendiente = (v.saldo_liquidado === "Sí") ? 0 : Math.max(0, Number(v.fee_pactado_total || 0) - Number(v.monto_adelanto || 0));
+    const saldoPendiente = (String(v.saldo_liquidado).trim().toLowerCase() === "sí") ? 0 : Math.max(0, Number(v.fee_pactado_total || 0) - Number(v.monto_adelanto || 0));
     if (saldoPendiente > 0) totalPorCobrarGlobal += saldoPendiente;
 
-    if (v.estatus_vacante === "En Proceso") totalFees += Number(v.fee_pactado_total);
+    if (String(v.estatus_vacante).trim().toLowerCase() === "en proceso") totalFees += Number(v.fee_pactado_total || 0);
     totalGastos += gastosVacante;
 
     const infoGarantia = calcularDiasGarantia(v);
@@ -580,7 +525,7 @@ function renderizarApp() {
     const card = document.createElement("div");
     card.className = "bg-[#131B2B] rounded-2xl border border-slate-800/90 p-4 shadow-lg shadow-black/40 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all hover:border-amber-500/40";
     
-    const badgeEstatusHTML = v.estatus_vacante === 'En Proceso' ? `
+    const badgeEstatusHTML = String(v.estatus_vacante).trim().toLowerCase() === 'en proceso' ? `
       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
         <span class="relative flex h-2 w-2">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -623,11 +568,11 @@ function renderizarApp() {
         </span>
       </div>
 
-      ${v.estatus_vacante === 'Contratado' ? `
+      ${String(v.estatus_vacante).trim().toLowerCase() === 'contratado' ? `
         <div class="mt-3 p-2.5 rounded-xl bg-[#0F1626] border border-slate-800 flex items-center justify-between text-xs">
           <div class="flex items-center gap-1.5">
             <i class="ph-bold ph-shield-check text-base text-amber-400"></i>
-            <span class="font-medium text-slate-300">Garantía (${v.dias_garantia_pactados}d):</span>
+            <span class="font-medium text-slate-300">Garantía (${v.dias_garantia_pactados || 30}d):</span>
           </div>
           <span class="font-bold ${infoGarantia.color}">${infoGarantia.texto}</span>
         </div>
@@ -636,7 +581,7 @@ function renderizarApp() {
       <div class="mt-3 pt-3 border-t border-slate-800 grid grid-cols-3 gap-1 text-center">
         <div>
           <span class="text-[10px] text-slate-400 font-semibold block uppercase">Fee Total</span>
-          <span class="text-xs font-bold text-amber-300">$${Number(v.fee_pactado_total).toLocaleString()}</span>
+          <span class="text-xs font-bold text-amber-300">$${Number(v.fee_pactado_total || 0).toLocaleString()}</span>
         </div>
         <div>
           <span class="text-[10px] text-slate-400 font-semibold block uppercase">Invertido</span>
@@ -655,7 +600,7 @@ function renderizarApp() {
         <button class="btn-card-hora flex-1 py-2 bg-[#162032] hover:bg-[#1A2438] text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1">
           <i class="ph-bold ph-clock text-amber-400"></i> + Horas
         </button>
-        ${v.estatus_vacante === 'En Proceso' ? `
+        ${String(v.estatus_vacante).trim().toLowerCase() === 'en proceso' ? `
           <button class="btn-card-contratar w-full py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1 shadow-md shadow-emerald-600/20">
             <i class="ph-bold ph-check-circle text-sm"></i> Marcar Contratada
           </button>
@@ -701,13 +646,13 @@ function calcularSlaProceso(vacante) {
   const inicio = parsearFechaSegura(vacante.fecha_inicio_proceso);
   if (!inicio) return { dias: 0, texto: "Sin fecha", color: "text-slate-400" };
   
-  const srv = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { sla_meta_dias: 20 };
+  const srv = DB.servicios.find(s => String(s.id_servicio).trim() === String(vacante.id_servicio).trim()) || { sla_meta_dias: 20 };
   const meta = srv.sla_meta_dias || 20;
 
   const fin = vacante.fecha_contratacion ? (parsearFechaSegura(vacante.fecha_contratacion) || new Date()) : new Date();
   const transcurridos = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
 
-  if (vacante.estatus_vacante === "Contratado") {
+  if (String(vacante.estatus_vacante).trim().toLowerCase() === "contratado") {
     return { dias: transcurridos, texto: `Cerrada en ${transcurridos}d`, color: transcurridos <= meta ? "text-emerald-400" : "text-amber-400" };
   }
 
@@ -718,13 +663,13 @@ function calcularSlaProceso(vacante) {
 
 function abrirExpediente(vacante) {
   vacanteSeleccionadaExpediente = vacante;
-  const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General", contacto_whatsapp: "" };
-  const servicio = DB.servicios.find(s => String(s.id_servicio) === String(vacante.id_servicio)) || { nombre_servicio: "Reclutamiento", sla_meta_dias: 20 };
+  const cliente = DB.clientes.find(c => String(c.id_cliente).trim() === String(vacante.id_cliente).trim()) || { nombre_comercial: "Empresa", region: "General", contacto_whatsapp: "" };
+  const servicio = DB.servicios.find(s => String(s.id_servicio).trim() === String(vacante.id_servicio).trim()) || { nombre_servicio: "Reclutamiento", sla_meta_dias: 20 };
 
-  const gastosVacante = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante));
+  const gastosVacante = DB.gastos.filter(g => String(g.id_vacante).trim() === String(vacante.id_vacante).trim());
   const totalGastos = gastosVacante.reduce((sum, g) => sum + Number(g.monto || 0), 0);
   
-  const horasVacante = DB.horas.filter(h => String(h.id_vacante) === String(vacante.id_vacante));
+  const horasVacante = DB.horas.filter(h => String(h.id_vacante).trim() === String(vacante.id_vacante).trim());
   const costoHoras = horasVacante.reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
 
   const inversionTotal = totalGastos + costoHoras;
@@ -764,7 +709,7 @@ function abrirExpediente(vacante) {
 
   const badgeEstatus = document.getElementById("expBadgeEstatus");
   if (badgeEstatus) {
-    if (vacante.estatus_vacante === "En Proceso") {
+    if (String(vacante.estatus_vacante).trim().toLowerCase() === "en proceso") {
       badgeEstatus.innerHTML = `
         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
           <i class="ph-bold ph-circle-notch animate-spin text-amber-400"></i> En Proceso
@@ -795,7 +740,7 @@ function abrirExpediente(vacante) {
   setText("btnPerfilPuestoText", "Ver Perfil de Puesto");
 
   const anticipo = Number(vacante.monto_adelanto || 0);
-  const saldo = (vacante.saldo_liquidado === "Sí") ? 0 : Math.max(0, feeTotal - anticipo);
+  const saldo = (String(vacante.saldo_liquidado).trim().toLowerCase() === "sí") ? 0 : Math.max(0, feeTotal - anticipo);
 
   setText("expCobranzaAnticipo", `$${anticipo.toLocaleString()}`);
   
@@ -805,7 +750,7 @@ function abrirExpediente(vacante) {
     elSaldo.className = saldo === 0 ? "font-bold text-emerald-400" : "font-bold text-amber-400";
   }
 
-  setText("expGarantiaPactada", `${vacante.dias_garantia_pactados} días`);
+  setText("expGarantiaPactada", `${vacante.dias_garantia_pactados || 30} días`);
   
   if (fechaContratacionObj) {
     const fcLimite = new Date(fechaContratacionObj);
@@ -830,10 +775,10 @@ function abrirExpediente(vacante) {
   const btnFinalizar = document.getElementById("btnExpFinalizar");
   const btnReactivarGarantia = document.getElementById("btnExpGarantiaReactivar");
 
-  if (vacante.estatus_vacante === "Contratado") {
+  if (String(vacante.estatus_vacante).trim().toLowerCase() === "contratado") {
     if (btnFinalizar) btnFinalizar.classList.add("hidden");
     if (btnReactivarGarantia) {
-      if (infoGarantia.diasRestantes > 0 && vacante.garantia_aplicada === "No") {
+      if (infoGarantia.diasRestantes > 0 && String(vacante.garantia_aplicada).trim().toLowerCase() === "no") {
         btnReactivarGarantia.classList.remove("hidden");
       } else {
         btnReactivarGarantia.classList.add("hidden");
@@ -878,7 +823,7 @@ function renderPipelineVacante(vacante) {
   const tasaCalificacion = (p.postulados > 0) ? Math.round((p.filtro / p.postulados) * 100) : 0;
   const efectividadTerna = (p.terna > 0) ? Math.round((p.oferta / p.terna) * 100) : 0;
   
-  const gastosAds = DB.gastos.filter(g => String(g.id_vacante) === String(vacante.id_vacante) && g.categoria.includes("Ads")).reduce((s, g) => s + Number(g.monto || 0), 0);
+  const gastosAds = DB.gastos.filter(g => String(g.id_vacante).trim() === String(vacante.id_vacante).trim() && String(g.categoria).includes("Ads")).reduce((s, g) => s + Number(g.monto || 0), 0);
   const costoPorEntrevista = (p.entrevistas > 0 && gastosAds > 0) ? Math.round(gastosAds / p.entrevistas) : 0;
 
   setText("ratioCalificacion", `${tasaCalificacion}%`);
@@ -889,7 +834,7 @@ function renderPipelineVacante(vacante) {
 function enviarReportePipelineWhatsApp() {
   if (!vacanteSeleccionadaExpediente) return;
   const v = vacanteSeleccionadaExpediente;
-  const cliente = DB.clientes.find(c => String(c.id_cliente) === String(v.id_cliente));
+  const cliente = DB.clientes.find(c => String(c.id_cliente).trim() === String(v.id_cliente).trim());
   const wa = cliente ? limpiarTelefono(cliente.contacto_whatsapp) : "";
 
   const p = v.pipeline || { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
@@ -981,7 +926,7 @@ function renderHistorialGastosExpediente(gastosVacante, costoHoras, inversionTot
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="py-2 text-slate-300">${g.categoria}</td>
-        <td class="py-2 text-right text-rose-400 font-bold">$${Number(g.monto).toLocaleString()}</td>
+        <td class="py-2 text-right text-rose-400 font-bold">$${Number(g.monto || 0).toLocaleString()}</td>
       `;
       tableGastos.appendChild(tr);
     });
@@ -1099,7 +1044,7 @@ function renderizarAnaliticas() {
 
     const categorias = {};
     DB.gastos.forEach(g => {
-      categorias[g.categoria] = (categorias[g.categoria] || 0) + Number(g.monto);
+      categorias[g.categoria] = (categorias[g.categoria] || 0) + Number(g.monto || 0);
     });
     if (totalHorasHH > 0) {
       categorias["Horas de Consultoría"] = totalHorasHH;
@@ -1130,17 +1075,17 @@ function renderizarAnaliticas() {
   containerClientes.innerHTML = "";
 
   DB.clientes.forEach(c => {
-    const vacantesCliente = DB.vacantes.filter(v => String(v.id_cliente) === String(c.id_cliente));
+    const vacantesCliente = DB.vacantes.filter(v => String(v.id_cliente).trim() === String(c.id_cliente).trim());
     if (vacantesCliente.length === 0) return;
 
     const facturadoCliente = vacantesCliente.reduce((sum, v) => sum + Number(v.fee_pactado_total || 0), 0);
-    const idsVacantes = vacantesCliente.map(v => String(v.id_vacante));
+    const idsVacantes = vacantesCliente.map(v => String(v.id_vacante).trim());
 
     const gastosPautaCliente = DB.gastos
-      .filter(g => idsVacantes.includes(String(g.id_vacante)))
+      .filter(g => idsVacantes.includes(String(g.id_vacante).trim()))
       .reduce((sum, g) => sum + Number(g.monto || 0), 0);
 
-    const horasClienteArr = DB.horas.filter(h => idsVacantes.includes(String(h.id_vacante)));
+    const horasClienteArr = DB.horas.filter(h => idsVacantes.includes(String(h.id_vacante).trim()));
     const totalHorasCliente = horasClienteArr.reduce((sum, h) => sum + Number(h.horas_invertidas || 0), 0);
     const costoHorasCliente = horasClienteArr.reduce((sum, h) => sum + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
 
@@ -1217,8 +1162,8 @@ function renderizarAnaliticas() {
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Desglose por Proceso</span>
           <div class="space-y-1.5">
             ${vacantesCliente.map(v => {
-              const gastosV = DB.gastos.filter(g => String(g.id_vacante) === String(v.id_vacante)).reduce((s, g) => s + Number(g.monto || 0), 0);
-              const horasV = DB.horas.filter(h => String(h.id_vacante) === String(v.id_vacante)).reduce((s, h) => s + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
+              const gastosV = DB.gastos.filter(g => String(g.id_vacante).trim() === String(v.id_vacante).trim()).reduce((s, g) => s + Number(g.monto || 0), 0);
+              const horasV = DB.horas.filter(h => String(h.id_vacante).trim() === String(v.id_vacante).trim()).reduce((s, h) => s + (Number(h.horas_invertidas || 0) * Number(h.costo_por_hora || 0)), 0);
               const totalInvV = gastosV + horasV;
               const netoV = Number(v.fee_pactado_total || 0) - totalInvV;
               const margenV = v.fee_pactado_total > 0 ? Math.round((netoV / v.fee_pactado_total) * 100) : 0;
@@ -1228,7 +1173,7 @@ function renderizarAnaliticas() {
                   <div>
                     <div class="flex items-center gap-1.5">
                       <span class="font-bold text-white font-serif">${v.titulo_puesto}</span>
-                      <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${v.estatus_vacante === 'En Proceso' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">
+                      <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${String(v.estatus_vacante).trim().toLowerCase() === 'en proceso' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">
                         ${v.estatus_vacante}
                       </span>
                     </div>
@@ -1262,9 +1207,9 @@ function renderizarDirectorioClientes() {
   container.innerHTML = "";
 
   DB.clientes.forEach(c => {
-    const vacantesCliente = DB.vacantes.filter(v => String(v.id_cliente) === String(c.id_cliente));
-    const activas = vacantesCliente.filter(v => v.estatus_vacante === "En Proceso").length;
-    const cerradas = vacantesCliente.filter(v => v.estatus_vacante === "Contratado").length;
+    const vacantesCliente = DB.vacantes.filter(v => String(v.id_cliente).trim() === String(c.id_cliente).trim());
+    const activas = vacantesCliente.filter(v => String(v.estatus_vacante).trim().toLowerCase() === "en proceso").length;
+    const cerradas = vacantesCliente.filter(v => String(v.estatus_vacante).trim().toLowerCase() === "contratado").length;
 
     const card = document.createElement("div");
     card.className = "p-4 bg-[#131B2B] rounded-2xl border border-slate-800 space-y-3 shadow-lg shadow-black/30";
@@ -1343,7 +1288,7 @@ function calcularDiasGarantia(vacante) {
   const diffTime = finGarantia - hoy;
   const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  if (vacante.garantia_aplicada !== "No") return { diasRestantes: 0, texto: "Consumida", color: "text-purple-400" };
+  if (String(vacante.garantia_aplicada).trim().toLowerCase() !== "no") return { diasRestantes: 0, texto: "Consumida", color: "text-purple-400" };
   if (diasRestantes <= 0) return { diasRestantes: 0, texto: "Vencida", color: "text-rose-400" };
   if (diasRestantes <= 15) return { diasRestantes, texto: `${diasRestantes}d (Por vencer)`, color: "text-amber-400" };
   return { diasRestantes, texto: `${diasRestantes}d restantes`, color: "text-emerald-400" };
@@ -1364,7 +1309,7 @@ async function procesarContratacion(e) {
   const candidato = document.getElementById("modalContratarNombreCandidato").value.trim();
   const liquidar = document.getElementById("checkLiquidarSaldo").checked;
 
-  const vacante = DB.vacantes.find(v => String(v.id_vacante) === String(idVacante));
+  const vacante = DB.vacantes.find(v => String(v.id_vacante).trim() === String(idVacante).trim());
   if (vacante) {
     vacante.estatus_vacante = "Contratado";
     vacante.fecha_contratacion = fecha;
@@ -1597,6 +1542,7 @@ async function cargarDatosDesdeAPI() {
 
     poblarSelects();
     renderizarApp();
+    console.log("✓ Sincronización completada con éxito:", DB.vacantes.length, "vacantes cargadas.");
   } catch (err) {
     console.error("Error al obtener datos desde Google Sheets:", err);
   }
