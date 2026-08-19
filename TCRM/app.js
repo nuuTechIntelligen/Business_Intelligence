@@ -1,11 +1,17 @@
 /**
  * CRM Talentum - Lógica de Control Operativo y Financiero
- * Paleta de Colores Talentum + Microanimaciones UX
+ * Catálogo Dinámico Unificado de Regiones (CAT_REGIONES)
  */
 
-const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
 
 let DB = {
+  regiones: [
+    { id_region: "REG-001", nombre_region: "Querétaro" },
+    { id_region: "REG-002", nombre_region: "CDMX" },
+    { id_region: "REG-003", nombre_region: "Bajío" },
+    { id_region: "REG-004", nombre_region: "Remoto" }
+  ],
   clientes: [
     { 
       id_cliente: "CLI-001", 
@@ -169,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   poblarSelects();
   
-  // Prellenar fecha de inicio de vacante con la fecha actual
   const inputFechaInicio = document.getElementById("nuevaVacanteFechaInicio");
   if (inputFechaInicio) {
     inputFechaInicio.value = new Date().toISOString().split("T")[0];
@@ -234,6 +239,21 @@ function setupEventListeners() {
     document.getElementById("boxNuevoServicio").classList.toggle("hidden");
   });
   document.getElementById("btnGuardarNuevoServicio").addEventListener("click", guardarNuevoServicio);
+
+  // Toggles de Nueva Región
+  document.getElementById("btnToggleNuevaRegion").addEventListener("click", () => {
+    document.getElementById("boxNuevaRegion").classList.toggle("hidden");
+  });
+  document.getElementById("btnGuardarNuevaRegion").addEventListener("click", () => {
+    guardarNuevaRegion("inputNuevaRegionNombre", "boxNuevaRegion", "nuevaVacanteRegionSelect");
+  });
+
+  document.getElementById("btnToggleNuevaRegionCliente").addEventListener("click", () => {
+    document.getElementById("boxNuevaRegionCliente").classList.toggle("hidden");
+  });
+  document.getElementById("btnGuardarNuevaRegionCliente").addEventListener("click", () => {
+    guardarNuevaRegion("inputNuevaRegionNombreCliente", "boxNuevaRegionCliente", "clienteDirectoRegionSelect");
+  });
 
   document.getElementById("modalVacanteServicio").addEventListener("change", actualizarValoresServicio);
 
@@ -392,17 +412,80 @@ function closeModal() {
 }
 
 function poblarSelects() {
+  // Vacantes
   const selectGasto = document.getElementById("modalGastoVacante");
   const selectHora = document.getElementById("modalHoraVacante");
   const optionsVacantes = DB.vacantes.map(v => `<option value="${v.id_vacante}">${v.titulo_puesto}</option>`).join("");
   if (selectGasto) selectGasto.innerHTML = optionsVacantes;
   if (selectHora) selectHora.innerHTML = optionsVacantes;
 
+  // Clientes
   const selectClientes = document.getElementById("modalVacanteCliente");
   if (selectClientes) selectClientes.innerHTML = DB.clientes.map(c => `<option value="${c.id_cliente}">${c.nombre_comercial}</option>`).join("");
 
+  // Servicios
   const selectServicios = document.getElementById("modalVacanteServicio");
   if (selectServicios) selectServicios.innerHTML = DB.servicios.map(s => `<option value="${s.id_servicio}">${s.nombre_servicio}</option>`).join("");
+
+  // Regiones en todos los selectores
+  poblarSelectoresRegiones();
+}
+
+function poblarSelectoresRegiones() {
+  const optionsRegiones = DB.regiones.map(r => `<option value="${r.nombre_region}">${r.nombre_region}</option>`).join("");
+
+  // Filtro superior
+  const selectFiltroReg = document.getElementById("selectFiltroRegion");
+  if (selectFiltroReg) {
+    const prevVal = selectFiltroReg.value || "Todas";
+    selectFiltroReg.innerHTML = `<option value="Todas">🌍 Todas</option>` + optionsRegiones;
+    selectFiltroReg.value = prevVal;
+  }
+
+  // Selector en Modal Vacante
+  const selectRegVacante = document.getElementById("nuevaVacanteRegionSelect");
+  if (selectRegVacante) selectRegVacante.innerHTML = optionsRegiones;
+
+  // Selector en Modal Cliente Directo
+  const selectRegCliente = document.getElementById("clienteDirectoRegionSelect");
+  if (selectRegCliente) selectRegCliente.innerHTML = optionsRegiones;
+
+  // Selector en Cliente Inline dentro de Vacante
+  const selectRegClienteInline = document.getElementById("nuevoClienteRegionSelect");
+  if (selectRegClienteInline) selectRegClienteInline.innerHTML = optionsRegiones;
+}
+
+function guardarNuevaRegion(inputId, boxId, targetSelectId) {
+  const input = document.getElementById(inputId);
+  const nombre = input ? input.value.trim() : "";
+
+  if (!nombre) {
+    alert("Ingresa un nombre para la región / estado");
+    return;
+  }
+
+  // Evitar duplicados por nombre
+  const existe = DB.regiones.find(r => r.nombre_region.toLowerCase() === nombre.toLowerCase());
+  let idRegion = existe ? existe.id_region : `REG-${Date.now().toString().slice(-4)}`;
+
+  if (!existe) {
+    const nuevaReg = { id_region: idRegion, nombre_region: nombre };
+    DB.regiones.push(nuevaReg);
+    poblarSelectoresRegiones();
+
+    sendToAppsScript({
+      action: "create",
+      targetSheet: "CAT_REGIONES",
+      payload: [idRegion, nombre]
+    });
+  }
+
+  const targetSelect = document.getElementById(targetSelectId);
+  if (targetSelect) targetSelect.value = nombre;
+
+  const box = document.getElementById(boxId);
+  if (box) box.classList.add("hidden");
+  if (input) input.value = "";
 }
 
 function actualizarValoresServicio() {
@@ -1357,7 +1440,8 @@ async function guardarVacante(e) {
   if (!boxNuevoCliente.classList.contains("hidden")) {
     const nombreCliente = document.getElementById("nuevoClienteNombre").value;
     const contacto = document.getElementById("nuevoClienteContacto").value;
-    region = document.getElementById("nuevoClienteRegion").value || region;
+    const regionClienteSelect = document.getElementById("nuevoClienteRegionSelect");
+    const regionCliente = regionClienteSelect ? regionClienteSelect.value : region;
     const wa = document.getElementById("nuevoClienteWhatsApp").value;
     const email = document.getElementById("nuevoClienteEmail").value;
     
@@ -1365,7 +1449,7 @@ async function guardarVacante(e) {
     DB.clientes.push({ 
       id_cliente: idCliente, 
       nombre_comercial: nombreCliente, 
-      region, 
+      region: regionCliente, 
       contacto_nombre: contacto, 
       contacto_whatsapp: wa, 
       contacto_email: email, 
@@ -1375,14 +1459,13 @@ async function guardarVacante(e) {
     sendToAppsScript({
       action: "create",
       targetSheet: "CLIENTES",
-      payload: [idCliente, nombreCliente, region, contacto, wa, "Activo", email]
+      payload: [idCliente, nombreCliente, regionCliente, contacto, wa, "Activo", email]
     });
   }
 
   const idVacante = `VAC-${Date.now().toString().slice(-4)}`;
   const perfilTexto = document.getElementById("nuevaVacantePerfil").value.trim();
   
-  // Obtener la fecha de inicio seleccionada por el usuario
   const inputFechaInicio = document.getElementById("nuevaVacanteFechaInicio");
   const fechaInicioSeleccionada = inputFechaInicio && inputFechaInicio.value ? inputFechaInicio.value : new Date().toISOString().split('T')[0];
 
@@ -1411,7 +1494,6 @@ async function guardarVacante(e) {
   document.getElementById("formVacante").reset();
   boxNuevoCliente.classList.add("hidden");
   
-  // Reestablecer fecha de inicio a hoy para el próximo registro
   if (inputFechaInicio) inputFechaInicio.value = new Date().toISOString().split("T")[0];
 
   poblarSelects();
@@ -1446,7 +1528,8 @@ function guardarClienteDirecto(e) {
   e.preventDefault();
   const nombre = document.getElementById("clienteDirectoNombre").value.trim();
   const contacto = document.getElementById("clienteDirectoContacto").value.trim();
-  const region = document.getElementById("clienteDirectoRegion").value.trim() || "Querétaro";
+  const regionSelect = document.getElementById("clienteDirectoRegionSelect");
+  const region = regionSelect ? regionSelect.value : "Querétaro";
   const wa = document.getElementById("clienteDirectoWhatsApp").value.trim();
   const email = document.getElementById("clienteDirectoEmail").value.trim();
 
@@ -1495,6 +1578,8 @@ async function cargarDatosDesdeAPI() {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getDashboardData`);
     const data = await res.json();
     
+    if (data.regiones && data.regiones.length > 0) DB.regiones = data.regiones;
+
     if (data.vacantes && data.vacantes.length > 0) {
       DB.vacantes = data.vacantes.map(v => {
         let pipeline = { postulados: 0, filtro: 0, entrevistas: 0, terna: 0, oferta: 0 };
