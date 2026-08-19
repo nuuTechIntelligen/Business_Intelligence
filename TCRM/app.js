@@ -3,7 +3,7 @@
  * Paleta de Colores Talentum + Microanimaciones UX
  */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3mVfFIE3fNUN_G_ox6vvnGnCosxfvcu-ievTYTqlQypvrfjSZC6i7BlwjogDdUHIl/exec";
+const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUI";
 
 let DB = {
   clientes: [
@@ -87,13 +87,11 @@ let activeModalSheet = null;
 let vacanteSeleccionadaExpediente = null;
 let clienteAbiertoDetalle = null;
 
-// Helper seguro para asignar texto en elementos
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
 
-// Función robusta para parsear cualquier fecha que venga de Google Sheets o Inputs
 function parsearFechaSegura(fechaRaw) {
   if (!fechaRaw) return null;
   if (fechaRaw instanceof Date && !isNaN(fechaRaw.getTime())) {
@@ -105,7 +103,6 @@ function parsearFechaSegura(fechaRaw) {
   const str = String(fechaRaw).trim();
   if (!str) return null;
 
-  // Si viene en formato YYYY-MM-DD o con tiempo YYYY-MM-DDTHH:mm:ss...
   if (str.includes("-")) {
     const soloFecha = str.split("T")[0];
     const p = soloFecha.split("-");
@@ -121,7 +118,6 @@ function parsearFechaSegura(fechaRaw) {
     }
   }
 
-  // Si viene en formato DD/MM/YYYY
   if (str.includes("/")) {
     const p = str.split("/");
     if (p.length === 3) {
@@ -136,7 +132,6 @@ function parsearFechaSegura(fechaRaw) {
     }
   }
 
-  // Fallback nativo
   const d = new Date(str);
   if (!isNaN(d.getTime())) {
     d.setHours(0, 0, 0, 0);
@@ -146,7 +141,6 @@ function parsearFechaSegura(fechaRaw) {
   return null;
 }
 
-// Formateador estándar YYYY-MM-DD para visualización
 function formatearFechaISO(dateObj) {
   if (!dateObj || isNaN(dateObj.getTime())) return "N/A";
   const year = dateObj.getFullYear();
@@ -155,7 +149,6 @@ function formatearFechaISO(dateObj) {
   return `${year}-${month}-${day}`;
 }
 
-// CONTROL DINÁMICO DEL PIPELINE CON PERSISTENCIA EN GOOGLE SHEETS
 window.cambiarPipeline = function(idVacante, etapa, delta) {
   const v = DB.vacantes.find(item => String(item.id_vacante) === String(idVacante));
   if (v && v.pipeline) {
@@ -175,6 +168,13 @@ window.cambiarPipeline = function(idVacante, etapa, delta) {
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   poblarSelects();
+  
+  // Prellenar fecha de inicio de vacante con la fecha actual
+  const inputFechaInicio = document.getElementById("nuevaVacanteFechaInicio");
+  if (inputFechaInicio) {
+    inputFechaInicio.value = new Date().toISOString().split("T")[0];
+  }
+
   cargarDatosDesdeAPI();
 });
 
@@ -193,7 +193,14 @@ function setupEventListeners() {
 
   // FAB
   document.getElementById("btnFab").addEventListener("click", toggleFabMenu);
-  document.getElementById("btnOpenModalVacante").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetVacante"); });
+  document.getElementById("btnOpenModalVacante").addEventListener("click", () => { 
+    toggleFabMenu(); 
+    const inputFechaInicio = document.getElementById("nuevaVacanteFechaInicio");
+    if (inputFechaInicio && !inputFechaInicio.value) {
+      inputFechaInicio.value = new Date().toISOString().split("T")[0];
+    }
+    openModal("modalSheetVacante"); 
+  });
   document.getElementById("btnOpenModalHora").addEventListener("click", () => { toggleFabMenu(); openModal("modalSheetHora"); });
   document.getElementById("btnOpenModalNuevoClienteDirecto").addEventListener("click", () => openModal("modalSheetNuevoClienteDirecto"));
 
@@ -208,6 +215,15 @@ function setupEventListeners() {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
+  });
+
+  // Sincronizar región sugerida al cambiar de cliente en el modal de vacante
+  document.getElementById("modalVacanteCliente").addEventListener("change", (e) => {
+    const cli = DB.clientes.find(c => String(c.id_cliente) === String(e.target.value));
+    if (cli && cli.region) {
+      const selectReg = document.getElementById("nuevaVacanteRegionSelect");
+      if (selectReg) selectReg.value = cli.region;
+    }
   });
 
   // Toggles de Nuevo Cliente y Nuevo Servicio
@@ -258,7 +274,6 @@ function setupEventListeners() {
   });
 
   document.getElementById("btnExpGarantiaReactivar").addEventListener("click", reactivarPorGarantia);
-
   document.getElementById("btnEnviarReporteWhatsApp").addEventListener("click", enviarReportePipelineWhatsApp);
 
   document.getElementById("btnExpEliminar").addEventListener("click", () => {
@@ -626,9 +641,6 @@ function calcularSlaProceso(vacante) {
   return { dias: transcurridos, texto: `${transcurridos}/${meta}d SLA`, color: "text-cyan-400" };
 }
 
-// ==========================================
-// EXPEDIENTE DETALLADO (MODAL OSCURA)
-// ==========================================
 function abrirExpediente(vacante) {
   vacanteSeleccionadaExpediente = vacante;
   const cliente = DB.clientes.find(c => String(c.id_cliente) === String(vacante.id_cliente)) || { nombre_comercial: "Empresa", region: "General", contacto_whatsapp: "" };
@@ -692,7 +704,6 @@ function abrirExpediente(vacante) {
     }
   }
 
-  // Fechas parseadas de forma segura para evitar RangeError
   const fechaInicioObj = parsearFechaSegura(vacante.fecha_inicio_proceso);
   const fechaContratacionObj = parsearFechaSegura(vacante.fecha_contratacion);
 
@@ -721,7 +732,6 @@ function abrirExpediente(vacante) {
 
   setText("expGarantiaPactada", `${vacante.dias_garantia_pactados} días`);
   
-  // Cálculo seguro de fecha límite de garantía
   if (fechaContratacionObj) {
     const fcLimite = new Date(fechaContratacionObj);
     fcLimite.setDate(fcLimite.getDate() + Number(vacante.dias_garantia_pactados || 30));
@@ -1371,6 +1381,10 @@ async function guardarVacante(e) {
 
   const idVacante = `VAC-${Date.now().toString().slice(-4)}`;
   const perfilTexto = document.getElementById("nuevaVacantePerfil").value.trim();
+  
+  // Obtener la fecha de inicio seleccionada por el usuario
+  const inputFechaInicio = document.getElementById("nuevaVacanteFechaInicio");
+  const fechaInicioSeleccionada = inputFechaInicio && inputFechaInicio.value ? inputFechaInicio.value : new Date().toISOString().split('T')[0];
 
   const nuevaVacante = {
     id_vacante: idVacante,
@@ -1382,7 +1396,7 @@ async function guardarVacante(e) {
     fee_pactado_total: parseFloat(document.getElementById("nuevaVacanteFee").value),
     monto_adelanto: parseFloat(document.getElementById("nuevaVacanteAnticipo").value),
     saldo_liquidado: "No",
-    fecha_inicio_proceso: new Date().toISOString().split('T')[0],
+    fecha_inicio_proceso: fechaInicioSeleccionada,
     estatus_vacante: "En Proceso",
     fecha_contratacion: "",
     candidato_contratado: "",
@@ -1396,6 +1410,10 @@ async function guardarVacante(e) {
   closeModal();
   document.getElementById("formVacante").reset();
   boxNuevoCliente.classList.add("hidden");
+  
+  // Reestablecer fecha de inicio a hoy para el próximo registro
+  if (inputFechaInicio) inputFechaInicio.value = new Date().toISOString().split("T")[0];
+
   poblarSelects();
   renderizarApp();
 
