@@ -529,7 +529,7 @@
     </form>
   </div>
 
-  <!-- MODAL 3: NUEVA VACANTE -->
+  <!-- MODAL 3: NUEVA VACANTE (CON CATÁLOGO DE REGIONES Y +REGIÓN INLINE PARA CLIENTE Y VACANTE) -->
   <div id="modalSheetVacante" class="fixed inset-x-0 bottom-0 bg-[#0F1626] text-white rounded-t-3xl p-5 z-50 bottom-sheet max-w-lg mx-auto shadow-2xl border-t border-slate-800 max-h-[90vh] overflow-y-auto">
     <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4"></div>
     <div class="flex justify-between items-center mb-4">
@@ -547,14 +547,29 @@
         </div>
       </div>
 
-      <!-- ALTA DE CLIENTE INLINE DENTRO DE VACANTE -->
+      <!-- ALTA DE CLIENTE INLINE DENTRO DE VACANTE CON +REGIÓN -->
       <div id="boxNuevoCliente" class="hidden p-3 bg-[#131B2B] rounded-xl border border-slate-800 flex flex-col gap-2">
         <span class="text-xs font-bold text-amber-400">Datos de la Nueva Empresa</span>
         <input type="text" id="nuevoClienteNombre" placeholder="Razón Social / Nombre Comercial" class="w-full bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200" />
-        <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="nuevoClienteContacto" placeholder="Persona de Contacto" class="bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200" />
-          <select id="nuevoClienteRegionSelect" class="bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200"></select>
+        <input type="text" id="nuevoClienteContacto" placeholder="Persona de Contacto" class="bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200" />
+        
+        <div>
+          <label class="text-[10px] font-semibold text-slate-400">Región Corporativa del Cliente</label>
+          <div class="flex gap-2 mt-0.5">
+            <select id="nuevoClienteRegionSelect" class="flex-1 bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200"></select>
+            <button type="button" id="btnToggleNuevaRegionClienteInline" class="px-2.5 bg-[#1A2438] text-amber-300 rounded-lg text-xs font-bold border border-slate-700">+ Región</button>
+          </div>
         </div>
+
+        <!-- CAJA NUEVA REGIÓN INLINE CLIENTE DENTRO DE VACANTE -->
+        <div id="boxNuevaRegionClienteInline" class="hidden p-2.5 bg-[#0B0F17] rounded-lg border border-slate-800 flex flex-col gap-1.5">
+          <span class="text-[11px] font-bold text-amber-400">Nueva Región para Cliente</span>
+          <div class="flex gap-2">
+            <input type="text" id="inputNuevaRegionNombreClienteInline" placeholder="Ej. Guanajuato / León" class="flex-1 bg-[#162032] border border-slate-700 rounded-lg p-1.5 text-xs outline-none text-slate-200" />
+            <button type="button" id="btnGuardarNuevaRegionClienteInline" class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-2.5 rounded-lg text-xs font-bold">Guardar</button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-2">
           <input type="tel" id="nuevoClienteWhatsApp" placeholder="WhatsApp / Tel (10 dígitos)" class="bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200" />
           <input type="email" id="nuevoClienteEmail" placeholder="Correo electrónico" class="bg-[#162032] border border-slate-700 rounded-lg p-2 text-xs outline-none text-slate-200" />
@@ -575,7 +590,7 @@
         </div>
       </div>
 
-      <!-- CAJA NUEVA REGIÓN INLINE -->
+      <!-- CAJA NUEVA REGIÓN VACANTE INLINE -->
       <div id="boxNuevaRegion" class="hidden p-3 bg-[#131B2B] rounded-xl border border-slate-800 flex flex-col gap-2">
         <span class="text-xs font-bold text-amber-400">Agregar Nueva Región / Estado al Catálogo</span>
         <div class="flex gap-2">
