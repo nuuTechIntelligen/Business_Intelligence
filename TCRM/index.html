@@ -185,22 +185,22 @@
     <div id="directorioClientesContainer" class="space-y-3 mt-3"></div>
   </section>
 
-  <!-- BOTÓN FLOTANTE (FAB) -->
-  <div id="fabContainer" class="fixed bottom-20 right-5 z-20 flex flex-col items-end gap-2">
-    <div id="fabMenu" class="hidden flex-col items-end gap-2 transition-all">
-      <button id="btnOpenModalVacante" class="flex items-center gap-2 bg-[#162032] text-amber-300 px-4 py-2.5 rounded-full shadow-xl border border-amber-500/30 text-xs font-bold active:scale-95 transition-all">
-        <span>+ Nueva Vacante</span>
-        <i class="ph ph-briefcase text-base text-amber-400"></i>
-      </button>
-      <button id="btnOpenModalHora" class="flex items-center gap-2 bg-[#162032] text-amber-300 px-4 py-2.5 rounded-full shadow-xl border border-amber-500/30 text-xs font-bold active:scale-95 transition-all">
-        <span>+ Registrar Horas</span>
-        <i class="ph ph-clock text-base text-amber-400"></i>
-      </button>
-    </div>
-    <button id="btnFab" class="h-14 w-14 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 text-slate-950 shadow-xl shadow-amber-500/30 flex items-center justify-center text-2xl active:scale-90 transition-transform">
-      <i id="fabIcon" class="ph ph-plus-bold font-black"></i>
+  <!-- BOTÓN FLOTANTE (FAB) CON ÍCONO VISIBLE Y ROTACIÓN FLUIDA -->
+<div id="fabContainer" class="fixed bottom-20 right-5 z-20 flex flex-col items-end gap-2">
+  <div id="fabMenu" class="hidden flex-col items-end gap-2 transition-all">
+    <button id="btnOpenModalVacante" class="flex items-center gap-2 bg-[#162032] text-amber-300 px-4 py-2.5 rounded-full shadow-xl border border-amber-500/30 text-xs font-bold active:scale-95 transition-all">
+      <span>+ Nueva Vacante</span>
+      <i class="ph-bold ph-briefcase text-base text-amber-400"></i>
+    </button>
+    <button id="btnOpenModalHora" class="flex items-center gap-2 bg-[#162032] text-amber-300 px-4 py-2.5 rounded-full shadow-xl border border-amber-500/30 text-xs font-bold active:scale-95 transition-all">
+      <span>+ Registrar Horas</span>
+      <i class="ph-bold ph-clock text-base text-amber-400"></i>
     </button>
   </div>
+  <button id="btnFab" class="h-14 w-14 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 text-slate-950 shadow-xl shadow-amber-500/30 flex items-center justify-center text-2xl active:scale-90 transition-transform">
+    <i id="fabIcon" class="ph-bold ph-plus transition-transform duration-300 text-2xl"></i>
+  </button>
+</div>
 
   <!-- BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 left-0 right-0 z-30 bg-[#0B0F17]/95 backdrop-blur-xl border-t border-slate-800/80 px-6 py-2 flex justify-around items-center max-w-lg mx-auto">
