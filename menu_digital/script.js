@@ -1,18 +1,23 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
 let productoSeleccionado = null;
 let montoSeleccionadoActual = 20;
+let montoMinimoActual = 10;
+let limiteIngredientesActual = 0;
 let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
 
+// Días en español
+const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+
 // ======================================================
-// 1. CARGA DINÁMICA DESDE SHEETDB
+// 1. CARGA DINÁMICA Y FILTRADO POR DÍA
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeSheetDB();
@@ -24,7 +29,20 @@ async function cargarMenuDesdeSheetDB() {
         const productos = await respuesta.json();
         productosGlobales = productos;
 
-        renderizarMenu(productos);
+        const diaHoy = DIAS_SEMANA[new Date().getDay()];
+
+        // 1. Filtrar productos habilitados para el día de hoy
+        const productosHoy = productos.filter(p => {
+            const diasConfig = (p.dias_disponible || 'TODOS').toUpperCase();
+            if (diasConfig === 'TODOS' || diasConfig.trim() === '') return true;
+            return diasConfig.includes(diaHoy);
+        });
+
+        // 2. Renderizar Banner de Especiales del Día
+        renderizarBannerEspeciales(productosHoy);
+
+        // 3. Renderizar Catálogo en 2 Columnas
+        renderizarMenu(productosHoy);
         iniciarNavegacionScroll();
     } catch (error) {
         console.error("Error al cargar datos desde SheetDB:", error);
@@ -34,6 +52,44 @@ async function cargarMenuDesdeSheetDB() {
             </div>
         `;
     }
+}
+
+// Renderiza el banner horizontal con imágenes debajo del botón amarillo
+function renderizarBannerEspeciales(productos) {
+    const bannerContainer = document.getElementById('heroBannerContainer');
+    const bannerTrack = document.getElementById('bannerSliderTrack');
+    if (!bannerContainer || !bannerTrack) return;
+
+    // Buscar productos con destacado_banner = 'SI' y disponibles
+    const destacados = productos.filter(p => 
+        String(p.destacado_banner).toUpperCase() === 'SI' && 
+        String(p.disponible).toUpperCase() === 'SI'
+    );
+
+    if (destacados.length === 0) {
+        bannerContainer.style.display = 'none';
+        return;
+    }
+
+    bannerTrack.innerHTML = '';
+    destacados.forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'banner-item-card';
+        card.onclick = () => abrirModalPersonalizacion(prod.id);
+
+        const precioTxt = prod.venta_por_monto === 'SI' ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
+
+        card.innerHTML = `
+            <div class="banner-img" style="background-image: url('${prod.imagen || 'images/exhibidor_botanas.jpg'}');"></div>
+            <div class="banner-info">
+                <strong>${prod.nombre}</strong>
+                <span>${precioTxt}</span>
+            </div>
+        `;
+        bannerTrack.appendChild(card);
+    });
+
+    bannerContainer.style.display = 'block';
 }
 
 function renderizarMenu(productos) {
@@ -114,7 +170,7 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 }
 
 // ======================================================
-// 2. MODAL DE PERSONALIZACIÓN DE INGREDIENTES
+// 2. MODAL Y PERSONALIZACIÓN DE INGREDIENTES
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
@@ -126,11 +182,16 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = prod.venta_por_monto === 'SI' ? '$20.00' : `$${parseFloat(prod.precio).toFixed(2)}`;
 
+    // Configuración de Límite de Ingredientes (Mini Hot Cakes, etc.)
+    limiteIngredientesActual = parseInt(prod.max_ingredientes || '0');
+    actualizarBadgeLimiteIngredientes(0);
+
+    // Configuración de Venta por Monto y Límite Mínimo
     const amountGroup = document.getElementById('modalAmountGroup');
     if (prod.venta_por_monto === 'SI') {
         amountGroup.style.display = 'block';
-        montoSeleccionadoActual = parseFloat(prod.precio) || 20;
-        renderizarPillsMonto();
+        montoMinimoActual = parseFloat(prod.monto_minimo || '10');
+        renderizarPillsMontoDinámicas(prod.montos_sugeridos, montoMinimoActual);
     } else {
         amountGroup.style.display = 'none';
     }
@@ -142,47 +203,62 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('productModal').classList.add('active');
 }
 
-function renderizarPillsMonto() {
+// Renderiza pills basadas en la columna 'montos_sugeridos' de Google Sheets
+function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
     const pillsContainer = document.getElementById('modalAmountPills');
+    const inputCustom = document.getElementById('modalCustomAmount');
+    const hintMin = document.getElementById('modalMinAmountMsg');
     if (!pillsContainer) return;
 
-    const montosFrecuentes = [20, 30, 50, 100];
-    pillsContainer.innerHTML = '';
+    let listaMontos = [20, 30, 50, 100];
+    if (montosConfig && montosConfig.trim() !== '') {
+        listaMontos = montosConfig.split(',').map(m => parseFloat(m.trim())).filter(m => !isNaN(m));
+    }
 
-    montosFrecuentes.forEach(monto => {
+    montoSeleccionadoActual = listaMontos[0] || montoMinimo;
+    document.getElementById('modalProductPrice').textContent = `$${montoSeleccionadoActual.toFixed(2)}`;
+
+    pillsContainer.innerHTML = '';
+    listaMontos.forEach((monto, idx) => {
         const pill = document.createElement('button');
         pill.type = 'button';
-        pill.className = `amount-pill ${montoSeleccionadoActual === monto ? 'active' : ''}`;
+        pill.className = `amount-pill ${idx === 0 ? 'active' : ''}`;
         pill.textContent = `$${monto}`;
         pill.onclick = () => {
             montoSeleccionadoActual = monto;
             document.getElementById('modalCustomWrapper').style.display = 'none';
             document.getElementById('modalProductPrice').textContent = `$${monto.toFixed(2)}`;
+            hintMin.textContent = '';
             actualizarClasesPills();
         };
         pillsContainer.appendChild(pill);
     });
 
+    // Pill de "Otro monto"
     const pillOtro = document.createElement('button');
     pillOtro.type = 'button';
-    pillOtro.className = `amount-pill ${!montosFrecuentes.includes(montoSeleccionadoActual) ? 'active' : ''}`;
+    pillOtro.className = 'amount-pill';
     pillOtro.textContent = 'Otro ✏️';
     pillOtro.onclick = () => {
         const customWrapper = document.getElementById('modalCustomWrapper');
         customWrapper.style.display = 'flex';
-        const inputCustom = document.getElementById('modalCustomAmount');
+        inputCustom.min = montoMinimo;
+        inputCustom.value = montoSeleccionadoActual;
         inputCustom.focus();
-        montoSeleccionadoActual = parseFloat(inputCustom.value) || 20;
-        document.getElementById('modalProductPrice').textContent = `$${montoSeleccionadoActual.toFixed(2)}`;
+        hintMin.textContent = `* Cantidad mínima: $${montoMinimo.toFixed(2)}`;
         actualizarClasesPills();
     };
     pillsContainer.appendChild(pillOtro);
 
-    const inputCustom = document.getElementById('modalCustomAmount');
     inputCustom.oninput = () => {
         const val = parseFloat(inputCustom.value) || 0;
         montoSeleccionadoActual = val;
         document.getElementById('modalProductPrice').textContent = `$${val.toFixed(2)}`;
+        if (val < montoMinimo) {
+            hintMin.textContent = `⚠️ El monto mínimo es de $${montoMinimo.toFixed(2)}`;
+        } else {
+            hintMin.textContent = '';
+        }
     };
 }
 
@@ -219,7 +295,7 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
             searchInput = document.createElement('input');
             searchInput.type = 'text';
             searchInput.className = 'modal-search-input';
-            searchInput.placeholder = '🔍 Buscar opción... (ej. Cheto, Takis, Papa)';
+            searchInput.placeholder = '🔍 Buscar opción... (ej. Cheto, Takis, Fresa)';
             groupEl.insertBefore(searchInput, containerEl);
         }
         searchInput.value = '';
@@ -241,11 +317,53 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
         const label = document.createElement('label');
         label.className = 'option-chip';
         label.innerHTML = `
-            <input type="${inputType}" name="${inputName}" value="${op}" ${inputType === 'radio' && index === 0 ? 'checked' : ''}>
+            <input type="${inputType}" name="${inputName}" value="${op}" ${inputType === 'radio' && index === 0 ? 'checked' : ''} onchange="manejarCambioIngredientes(this)">
             <span>${op}</span>
         `;
         containerEl.appendChild(label);
     });
+}
+
+// Control dinámico de checkboxes según 'max_ingredientes'
+function manejarCambioIngredientes(inputEl) {
+    if (inputEl.type !== 'checkbox' || limiteIngredientesActual <= 0) return;
+
+    const checkboxes = document.querySelectorAll('input[name="grupo_ing"]');
+    const seleccionados = Array.from(checkboxes).filter(cb => cb.checked);
+    const totalSeleccionados = seleccionados.length;
+
+    actualizarBadgeLimiteIngredientes(totalSeleccionados);
+
+    if (totalSeleccionados >= limiteIngredientesActual) {
+        checkboxes.forEach(cb => {
+            if (!cb.checked) {
+                cb.disabled = true;
+                cb.closest('.option-chip').classList.add('disabled');
+            }
+        });
+    } else {
+        checkboxes.forEach(cb => {
+            cb.disabled = false;
+            cb.closest('.option-chip').classList.remove('disabled');
+        });
+    }
+}
+
+function actualizarBadgeLimiteIngredientes(actuales) {
+    const badge = document.getElementById('modalIngredientsLimitBadge');
+    if (!badge) return;
+
+    if (limiteIngredientesActual > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = `${actuales} de ${limiteIngredientesActual} permitidos`;
+        if (actuales >= limiteIngredientesActual) {
+            badge.className = 'limit-badge complete';
+        } else {
+            badge.className = 'limit-badge';
+        }
+    } else {
+        badge.style.display = 'none';
+    }
 }
 
 function cerrarModal() {
@@ -259,8 +377,8 @@ function confirmarAgregarAlCarrito() {
     let precioFinal = parseFloat(productoSeleccionado.precio || 0);
 
     if (productoSeleccionado.venta_por_monto === 'SI') {
-        if (isNaN(montoSeleccionadoActual) || montoSeleccionadoActual <= 0) {
-            alert("Por favor ingresa o selecciona un monto válido.");
+        if (isNaN(montoSeleccionadoActual) || montoSeleccionadoActual < montoMinimoActual) {
+            alert(`El monto mínimo para este producto es de $${montoMinimoActual.toFixed(2)}`);
             return;
         }
         precioFinal = montoSeleccionadoActual;
@@ -297,7 +415,7 @@ function actualizarBarraCarrito() {
 }
 
 // ======================================================
-// 3. CHECKOUT Y GENERACIÓN DE TURNOS
+// 3. CHECKOUT, TURNOS Y REINICIO KIOSKO
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -403,7 +521,7 @@ function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    // 1. Guardar para la pantalla de cocina
+    // Guardar para pantalla de cocina
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
@@ -438,8 +556,6 @@ function mostrarBoletoTurno(pedido) {
     }
 
     document.getElementById('ticketModal').classList.add('active');
-
-    // CUENTA REGRESIVA DE REINICIO AUTOMÁTICO (KIOSKO)
     iniciarCuentaRegresivaKiosko(7);
 }
 
