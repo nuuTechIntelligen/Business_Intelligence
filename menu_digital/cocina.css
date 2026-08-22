@@ -450,6 +450,36 @@ body {
     font-family: var(--font-heading);
 }
 
+/* CONTENEDOR DE GRÁFICAS */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    background: #1E1E1E;
+    border: 1px solid #2D2D2D;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card h3 {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    color: #FFCB05;
+    margin-bottom: 12px;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 240px;
+    width: 100%;
+}
+
 /* ====================================================== */
 /* 6. MODAL DE TIEMPO ESTIMADO                            */
 /* ====================================================== */
