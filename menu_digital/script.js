@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -13,7 +13,7 @@ let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
 
-// Días en español
+// Días en español para matching con Google Sheets
 const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
 // ======================================================
@@ -31,17 +31,17 @@ async function cargarMenuDesdeSheetDB() {
 
         const diaHoy = DIAS_SEMANA[new Date().getDay()];
 
-        // 1. Filtrar productos habilitados para el día de hoy
+        // Filtrar productos por día actual (si está vacío o en 'TODOS', se muestra siempre)
         const productosHoy = productos.filter(p => {
             const diasConfig = (p.dias_disponible || 'TODOS').toUpperCase();
             if (diasConfig === 'TODOS' || diasConfig.trim() === '') return true;
             return diasConfig.includes(diaHoy);
         });
 
-        // 2. Renderizar Banner de Especiales del Día
+        // 1. Renderizar Banner de Especiales del Día
         renderizarBannerEspeciales(productosHoy);
 
-        // 3. Renderizar Catálogo en 2 Columnas
+        // 2. Renderizar Menú en 2 Columnas
         renderizarMenu(productosHoy);
         iniciarNavegacionScroll();
     } catch (error) {
@@ -54,13 +54,11 @@ async function cargarMenuDesdeSheetDB() {
     }
 }
 
-// Renderiza el banner horizontal con imágenes debajo del botón amarillo
 function renderizarBannerEspeciales(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
     const bannerTrack = document.getElementById('bannerSliderTrack');
     if (!bannerContainer || !bannerTrack) return;
 
-    // Buscar productos con destacado_banner = 'SI' y disponibles
     const destacados = productos.filter(p => 
         String(p.destacado_banner).toUpperCase() === 'SI' && 
         String(p.disponible).toUpperCase() === 'SI'
@@ -182,11 +180,11 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = prod.venta_por_monto === 'SI' ? '$20.00' : `$${parseFloat(prod.precio).toFixed(2)}`;
 
-    // Configuración de Límite de Ingredientes (Mini Hot Cakes, etc.)
-    limiteIngredientesActual = parseInt(prod.max_ingredientes || '0');
-    actualizarBadgeLimiteIngredientes(0);
+    // Parseo seguro del límite de ingredientes de 'max_ingredientes'
+    const rawMax = prod.max_ingredientes ? String(prod.max_ingredientes).trim() : '0';
+    limiteIngredientesActual = isNaN(parseInt(rawMax)) ? 0 : parseInt(rawMax);
 
-    // Configuración de Venta por Monto y Límite Mínimo
+    // Configuración de venta a granel / montos
     const amountGroup = document.getElementById('modalAmountGroup');
     if (prod.venta_por_monto === 'SI') {
         amountGroup.style.display = 'block';
@@ -200,10 +198,12 @@ function abrirModalPersonalizacion(productoId) {
     renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', prod.grupo_ingredientes_nombre, prod.grupo_ingredientes_opciones, 'checkbox', 'grupo_ing');
     renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', prod.grupo_salsas_nombre, prod.grupo_salsas_opciones, 'radio', 'grupo_salsa');
 
+    // Inicializar indicador de conteo en 0
+    actualizarBadgeLimiteIngredientes(0);
+
     document.getElementById('productModal').classList.add('active');
 }
 
-// Renderiza pills basadas en la columna 'montos_sugeridos' de Google Sheets
 function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
     const pillsContainer = document.getElementById('modalAmountPills');
     const inputCustom = document.getElementById('modalCustomAmount');
@@ -234,7 +234,6 @@ function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
         pillsContainer.appendChild(pill);
     });
 
-    // Pill de "Otro monto"
     const pillOtro = document.createElement('button');
     pillOtro.type = 'button';
     pillOtro.className = 'amount-pill';
@@ -324,9 +323,8 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     });
 }
 
-// Control dinámico de checkboxes según 'max_ingredientes'
 function manejarCambioIngredientes(inputEl) {
-    if (inputEl.type !== 'checkbox' || limiteIngredientesActual <= 0) return;
+    if (inputEl.type !== 'checkbox') return;
 
     const checkboxes = document.querySelectorAll('input[name="grupo_ing"]');
     const seleccionados = Array.from(checkboxes).filter(cb => cb.checked);
@@ -334,18 +332,20 @@ function manejarCambioIngredientes(inputEl) {
 
     actualizarBadgeLimiteIngredientes(totalSeleccionados);
 
-    if (totalSeleccionados >= limiteIngredientesActual) {
-        checkboxes.forEach(cb => {
-            if (!cb.checked) {
-                cb.disabled = true;
-                cb.closest('.option-chip').classList.add('disabled');
-            }
-        });
-    } else {
-        checkboxes.forEach(cb => {
-            cb.disabled = false;
-            cb.closest('.option-chip').classList.remove('disabled');
-        });
+    if (limiteIngredientesActual > 0) {
+        if (totalSeleccionados >= limiteIngredientesActual) {
+            checkboxes.forEach(cb => {
+                if (!cb.checked) {
+                    cb.disabled = true;
+                    cb.closest('.option-chip').classList.add('disabled');
+                }
+            });
+        } else {
+            checkboxes.forEach(cb => {
+                cb.disabled = false;
+                cb.closest('.option-chip').classList.remove('disabled');
+            });
+        }
     }
 }
 
@@ -521,7 +521,6 @@ function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    // Guardar para pantalla de cocina
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
