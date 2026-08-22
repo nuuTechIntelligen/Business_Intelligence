@@ -777,3 +777,218 @@ body {
         height: 170px;
     }
 }
+
+/* ====================================================== */
+/* 9. ESTILOS DE CHECKOUT Y BOLETO DE TURNO (ETAPA 1)     */
+/* ====================================================== */
+
+/* Lista de ítems en Checkout */
+.checkout-items-list {
+    max-height: 180px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 8px 12px;
+    background: #FAFAFA;
+}
+
+.checkout-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #EEE;
+    font-size: 0.82rem;
+}
+.checkout-item:last-child {
+    border-bottom: none;
+}
+
+.checkout-item-details strong {
+    color: var(--text-dark);
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+}
+
+.checkout-item-details p {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+
+.checkout-item-price {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+.btn-remove-item {
+    background: none;
+    border: none;
+    color: #D32F2F;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 0.9rem;
+}
+
+/* Selector de Modalidad (Tienda vs Para Recoger) */
+.order-type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.type-card {
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #FFF;
+}
+
+.type-card input {
+    display: none;
+}
+
+.type-card i {
+    font-size: 1.4rem;
+    color: #666;
+}
+
+.type-card div strong {
+    display: block;
+    font-size: 0.85rem;
+    font-family: var(--font-heading);
+}
+
+.type-card div small {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    line-height: 1.1;
+}
+
+.type-card.active {
+    border-color: var(--primary-orange);
+    background: #FFF0F5;
+}
+.type-card.active i {
+    color: var(--primary-orange);
+}
+
+.checkout-input {
+    width: 100%;
+    border: 1.5px solid #DDD;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+}
+.checkout-input:focus {
+    border-color: var(--primary-orange);
+}
+
+/* BOLETO DIGITAL (TICKET) */
+.ticket-card {
+    text-align: center;
+    border-top: 6px solid var(--primary-orange);
+}
+
+.ticket-header {
+    padding-bottom: 12px;
+    border-bottom: 2px dashed #E5E7EB;
+}
+
+.ticket-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.badge-tienda { background: #E0F2FE; color: #0284C7; }
+.badge-recoger { background: #FFEDD5; color: #EA580C; }
+
+.ticket-number {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--primary-orange);
+    line-height: 1;
+    margin: 8px 0;
+    letter-spacing: 2px;
+}
+
+.ticket-status-box {
+    background: #FEF9C3;
+    border: 1px solid #FDE047;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    margin: 14px 0;
+}
+.ticket-status-box i {
+    font-size: 1.5rem;
+    color: #CA8A04;
+}
+.ticket-status-box strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #854D0E;
+}
+.ticket-status-box p {
+    font-size: 0.75rem;
+    color: #A16207;
+    margin: 0;
+}
+
+.ticket-payment-alert {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+.alert-tienda {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    color: #166534;
+}
+.alert-recoger {
+    background: #FFF7ED;
+    border: 1px solid #FFEDD5;
+    color: #9A3412;
+}
+
+.ticket-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.w-100 {
+    width: 100%;
+}
+.btn-secondary {
+    background: #F3F4F6;
+    color: #333;
+    border: 1px solid #DDD;
+    padding: 10px;
+    border-radius: 30px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    cursor: pointer;
+}
