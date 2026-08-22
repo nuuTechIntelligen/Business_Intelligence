@@ -1,13 +1,14 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Asegúrate de mantener tu ID
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
 let productoSeleccionado = null;
 let montoSeleccionadoActual = 20;
 let carrito = [];
+let ultimoPedidoGenerado = null;
 
 // ======================================================
 // 1. CARGA DINÁMICA DESDE SHEETDB
@@ -38,7 +39,6 @@ function renderizarMenu(productos) {
     const navContainer = document.getElementById('nav-categories-container');
     const sectionsContainer = document.getElementById('menu-sections-container');
 
-    // 1. Agrupar productos por categoría
     const categorias = {};
     productos.forEach(p => {
         const catId = p.categoria_id || 'otros';
@@ -54,7 +54,6 @@ function renderizarMenu(productos) {
         categorias[catId].productos.push(p);
     });
 
-    // 2. Renderizar Botones de Navegación
     navContainer.innerHTML = '';
     let primeraCat = true;
     Object.values(categorias).forEach(cat => {
@@ -66,7 +65,6 @@ function renderizarMenu(productos) {
         primeraCat = false;
     });
 
-    // 3. Renderizar Secciones de Productos en Cuadrícula
     sectionsContainer.innerHTML = '';
     Object.values(categorias).forEach(cat => {
         const section = document.createElement('section');
@@ -115,7 +113,7 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 }
 
 // ======================================================
-// 2. MODAL Y PERSONALIZACIÓN DE INGREDIENTES
+// 2. MODAL DE PERSONALIZACIÓN DE INGREDIENTES
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
@@ -127,7 +125,6 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = prod.venta_por_monto === 'SI' ? '$20.00' : `$${parseFloat(prod.precio).toFixed(2)}`;
 
-    // Manejo de Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
     if (prod.venta_por_monto === 'SI') {
         amountGroup.style.display = 'block';
@@ -137,7 +134,6 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Grupos de opciones con cuadrícula y buscador
     renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', prod.grupo_base_nombre, prod.grupo_base_opciones, 'radio', 'grupo_base');
     renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', prod.grupo_ingredientes_nombre, prod.grupo_ingredientes_opciones, 'checkbox', 'grupo_ing');
     renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', prod.grupo_salsas_nombre, prod.grupo_salsas_opciones, 'radio', 'grupo_salsa');
@@ -216,7 +212,6 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     const opciones = opcionesTexto.split(',').map(o => o.trim()).filter(o => o.length > 0);
     containerEl.innerHTML = '';
 
-    // Buscador automático si hay más de 8 opciones
     let searchInput = groupEl.querySelector('.modal-search-input');
     if (opciones.length > 8) {
         if (!searchInput) {
@@ -275,6 +270,7 @@ function confirmarAgregarAlCarrito() {
     const salsaSeleccionada = document.querySelector('input[name="grupo_salsa"]:checked')?.value || '';
 
     carrito.push({
+        id_unico: Date.now() + Math.random(),
         nombre: productoSeleccionado.nombre,
         precio: precioFinal,
         base: baseSeleccionada,
@@ -291,9 +287,6 @@ function confirmarAgregarAlCarrito() {
     setTimeout(() => cartBar.style.transform = 'scale(1)', 150);
 }
 
-// ======================================================
-// 3. ACTUALIZACIÓN DEL CARRITO Y WHATSAPP
-// ======================================================
 function actualizarBarraCarrito() {
     const totalCount = carrito.length;
     const totalPrice = carrito.reduce((sum, item) => sum + item.precio, 0);
@@ -302,33 +295,176 @@ function actualizarBarraCarrito() {
     document.getElementById('cartTotal').textContent = `$${totalPrice.toFixed(2)}`;
 }
 
-function enviarPedidoWhatsApp() {
+// ======================================================
+// 3. CHECKOUT Y GENERACIÓN DE TURNOS
+// ======================================================
+function abrirModalCheckout() {
     if (carrito.length === 0) {
-        alert("¡Tu pedido está vacío! Toca cualquier botana para prepararla y agregarla.");
+        alert("¡Tu pedido está vacío! Elige una botana para comenzar.");
         return;
     }
 
-    let mensaje = "Hola *La Engordadera* 🍿🌶️, me gustaría hacer el siguiente pedido:\n\n";
+    const itemsContainer = document.getElementById('checkoutItemsList');
+    itemsContainer.innerHTML = '';
     let total = 0;
 
     carrito.forEach((item, index) => {
         total += item.precio;
-        mensaje += `*${index + 1}. ${item.nombre}* - $${item.precio.toFixed(2)}\n`;
+        const div = document.createElement('div');
+        div.className = 'checkout-item';
+        
+        let extras = [];
+        if (item.base) extras.push(`Base: ${item.base}`);
+        if (item.ingredientes.length > 0) extras.push(`Con: ${item.ingredientes.join(', ')}`);
+        if (item.salsa) extras.push(`Salsa: ${item.salsa}`);
 
-        if (item.base) {
-            mensaje += `   • _Base:_ ${item.base}\n`;
-        }
-        if (item.ingredientes && item.ingredientes.length > 0) {
-            mensaje += `   • _Con:_ ${item.ingredientes.join(', ')}\n`;
-        }
-        if (item.salsa) {
-            mensaje += `   • _Salsa:_ ${item.salsa}\n`;
-        }
-        mensaje += "\n";
+        div.innerHTML = `
+            <div class="checkout-item-details">
+                <strong>${item.nombre}</strong>
+                <p>${extras.join(' | ') || 'Sin ingredientes adicionales'}</p>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="checkout-item-price">$${item.precio.toFixed(2)}</span>
+                <button type="button" class="btn-remove-item" onclick="eliminarDelCarrito(${index})">&times;</button>
+            </div>
+        `;
+        itemsContainer.appendChild(div);
     });
 
-    mensaje += `*Total Estimado:* $${total.toFixed(2)}\n`;
-    mensaje += "\n📍 *Dirección de Entrega / Recolección:* (Escribe aquí tu dirección o si pasas a sucursal)";
+    document.getElementById('checkoutTotalPrice').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('checkoutModal').classList.add('active');
+}
+
+function cerrarModalCheckout() {
+    document.getElementById('checkoutModal').classList.remove('active');
+}
+
+function eliminarDelCarrito(index) {
+    carrito.splice(index, 1);
+    actualizarBarraCarrito();
+    if (carrito.length === 0) {
+        cerrarModalCheckout();
+    } else {
+        abrirModalCheckout();
+    }
+}
+
+function cambiarTipoPedido(tipo) {
+    const storeLabel = document.getElementById('typeStoreLabel');
+    const pickupLabel = document.getElementById('typePickupLabel');
+
+    if (tipo === 'tienda') {
+        storeLabel.classList.add('active');
+        pickupLabel.classList.remove('active');
+    } else {
+        pickupLabel.classList.add('active');
+        storeLabel.classList.remove('active');
+    }
+}
+
+// Generador de Turno Consecutivo Local (Simulador FIFO)
+function obtenerSiguienteTurno(tipo) {
+    const prefijo = tipo === 'tienda' ? 'T' : 'R';
+    const claveStorage = `turno_${prefijo}_consecutivo`;
+    let actual = parseInt(localStorage.getItem(claveStorage) || '0') + 1;
+    if (actual > 99) actual = 1; // Reinicia en 1 al llegar a 99
+    localStorage.setItem(claveStorage, actual);
+
+    const numeroFormateado = actual < 10 ? `0${actual}` : `${actual}`;
+    return `#${prefijo}-${numeroFormateado}`;
+}
+
+function procesarGeneracionTurno() {
+    const nombreCliente = document.getElementById('clientNameInput').value.trim();
+    if (!nombreCliente) {
+        alert("Por favor ingresa tu nombre para identificar tu pedido.");
+        return;
+    }
+
+    const tipoPedido = document.querySelector('input[name="orderType"]:checked').value;
+    const numeroTurno = obtenerSiguienteTurno(tipoPedido);
+    const total = carrito.reduce((sum, item) => sum + item.precio, 0);
+
+    ultimoPedidoGenerado = {
+        turno: numeroTurno,
+        tipo: tipoPedido,
+        cliente: nombreCliente,
+        items: [...carrito],
+        total: total,
+        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    cerrarModalCheckout();
+    mostrarBoletoTurno(ultimoPedidoGenerado);
+}
+
+function mostrarBoletoTurno(pedido) {
+    const badgeType = document.getElementById('ticketBadgeType');
+    const paymentAlert = document.getElementById('ticketPaymentAlert');
+
+    document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
+    document.getElementById('ticketClientName').textContent = `Cliente: ${pedido.cliente}`;
+
+    if (pedido.tipo === 'tienda') {
+        badgeType.textContent = '🏪 CONSUMO EN TIENDA';
+        badgeType.className = 'ticket-badge badge-tienda';
+        paymentAlert.className = 'ticket-payment-alert alert-tienda';
+        paymentAlert.innerHTML = `
+            <strong>💵 Pago en Mostrador:</strong><br>
+            Pagarás <strong>$${pedido.total.toFixed(2)}</strong> al momento de recibir tus botanas preparadas.
+        `;
+    } else {
+        badgeType.textContent = '🛍️ PARA RECOGER';
+        badgeType.className = 'ticket-badge badge-recoger';
+        paymentAlert.className = 'ticket-payment-alert alert-recoger';
+        paymentAlert.innerHTML = `
+            <strong>⚠️ Pago Previo Requerido:</strong><br>
+            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, por favor envía tu pedido por WhatsApp y adjunta tu comprobante de pago/anticipo.
+        `;
+    }
+
+    document.getElementById('ticketModal').classList.add('active');
+}
+
+function cerrarTicketModal() {
+    document.getElementById('ticketModal').classList.remove('active');
+}
+
+function reiniciarParaNuevoPedido() {
+    carrito = [];
+    actualizarBarraCarrito();
+    document.getElementById('clientNameInput').value = '';
+    cerrarTicketModal();
+}
+
+function enviarComprobanteWhatsApp() {
+    if (!ultimoPedidoGenerado) return;
+
+    const p = ultimoPedidoGenerado;
+    let mensaje = `🍿 *LA ENGORDADERA - NUEVO PEDIDO*\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `🎫 *TURNO:* *${p.turno}*\n`;
+    mensaje += `👤 *Cliente:* ${p.cliente}\n`;
+    mensaje += `📍 *Tipo:* ${p.tipo === 'tienda' ? '🏪 En Tienda' : '🛍️ Para Recoger'}\n`;
+    mensaje += `🕒 *Hora:* ${p.fecha}\n`;
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    mensaje += `📝 *DETALLE DE BOTANAS:*\n`;
+
+    p.items.forEach((item, index) => {
+        mensaje += `\n*${index + 1}. ${item.nombre}* ($${item.precio.toFixed(2)})\n`;
+        if (item.base) mensaje += `   • Base: ${item.base}\n`;
+        if (item.ingredientes.length > 0) mensaje += `   • Con: ${item.ingredientes.join(', ')}\n`;
+        if (item.salsa) mensaje += `   • Salsa: ${item.salsa}\n`;
+    });
+
+    mensaje += `\n━━━━━━━━━━━━━━━━━━━━━\n`;
+    mensaje += `💰 *TOTAL A PAGAR:* *$${p.total.toFixed(2)}*\n\n`;
+
+    if (p.tipo === 'recoger') {
+        mensaje += `📸 *(Adjunto aquí mi comprobante de pago/transferencia para iniciar la preparación)*`;
+    } else {
+        mensaje += `📍 *(Pagaré en mostrador al recibir mi turno)*`;
+    }
 
     const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
