@@ -386,13 +386,21 @@ function procesarGeneracionTurno() {
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
 
     ultimoPedidoGenerado = {
+        id_pedido: 'PED-' + Date.now(),
         turno: numeroTurno,
         tipo: tipoPedido,
         cliente: nombreCliente,
         items: [...carrito],
         total: total,
+        estado: 'cola', // Estado inicial
+        pagado: tipoPedido === 'tienda', // En tienda paga al recibir
         fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
+
+    // 1. Guardar y emitir pedido hacia la Pantalla de Cocina (KDS)
+    const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
+    pedidosActuales.push(ultimoPedidoGenerado);
+    localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
     cerrarModalCheckout();
     mostrarBoletoTurno(ultimoPedidoGenerado);
