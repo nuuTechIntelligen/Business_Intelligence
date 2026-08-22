@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -13,7 +13,6 @@ let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
 
-// Días normalizados sin acentos
 const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
 function limpiarTexto(txt) {
@@ -45,17 +44,13 @@ async function cargarMenuDesdeSheetDB() {
 
         const diaHoy = DIAS_SEMANA[new Date().getDay()];
 
-        // 1. Filtrar productos para el día de hoy
         const productosHoy = productos.filter(p => {
             const diasConfig = limpiarTexto(p.dias_disponible);
             if (!diasConfig || diasConfig === 'TODOS' || diasConfig === '') return true;
             return diasConfig.includes(diaHoy);
         });
 
-        // 2. Renderizar Banner de Especiales del Día
         renderizarBannerEspeciales(productosHoy);
-
-        // 3. Renderizar Menú en Pantalla
         renderizarMenu(productosHoy.length > 0 ? productosHoy : productos);
         iniciarNavegacionScroll();
     } catch (error) {
@@ -198,9 +193,10 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = esPorMonto ? '$20.00' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-    // Parseo de max_ingredientes
-    const rawMax = prod.max_ingredientes ? String(prod.max_ingredientes).trim() : '0';
-    limiteIngredientesActual = isNaN(parseInt(rawMax)) ? 0 : parseInt(rawMax);
+    // Lectura robusta de max_ingredientes
+    const rawMax = prod.max_ingredientes !== undefined && prod.max_ingredientes !== null ? String(prod.max_ingredientes).trim() : '0';
+    const parsedMax = parseInt(rawMax, 10);
+    limiteIngredientesActual = isNaN(parsedMax) ? 0 : parsedMax;
 
     // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
@@ -212,10 +208,19 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Grupos: Base (Radio), Ingredientes (Checkbox), Salsas (Radio)
-    renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', prod.grupo_base_nombre, prod.grupo_base_opciones, 'radio', 'grupo_base');
-    renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', prod.grupo_ingredientes_nombre, prod.grupo_ingredientes_opciones, 'checkbox', 'grupo_ing');
-    renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', prod.grupo_salsas_nombre, prod.grupo_salsas_opciones, 'radio', 'grupo_salsa');
+    // Compatibilidad con nombres de columna (plural o singular)
+    const baseNombre = prod.grupo_base_nombre || 'Selecciona tu Base';
+    const baseOpciones = prod.grupo_base_opciones || prod.grupo_bases_opciones || '';
+
+    const ingNombre = prod.grupo_ingredientes_nombre || prod.grupo_ingrediente_nombre || '¿Qué ingredientes le ponemos?';
+    const ingOpciones = prod.grupo_ingredientes_opciones || prod.grupo_ingrediente_opciones || '';
+
+    const salsaNombre = prod.grupo_salsas_nombre || prod.grupo_salsa_nombre || 'Selecciona tu Salsa';
+    const salsaOpciones = prod.grupo_salsas_opciones || prod.grupo_salsa_opciones || '';
+
+    renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', baseNombre, baseOpciones, 'radio', 'grupo_base');
+    renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', ingNombre, ingOpciones, 'checkbox', 'grupo_ing');
+    renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', salsaNombre, salsaOpciones, 'radio', 'grupo_salsa');
 
     actualizarBadgeLimiteIngredientes(0);
 
@@ -294,7 +299,7 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     const titleEl = document.getElementById(titleId);
     const containerEl = document.getElementById(containerId);
 
-    if (!opcionesTexto || opcionesTexto.trim() === '') {
+    if (!opcionesTexto || String(opcionesTexto).trim() === '') {
         groupEl.style.display = 'none';
         containerEl.innerHTML = '';
         return;
@@ -303,7 +308,7 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     groupEl.style.display = 'block';
     titleEl.textContent = nombreGrupo || 'Selecciona tus opciones';
 
-    const opciones = opcionesTexto.split(',').map(o => o.trim()).filter(o => o.length > 0);
+    const opciones = String(opcionesTexto).split(',').map(o => o.trim()).filter(o => o.length > 0);
     containerEl.innerHTML = '';
 
     let searchInput = groupEl.querySelector('.modal-search-input');
@@ -312,7 +317,7 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
             searchInput = document.createElement('input');
             searchInput.type = 'text';
             searchInput.className = 'modal-search-input';
-            searchInput.placeholder = '🔍 Buscar opción... (ej. Cheto, Takis, Fresa)';
+            searchInput.placeholder = '🔍 Buscar opción... (ej. Fresa, Nuez, Nutella)';
             groupEl.insertBefore(searchInput, containerEl);
         }
         searchInput.value = '';
@@ -334,7 +339,7 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
         const label = document.createElement('label');
         label.className = 'option-chip';
         
-        // Los radio buttons inician marcando el primero; los checkboxes inician desmarcados
+        // En radio se marca el primero por defecto; en checkboxes NINGUNO inicia marcado
         const isChecked = (inputType === 'radio' && index === 0) ? 'checked' : '';
 
         label.innerHTML = `
@@ -354,20 +359,32 @@ function manejarCambioIngredientes(inputEl) {
 
     actualizarBadgeLimiteIngredientes(totalSeleccionados);
 
+    // Si tiene un límite configurado (> 0)
     if (limiteIngredientesActual > 0) {
         if (totalSeleccionados >= limiteIngredientesActual) {
+            // Deshabilitar solo los que NO están marcados
             checkboxes.forEach(cb => {
                 if (!cb.checked) {
                     cb.disabled = true;
                     cb.closest('.option-chip').classList.add('disabled');
+                } else {
+                    cb.disabled = false;
+                    cb.closest('.option-chip').classList.remove('disabled');
                 }
             });
         } else {
+            // Habilitar todos
             checkboxes.forEach(cb => {
                 cb.disabled = false;
                 cb.closest('.option-chip').classList.remove('disabled');
             });
         }
+    } else {
+        // Sin límite: todos activos
+        checkboxes.forEach(cb => {
+            cb.disabled = false;
+            cb.closest('.option-chip').classList.remove('disabled');
+        });
     }
 }
 
@@ -410,6 +427,12 @@ function confirmarAgregarAlCarrito() {
     const baseSeleccionada = document.querySelector('input[name="grupo_base"]:checked')?.value || '';
     const ingredientesSeleccionados = Array.from(document.querySelectorAll('input[name="grupo_ing"]:checked')).map(cb => cb.value);
     const salsaSeleccionada = document.querySelector('input[name="grupo_salsa"]:checked')?.value || '';
+
+    // Validación si requiere seleccionar al menos 1 ingrediente
+    if (limiteIngredientesActual > 0 && ingredientesSeleccionados.length === 0) {
+        alert(`Por favor elige al menos 1 ingrediente para tu orden.`);
+        return;
+    }
 
     carrito.push({
         id_unico: Date.now() + Math.random(),
