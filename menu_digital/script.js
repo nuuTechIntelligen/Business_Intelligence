@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -193,10 +193,13 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = esPorMonto ? '$20.00' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-    // Lectura robusta de max_ingredientes
-    const rawMax = prod.max_ingredientes !== undefined && prod.max_ingredientes !== null ? String(prod.max_ingredientes).trim() : '0';
-    const parsedMax = parseInt(rawMax, 10);
-    limiteIngredientesActual = isNaN(parsedMax) ? 0 : parsedMax;
+    // Parseo robusto del valor numérico de max_ingredientes
+    let maxVal = 0;
+    if (prod.max_ingredientes !== undefined && prod.max_ingredientes !== null) {
+        const num = parseInt(String(prod.max_ingredientes).trim(), 10);
+        if (!isNaN(num)) maxVal = num;
+    }
+    limiteIngredientesActual = maxVal;
 
     // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
@@ -208,7 +211,7 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Compatibilidad con nombres de columna (plural o singular)
+    // Grupos de opciones
     const baseNombre = prod.grupo_base_nombre || 'Selecciona tu Base';
     const baseOpciones = prod.grupo_base_opciones || prod.grupo_bases_opciones || '';
 
@@ -339,52 +342,50 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
         const label = document.createElement('label');
         label.className = 'option-chip';
         
-        // En radio se marca el primero por defecto; en checkboxes NINGUNO inicia marcado
         const isChecked = (inputType === 'radio' && index === 0) ? 'checked' : '';
 
         label.innerHTML = `
-            <input type="${inputType}" name="${inputName}" value="${op}" ${isChecked} onchange="manejarCambioIngredientes(this)">
+            <input type="${inputType}" name="${inputName}" value="${op}" ${isChecked}>
             <span>${op}</span>
         `;
+
+        const inputInside = label.querySelector('input');
+        inputInside.addEventListener('change', () => {
+            if (inputType === 'checkbox') {
+                controlarCheckboxesIngredientes();
+            }
+        });
+
         containerEl.appendChild(label);
     });
 }
 
-function manejarCambioIngredientes(inputEl) {
-    if (inputEl.type !== 'checkbox') return;
-
-    const checkboxes = document.querySelectorAll('input[name="grupo_ing"]');
-    const seleccionados = Array.from(checkboxes).filter(cb => cb.checked);
+function controlarCheckboxesIngredientes() {
+    const checkboxes = Array.from(document.querySelectorAll('#modalIngredientsOptions input[type="checkbox"]'));
+    const seleccionados = checkboxes.filter(cb => cb.checked);
     const totalSeleccionados = seleccionados.length;
 
     actualizarBadgeLimiteIngredientes(totalSeleccionados);
 
-    // Si tiene un límite configurado (> 0)
     if (limiteIngredientesActual > 0) {
         if (totalSeleccionados >= limiteIngredientesActual) {
-            // Deshabilitar solo los que NO están marcados
             checkboxes.forEach(cb => {
+                const chip = cb.closest('.option-chip');
                 if (!cb.checked) {
                     cb.disabled = true;
-                    cb.closest('.option-chip').classList.add('disabled');
+                    if (chip) chip.classList.add('disabled');
                 } else {
                     cb.disabled = false;
-                    cb.closest('.option-chip').classList.remove('disabled');
+                    if (chip) chip.classList.remove('disabled');
                 }
             });
         } else {
-            // Habilitar todos
             checkboxes.forEach(cb => {
                 cb.disabled = false;
-                cb.closest('.option-chip').classList.remove('disabled');
+                const chip = cb.closest('.option-chip');
+                if (chip) chip.classList.remove('disabled');
             });
         }
-    } else {
-        // Sin límite: todos activos
-        checkboxes.forEach(cb => {
-            cb.disabled = false;
-            cb.closest('.option-chip').classList.remove('disabled');
-        });
     }
 }
 
@@ -424,11 +425,10 @@ function confirmarAgregarAlCarrito() {
         precioFinal = montoSeleccionadoActual;
     }
 
-    const baseSeleccionada = document.querySelector('input[name="grupo_base"]:checked')?.value || '';
-    const ingredientesSeleccionados = Array.from(document.querySelectorAll('input[name="grupo_ing"]:checked')).map(cb => cb.value);
-    const salsaSeleccionada = document.querySelector('input[name="grupo_salsa"]:checked')?.value || '';
+    const baseSeleccionada = document.querySelector('#modalBaseOptions input[type="radio"]:checked')?.value || '';
+    const ingredientesSeleccionados = Array.from(document.querySelectorAll('#modalIngredientsOptions input[type="checkbox"]:checked')).map(cb => cb.value);
+    const salsaSeleccionada = document.querySelector('#modalSaucesOptions input[type="radio"]:checked')?.value || '';
 
-    // Validación si requiere seleccionar al menos 1 ingrediente
     if (limiteIngredientesActual > 0 && ingredientesSeleccionados.length === 0) {
         alert(`Por favor elige al menos 1 ingrediente para tu orden.`);
         return;
