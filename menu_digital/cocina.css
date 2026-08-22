@@ -124,6 +124,32 @@ body {
     gap: 14px;
 }
 
+.btn-clear-history {
+    background: #252525;
+    color: #AAA;
+    border: 1px solid #3D3D3D;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-clear-history:hover {
+    background: #333333;
+    color: #FFCB05;
+    border-color: #555555;
+    transform: translateY(-1px);
+}
+
+.btn-clear-history:active {
+    transform: scale(0.96);
+}
+
 .live-clock {
     font-family: var(--font-heading);
     font-size: 1.1rem;
