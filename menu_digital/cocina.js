@@ -1,149 +1,365 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KDS Despacho & Finanzas | La Engordadera</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="cocina.css">
-</head>
-<body>
+// ======================================================
+// GESTOR KDS, NOTIFICACIONES Y FINANZAS
+// ======================================================
 
-    <!-- BARRA SUPERIOR DE COCINA -->
-    <header class="kds-header">
-        <div class="kds-brand">
-            <span class="logo-emoji">🍿</span>
-            <div>
-                <h1>KDS LA ENGORDADERA</h1>
-                <small>Sistema de Despacho & Finanzas</small>
+let pedidos = [];
+let pedidoEnProcesoTiempo = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    iniciarReloj();
+    cargarPedidosDesdeStorage();
+
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'engordadera_pedidos_cocina') {
+            cargarPedidosDesdeStorage(true);
+        }
+    });
+});
+
+function iniciarReloj() {
+    const clock = document.getElementById('liveClock');
+    setInterval(() => {
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }, 1000);
+}
+
+function cargarPedidosDesdeStorage(reproducirSonido = false) {
+    const guardados = localStorage.getItem('engordadera_pedidos_cocina');
+    const anterioresCount = pedidos.length;
+
+    if (guardados) {
+        pedidos = JSON.parse(guardados);
+    } else {
+        pedidos = [];
+    }
+
+    if (reproducirSonido && pedidos.length > anterioresCount) {
+        const audio = document.getElementById('orderNotificationSound');
+        if (audio) audio.play().catch(() => {});
+    }
+
+    renderizarTablero();
+    actualizarMetricasFinancieras();
+}
+
+function guardarPedidosEnStorage() {
+    localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidos));
+    renderizarTablero();
+    actualizarMetricasFinancieras();
+}
+
+// ======================================================
+// RENDERIZADO DEL TABLERO KANBAN
+// ======================================================
+function renderizarTablero() {
+    const containerCola = document.getElementById('containerCola');
+    const containerPrep = document.getElementById('containerPrep');
+    const containerListos = document.getElementById('containerListos');
+
+    containerCola.innerHTML = '';
+    containerPrep.innerHTML = '';
+    containerListos.innerHTML = '';
+
+    let colaCount = 0;
+    let prepCount = 0;
+    let listosCount = 0;
+
+    pedidos.forEach(p => {
+        if (p.estado === 'entregado') return;
+
+        const card = crearTarjetaComanda(p);
+
+        if (p.estado === 'cola' || !p.estado) {
+            containerCola.appendChild(card);
+            colaCount++;
+        } else if (p.estado === 'prep') {
+            containerPrep.appendChild(card);
+            prepCount++;
+        } else if (p.estado === 'listo') {
+            containerListos.appendChild(card);
+            listosCount++;
+        }
+    });
+
+    document.getElementById('countCola').textContent = colaCount;
+    document.getElementById('countPrep').textContent = prepCount;
+    document.getElementById('countListos').textContent = listosCount;
+
+    document.getElementById('metricCola').textContent = colaCount;
+    document.getElementById('metricPrep').textContent = prepCount;
+    document.getElementById('metricListos').textContent = listosCount;
+}
+
+function crearTarjetaComanda(pedido) {
+    const card = document.createElement('div');
+    const esTienda = pedido.tipo === 'tienda';
+    card.className = `order-card ${esTienda ? 'tienda' : 'recoger'}`;
+
+    let itemsHTML = '';
+    pedido.items.forEach((item, idx) => {
+        let details = [];
+        if (item.base) details.push(`Base: ${item.base}`);
+        if (item.ingredientes && item.ingredientes.length > 0) details.push(`Con: ${item.ingredientes.join(', ')}`);
+        if (item.salsa) details.push(`Salsa: ${item.salsa}`);
+
+        itemsHTML += `
+            <div class="order-item-row">
+                <div class="order-item-title">${idx + 1}. ${item.nombre}</div>
+                <div class="order-item-details">${details.join('<br>') || 'Clásico'}</div>
             </div>
-        </div>
+        `;
+    });
 
-        <!-- Pestañas de Vista: Tablero vs Finanzas -->
-        <div class="kds-tabs">
-            <button class="kds-tab-btn active" id="tabBtnKDS" onclick="mostrarVista('kds')">
-                <i class="fa-solid fa-utensils"></i> Comandas
-            </button>
-            <button class="kds-tab-btn" id="tabBtnFinanzas" onclick="mostrarVista('finanzas')">
-                <i class="fa-solid fa-chart-line"></i> Corte & Finanzas
-            </button>
-        </div>
-
-        <div class="kds-metrics" id="kdsMetricsHeader">
-            <div class="metric-pill"><span class="metric-label">Cola:</span> <strong id="metricCola">0</strong></div>
-            <div class="metric-pill active-prep"><span class="metric-label">Prep:</span> <strong id="metricPrep">0</strong></div>
-            <div class="metric-pill done"><span class="metric-label">Listos:</span> <strong id="metricListos">0</strong></div>
-        </div>
-
-        <div class="kds-actions">
-            <span class="live-clock" id="liveClock">00:00:00</span>
-        </div>
-    </header>
-
-    <!-- VISTA 1: TABLERO KANBAN DE COCINA -->
-    <main class="kds-board" id="vistaKDS">
-        
-        <!-- COLUMNA 1: COLA -->
-        <section class="kds-column" id="col-cola">
-            <div class="column-header col-header-cola">
-                <h2>🟡 En Cola (<span id="countCola">0</span>)</h2>
-            </div>
-            <div class="orders-container" id="containerCola"></div>
-        </section>
-
-        <!-- COLUMNA 2: PREPARACIÓN -->
-        <section class="kds-column" id="col-prep">
-            <div class="column-header col-header-prep">
-                <h2>🟠 En Preparación (<span id="countPrep">0</span>)</h2>
-            </div>
-            <div class="orders-container" id="containerPrep"></div>
-        </section>
-
-        <!-- COLUMNA 3: LISTOS -->
-        <section class="kds-column" id="col-listos">
-            <div class="column-header col-header-listos">
-                <h2>🟢 Listos (<span id="countListos">0</span>)</h2>
-            </div>
-            <div class="orders-container" id="containerListos"></div>
-        </section>
-
-    </main>
-
-    <!-- VISTA 2: PANEL DE FINANZAS Y VENTAS -->
-    <section class="finance-panel" id="vistaFinanzas" style="display: none;">
-        <div class="finance-grid">
-            <div class="finance-card">
-                <h3>Venta Total del Día</h3>
-                <strong id="finTotalVentas">$0.00</strong>
-                <small id="finTotalPedidos">0 pedidos completados</small>
-            </div>
-            <div class="finance-card">
-                <h3>Venta En Tienda</h3>
-                <strong id="finVentaTienda" class="text-tienda">$0.00</strong>
-                <small id="finPedidosTienda">0 órdenes</small>
-            </div>
-            <div class="finance-card">
-                <h3>Venta Para Recoger</h3>
-                <strong id="finVentaRecoger" class="text-recoger">$0.00</strong>
-                <small id="finPedidosRecoger">0 órdenes</small>
-            </div>
-            <div class="finance-card">
-                <h3>Ticket Promedio</h3>
-                <strong id="finTicketPromedio">$0.00</strong>
-                <small>Por cliente</small>
-            </div>
-        </div>
-
-        <div class="finance-table-wrapper">
-            <div class="table-header-flex">
-                <h2>Historial de Órdenes del Día</h2>
-                <button class="btn-export" onclick="exportarReporteVentasCSV()">
-                    <i class="fa-solid fa-file-excel"></i> Descargar Reporte (Excel)
+    // Control de Pago para Recoger
+    let paymentBoxHTML = '';
+    if (!esTienda) {
+        const pagado = pedido.pagado === true;
+        paymentBoxHTML = `
+            <div class="payment-status-box ${pagado ? 'payment-done' : 'payment-pending'}">
+                <span>${pagado ? '✓ Pago Confirmado' : '⚠️ Pago Pendiente'}</span>
+                <button class="btn-toggle-pay" onclick="alternarEstadoPago('${pedido.id_pedido}')">
+                    ${pagado ? 'Cambiar a Pendiente' : 'Marcar Pagado'}
                 </button>
             </div>
-            <table class="finance-table">
-                <thead>
-                    <tr>
-                        <th>Turno</th>
-                        <th>Hora</th>
-                        <th>Cliente</th>
-                        <th>Tipo</th>
-                        <th>Detalle de Botanas</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody id="financeTableBody">
-                    <!-- Filas inyectadas dinámicamente -->
-                </tbody>
-            </table>
-        </div>
-    </section>
+        `;
+    }
 
-    <!-- MODAL SELECCIÓN DE TIEMPO ESTIMADO -->
-    <div class="modal-time-overlay" id="timeModal">
-        <div class="modal-time-card">
-            <h3>⏱️ Tiempo Estimado de Preparación</h3>
-            <p id="timeModalClientDesc">Indica en cuántos minutos estará listo:</p>
-            <div class="time-buttons-grid">
-                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(10)">10 min</button>
-                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(15)">15 min</button>
-                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(20)">20 min</button>
-                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(30)">30 min</button>
+    // Botones de acción y notificaciones
+    let actionBtnHTML = '';
+    if (pedido.estado === 'cola' || !pedido.estado) {
+        actionBtnHTML = `
+            <button class="btn-kds btn-start" onclick="solicitarTiempoOIniciar('${pedido.id_pedido}')">
+                <i class="fa-solid fa-fire-burner"></i> Iniciar Preparación
+            </button>
+        `;
+    } else if (pedido.estado === 'prep') {
+        actionBtnHTML = `
+            <button class="btn-kds btn-finish" onclick="marcarListoYNotificar('${pedido.id_pedido}')">
+                <i class="fa-solid fa-circle-check"></i> Marcar Listo
+            </button>
+        `;
+    } else if (pedido.estado === 'listo') {
+        const btnNotifListo = !esTienda ? `
+            <button class="btn-kds btn-wa-notify" onclick="notificarPedidoListoWhatsApp('${pedido.id_pedido}')">
+                <i class="fa-brands fa-whatsapp"></i> Avisar "¡Listo!"
+            </button>
+        ` : '';
+
+        actionBtnHTML = `
+            ${btnNotifListo}
+            <button class="btn-kds btn-deliver" onclick="entregarPedidoFinal('${pedido.id_pedido}')">
+                <i class="fa-solid fa-hand-holding-heart"></i> Entregar al Cliente
+            </button>
+        `;
+    }
+
+    card.innerHTML = `
+        <div class="order-card-header">
+            <span class="order-turn-badge ${esTienda ? 'badge-tienda' : 'badge-recoger'}">${pedido.turno}</span>
+            <div class="order-meta">
+                <span class="order-type-tag ${esTienda ? 'tag-tienda' : 'tag-recoger'}">${esTienda ? '🏪 En Tienda' : '🛍️ Para Recoger'}</span>
+                <span class="order-time">${pedido.fecha || ''}</span>
             </div>
-            <button class="btn-cancel-time" onclick="cerrarModalTiempo()">Solo Iniciar sin Notificar</button>
         </div>
-    </div>
 
-    <!-- AUDIO NOTIFICACIÓN -->
-    <audio id="orderNotificationSound" preload="auto">
-        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
-    </audio>
+        <div class="order-client-name">👤 ${pedido.cliente} ${pedido.telefono ? `(${pedido.telefono})` : ''}</div>
+        
+        ${paymentBoxHTML}
 
-    <script src="cocina.js"></script>
-</body>
-</html>
+        <div class="order-items-list">
+            ${itemsHTML}
+        </div>
+
+        <div class="card-actions">
+            ${actionBtnHTML}
+        </div>
+    `;
+
+    return card;
+}
+
+// ======================================================
+// NOTIFICACIONES DE TIEMPO ESTIMADO & LISTO (WHATSAPP)
+// ======================================================
+function solicitarTiempoOIniciar(idPedido) {
+    const p = pedidos.find(item => item.id_pedido === idPedido);
+    if (!p) return;
+
+    if (p.tipo === 'recoger') {
+        pedidoEnProcesoTiempo = p;
+        document.getElementById('timeModalClientDesc').textContent = `¿En cuántos minutos estará listo el pedido de ${p.cliente} (${p.turno})?`;
+        document.getElementById('timeModal').style.display = 'flex';
+    } else {
+        cambiarEstadoPedido(idPedido, 'prep');
+    }
+}
+
+function cerrarModalTiempo() {
+    if (pedidoEnProcesoTiempo) {
+        cambiarEstadoPedido(pedidoEnProcesoTiempo.id_pedido, 'prep');
+    }
+    document.getElementById('timeModal').style.display = 'none';
+    pedidoEnProcesoTiempo = null;
+}
+
+function confirmarTiempoYNotificar(minutos) {
+    if (!pedidoEnProcesoTiempo) return;
+
+    const p = pedidoEnProcesoTiempo;
+    cambiarEstadoPedido(p.id_pedido, 'prep');
+    document.getElementById('timeModal').style.display = 'none';
+
+    // Abrir WhatsApp con mensaje predeterminado
+    const tel = p.telefono ? p.telefono.replace(/\D/g, '') : '';
+    const numDestino = tel ? (tel.length === 10 ? `521${tel}` : tel) : '';
+
+    let msg = `¡Hola *${p.cliente}*! 🍿 En *La Engordadera* ya comenzamos a preparar tu pedido *${p.turno}*.\n\n⏱️ Estará listo para recoger en aprox. *${minutos} minutos*. ¡Te esperamos calientito y crujiente! 🔥`;
+
+    const url = numDestino ? `https://wa.me/${numDestino}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+    pedidoEnProcesoTiempo = null;
+}
+
+function marcarListoYNotificar(idPedido) {
+    cambiarEstadoPedido(idPedido, 'listo');
+    const p = pedidos.find(item => item.id_pedido === idPedido);
+    if (p && p.tipo === 'recoger') {
+        notificarPedidoListoWhatsApp(idPedido);
+    }
+}
+
+function notificarPedidoListoWhatsApp(idPedido) {
+    const p = pedidos.find(item => item.id_pedido === idPedido);
+    if (!p) return;
+
+    const tel = p.telefono ? p.telefono.replace(/\D/g, '') : '';
+    const numDestino = tel ? (tel.length === 10 ? `521${tel}` : tel) : '';
+
+    let msg = `¡Hola *${p.cliente}*! 🎉 Tu pedido *${p.turno}* ya está *¡LISTO EN MOSTRADOR!* en *La Engordadera*.\n\nPuedes pasar a recogerlo con tu número de turno. ¡Buen provecho! 🌶️🧀`;
+
+    const url = numDestino ? `https://wa.me/${numDestino}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+}
+
+function cambiarEstadoPedido(idPedido, nuevoEstado) {
+    const index = pedidos.findIndex(p => p.id_pedido === idPedido);
+    if (index !== -1) {
+        pedidos[index].estado = nuevoEstado;
+        guardarPedidosEnStorage();
+    }
+}
+
+function alternarEstadoPago(idPedido) {
+    const index = pedidos.findIndex(p => p.id_pedido === idPedido);
+    if (index !== -1) {
+        pedidos[index].pagado = !pedidos[index].pagado;
+        guardarPedidosEnStorage();
+    }
+}
+
+function entregarPedidoFinal(idPedido) {
+    const index = pedidos.findIndex(p => p.id_pedido === idPedido);
+    if (index !== -1) {
+        pedidos[index].estado = 'entregado';
+        pedidos[index].hora_entrega = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        guardarPedidosEnStorage();
+    }
+}
+
+// ======================================================
+// PANEL DE FINANZAS Y CORTE DE CAJA
+// ======================================================
+function mostrarVista(vista) {
+    const vKDS = document.getElementById('vistaKDS');
+    const vFin = document.getElementById('vistaFinanzas');
+    const bKDS = document.getElementById('tabBtnKDS');
+    const bFin = document.getElementById('tabBtnFinanzas');
+    const mHead = document.getElementById('kdsMetricsHeader');
+
+    if (vista === 'kds') {
+        vKDS.style.display = 'grid';
+        vFin.style.display = 'none';
+        bKDS.classList.add('active');
+        bFin.classList.remove('active');
+        mHead.style.display = 'flex';
+    } else {
+        vKDS.style.display = 'none';
+        vFin.style.display = 'block';
+        bFin.classList.add('active');
+        bKDS.classList.remove('active');
+        mHead.style.display = 'none';
+        actualizarMetricasFinancieras();
+    }
+}
+
+function actualizarMetricasFinancieras() {
+    let totalDia = 0;
+    let ventaTienda = 0;
+    let ventaRecoger = 0;
+    let pedidosTiendaCount = 0;
+    let pedidosRecogerCount = 0;
+
+    const tableBody = document.getElementById('financeTableBody');
+    if (tableBody) tableBody.innerHTML = '';
+
+    pedidos.forEach(p => {
+        const monto = parseFloat(p.total || 0);
+        totalDia += monto;
+
+        if (p.tipo === 'tienda') {
+            ventaTienda += monto;
+            pedidosTiendaCount++;
+        } else {
+            ventaRecoger += monto;
+            pedidosRecogerCount++;
+        }
+
+        if (tableBody) {
+            const tr = document.createElement('tr');
+            const itemsResumen = p.items.map(i => i.nombre).join(', ');
+
+            tr.innerHTML = `
+                <td><strong>${p.turno}</strong></td>
+                <td>${p.fecha}</td>
+                <td>${p.cliente}</td>
+                <td><span class="order-type-tag ${p.tipo === 'tienda' ? 'tag-tienda' : 'tag-recoger'}">${p.tipo === 'tienda' ? 'Tienda' : 'Recoger'}</span></td>
+                <td><small>${itemsResumen}</small></td>
+                <td><strong>$${monto.toFixed(2)}</strong></td>
+            `;
+            tableBody.appendChild(tr);
+        }
+    });
+
+    const totalCount = pedidos.length;
+    const ticketProm = totalCount > 0 ? (totalDia / totalCount) : 0;
+
+    if (document.getElementById('finTotalVentas')) {
+        document.getElementById('finTotalVentas').textContent = `$${totalDia.toFixed(2)}`;
+        document.getElementById('finTotalPedidos').textContent = `${totalCount} órdenes registradas hoy`;
+        document.getElementById('finVentaTienda').textContent = `$${ventaTienda.toFixed(2)}`;
+        document.getElementById('finPedidosTienda').textContent = `${pedidosTiendaCount} órdenes`;
+        document.getElementById('finVentaRecoger').textContent = `$${ventaRecoger.toFixed(2)}`;
+        document.getElementById('finPedidosRecoger').textContent = `${pedidosRecogerCount} órdenes`;
+        document.getElementById('finTicketPromedio').textContent = `$${ticketProm.toFixed(2)}`;
+    }
+}
+
+function exportarReporteVentasCSV() {
+    if (pedidos.length === 0) {
+        alert("No hay ventas registradas el día de hoy.");
+        return;
+    }
+
+    let csv = "Turno,Hora,Cliente,Telefono,Tipo,Total,Estado,Detalle\n";
+    pedidos.forEach(p => {
+        const items = p.items.map(i => `${i.nombre} ($${i.precio})`).join(' + ');
+        csv += `"${p.turno}","${p.fecha}","${p.cliente}","${p.telefono || ''}","${p.tipo}",${p.total},"${p.estado}","${items}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Corte_Ventas_La_Engordadera_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+}
