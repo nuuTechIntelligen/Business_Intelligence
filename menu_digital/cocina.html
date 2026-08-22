@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla de Cocina / Despacho | La Engordadera</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="cocina.css">
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR DE COCINA -->
+    <header class="kds-header">
+        <div class="kds-brand">
+            <span class="logo-emoji">🍿</span>
+            <div>
+                <h1>KDS DESPACHO</h1>
+                <small>La Engordadera</small>
+            </div>
+        </div>
+
+        <div class="kds-metrics">
+            <div class="metric-pill">
+                <span class="metric-label">En Cola:</span>
+                <strong id="metricCola">0</strong>
+            </div>
+            <div class="metric-pill active-prep">
+                <span class="metric-label">Preparando:</span>
+                <strong id="metricPrep">0</strong>
+            </div>
+            <div class="metric-pill done">
+                <span class="metric-label">Listos:</span>
+                <strong id="metricListos">0</strong>
+            </div>
+        </div>
+
+        <div class="kds-actions">
+            <button class="btn-clear-history" onclick="limpiarEntregadosAntiguos()" title="Limpiar pedidos entregados">
+                <i class="fa-solid fa-broom"></i> Limpiar
+            </button>
+            <span class="live-clock" id="liveClock">00:00:00</span>
+        </div>
+    </header>
+
+    <!-- TABLERO KANBAN DE 3 COLUMNAS -->
+    <main class="kds-board">
+        
+        <!-- COLUMNA 1: PENDIENTES / EN COLA -->
+        <section class="kds-column" id="col-cola">
+            <div class="column-header col-header-cola">
+                <h2>🟡 En Cola (<span id="countCola">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerCola">
+                <!-- Tarjetas inyectadas dinámicamente -->
+            </div>
+        </section>
+
+        <!-- COLUMNA 2: EN PREPARACIÓN -->
+        <section class="kds-column" id="col-prep">
+            <div class="column-header col-header-prep">
+                <h2>🟠 En Preparación (<span id="countPrep">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerPrep">
+                <!-- Tarjetas inyectadas dinámicamente -->
+            </div>
+        </section>
+
+        <!-- COLUMNA 3: LISTOS PARA ENTREGAR -->
+        <section class="kds-column" id="col-listos">
+            <div class="column-header col-header-listos">
+                <h2>🟢 Listos / Por Entregar (<span id="countListos">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerListos">
+                <!-- Tarjetas inyectadas dinámicamente -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- AUDIO DE NOTIFICACIÓN DE NUEVO PEDIDO -->
+    <audio id="orderNotificationSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="cocina.js"></script>
+</body>
+</html>
