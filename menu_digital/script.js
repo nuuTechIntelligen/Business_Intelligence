@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -21,7 +21,7 @@ function limpiarTexto(txt) {
     return String(txt)
         .toUpperCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Remueve acentos (ej. SÁBADO -> SABADO)
+        .replace(/[\u0300-\u036f]/g, "")
         .trim();
 }
 
@@ -198,11 +198,11 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = esPorMonto ? '$20.00' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-    // Parseo del límite de ingredientes de 'max_ingredientes'
+    // Parseo de max_ingredientes
     const rawMax = prod.max_ingredientes ? String(prod.max_ingredientes).trim() : '0';
     limiteIngredientesActual = isNaN(parseInt(rawMax)) ? 0 : parseInt(rawMax);
 
-    // Configuración de venta a granel / montos
+    // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
     if (esPorMonto) {
         amountGroup.style.display = 'block';
@@ -212,6 +212,7 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
+    // Grupos: Base (Radio), Ingredientes (Checkbox), Salsas (Radio)
     renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', prod.grupo_base_nombre, prod.grupo_base_opciones, 'radio', 'grupo_base');
     renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', prod.grupo_ingredientes_nombre, prod.grupo_ingredientes_opciones, 'checkbox', 'grupo_ing');
     renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', prod.grupo_salsas_nombre, prod.grupo_salsas_opciones, 'radio', 'grupo_salsa');
@@ -332,8 +333,12 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     opciones.forEach((op, index) => {
         const label = document.createElement('label');
         label.className = 'option-chip';
+        
+        // Los radio buttons inician marcando el primero; los checkboxes inician desmarcados
+        const isChecked = (inputType === 'radio' && index === 0) ? 'checked' : '';
+
         label.innerHTML = `
-            <input type="${inputType}" name="${inputName}" value="${op}" ${inputType === 'radio' && index === 0 ? 'checked' : ''} onchange="manejarCambioIngredientes(this)">
+            <input type="${inputType}" name="${inputName}" value="${op}" ${isChecked} onchange="manejarCambioIngredientes(this)">
             <span>${op}</span>
         `;
         containerEl.appendChild(label);
