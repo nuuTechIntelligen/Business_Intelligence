@@ -1,201 +1,149 @@
-// ======================================================
-// GESTOR DE COMANDAS / PANTALLA DE COCINA (KDS)
-// ======================================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDS Despacho & Finanzas | La Engordadera</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="cocina.css">
+</head>
+<body>
 
-let pedidos = [];
-
-document.addEventListener('DOMContentLoaded', () => {
-    iniciarReloj();
-    cargarPedidosDesdeStorage();
-
-    // Escucha eventos automáticos cuando el cliente genera un pedido en index.html
-    window.addEventListener('storage', (event) => {
-        if (event.key === 'engordadera_pedidos_cocina') {
-            cargarPedidosDesdeStorage(true);
-        }
-    });
-});
-
-function iniciarReloj() {
-    const clock = document.getElementById('liveClock');
-    setInterval(() => {
-        const now = new Date();
-        clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }, 1000);
-}
-
-function cargarPedidosDesdeStorage(reproducirSonido = false) {
-    const guardados = localStorage.getItem('engordadera_pedidos_cocina');
-    const anterioresCount = pedidos.length;
-
-    if (guardados) {
-        pedidos = JSON.parse(guardados);
-    } else {
-        pedidos = [];
-    }
-
-    if (reproducirSonido && pedidos.length > anterioresCount) {
-        reproducirAlertaSonora();
-    }
-
-    renderizarTablero();
-}
-
-function guardarPedidosEnStorage() {
-    localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidos));
-    renderizarTablero();
-}
-
-function reproducirAlertaSonora() {
-    const audio = document.getElementById('orderNotificationSound');
-    if (audio) {
-        audio.play().catch(() => {});
-    }
-}
-
-// ======================================================
-// RENDERIZADO DEL TABLERO KANBAN
-// ======================================================
-function renderizarTablero() {
-    const containerCola = document.getElementById('containerCola');
-    const containerPrep = document.getElementById('containerPrep');
-    const containerListos = document.getElementById('containerListos');
-
-    containerCola.innerHTML = '';
-    containerPrep.innerHTML = '';
-    containerListos.innerHTML = '';
-
-    let colaCount = 0;
-    let prepCount = 0;
-    let listosCount = 0;
-
-    pedidos.forEach(p => {
-        if (p.estado === 'entregado') return;
-
-        const card = crearTarjetaComanda(p);
-
-        if (p.estado === 'cola' || !p.estado) {
-            containerCola.appendChild(card);
-            colaCount++;
-        } else if (p.estado === 'prep') {
-            containerPrep.appendChild(card);
-            prepCount++;
-        } else if (p.estado === 'listo') {
-            containerListos.appendChild(card);
-            listosCount++;
-        }
-    });
-
-    document.getElementById('countCola').textContent = colaCount;
-    document.getElementById('countPrep').textContent = prepCount;
-    document.getElementById('countListos').textContent = listosCount;
-
-    document.getElementById('metricCola').textContent = colaCount;
-    document.getElementById('metricPrep').textContent = prepCount;
-    document.getElementById('metricListos').textContent = listosCount;
-}
-
-function crearTarjetaComanda(pedido) {
-    const card = document.createElement('div');
-    const esTienda = pedido.tipo === 'tienda';
-    card.className = `order-card ${esTienda ? 'tienda' : 'recoger'}`;
-
-    let itemsHTML = '';
-    pedido.items.forEach((item, idx) => {
-        let details = [];
-        if (item.base) details.push(`Base: ${item.base}`);
-        if (item.ingredientes && item.ingredientes.length > 0) details.push(`Con: ${item.ingredientes.join(', ')}`);
-        if (item.salsa) details.push(`Salsa: ${item.salsa}`);
-
-        itemsHTML += `
-            <div class="order-item-row">
-                <div class="order-item-title">${idx + 1}. ${item.nombre}</div>
-                <div class="order-item-details">${details.join('<br>') || 'Clásico'}</div>
+    <!-- BARRA SUPERIOR DE COCINA -->
+    <header class="kds-header">
+        <div class="kds-brand">
+            <span class="logo-emoji">🍿</span>
+            <div>
+                <h1>KDS LA ENGORDADERA</h1>
+                <small>Sistema de Despacho & Finanzas</small>
             </div>
-        `;
-    });
+        </div>
 
-    // Control de Pago para Recoger
-    let paymentBoxHTML = '';
-    if (!esTienda) {
-        const pagado = pedido.pagado === true;
-        paymentBoxHTML = `
-            <div class="payment-status-box ${pagado ? 'payment-done' : 'payment-pending'}">
-                <span>${pagado ? '✓ Pago Confirmado' : '⚠️ Pago Pendiente'}</span>
-                <button class="btn-toggle-pay" onclick="alternarEstadoPago('${pedido.id_pedido}')">
-                    ${pagado ? 'Cambiar a Pendiente' : 'Marcar Pagado'}
+        <!-- Pestañas de Vista: Tablero vs Finanzas -->
+        <div class="kds-tabs">
+            <button class="kds-tab-btn active" id="tabBtnKDS" onclick="mostrarVista('kds')">
+                <i class="fa-solid fa-utensils"></i> Comandas
+            </button>
+            <button class="kds-tab-btn" id="tabBtnFinanzas" onclick="mostrarVista('finanzas')">
+                <i class="fa-solid fa-chart-line"></i> Corte & Finanzas
+            </button>
+        </div>
+
+        <div class="kds-metrics" id="kdsMetricsHeader">
+            <div class="metric-pill"><span class="metric-label">Cola:</span> <strong id="metricCola">0</strong></div>
+            <div class="metric-pill active-prep"><span class="metric-label">Prep:</span> <strong id="metricPrep">0</strong></div>
+            <div class="metric-pill done"><span class="metric-label">Listos:</span> <strong id="metricListos">0</strong></div>
+        </div>
+
+        <div class="kds-actions">
+            <span class="live-clock" id="liveClock">00:00:00</span>
+        </div>
+    </header>
+
+    <!-- VISTA 1: TABLERO KANBAN DE COCINA -->
+    <main class="kds-board" id="vistaKDS">
+        
+        <!-- COLUMNA 1: COLA -->
+        <section class="kds-column" id="col-cola">
+            <div class="column-header col-header-cola">
+                <h2>🟡 En Cola (<span id="countCola">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerCola"></div>
+        </section>
+
+        <!-- COLUMNA 2: PREPARACIÓN -->
+        <section class="kds-column" id="col-prep">
+            <div class="column-header col-header-prep">
+                <h2>🟠 En Preparación (<span id="countPrep">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerPrep"></div>
+        </section>
+
+        <!-- COLUMNA 3: LISTOS -->
+        <section class="kds-column" id="col-listos">
+            <div class="column-header col-header-listos">
+                <h2>🟢 Listos (<span id="countListos">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerListos"></div>
+        </section>
+
+    </main>
+
+    <!-- VISTA 2: PANEL DE FINANZAS Y VENTAS -->
+    <section class="finance-panel" id="vistaFinanzas" style="display: none;">
+        <div class="finance-grid">
+            <div class="finance-card">
+                <h3>Venta Total del Día</h3>
+                <strong id="finTotalVentas">$0.00</strong>
+                <small id="finTotalPedidos">0 pedidos completados</small>
+            </div>
+            <div class="finance-card">
+                <h3>Venta En Tienda</h3>
+                <strong id="finVentaTienda" class="text-tienda">$0.00</strong>
+                <small id="finPedidosTienda">0 órdenes</small>
+            </div>
+            <div class="finance-card">
+                <h3>Venta Para Recoger</h3>
+                <strong id="finVentaRecoger" class="text-recoger">$0.00</strong>
+                <small id="finPedidosRecoger">0 órdenes</small>
+            </div>
+            <div class="finance-card">
+                <h3>Ticket Promedio</h3>
+                <strong id="finTicketPromedio">$0.00</strong>
+                <small>Por cliente</small>
+            </div>
+        </div>
+
+        <div class="finance-table-wrapper">
+            <div class="table-header-flex">
+                <h2>Historial de Órdenes del Día</h2>
+                <button class="btn-export" onclick="exportarReporteVentasCSV()">
+                    <i class="fa-solid fa-file-excel"></i> Descargar Reporte (Excel)
                 </button>
             </div>
-        `;
-    }
+            <table class="finance-table">
+                <thead>
+                    <tr>
+                        <th>Turno</th>
+                        <th>Hora</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th>Detalle de Botanas</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="financeTableBody">
+                    <!-- Filas inyectadas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-    // Botones según estado
-    let actionBtnHTML = '';
-    if (pedido.estado === 'cola' || !pedido.estado) {
-        actionBtnHTML = `
-            <button class="btn-kds btn-start" onclick="cambiarEstadoPedido('${pedido.id_pedido}', 'prep')">
-                <i class="fa-solid fa-fire-burner"></i> Iniciar Preparación
-            </button>
-        `;
-    } else if (pedido.estado === 'prep') {
-        actionBtnHTML = `
-            <button class="btn-kds btn-finish" onclick="cambiarEstadoPedido('${pedido.id_pedido}', 'listo')">
-                <i class="fa-solid fa-circle-check"></i> Marcar Listo
-            </button>
-        `;
-    } else if (pedido.estado === 'listo') {
-        actionBtnHTML = `
-            <button class="btn-kds btn-deliver" onclick="cambiarEstadoPedido('${pedido.id_pedido}', 'entregado')">
-                <i class="fa-solid fa-hand-holding-heart"></i> Entregar al Cliente
-            </button>
-        `;
-    }
-
-    card.innerHTML = `
-        <div class="order-card-header">
-            <span class="order-turn-badge ${esTienda ? 'badge-tienda' : 'badge-recoger'}">${pedido.turno}</span>
-            <div class="order-meta">
-                <span class="order-type-tag ${esTienda ? 'tag-tienda' : 'tag-recoger'}">${esTienda ? '🏪 En Tienda' : '🛍️ Para Recoger'}</span>
-                <span class="order-time">${pedido.fecha || ''}</span>
+    <!-- MODAL SELECCIÓN DE TIEMPO ESTIMADO -->
+    <div class="modal-time-overlay" id="timeModal">
+        <div class="modal-time-card">
+            <h3>⏱️ Tiempo Estimado de Preparación</h3>
+            <p id="timeModalClientDesc">Indica en cuántos minutos estará listo:</p>
+            <div class="time-buttons-grid">
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(10)">10 min</button>
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(15)">15 min</button>
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(20)">20 min</button>
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(30)">30 min</button>
             </div>
+            <button class="btn-cancel-time" onclick="cerrarModalTiempo()">Solo Iniciar sin Notificar</button>
         </div>
+    </div>
 
-        <div class="order-client-name">👤 ${pedido.cliente}</div>
-        
-        ${paymentBoxHTML}
+    <!-- AUDIO NOTIFICACIÓN -->
+    <audio id="orderNotificationSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
 
-        <div class="order-items-list">
-            ${itemsHTML}
-        </div>
-
-        <div class="card-actions">
-            ${actionBtnHTML}
-        </div>
-    `;
-
-    return card;
-}
-
-// ======================================================
-// ACCIONES DE DESPACHO
-// ======================================================
-function cambiarEstadoPedido(idPedido, nuevoEstado) {
-    const index = pedidos.findIndex(p => p.id_pedido === idPedido);
-    if (index !== -1) {
-        pedidos[index].estado = nuevoEstado;
-        guardarPedidosEnStorage();
-    }
-}
-
-function alternarEstadoPago(idPedido) {
-    const index = pedidos.findIndex(p => p.id_pedido === idPedido);
-    if (index !== -1) {
-        pedidos[index].pagado = !pedidos[index].pagado;
-        guardarPedidosEnStorage();
-    }
-}
-
-function limpiarEntregadosAntiguos() {
-    pedidos = pedidos.filter(p => p.estado !== 'entregado');
-    guardarPedidosEnStorage();
-}
+    <script src="cocina.js"></script>
+</body>
+</html>
