@@ -87,15 +87,15 @@
 
     </main>
 
-    <!-- ========================================== -->
-    <!-- 3. VISTA 2: PANEL DE FINANZAS Y CORTE      -->
+   <!-- ========================================== -->
+    <!-- 3. VISTA 2: PANEL DE FINANZAS Y ANALÍTICA  -->
     <!-- ========================================== -->
     <section class="finance-panel" id="vistaFinanzas" style="display: none;">
         
         <!-- Tarjetas de Resumen Financiero -->
         <div class="finance-grid">
             <div class="finance-card">
-                <h3>Venta Total del Día</h3>
+                <h3>Venta Total Acumulada</h3>
                 <strong id="finTotalVentas">$0.00</strong>
                 <small id="finTotalPedidos">0 órdenes registradas</small>
             </div>
@@ -116,19 +116,40 @@
             </div>
         </div>
 
+        <!-- SECCIÓN DE GRÁFICAS DE COMPORTAMIENTO -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📈 Ventas por Día (Histórico)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartVentasDias"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🍿 Top Productos Más Vendidos</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartTopProductos"></canvas>
+                </div>
+            </div>
+        </div>
+
         <!-- Tabla de Historial con Exportador -->
         <div class="finance-table-wrapper">
             <div class="table-header-flex">
-                <h2>📋 Detalle de Ventas del Día</h2>
-                <button class="btn-export" onclick="exportarReporteVentasCSV()">
-                    <i class="fa-solid fa-file-excel"></i> Descargar Corte (Excel / CSV)
-                </button>
+                <h2>📋 Detalle de Ventas Registradas</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-export" onclick="exportarReporteVentasCSV()">
+                        <i class="fa-solid fa-file-excel"></i> Descargar Histórico (CSV)
+                    </button>
+                    <button class="btn-clear-history" onclick="borrarHistorialFinanciero()" style="background:#7F1D1D; color:#FCA5A5; border-color:#991B1B;">
+                        <i class="fa-solid fa-trash"></i> Reiniciar Historial
+                    </button>
+                </div>
             </div>
             <table class="finance-table">
                 <thead>
                     <tr>
                         <th>Turno</th>
-                        <th>Hora</th>
+                        <th>Fecha / Hora</th>
                         <th>Cliente</th>
                         <th>Modalidad</th>
                         <th>Detalle de Productos</th>
