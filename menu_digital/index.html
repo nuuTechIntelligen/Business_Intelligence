@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- Configuración para adaptación móvil (Mobile First) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Engordadera | Frituras y Botanas</title>
     
+    <!-- Iconos vectoriales FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tipografías Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
+    <!-- Hoja de estilos principal -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- HERO -->
+    <!-- ========================================== -->
+    <!-- 1. HERO / BIENVENIDA                       -->
+    <!-- ========================================== -->
     <header class="hero">
         <div class="hero-overlay"></div>
         <div class="container hero-content">
@@ -29,12 +36,18 @@
         </div>
     </header>
 
-    <!-- NAVEGACIÓN DINÁMICA -->
+    <!-- ========================================== -->
+    <!-- 2. NAVEGACIÓN DINÁMICA                     -->
+    <!-- ========================================== -->
     <nav class="sticky-nav" id="menu-nav">
-        <div class="nav-scroll-wrapper" id="nav-categories-container"></div>
+        <div class="nav-scroll-wrapper" id="nav-categories-container">
+            <!-- Los botones se inyectan dinámicamente desde SheetDB -->
+        </div>
     </nav>
 
-    <!-- CONTENIDO DINÁMICO -->
+    <!-- ========================================== -->
+    <!-- 3. CONTENIDO PRINCIPAL (PRODUCTOS)         -->
+    <!-- ========================================== -->
     <main class="container main-content" id="menu-sections-container">
         <div class="loading-state">
             <div class="spinner"></div>
@@ -42,7 +55,9 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
+    <!-- ========================================== -->
+    <!-- 4. FOOTER                                  -->
+    <!-- ========================================== -->
     <footer class="footer">
         <div class="container text-center">
             <h3>FRITURAS Y BOTANAS LA ENGORDADERA</h3>
@@ -51,7 +66,9 @@
         </div>
     </footer>
 
-    <!-- BARRA FLOTANTE DE PEDIDO -->
+    <!-- ========================================== -->
+    <!-- 5. BARRA FLOTANTE DE PEDIDO / CARRITO      -->
+    <!-- ========================================== -->
     <div class="cart-floating-bar" id="cartBar">
         <div class="cart-info">
             <i class="fa-solid fa-basket-shopping"></i>
@@ -62,13 +79,13 @@
         </button>
     </div>
 
-    <!-- BOTÓN FLOTANTE INDEPENDIENTE -->
+    <!-- Botón flotante independiente -->
     <a href="javascript:void(0)" class="wa-float-btn" onclick="abrirModalCheckout()" title="Ver Pedido">
         <i class="fa-solid fa-basket-shopping"></i>
     </a>
 
     <!-- ========================================== -->
-    <!-- 1. MODAL DE PERSONALIZACIÓN DE BOTANA      -->
+    <!-- 6. MODAL DE PERSONALIZACIÓN DE BOTANA      -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="productModal">
         <div class="modal-card">
@@ -80,7 +97,7 @@
             <p class="modal-desc" id="modalProductDesc">Descripción del producto</p>
 
             <form id="modalForm" onsubmit="event.preventDefault(); confirmarAgregarAlCarrito();">
-                <!-- Venta por Monto -->
+                <!-- Venta por Monto con botones rápidos -->
                 <div id="modalAmountGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
                     <div class="amount-pills-grid" id="modalAmountPills"></div>
@@ -90,7 +107,7 @@
                     </div>
                 </div>
 
-                <!-- Grupos de Ingredientes -->
+                <!-- Grupos de Opciones estructurados -->
                 <div id="modalBaseGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title" id="modalBaseTitle">Selecciona tu Base</label>
                     <div class="options-grid" id="modalBaseOptions"></div>
@@ -116,7 +133,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 2. MODAL DE CHECKOUT (TIENDA VS RECOGER)   -->
+    <!-- 7. MODAL DE CHECKOUT (TIENDA VS RECOGER)   -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-card">
@@ -127,11 +144,11 @@
             </div>
             <p class="modal-desc">Revisa tus botanas y elige cómo deseas recibir tu orden.</p>
 
-            <!-- Lista de productos en carrito -->
+            <!-- Lista de botanas agregadas -->
             <div class="checkout-items-list" id="checkoutItemsList"></div>
 
             <form id="checkoutForm" onsubmit="event.preventDefault(); procesarGeneracionTurno();">
-                <!-- Modalidad -->
+                <!-- Modalidad: Tienda vs Recoger -->
                 <div class="modal-group">
                     <label class="modal-group-title">📍 ¿Dónde consumirás?</label>
                     <div class="order-type-selector">
@@ -160,6 +177,12 @@
                     <input type="text" id="clientNameInput" required placeholder="Escribe tu nombre o apodo..." class="checkout-input">
                 </div>
 
+                <!-- WhatsApp para pedidos Para Recoger -->
+                <div class="modal-group" id="phoneInputGroup" style="display: none;">
+                    <label class="modal-group-title">📱 WhatsApp para avisarte cuando esté listo (10 dígitos):</label>
+                    <input type="tel" id="clientPhoneInput" placeholder="Ej. 4421234567" class="checkout-input">
+                </div>
+
                 <div class="modal-actions">
                     <button type="submit" class="btn-confirm-add btn-generate-ticket">
                         <i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno
@@ -170,7 +193,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 3. MODAL DE BOLETO DIGITAL / CONFIRMACIÓN -->
+    <!-- 8. MODAL DE BOLETO DIGITAL / CONFIRMACIÓN -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="ticketModal">
         <div class="modal-card ticket-card">
@@ -195,18 +218,22 @@
                     <!-- Mensaje dinámico de pago -->
                 </div>
 
+                <!-- Cuenta regresiva automática para modo Kiosko -->
+                <small id="kioskCountdown" style="display: block; color: #888; margin-bottom: 10px; font-weight: 600;"></small>
+
                 <div class="ticket-actions">
                     <button class="btn-whatsapp w-100" id="btnTicketWhatsApp" onclick="enviarComprobanteWhatsApp()">
                         <i class="fa-brands fa-whatsapp"></i> Enviar a WhatsApp
                     </button>
-                    <button class="btn-secondary w-100" onclick="reiniciarParaNuevoPedido()">
-                        <i class="fa-solid fa-plus"></i> Hacer otro Pedido
+                    <button class="btn-secondary w-100" onclick="cerrarTicketModal()">
+                        <i class="fa-solid fa-check"></i> Terminar y Hacer Nuevo Pedido
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Script de lógica -->
     <script src="script.js"></script>
 </body>
 </html>
