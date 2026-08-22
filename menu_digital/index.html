@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Engordadera | Frituras y Botanas</title>
     
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -17,7 +14,7 @@
 </head>
 <body>
 
-    <!-- HERO / BIENVENIDA -->
+    <!-- HERO -->
     <header class="hero">
         <div class="hero-overlay"></div>
         <div class="container hero-content">
@@ -32,17 +29,14 @@
         </div>
     </header>
 
-    <!-- BARRA DE NAVEGACIÓN DINÁMICA (Generada desde SheetDB) -->
+    <!-- NAVEGACIÓN DINÁMICA -->
     <nav class="sticky-nav" id="menu-nav">
-        <div class="nav-scroll-wrapper" id="nav-categories-container">
-            <!-- Los botones de categorías se inyectan automáticamente con JS -->
-        </div>
+        <div class="nav-scroll-wrapper" id="nav-categories-container"></div>
     </nav>
 
-    <!-- CONTENIDO PRINCIPAL DINÁMICO -->
+    <!-- CONTENIDO DINÁMICO -->
     <main class="container main-content" id="menu-sections-container">
-        <!-- Indicador de carga -->
-        <div class="loading-state" id="loadingState">
+        <div class="loading-state">
             <div class="spinner"></div>
             <p>Cargando el menú más antojable...</p>
         </div>
@@ -63,17 +57,18 @@
             <i class="fa-solid fa-basket-shopping"></i>
             <span id="cartCount">0 productos</span> | <strong id="cartTotal">$0.00</strong>
         </div>
-        <button class="btn-whatsapp" onclick="enviarPedidoWhatsApp()">
-            <i class="fa-brands fa-whatsapp"></i> Enviar Pedido
+        <button class="btn-whatsapp" onclick="abrirModalCheckout()">
+            <i class="fa-solid fa-receipt"></i> Ver Pedido / Turno
         </button>
     </div>
 
-    <a href="#" class="wa-float-btn" onclick="enviarPedidoWhatsApp()" title="Pedir por WhatsApp">
-        <i class="fa-brands fa-whatsapp"></i>
+    <!-- BOTÓN FLOTANTE INDEPENDIENTE -->
+    <a href="javascript:void(0)" class="wa-float-btn" onclick="abrirModalCheckout()" title="Ver Pedido">
+        <i class="fa-solid fa-basket-shopping"></i>
     </a>
 
     <!-- ========================================== -->
-    <!-- MODAL / VENTANA FLOTANTE DE PERSONALIZACIÓN-->
+    <!-- 1. MODAL DE PERSONALIZACIÓN DE BOTANA      -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="productModal">
         <div class="modal-card">
@@ -85,16 +80,17 @@
             <p class="modal-desc" id="modalProductDesc">Descripción del producto</p>
 
             <form id="modalForm" onsubmit="event.preventDefault(); confirmarAgregarAlCarrito();">
-                <!-- Contenedores para grupos de opciones dinámicas -->
+                <!-- Venta por Monto -->
                 <div id="modalAmountGroup" class="modal-group" style="display: none;">
-    <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
-    <div class="amount-pills-grid" id="modalAmountPills"></div>
-    <div class="amount-input-wrapper" id="modalCustomWrapper">
-        <span>$</span>
-        <input type="number" id="modalCustomAmount" min="10" step="5" value="20" class="input-amount" placeholder="0.00">
-    </div>
-</div>
+                    <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
+                    <div class="amount-pills-grid" id="modalAmountPills"></div>
+                    <div class="amount-input-wrapper" id="modalCustomWrapper">
+                        <span>$</span>
+                        <input type="number" id="modalCustomAmount" min="10" step="5" value="20" class="input-amount" placeholder="0.00">
+                    </div>
+                </div>
 
+                <!-- Grupos de Ingredientes -->
                 <div id="modalBaseGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title" id="modalBaseTitle">Selecciona tu Base</label>
                     <div class="options-grid" id="modalBaseOptions"></div>
@@ -119,7 +115,98 @@
         </div>
     </div>
 
-    <!-- Script de lógica dinámica -->
+    <!-- ========================================== -->
+    <!-- 2. MODAL DE CHECKOUT (TIENDA VS RECOGER)   -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="cerrarModalCheckout()">&times;</button>
+            <div class="modal-header">
+                <h3>Resumen de tu Pedido</h3>
+                <span class="modal-price" id="checkoutTotalPrice">$0.00</span>
+            </div>
+            <p class="modal-desc">Revisa tus botanas y elige cómo deseas recibir tu orden.</p>
+
+            <!-- Lista de productos en carrito -->
+            <div class="checkout-items-list" id="checkoutItemsList"></div>
+
+            <form id="checkoutForm" onsubmit="event.preventDefault(); procesarGeneracionTurno();">
+                <!-- Modalidad -->
+                <div class="modal-group">
+                    <label class="modal-group-title">📍 ¿Dónde consumirás?</label>
+                    <div class="order-type-selector">
+                        <label class="type-card active" id="typeStoreLabel">
+                            <input type="radio" name="orderType" value="tienda" checked onchange="cambiarTipoPedido('tienda')">
+                            <i class="fa-solid fa-store"></i>
+                            <div>
+                                <strong>En Tienda</strong>
+                                <small>Pagas al recibir en mostrador</small>
+                            </div>
+                        </label>
+                        <label class="type-card" id="typePickupLabel">
+                            <input type="radio" name="orderType" value="recoger" onchange="cambiarTipoPedido('recoger')">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                            <div>
+                                <strong>Para Recoger</strong>
+                                <small>Requiere pago previo</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nombre del Cliente -->
+                <div class="modal-group">
+                    <label class="modal-group-title">👤 ¿A qué nombre sale tu pedido?</label>
+                    <input type="text" id="clientNameInput" required placeholder="Escribe tu nombre o apodo..." class="checkout-input">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-confirm-add btn-generate-ticket">
+                        <i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. MODAL DE BOLETO DIGITAL / CONFIRMACIÓN -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal-card ticket-card">
+            <button class="modal-close" onclick="cerrarTicketModal()">&times;</button>
+            <div class="ticket-header">
+                <span class="ticket-badge" id="ticketBadgeType">🏪 EN TIENDA</span>
+                <p>¡Pedido registrado con éxito!</p>
+                <div class="ticket-number" id="ticketNumberDisplay">#T-01</div>
+                <h4 id="ticketClientName">Cliente: Juan</h4>
+            </div>
+
+            <div class="ticket-body">
+                <div class="ticket-status-box" id="ticketStatusBox">
+                    <i class="fa-solid fa-clock"></i>
+                    <div>
+                        <strong id="ticketStatusTitle">En Cola de Espera</strong>
+                        <p id="ticketStatusDesc">Tu pedido pasará a preparación en breve.</p>
+                    </div>
+                </div>
+
+                <div class="ticket-payment-alert" id="ticketPaymentAlert">
+                    <!-- Mensaje dinámico de pago -->
+                </div>
+
+                <div class="ticket-actions">
+                    <button class="btn-whatsapp w-100" id="btnTicketWhatsApp" onclick="enviarComprobanteWhatsApp()">
+                        <i class="fa-brands fa-whatsapp"></i> Enviar a WhatsApp
+                    </button>
+                    <button class="btn-secondary w-100" onclick="reiniciarParaNuevoPedido()">
+                        <i class="fa-solid fa-plus"></i> Hacer otro Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
