@@ -1,14 +1,17 @@
 // ======================================================
-// GESTOR KDS, NOTIFICACIONES Y FINANZAS
+// GESTOR KDS, NOTIFICACIONES Y FINANZAS (COMPLETO)
 // ======================================================
 
 let pedidos = [];
 let pedidoEnProcesoTiempo = null;
+let chartVentasInstancia = null;
+let chartProductosInstancia = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     iniciarReloj();
     cargarPedidosDesdeStorage();
 
+    // Escucha cambios automáticos emitidos desde index.html
     window.addEventListener('storage', (event) => {
         if (event.key === 'engordadera_pedidos_cocina') {
             cargarPedidosDesdeStorage(true);
@@ -18,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function iniciarReloj() {
     const clock = document.getElementById('liveClock');
+    if (!clock) return;
     setInterval(() => {
         const now = new Date();
         clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -50,12 +54,14 @@ function guardarPedidosEnStorage() {
 }
 
 // ======================================================
-// RENDERIZADO DEL TABLERO KANBAN
+// 1. RENDERIZADO DEL TABLERO KANBAN DE COMANDAS
 // ======================================================
 function renderizarTablero() {
     const containerCola = document.getElementById('containerCola');
     const containerPrep = document.getElementById('containerPrep');
     const containerListos = document.getElementById('containerListos');
+
+    if (!containerCola || !containerPrep || !containerListos) return;
 
     containerCola.innerHTML = '';
     containerPrep.innerHTML = '';
@@ -82,13 +88,13 @@ function renderizarTablero() {
         }
     });
 
-    document.getElementById('countCola').textContent = colaCount;
-    document.getElementById('countPrep').textContent = prepCount;
-    document.getElementById('countListos').textContent = listosCount;
+    if (document.getElementById('countCola')) document.getElementById('countCola').textContent = colaCount;
+    if (document.getElementById('countPrep')) document.getElementById('countPrep').textContent = prepCount;
+    if (document.getElementById('countListos')) document.getElementById('countListos').textContent = listosCount;
 
-    document.getElementById('metricCola').textContent = colaCount;
-    document.getElementById('metricPrep').textContent = prepCount;
-    document.getElementById('metricListos').textContent = listosCount;
+    if (document.getElementById('metricCola')) document.getElementById('metricCola').textContent = colaCount;
+    if (document.getElementById('metricPrep')) document.getElementById('metricPrep').textContent = prepCount;
+    if (document.getElementById('metricListos')) document.getElementById('metricListos').textContent = listosCount;
 }
 
 function crearTarjetaComanda(pedido) {
@@ -97,7 +103,7 @@ function crearTarjetaComanda(pedido) {
     card.className = `order-card ${esTienda ? 'tienda' : 'recoger'}`;
 
     let itemsHTML = '';
-    pedido.items.forEach((item, idx) => {
+    (pedido.items || []).forEach((item, idx) => {
         let details = [];
         if (item.base) details.push(`Base: ${item.base}`);
         if (item.ingredientes && item.ingredientes.length > 0) details.push(`Con: ${item.ingredientes.join(', ')}`);
@@ -111,7 +117,6 @@ function crearTarjetaComanda(pedido) {
         `;
     });
 
-    // Control de Pago para Recoger
     let paymentBoxHTML = '';
     if (!esTienda) {
         const pagado = pedido.pagado === true;
@@ -125,7 +130,6 @@ function crearTarjetaComanda(pedido) {
         `;
     }
 
-    // Botones de acción y notificaciones
     let actionBtnHTML = '';
     if (pedido.estado === 'cola' || !pedido.estado) {
         actionBtnHTML = `
@@ -180,7 +184,7 @@ function crearTarjetaComanda(pedido) {
 }
 
 // ======================================================
-// NOTIFICACIONES DE TIEMPO ESTIMADO & LISTO (WHATSAPP)
+// 2. NOTIFICACIONES DE TIEMPO ESTIMADO & LISTO (WHATSAPP)
 // ======================================================
 function solicitarTiempoOIniciar(idPedido) {
     const p = pedidos.find(item => item.id_pedido === idPedido);
@@ -210,7 +214,6 @@ function confirmarTiempoYNotificar(minutos) {
     cambiarEstadoPedido(p.id_pedido, 'prep');
     document.getElementById('timeModal').style.display = 'none';
 
-    // Abrir WhatsApp con mensaje predeterminado
     const tel = p.telefono ? p.telefono.replace(/\D/g, '') : '';
     const numDestino = tel ? (tel.length === 10 ? `521${tel}` : tel) : '';
 
@@ -267,8 +270,13 @@ function entregarPedidoFinal(idPedido) {
     }
 }
 
+function limpiarEntregadosAntiguos() {
+    pedidos = pedidos.filter(p => p.estado !== 'entregado');
+    guardarPedidosEnStorage();
+}
+
 // ======================================================
-// PANEL DE FINANZAS Y CORTE DE CAJA
+// 3. PANEL DE FINANZAS, ANALÍTICA Y GRÁFICAS
 // ======================================================
 function mostrarVista(vista) {
     const vKDS = document.getElementById('vistaKDS');
@@ -277,35 +285,40 @@ function mostrarVista(vista) {
     const bFin = document.getElementById('tabBtnFinanzas');
     const mHead = document.getElementById('kdsMetricsHeader');
 
+    if (!vKDS || !vFin) return;
+
     if (vista === 'kds') {
         vKDS.style.display = 'grid';
         vFin.style.display = 'none';
         bKDS.classList.add('active');
         bFin.classList.remove('active');
-        mHead.style.display = 'flex';
+        if (mHead) mHead.style.display = 'flex';
     } else {
         vKDS.style.display = 'none';
         vFin.style.display = 'block';
         bFin.classList.add('active');
         bKDS.classList.remove('active');
-        mHead.style.display = 'none';
+        if (mHead) mHead.style.display = 'none';
         actualizarMetricasFinancieras();
     }
 }
 
 function actualizarMetricasFinancieras() {
-    let totalDia = 0;
+    let totalAcumulado = 0;
     let ventaTienda = 0;
     let ventaRecoger = 0;
     let pedidosTiendaCount = 0;
     let pedidosRecogerCount = 0;
+
+    const ventasPorDia = {};
+    const conteoProductos = {};
 
     const tableBody = document.getElementById('financeTableBody');
     if (tableBody) tableBody.innerHTML = '';
 
     pedidos.forEach(p => {
         const monto = parseFloat(p.total || 0);
-        totalDia += monto;
+        totalAcumulado += monto;
 
         if (p.tipo === 'tienda') {
             ventaTienda += monto;
@@ -315,13 +328,23 @@ function actualizarMetricasFinancieras() {
             pedidosRecogerCount++;
         }
 
+        const fechaDia = p.fecha_completa ? p.fecha_completa.split('T')[0] : (new Date().toISOString().split('T')[0]);
+        ventasPorDia[fechaDia] = (ventasPorDia[fechaDia] || 0) + monto;
+
+        if (p.items && Array.isArray(p.items)) {
+            p.items.forEach(item => {
+                const nombreLimpio = item.nombre || 'Botana';
+                conteoProductos[nombreLimpio] = (conteoProductos[nombreLimpio] || 0) + 1;
+            });
+        }
+
         if (tableBody) {
             const tr = document.createElement('tr');
-            const itemsResumen = p.items.map(i => i.nombre).join(', ');
+            const itemsResumen = (p.items || []).map(i => i.nombre).join(', ');
 
             tr.innerHTML = `
                 <td><strong>${p.turno}</strong></td>
-                <td>${p.fecha}</td>
+                <td><small>${fechaDia} ${p.fecha}</small></td>
                 <td>${p.cliente}</td>
                 <td><span class="order-type-tag ${p.tipo === 'tienda' ? 'tag-tienda' : 'tag-recoger'}">${p.tipo === 'tienda' ? 'Tienda' : 'Recoger'}</span></td>
                 <td><small>${itemsResumen}</small></td>
@@ -332,29 +355,107 @@ function actualizarMetricasFinancieras() {
     });
 
     const totalCount = pedidos.length;
-    const ticketProm = totalCount > 0 ? (totalDia / totalCount) : 0;
+    const ticketProm = totalCount > 0 ? (totalAcumulado / totalCount) : 0;
 
     if (document.getElementById('finTotalVentas')) {
-        document.getElementById('finTotalVentas').textContent = `$${totalDia.toFixed(2)}`;
-        document.getElementById('finTotalPedidos').textContent = `${totalCount} órdenes registradas hoy`;
+        document.getElementById('finTotalVentas').textContent = `$${totalAcumulado.toFixed(2)}`;
+        document.getElementById('finTotalPedidos').textContent = `${totalCount} órdenes registradas`;
         document.getElementById('finVentaTienda').textContent = `$${ventaTienda.toFixed(2)}`;
         document.getElementById('finPedidosTienda').textContent = `${pedidosTiendaCount} órdenes`;
         document.getElementById('finVentaRecoger').textContent = `$${ventaRecoger.toFixed(2)}`;
         document.getElementById('finPedidosRecoger').textContent = `${pedidosRecogerCount} órdenes`;
         document.getElementById('finTicketPromedio').textContent = `$${ticketProm.toFixed(2)}`;
     }
+
+    renderizarGraficas(ventasPorDia, conteoProductos);
+}
+
+function renderizarGraficas(ventasPorDia, conteoProductos) {
+    if (typeof Chart === 'undefined') return;
+
+    // 1. Gráfica de Ventas Diarias
+    const ctxVentas = document.getElementById('chartVentasDias');
+    if (ctxVentas) {
+        const labelsDias = Object.keys(ventasPorDia).sort();
+        const dataVentas = labelsDias.map(dia => ventasPorDia[dia]);
+
+        if (chartVentasInstancia) chartVentasInstancia.destroy();
+
+        chartVentasInstancia = new Chart(ctxVentas, {
+            type: 'line',
+            data: {
+                labels: labelsDias.length ? labelsDias : ['Hoy'],
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: dataVentas.length ? dataVentas : [0],
+                    borderColor: '#34D399',
+                    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { ticks: { color: '#888' }, grid: { color: '#2A2A2A' } },
+                    y: { ticks: { color: '#888' }, grid: { color: '#2A2A2A' } }
+                }
+            }
+        });
+    }
+
+    // 2. Gráfica de Top Productos
+    const ctxProductos = document.getElementById('chartTopProductos');
+    if (ctxProductos) {
+        const productosOrdenados = Object.entries(conteoProductos)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+        const labelsProd = productosOrdenados.map(p => p[0]);
+        const dataProd = productosOrdenados.map(p => p[1]);
+
+        if (chartProductosInstancia) chartProductosInstancia.destroy();
+
+        chartProductosInstancia = new Chart(ctxProductos, {
+            type: 'doughnut',
+            data: {
+                labels: labelsProd.length ? labelsProd : ['Sin datos'],
+                datasets: [{
+                    data: dataProd.length ? dataProd : [1],
+                    backgroundColor: ['#E91E63', '#FFCB05', '#00A8E8', '#7BC043', '#FB923C'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#DDD', font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
 }
 
 function exportarReporteVentasCSV() {
     if (pedidos.length === 0) {
-        alert("No hay ventas registradas el día de hoy.");
+        alert("No hay ventas registradas.");
         return;
     }
 
-    let csv = "Turno,Hora,Cliente,Telefono,Tipo,Total,Estado,Detalle\n";
+    let csv = "Turno,Fecha,Hora,Cliente,Telefono,Tipo,Total,Estado,Detalle\n";
     pedidos.forEach(p => {
-        const items = p.items.map(i => `${i.nombre} ($${i.precio})`).join(' + ');
-        csv += `"${p.turno}","${p.fecha}","${p.cliente}","${p.telefono || ''}","${p.tipo}",${p.total},"${p.estado}","${items}"\n`;
+        const fechaDia = p.fecha_completa ? p.fecha_completa.split('T')[0] : '';
+        const items = (p.items || []).map(i => `${i.nombre} ($${i.precio})`).join(' + ');
+        csv += `"${p.turno}","${fechaDia}","${p.fecha}","${p.cliente}","${p.telefono || ''}","${p.tipo}",${p.total},"${p.estado}","${items}"\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -362,4 +463,11 @@ function exportarReporteVentasCSV() {
     link.href = URL.createObjectURL(blob);
     link.download = `Corte_Ventas_La_Engordadera_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
+}
+
+function borrarHistorialFinanciero() {
+    if (confirm("⚠️ ¿Estás seguro de reiniciar el historial de ventas? Asegúrate de haber descargado tu reporte en CSV/Excel primero.")) {
+        pedidos = [];
+        guardarPedidosEnStorage();
+    }
 }
