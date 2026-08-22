@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -9,6 +9,7 @@ let productoSeleccionado = null;
 let montoSeleccionadoActual = 20;
 let carrito = [];
 let ultimoPedidoGenerado = null;
+let temporizadorKiosko = null;
 
 // ======================================================
 // 1. CARGA DINÁMICA DESDE SHEETDB
@@ -352,22 +353,24 @@ function eliminarDelCarrito(index) {
 function cambiarTipoPedido(tipo) {
     const storeLabel = document.getElementById('typeStoreLabel');
     const pickupLabel = document.getElementById('typePickupLabel');
+    const phoneGroup = document.getElementById('phoneInputGroup');
 
     if (tipo === 'tienda') {
         storeLabel.classList.add('active');
         pickupLabel.classList.remove('active');
+        if (phoneGroup) phoneGroup.style.display = 'none';
     } else {
         pickupLabel.classList.add('active');
         storeLabel.classList.remove('active');
+        if (phoneGroup) phoneGroup.style.display = 'block';
     }
 }
 
-// Generador de Turno Consecutivo Local (Simulador FIFO)
 function obtenerSiguienteTurno(tipo) {
     const prefijo = tipo === 'tienda' ? 'T' : 'R';
     const claveStorage = `turno_${prefijo}_consecutivo`;
     let actual = parseInt(localStorage.getItem(claveStorage) || '0') + 1;
-    if (actual > 99) actual = 1; // Reinicia en 1 al llegar a 99
+    if (actual > 99) actual = 1;
     localStorage.setItem(claveStorage, actual);
 
     const numeroFormateado = actual < 10 ? `0${actual}` : `${actual}`;
@@ -382,6 +385,7 @@ function procesarGeneracionTurno() {
     }
 
     const tipoPedido = document.querySelector('input[name="orderType"]:checked').value;
+    const telefonoCliente = document.getElementById('clientPhoneInput') ? document.getElementById('clientPhoneInput').value.trim() : '';
     const numeroTurno = obtenerSiguienteTurno(tipoPedido);
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
 
@@ -390,14 +394,16 @@ function procesarGeneracionTurno() {
         turno: numeroTurno,
         tipo: tipoPedido,
         cliente: nombreCliente,
+        telefono: telefonoCliente,
         items: [...carrito],
         total: total,
-        estado: 'cola', // Estado inicial
-        pagado: tipoPedido === 'tienda', // En tienda paga al recibir
-        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        estado: 'cola',
+        pagado: tipoPedido === 'tienda',
+        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        fecha_completa: new Date().toISOString()
     };
 
-    // 1. Guardar y emitir pedido hacia la Pantalla de Cocina (KDS)
+    // 1. Guardar para la pantalla de cocina
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
@@ -427,26 +433,51 @@ function mostrarBoletoTurno(pedido) {
         paymentAlert.className = 'ticket-payment-alert alert-recoger';
         paymentAlert.innerHTML = `
             <strong>⚠️ Pago Previo Requerido:</strong><br>
-            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, por favor envía tu pedido por WhatsApp y adjunta tu comprobante de pago/anticipo.
+            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, por favor envía tu pedido por WhatsApp y adjunta tu comprobante.
         `;
     }
 
     document.getElementById('ticketModal').classList.add('active');
+
+    // CUENTA REGRESIVA DE REINICIO AUTOMÁTICO (KIOSKO)
+    iniciarCuentaRegresivaKiosko(7);
+}
+
+function iniciarCuentaRegresivaKiosko(segundosRestantes) {
+    if (temporizadorKiosko) clearInterval(temporizadorKiosko);
+    
+    const countEl = document.getElementById('kioskCountdown');
+    if (countEl) countEl.textContent = `Pantalla se reinicia en ${segundosRestantes}s...`;
+
+    temporizadorKiosko = setInterval(() => {
+        segundosRestantes--;
+        if (countEl) countEl.textContent = `Pantalla se reinicia en ${segundosRestantes}s...`;
+        
+        if (segundosRestantes <= 0) {
+            clearInterval(temporizadorKiosko);
+            reiniciarParaNuevoPedido();
+        }
+    }, 1000);
 }
 
 function cerrarTicketModal() {
+    if (temporizadorKiosko) clearInterval(temporizadorKiosko);
     document.getElementById('ticketModal').classList.remove('active');
+    reiniciarParaNuevoPedido();
 }
 
 function reiniciarParaNuevoPedido() {
+    if (temporizadorKiosko) clearInterval(temporizadorKiosko);
     carrito = [];
     actualizarBarraCarrito();
     document.getElementById('clientNameInput').value = '';
-    cerrarTicketModal();
+    if (document.getElementById('clientPhoneInput')) document.getElementById('clientPhoneInput').value = '';
+    document.getElementById('ticketModal').classList.remove('active');
 }
 
 function enviarComprobanteWhatsApp() {
     if (!ultimoPedidoGenerado) return;
+    if (temporizadorKiosko) clearInterval(temporizadorKiosko);
 
     const p = ultimoPedidoGenerado;
     let mensaje = `🍿 *LA ENGORDADERA - NUEVO PEDIDO*\n`;
@@ -469,7 +500,7 @@ function enviarComprobanteWhatsApp() {
     mensaje += `💰 *TOTAL A PAGAR:* *$${p.total.toFixed(2)}*\n\n`;
 
     if (p.tipo === 'recoger') {
-        mensaje += `📸 *(Adjunto aquí mi comprobante de pago/transferencia para iniciar la preparación)*`;
+        mensaje += `📸 *(Adjunto aquí mi comprobante de pago para iniciar la preparación)*`;
     } else {
         mensaje += `📍 *(Pagaré en mostrador al recibir mi turno)*`;
     }
