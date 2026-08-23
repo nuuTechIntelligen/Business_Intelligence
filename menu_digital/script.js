@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -22,6 +22,22 @@ function limpiarTexto(txt) {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .trim();
+}
+
+// Busca propiedades en el objeto JSON de SheetDB sin importar mayúsculas, espacios o guiones
+function obtenerPropiedadFlexible(obj, clavesPosibles) {
+    if (!obj || typeof obj !== 'object') return '';
+    const llaves = Object.keys(obj);
+    for (let cp of clavesPosibles) {
+        const cpNormal = limpiarTexto(cp).replace(/[^A-Z0-9]/g, '');
+        for (let k of llaves) {
+            const kNormal = limpiarTexto(k).replace(/[^A-Z0-9]/g, '');
+            if (kNormal === cpNormal) {
+                return obj[k];
+            }
+        }
+    }
+    return '';
 }
 
 // ======================================================
@@ -45,7 +61,7 @@ async function cargarMenuDesdeSheetDB() {
         const diaHoy = DIAS_SEMANA[new Date().getDay()];
 
         const productosHoy = productos.filter(p => {
-            const diasConfig = limpiarTexto(p.dias_disponible);
+            const diasConfig = limpiarTexto(obtenerPropiedadFlexible(p, ['dias_disponible', 'dias', 'diasdisponible']));
             if (!diasConfig || diasConfig === 'TODOS' || diasConfig === '') return true;
             return diasConfig.includes(diaHoy);
         });
@@ -68,10 +84,11 @@ function renderizarBannerEspeciales(productos) {
     const bannerTrack = document.getElementById('bannerSliderTrack');
     if (!bannerContainer || !bannerTrack) return;
 
-    const destacados = productos.filter(p => 
-        limpiarTexto(p.destacado_banner) === 'SI' && 
-        limpiarTexto(p.disponible) === 'SI'
-    );
+    const destacados = productos.filter(p => {
+        const esDestacado = limpiarTexto(obtenerPropiedadFlexible(p, ['destacado_banner', 'destacado', 'banner'])) === 'SI';
+        const estaDisp = limpiarTexto(obtenerPropiedadFlexible(p, ['disponible', 'activo'])) === 'SI';
+        return esDestacado && estaDisp;
+    });
 
     if (destacados.length === 0) {
         bannerContainer.style.display = 'none';
@@ -84,7 +101,7 @@ function renderizarBannerEspeciales(productos) {
         card.className = 'banner-item-card';
         card.onclick = () => abrirModalPersonalizacion(prod.id);
 
-        const esPorMonto = limpiarTexto(prod.venta_por_monto) === 'SI';
+        const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
         const precioTxt = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
         card.innerHTML = `
@@ -138,8 +155,8 @@ function renderizarMenu(productos) {
 
         let cardsHTML = '';
         cat.productos.forEach(prod => {
-            const estaDisponible = limpiarTexto(prod.disponible) === 'SI';
-            const esPorMonto = limpiarTexto(prod.venta_por_monto) === 'SI';
+            const estaDisponible = limpiarTexto(obtenerPropiedadFlexible(prod, ['disponible', 'activo'])) === 'SI';
+            const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
             const precioDisplay = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
             cardsHTML += `
@@ -183,49 +200,44 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
-    if (!prod || limpiarTexto(prod.disponible) !== 'SI') return;
+    if (!prod || limpiarTexto(obtenerPropiedadFlexible(prod, ['disponible', 'activo'])) !== 'SI') return;
 
     productoSeleccionado = prod;
 
-    const esPorMonto = limpiarTexto(prod.venta_por_monto) === 'SI';
+    const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
 
     document.getElementById('modalProductTitle').textContent = prod.nombre;
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = esPorMonto ? '$20.00' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-    // Parseo numérico estricto de max_ingredientes
-    let maxVal = 0;
-    if (prod.max_ingredientes !== undefined && prod.max_ingredientes !== null && String(prod.max_ingredientes).trim() !== '') {
-        const parsed = parseInt(String(prod.max_ingredientes).trim(), 10);
-        if (!isNaN(parsed) && parsed > 0) {
-            maxVal = parsed;
-        }
-    }
-    limiteIngredientesActual = maxVal;
+    // Búsqueda flexible de la columna max_ingredientes
+    const rawMax = obtenerPropiedadFlexible(prod, ['max_ingredientes', 'maxingredientes', 'limite_ingredientes', 'max']);
+    const numMax = parseInt(String(rawMax).trim(), 10);
+    limiteIngredientesActual = (!isNaN(numMax) && numMax > 0) ? numMax : 0;
 
     // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
     if (esPorMonto) {
         amountGroup.style.display = 'block';
-        montoMinimoActual = parseFloat(prod.monto_minimo || '10');
-        renderizarPillsMontoDinámicas(prod.montos_sugeridos, montoMinimoActual);
+        montoMinimoActual = parseFloat(obtenerPropiedadFlexible(prod, ['monto_minimo', 'minimo', 'montominimo']) || '10');
+        renderizarPillsMontoDinámicas(obtenerPropiedadFlexible(prod, ['montos_sugeridos', 'montos']), montoMinimoActual);
     } else {
         amountGroup.style.display = 'none';
     }
 
     // Opciones
-    const baseNombre = prod.grupo_base_nombre || 'Selecciona tu Base';
-    const baseOpciones = prod.grupo_base_opciones || prod.grupo_bases_opciones || '';
+    const baseNombre = obtenerPropiedadFlexible(prod, ['grupo_base_nombre', 'base_nombre']) || 'Selecciona tu Base';
+    const baseOpciones = obtenerPropiedadFlexible(prod, ['grupo_base_opciones', 'base_opciones', 'bases']);
 
-    const ingNombre = prod.grupo_ingredientes_nombre || prod.grupo_ingrediente_nombre || '¿Qué ingredientes le ponemos?';
-    const ingOpciones = prod.grupo_ingredientes_opciones || prod.grupo_ingrediente_opciones || '';
+    const ingNombre = obtenerPropiedadFlexible(prod, ['grupo_ingredientes_nombre', 'ingredientes_nombre', 'grupo_ingrediente_nombre']) || '¿Qué ingredientes le ponemos?';
+    const ingOpciones = obtenerPropiedadFlexible(prod, ['grupo_ingredientes_opciones', 'ingredientes_opciones', 'grupo_ingrediente_opciones', 'ingredientes']);
 
-    const salsaNombre = prod.grupo_salsas_nombre || prod.grupo_salsa_nombre || 'Selecciona tu Salsa';
-    const salsaOpciones = prod.grupo_salsas_opciones || prod.grupo_salsa_opciones || '';
+    const salsaNombre = obtenerPropiedadFlexible(prod, ['grupo_salsas_nombre', 'salsa_nombre', 'grupo_salsa_nombre']) || 'Selecciona tu Salsa';
+    const salsaOpciones = obtenerPropiedadFlexible(prod, ['grupo_salsas_opciones', 'salsas_opciones', 'grupo_salsa_opciones', 'salsas']);
 
-    renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', baseNombre, baseOpciones, 'radio', 'grupo_base_input');
-    renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', ingNombre, ingOpciones, 'checkbox', 'grupo_ing_input');
-    renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', salsaNombre, salsaOpciones, 'radio', 'grupo_salsa_input');
+    renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', baseNombre, baseOpciones, 'radio', 'grupo_base');
+    renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', ingNombre, ingOpciones, 'checkbox', 'grupo_ing');
+    renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', salsaNombre, salsaOpciones, 'radio', 'grupo_salsa');
 
     actualizarBadgeLimiteIngredientes(0);
 
@@ -239,8 +251,8 @@ function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
     if (!pillsContainer) return;
 
     let listaMontos = [20, 30, 50, 100];
-    if (montosConfig && montosConfig.trim() !== '') {
-        listaMontos = montosConfig.split(',').map(m => parseFloat(m.trim())).filter(m => !isNaN(m));
+    if (montosConfig && String(montosConfig).trim() !== '') {
+        listaMontos = String(montosConfig).split(',').map(m => parseFloat(m.trim())).filter(m => !isNaN(m));
     }
 
     montoSeleccionadoActual = listaMontos[0] || montoMinimo;
@@ -343,95 +355,82 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     opciones.forEach((op, index) => {
         const chipDiv = document.createElement('div');
         chipDiv.className = 'option-chip';
+        chipDiv.setAttribute('data-value', op);
 
         const isRadioDefault = (inputType === 'radio' && index === 0);
         if (isRadioDefault) chipDiv.classList.add('selected');
 
-        const inputId = `${inputName}_${index}_${Date.now()}`;
-
         chipDiv.innerHTML = `
-            <input type="${inputType}" name="${inputName}" id="${inputId}" value="${op}" ${isRadioDefault ? 'checked' : ''}>
+            <input type="${inputType}" name="${inputName}" value="${op}" ${isRadioDefault ? 'checked' : ''} style="pointer-events:none;">
             <span>${op}</span>
         `;
 
-        const inputInside = chipDiv.querySelector('input');
-
-        // Manejador de clic directo sobre el chip
         chipDiv.onclick = (e) => {
-            if (e.target !== inputInside) {
-                if (inputType === 'checkbox') {
-                    if (!inputInside.disabled) {
-                        inputInside.checked = !inputInside.checked;
-                        inputInside.dispatchEvent(new Event('change'));
-                    }
-                } else if (inputType === 'radio') {
-                    inputInside.checked = true;
-                    inputInside.dispatchEvent(new Event('change'));
-                }
-            }
-        };
-
-        inputInside.onchange = () => {
-            if (inputType === 'checkbox') {
-                controlarCheckboxesIngredientes();
-            } else if (inputType === 'radio') {
-                const siblingChips = containerEl.querySelectorAll('.option-chip');
-                siblingChips.forEach(c => c.classList.remove('selected'));
-                chipDiv.classList.add('selected');
-            }
+            e.preventDefault();
+            toggleOpcion(containerId, chipDiv, inputType);
         };
 
         containerEl.appendChild(chipDiv);
     });
 }
 
-function controlarCheckboxesIngredientes() {
+function toggleOpcion(containerId, chipDiv, inputType) {
+    const container = document.getElementById(containerId);
+    const input = chipDiv.querySelector('input');
+
+    if (inputType === 'radio') {
+        const allChips = container.querySelectorAll('.option-chip');
+        allChips.forEach(c => {
+            c.classList.remove('selected');
+            c.querySelector('input').checked = false;
+        });
+        chipDiv.classList.add('selected');
+        input.checked = true;
+        return;
+    }
+
+    // Comportamiento Checkbox (Ingredientes)
+    if (chipDiv.classList.contains('disabled') && !input.checked) {
+        return;
+    }
+
+    input.checked = !input.checked;
+    if (input.checked) {
+        chipDiv.classList.add('selected');
+    } else {
+        chipDiv.classList.remove('selected');
+    }
+
+    if (containerId === 'modalIngredientsOptions') {
+        recalcularLimiteIngredientes();
+    }
+}
+
+function recalcularLimiteIngredientes() {
     const container = document.getElementById('modalIngredientsOptions');
     if (!container) return;
 
     const chips = Array.from(container.querySelectorAll('.option-chip'));
-    const checkboxes = chips.map(c => c.querySelector('input[type="checkbox"]'));
-    const seleccionados = checkboxes.filter(cb => cb.checked);
-    const totalSeleccionados = seleccionados.length;
+    const seleccionados = chips.filter(c => c.querySelector('input').checked);
+    const total = seleccionados.length;
 
-    // Actualizar estilos seleccionados
-    chips.forEach(chip => {
-        const cb = chip.querySelector('input[type="checkbox"]');
-        if (cb.checked) {
-            chip.classList.add('selected');
-        } else {
-            chip.classList.remove('selected');
-        }
-    });
+    actualizarBadgeLimiteIngredientes(total);
 
-    actualizarBadgeLimiteIngredientes(totalSeleccionados);
-
-    // Límite de ingredientes activo
     if (limiteIngredientesActual > 0) {
-        if (totalSeleccionados >= limiteIngredientesActual) {
-            chips.forEach(chip => {
-                const cb = chip.querySelector('input[type="checkbox"]');
+        if (total >= limiteIngredientesActual) {
+            chips.forEach(c => {
+                const cb = c.querySelector('input');
                 if (!cb.checked) {
-                    cb.disabled = true;
-                    chip.classList.add('disabled');
+                    c.classList.add('disabled');
                 } else {
-                    cb.disabled = false;
-                    chip.classList.remove('disabled');
+                    c.classList.remove('disabled');
                 }
             });
         } else {
-            chips.forEach(chip => {
-                const cb = chip.querySelector('input[type="checkbox"]');
-                cb.disabled = false;
-                chip.classList.remove('disabled');
-            });
+            chips.forEach(c => c.classList.remove('disabled'));
         }
     } else {
-        chips.forEach(chip => {
-            const cb = chip.querySelector('input[type="checkbox"]');
-            cb.disabled = false;
-            chip.classList.remove('disabled');
-        });
+        chips.forEach(c => c.classList.remove('disabled'));
     }
 }
 
@@ -460,7 +459,7 @@ function cerrarModal() {
 function confirmarAgregarAlCarrito() {
     if (!productoSeleccionado) return;
 
-    const esPorMonto = limpiarTexto(productoSeleccionado.venta_por_monto) === 'SI';
+    const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(productoSeleccionado, ['venta_por_monto', 'por_monto'])) === 'SI';
     let precioFinal = parseFloat(productoSeleccionado.precio || 0);
 
     if (esPorMonto) {
