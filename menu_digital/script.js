@@ -1,22 +1,18 @@
 // ======================================================
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-// Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
 const SHEETDB_INPUT = "sq3j6nb77cl27"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
 let MONTO_MINIMO_SELLO = 80.00;
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
-// Extractor seguro de ID de SheetDB
 function obtenerIdLimpioSheetDB(input) {
     if (!input || input.includes("TU_ID")) return "";
-    const limpio = input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
-    return limpio;
+    return input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
 }
 
 const SHEETDB_ID = obtenerIdLimpioSheetDB(SHEETDB_INPUT);
@@ -30,7 +26,6 @@ let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
 
-// Control del Carrusel de Promos
 let bannersPromoActivos = [];
 let indiceBannerActual = 0;
 let temporizadorAutoplayBanner = null;
@@ -116,11 +111,9 @@ async function cargarConfiguracionGlobal() {
             if (filaBanco && filaBanco.valor && filaBanco.valor.trim() !== '') {
                 BANCO_TITULAR = filaBanco.valor.trim();
             }
-
-            console.log("⚙️ Configuración sincronizada con Google Sheets");
         }
     } catch (e) {
-        console.warn("Usando configuración por defecto:", e);
+        console.warn("Usando configuración por defecto");
     }
 }
 
@@ -134,7 +127,6 @@ async function cargarMenuDesdeSheetDB() {
         }
 
         productosGlobales = productos;
-
         const diaHoy = DIAS_SEMANA[new Date().getDay()];
 
         const productosHoy = productos.filter(p => {
@@ -157,7 +149,7 @@ async function cargarMenuDesdeSheetDB() {
 }
 
 // ======================================================
-// CARRUSEL Y GALERÍA DE PROMOS CON VINCULACIÓN AL ID
+// CARRUSEL LIMPIO (SOLO IMAGEN + BOTÓN FLOTANTE)
 // ======================================================
 function renderizarGaleriaPromos(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
@@ -167,7 +159,6 @@ function renderizarGaleriaPromos(productos) {
 
     if (temporizadorAutoplayBanner) clearInterval(temporizadorAutoplayBanner);
 
-    // Filtra los que tienen destacado_banner = SI y tienen imagen_banner
     bannersPromoActivos = productos.filter(p => {
         const esDestacado = limpiarTexto(obtenerPropiedadFlexible(p, ['destacado_banner', 'destacado', 'banner'])) === 'SI';
         const estaDisp = limpiarTexto(obtenerPropiedadFlexible(p, ['disponible', 'activo'])) === 'SI';
@@ -186,30 +177,19 @@ function renderizarGaleriaPromos(productos) {
 
     bannersPromoActivos.forEach((prod, idx) => {
         const imgBanner = obtenerPropiedadFlexible(prod, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
-        const tituloPromo = obtenerPropiedadFlexible(prod, ['titulo_promo', 'promo_titulo', 'titulo_banner', 'promo']) || prod.nombre;
-        const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
-        const precioDisplay = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-        // Crear Slide
         const slide = document.createElement('div');
         slide.className = 'promo-slide';
         slide.onclick = () => abrirModalPersonalizacion(prod.id);
 
         slide.innerHTML = `
             <img src="${imgBanner}" alt="${prod.nombre}" class="promo-banner-image">
-            <div class="promo-slide-overlay">
-                <div class="promo-slide-info">
-                    <h4>${tituloPromo}</h4>
-                    <p>${prod.nombre} | ${precioDisplay}</p>
-                </div>
-                <button type="button" class="btn-promo-action">
-                    <i class="fa-solid fa-cart-plus"></i> Pedir Promo
-                </button>
-            </div>
+            <button type="button" class="btn-promo-floating">
+                <i class="fa-solid fa-cart-plus"></i> Pedir Promo
+            </button>
         `;
         sliderTrack.appendChild(slide);
 
-        // Crear Dot
         const dot = document.createElement('div');
         dot.className = `promo-dot ${idx === 0 ? 'active' : ''}`;
         dot.onclick = () => irAlBanner(idx);
@@ -219,11 +199,10 @@ function renderizarGaleriaPromos(productos) {
     bannerContainer.style.display = 'block';
     actualizarPosicionSlider();
 
-    // Iniciar Autoplay si hay más de 1 banner
     if (bannersPromoActivos.length > 1) {
         temporizadorAutoplayBanner = setInterval(() => {
             moverBannerManual(1);
-        }, 5000);
+        }, 4500);
     }
 }
 
@@ -940,7 +919,6 @@ async function procesarGeneracionTurno() {
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando pedido...';
 
-    // 1. Procesar Registro en Clientes_Lealtad
     let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
     if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
         infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
@@ -963,12 +941,10 @@ async function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    // 2. Guardar en KDS Local
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
-    // 3. Respaldo asegurado en Ventas_Historicas
     await respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
     btnSubmit.disabled = false;
@@ -978,7 +954,6 @@ async function procesarGeneracionTurno() {
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
-// Inserción / Actualización de Clientes_Lealtad
 async function procesarSelloEnGoogleSheets(telefono, nombre) {
     if (!SHEETDB_ID) {
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
@@ -1047,7 +1022,6 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
     }
 }
 
-// Inserción en Ventas_Historicas
 async function respaldarVentaEnGoogleSheets(pedido) {
     if (!SHEETDB_ID) return;
     try {
@@ -1134,13 +1108,11 @@ function mostrarBoletoTurno(pedido) {
         if (onlinePaymentCard) {
             onlinePaymentCard.style.display = 'block';
             
-            // Configurar botón de Mercado Pago
             const btnMp = document.getElementById('btnMercadoPagoLink');
             const mpTotalEl = document.getElementById('ticketMpTotal');
             if (btnMp) btnMp.href = LINK_MERCADOPAGO;
             if (mpTotalEl) mpTotalEl.textContent = `$${pedido.total.toFixed(2)}`;
 
-            // Configurar datos de transferencia
             document.getElementById('bankTitularText').textContent = BANCO_TITULAR;
             document.getElementById('clabeNumberText').textContent = CLABE_BANCARIA;
             document.getElementById('transferConceptoTurno').textContent = pedido.turno;
