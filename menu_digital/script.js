@@ -2,12 +2,15 @@
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
 // Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
-const SHEETDB_INPUT = "sq3j6nb77cl27"; 
-const NUMERO_WHATSAPP = "524425592147"; 
+const SHEETDB_INPUT = "TU_ID_O_URL_AQUI"; 
+const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
 let MONTO_MINIMO_SELLO = 80.00;
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
+let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
+let CLABE_BANCARIA = "123456789012345678";
+let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
 // Extractor seguro de ID de SheetDB
 function obtenerIdLimpioSheetDB(input) {
@@ -75,31 +78,49 @@ function parsearExtraConCosto(textoOpcion) {
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeSheetDB();
-    cargarConfiguracionMontoYPremio();
+    cargarConfiguracionGlobal();
 });
 
-async function cargarConfiguracionMontoYPremio() {
+async function cargarConfiguracionGlobal() {
     if (!SHEETDB_ID) return;
     try {
         const res = await fetch(obtenerUrlSheetDB('Configuracion'));
         const config = await res.json();
         if (Array.isArray(config)) {
-            // 1. Monto mínimo de lealtad
+            // 1. Monto mínimo
             const filaMonto = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
             if (filaMonto && !isNaN(parseFloat(filaMonto.valor))) {
                 MONTO_MINIMO_SELLO = parseFloat(filaMonto.valor);
-                console.log("⚙️ Monto mínimo cargado desde Sheets: $" + MONTO_MINIMO_SELLO);
             }
 
-            // 2. Premio o recompensa configurable
+            // 2. Premio de lealtad
             const filaPremio = config.find(c => limpiarTexto(c.clave) === 'PREMIO_LEALTAD');
             if (filaPremio && filaPremio.valor && filaPremio.valor.trim() !== '') {
                 PREMIO_LEALTAD = filaPremio.valor.trim();
-                console.log("🎁 Premio de lealtad cargado desde Sheets:", PREMIO_LEALTAD);
             }
+
+            // 3. Link de Mercado Pago
+            const filaMp = config.find(c => limpiarTexto(c.clave) === 'LINK_MERCADOPAGO');
+            if (filaMp && filaMp.valor && filaMp.valor.trim() !== '') {
+                LINK_MERCADOPAGO = filaMp.valor.trim();
+            }
+
+            // 4. CLABE Interbancaria
+            const filaClabe = config.find(c => limpiarTexto(c.clave) === 'CLABE_INTERBANCARIA' || limpiarTexto(c.clave) === 'CLABE');
+            if (filaClabe && filaClabe.valor && filaClabe.valor.trim() !== '') {
+                CLABE_BANCARIA = filaClabe.valor.trim();
+            }
+
+            // 5. Banco o Titular
+            const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
+            if (filaBanco && filaBanco.valor && filaBanco.valor.trim() !== '') {
+                BANCO_TITULAR = filaBanco.valor.trim();
+            }
+
+            console.log("⚙️ Configuración sincronizada con Google Sheets");
         }
     } catch (e) {
-        console.warn("Usando configuración por defecto");
+        console.warn("Usando configuración por defecto:", e);
     }
 }
 
@@ -735,7 +756,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT, TURNOS Y SINCRONIZACIÓN
+// 5. CHECKOUT, TURNOS Y PAGOS EN LÍNEA
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -1004,7 +1025,7 @@ async function respaldarVentaEnGoogleSheets(pedido) {
 function mostrarBoletoTurno(pedido) {
     const badgeType = document.getElementById('ticketBadgeType');
     const paymentAlert = document.getElementById('ticketPaymentAlert');
-    const qrContainer = document.getElementById('qrPaymentContainer');
+    const onlinePaymentCard = document.getElementById('onlinePaymentContainer');
     const loyaltyBanner = document.getElementById('ticketLoyaltyBanner');
 
     document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
@@ -1038,23 +1059,52 @@ function mostrarBoletoTurno(pedido) {
             <strong>💵 Pago en Mostrador:</strong><br>
             Pagarás <strong>$${pedido.total.toFixed(2)}</strong> al momento de recibir tus botanas preparadas.
         `;
-        if (qrContainer) qrContainer.style.display = 'none';
+        if (onlinePaymentCard) onlinePaymentCard.style.display = 'none';
     } else {
         badgeType.textContent = '🛍️ PARA RECOGER';
         badgeType.className = 'ticket-badge badge-recoger';
         paymentAlert.className = 'ticket-payment-alert alert-recoger';
         paymentAlert.innerHTML = `
             <strong>⚠️ Pago Previo Requerido:</strong><br>
-            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, realiza tu pago por transferencia o QR y envía el comprobante por WhatsApp.
+            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, realiza tu pago en línea o transferencia y envía el comprobante por WhatsApp.
         `;
-        if (qrContainer) {
-            qrContainer.style.display = 'block';
-            document.getElementById('qrConceptoTurno').textContent = pedido.turno;
+        
+        if (onlinePaymentCard) {
+            onlinePaymentCard.style.display = 'block';
+            
+            // Configurar botón de Mercado Pago
+            const btnMp = document.getElementById('btnMercadoPagoLink');
+            const mpTotalEl = document.getElementById('ticketMpTotal');
+            if (btnMp) btnMp.href = LINK_MERCADOPAGO;
+            if (mpTotalEl) mpTotalEl.textContent = `$${pedido.total.toFixed(2)}`;
+
+            // Configurar datos de transferencia
+            document.getElementById('bankTitularText').textContent = BANCO_TITULAR;
+            document.getElementById('clabeNumberText').textContent = CLABE_BANCARIA;
+            document.getElementById('transferConceptoTurno').textContent = pedido.turno;
         }
     }
 
     document.getElementById('ticketModal').classList.add('active');
-    iniciarCuentaRegresivaKiosko(12);
+    iniciarCuentaRegresivaKiosko(20); // 20s para darle tiempo de pulsar en el móvil
+}
+
+// Copiado rápido de CLABE con feedback visual
+function copiarClabeAlPortapapeles() {
+    navigator.clipboard.writeText(CLABE_BANCARIA).then(() => {
+        const btn = document.getElementById('btnCopyClabe');
+        if (btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Copiada!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+    }).catch(err => {
+        alert(`CLABE: ${CLABE_BANCARIA}`);
+    });
 }
 
 function iniciarCuentaRegresivaKiosko(segundosRestantes) {
