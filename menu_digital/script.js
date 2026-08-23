@@ -3,7 +3,7 @@
 // ======================================================
 // Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
 const SHEETDB_INPUT = "sq3j6nb77cl27"; 
-const NUMERO_WHATSAPP = "524425592147"; 
+const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
 let MONTO_MINIMO_SELLO = 80.00;
@@ -29,6 +29,11 @@ let limiteIngredientesActual = 0;
 let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
+
+// Control del Carrusel de Promos
+let bannersPromoActivos = [];
+let indiceBannerActual = 0;
+let temporizadorAutoplayBanner = null;
 
 const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
@@ -87,31 +92,26 @@ async function cargarConfiguracionGlobal() {
         const res = await fetch(obtenerUrlSheetDB('Configuracion'));
         const config = await res.json();
         if (Array.isArray(config)) {
-            // 1. Monto mínimo
             const filaMonto = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
             if (filaMonto && !isNaN(parseFloat(filaMonto.valor))) {
                 MONTO_MINIMO_SELLO = parseFloat(filaMonto.valor);
             }
 
-            // 2. Premio de lealtad
             const filaPremio = config.find(c => limpiarTexto(c.clave) === 'PREMIO_LEALTAD');
             if (filaPremio && filaPremio.valor && filaPremio.valor.trim() !== '') {
                 PREMIO_LEALTAD = filaPremio.valor.trim();
             }
 
-            // 3. Link de Mercado Pago
             const filaMp = config.find(c => limpiarTexto(c.clave) === 'LINK_MERCADOPAGO');
             if (filaMp && filaMp.valor && filaMp.valor.trim() !== '') {
                 LINK_MERCADOPAGO = filaMp.valor.trim();
             }
 
-            // 4. CLABE Interbancaria
             const filaClabe = config.find(c => limpiarTexto(c.clave) === 'CLABE_INTERBANCARIA' || limpiarTexto(c.clave) === 'CLABE');
             if (filaClabe && filaClabe.valor && filaClabe.valor.trim() !== '') {
                 CLABE_BANCARIA = filaClabe.valor.trim();
             }
 
-            // 5. Banco o Titular
             const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
             if (filaBanco && filaBanco.valor && filaBanco.valor.trim() !== '') {
                 BANCO_TITULAR = filaBanco.valor.trim();
@@ -143,7 +143,7 @@ async function cargarMenuDesdeSheetDB() {
             return diasConfig.includes(diaHoy);
         });
 
-        renderizarBannerEspeciales(productosHoy);
+        renderizarGaleriaPromos(productosHoy);
         renderizarMenu(productosHoy.length > 0 ? productosHoy : productos);
         iniciarNavegacionScroll();
     } catch (error) {
@@ -156,45 +156,107 @@ async function cargarMenuDesdeSheetDB() {
     }
 }
 
-function renderizarBannerEspeciales(productos) {
+// ======================================================
+// CARRUSEL Y GALERÍA DE PROMOS CON VINCULACIÓN AL ID
+// ======================================================
+function renderizarGaleriaPromos(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
-    const bannerTrack = document.getElementById('bannerSliderTrack');
-    if (!bannerContainer || !bannerTrack) return;
+    const sliderTrack = document.getElementById('bannerSliderTrack');
+    const dotsContainer = document.getElementById('promoDotsContainer');
+    if (!bannerContainer || !sliderTrack || !dotsContainer) return;
 
-    const destacados = productos.filter(p => {
+    if (temporizadorAutoplayBanner) clearInterval(temporizadorAutoplayBanner);
+
+    // Filtra los que tienen destacado_banner = SI y tienen imagen_banner
+    bannersPromoActivos = productos.filter(p => {
         const esDestacado = limpiarTexto(obtenerPropiedadFlexible(p, ['destacado_banner', 'destacado', 'banner'])) === 'SI';
         const estaDisp = limpiarTexto(obtenerPropiedadFlexible(p, ['disponible', 'activo'])) === 'SI';
-        return esDestacado && estaDisp;
+        const imgBanner = obtenerPropiedadFlexible(p, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
+        return esDestacado && estaDisp && imgBanner && imgBanner.trim() !== '';
     });
 
-    if (destacados.length === 0) {
+    if (bannersPromoActivos.length === 0) {
         bannerContainer.style.display = 'none';
         return;
     }
 
-    bannerTrack.innerHTML = '';
-    destacados.forEach(prod => {
-        const card = document.createElement('div');
-        card.className = 'banner-item-card';
-        card.onclick = () => abrirModalPersonalizacion(prod.id);
+    sliderTrack.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    indiceBannerActual = 0;
 
+    bannersPromoActivos.forEach((prod, idx) => {
+        const imgBanner = obtenerPropiedadFlexible(prod, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
+        const tituloPromo = obtenerPropiedadFlexible(prod, ['titulo_promo', 'promo_titulo', 'titulo_banner', 'promo']) || prod.nombre;
         const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
-        const precioTxt = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
+        const precioDisplay = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-        const imgBannerCustom = obtenerPropiedadFlexible(prod, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
-        const imgFinal = imgBannerCustom && imgBannerCustom.trim() !== '' ? imgBannerCustom : (prod.imagen || 'images/exhibidor_botanas.jpg');
+        // Crear Slide
+        const slide = document.createElement('div');
+        slide.className = 'promo-slide';
+        slide.onclick = () => abrirModalPersonalizacion(prod.id);
 
-        card.innerHTML = `
-            <div class="banner-img" style="background-image: url('${imgFinal}');"></div>
-            <div class="banner-info">
-                <strong>${prod.nombre}</strong>
-                <span>${precioTxt}</span>
+        slide.innerHTML = `
+            <img src="${imgBanner}" alt="${prod.nombre}" class="promo-banner-image">
+            <div class="promo-slide-overlay">
+                <div class="promo-slide-info">
+                    <h4>${tituloPromo}</h4>
+                    <p>${prod.nombre} | ${precioDisplay}</p>
+                </div>
+                <button type="button" class="btn-promo-action">
+                    <i class="fa-solid fa-cart-plus"></i> Pedir Promo
+                </button>
             </div>
         `;
-        bannerTrack.appendChild(card);
+        sliderTrack.appendChild(slide);
+
+        // Crear Dot
+        const dot = document.createElement('div');
+        dot.className = `promo-dot ${idx === 0 ? 'active' : ''}`;
+        dot.onclick = () => irAlBanner(idx);
+        dotsContainer.appendChild(dot);
     });
 
     bannerContainer.style.display = 'block';
+    actualizarPosicionSlider();
+
+    // Iniciar Autoplay si hay más de 1 banner
+    if (bannersPromoActivos.length > 1) {
+        temporizadorAutoplayBanner = setInterval(() => {
+            moverBannerManual(1);
+        }, 5000);
+    }
+}
+
+function moverBannerManual(direccion) {
+    if (bannersPromoActivos.length <= 1) return;
+    indiceBannerActual += direccion;
+    if (indiceBannerActual >= bannersPromoActivos.length) {
+        indiceBannerActual = 0;
+    } else if (indiceBannerActual < 0) {
+        indiceBannerActual = bannersPromoActivos.length - 1;
+    }
+    actualizarPosicionSlider();
+}
+
+function irAlBanner(indice) {
+    indiceBannerActual = indice;
+    actualizarPosicionSlider();
+}
+
+function actualizarPosicionSlider() {
+    const sliderTrack = document.getElementById('bannerSliderTrack');
+    const dots = document.querySelectorAll('.promo-dot');
+    if (!sliderTrack) return;
+
+    sliderTrack.style.transform = `translateX(-${indiceBannerActual * 100}%)`;
+
+    dots.forEach((dot, idx) => {
+        if (idx === indiceBannerActual) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
 }
 
 function renderizarMenu(productos) {
@@ -631,7 +693,7 @@ function actualizarBarraCarrito() {
 }
 
 // ======================================================
-// 3. UPSELLING AUTOMÁTICO (SUGERENCIAS CRUZADAS)
+// 3. UPSELLING AUTOMÁTICO
 // ======================================================
 function iniciarFlujoCheckout() {
     if (carrito.length === 0) {
@@ -1086,10 +1148,9 @@ function mostrarBoletoTurno(pedido) {
     }
 
     document.getElementById('ticketModal').classList.add('active');
-    iniciarCuentaRegresivaKiosko(20); // 20s para darle tiempo de pulsar en el móvil
+    iniciarCuentaRegresivaKiosko(20);
 }
 
-// Copiado rápido de CLABE con feedback visual
 function copiarClabeAlPortapapeles() {
     navigator.clipboard.writeText(CLABE_BANCARIA).then(() => {
         const btn = document.getElementById('btnCopyClabe');
