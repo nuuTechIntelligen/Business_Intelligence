@@ -1,7 +1,8 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Tu URL de Productos
+const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Ventas_Historicas"; // <-- URL para respaldo en la nube
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -39,11 +40,25 @@ function obtenerPropiedadFlexible(obj, clavesPosibles) {
     return '';
 }
 
+// Extrae el nombre y el costo extra de cadenas como: "Queso extra (+$8)"
+function parsearExtraConCosto(textoOpcion) {
+    const match = String(textoOpcion).match(/^(.*?)(?:\s*\(\s*\+\s*\$?\s*([\d\.]+)\s*\))?$/);
+    if (match) {
+        return {
+            nombreLimpio: match[1].trim(),
+            costoExtra: match[2] ? parseFloat(match[2]) : 0,
+            textoCompleto: textoOpcion
+        };
+    }
+    return { nombreLimpio: textoOpcion, costoExtra: 0, textoCompleto: textoOpcion };
+}
+
 // ======================================================
 // 1. CARGA DINÁMICA Y FILTRADO POR DÍA
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeSheetDB();
+    actualizarUILealtad();
 });
 
 async function cargarMenuDesdeSheetDB() {
@@ -103,7 +118,6 @@ function renderizarBannerEspeciales(productos) {
         const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
         const precioTxt = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-        // Prioridad: 1. imagen_banner -> 2. imagen regular -> 3. imagen por defecto
         const imgBannerCustom = obtenerPropiedadFlexible(prod, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
         const imgFinal = imgBannerCustom && imgBannerCustom.trim() !== '' ? imgBannerCustom : (prod.imagen || 'images/exhibidor_botanas.jpg');
 
@@ -199,7 +213,7 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 }
 
 // ======================================================
-// 2. MODAL Y PERSONALIZACIÓN DE INGREDIENTES
+// 2. MODAL Y PERSONALIZACIÓN DE INGREDIENTES Y EXTRAS
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
@@ -213,12 +227,9 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = esPorMonto ? '$20.00' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-    // Búsqueda flexible de la columna max_ingredientes
     const rawMax = obtenerPropiedadFlexible(prod, ['max_ingredientes', 'maxingredientes', 'limite_ingredientes', 'max']);
     const numMax = parseInt(String(rawMax).trim(), 10);
     limiteIngredientesActual = (!isNaN(numMax) && numMax > 0) ? numMax : 0;
-
-    console.log(`🔎 Producto: "${prod.nombre}" | Límite de ingredientes: ${limiteIngredientesActual}`);
 
     // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
@@ -237,14 +248,19 @@ function abrirModalPersonalizacion(productoId) {
     const ingNombre = obtenerPropiedadFlexible(prod, ['grupo_ingredientes_nombre', 'ingredientes_nombre', 'grupo_ingrediente_nombre']) || '¿Qué ingredientes le ponemos?';
     const ingOpciones = obtenerPropiedadFlexible(prod, ['grupo_ingredientes_opciones', 'ingredientes_opciones', 'grupo_ingrediente_opciones', 'ingredientes']);
 
+    const extrasNombre = obtenerPropiedadFlexible(prod, ['grupo_extras_nombre', 'extras_nombre']) || '🧀 Extras / Toppings Adicionales';
+    const extrasOpciones = obtenerPropiedadFlexible(prod, ['grupo_extras_opciones', 'extras_opciones', 'extras']);
+
     const salsaNombre = obtenerPropiedadFlexible(prod, ['grupo_salsas_nombre', 'salsa_nombre', 'grupo_salsa_nombre']) || 'Selecciona tu Salsa';
     const salsaOpciones = obtenerPropiedadFlexible(prod, ['grupo_salsas_opciones', 'salsas_opciones', 'grupo_salsa_opciones', 'salsas']);
 
     renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', baseNombre, baseOpciones, 'radio', 'grupo_base');
     renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', ingNombre, ingOpciones, 'checkbox', 'grupo_ing');
+    renderizarOpcionesModal('modalExtrasGroup', 'modalExtrasTitle', 'modalExtrasOptions', extrasNombre, extrasOpciones, 'checkbox_extras', 'grupo_extras');
     renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', salsaNombre, salsaOpciones, 'radio', 'grupo_salsa');
 
     actualizarBadgeLimiteIngredientes(0);
+    actualizarPrecioEnVivoModal();
 
     document.getElementById('productModal').classList.add('active');
 }
@@ -275,6 +291,7 @@ function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
             document.getElementById('modalProductPrice').textContent = `$${monto.toFixed(2)}`;
             hintMin.textContent = '';
             actualizarClasesPills();
+            actualizarPrecioEnVivoModal();
         };
         pillsContainer.appendChild(pill);
     });
@@ -303,6 +320,7 @@ function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
         } else {
             hintMin.textContent = '';
         }
+        actualizarPrecioEnVivoModal();
     };
 }
 
@@ -339,7 +357,7 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
             searchInput = document.createElement('input');
             searchInput.type = 'text';
             searchInput.className = 'modal-search-input';
-            searchInput.placeholder = '🔍 Buscar opción... (ej. Fresa, Nuez, Nutella)';
+            searchInput.placeholder = '🔍 Buscar opción...';
             groupEl.insertBefore(searchInput, containerEl);
         }
         searchInput.value = '';
@@ -358,15 +376,18 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     }
 
     opciones.forEach((op, index) => {
+        const parsed = parsearExtraConCosto(op);
         const chipDiv = document.createElement('div');
         chipDiv.className = 'option-chip';
-        chipDiv.setAttribute('data-value', op);
+        chipDiv.setAttribute('data-value', parsed.nombreLimpio);
+        chipDiv.setAttribute('data-costo', parsed.costoExtra);
 
-        const isRadioDefault = (inputType === 'radio' && index === 0);
+        const realInputType = inputType.startsWith('checkbox') ? 'checkbox' : 'radio';
+        const isRadioDefault = (realInputType === 'radio' && index === 0);
         if (isRadioDefault) chipDiv.classList.add('selected');
 
         chipDiv.innerHTML = `
-            <input type="${inputType}" name="${inputName}" value="${op}" ${isRadioDefault ? 'checked' : ''} style="pointer-events:none;">
+            <input type="${realInputType}" name="${inputName}" value="${parsed.nombreLimpio}" ${isRadioDefault ? 'checked' : ''} style="pointer-events:none;">
             <span>${op}</span>
         `;
 
@@ -391,6 +412,7 @@ function toggleOpcion(containerId, chipDiv, inputType) {
         });
         chipDiv.classList.add('selected');
         input.checked = true;
+        actualizarPrecioEnVivoModal();
         return;
     }
 
@@ -408,6 +430,7 @@ function toggleOpcion(containerId, chipDiv, inputType) {
     if (containerId === 'modalIngredientsOptions') {
         recalcularLimiteIngredientes();
     }
+    actualizarPrecioEnVivoModal();
 }
 
 function recalcularLimiteIngredientes() {
@@ -455,6 +478,27 @@ function actualizarBadgeLimiteIngredientes(actuales) {
     }
 }
 
+function actualizarPrecioEnVivoModal() {
+    if (!productoSeleccionado) return;
+
+    const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(productoSeleccionado, ['venta_por_monto', 'por_monto'])) === 'SI';
+    let basePrice = esPorMonto ? montoSeleccionadoActual : parseFloat(productoSeleccionado.precio || 0);
+
+    // Suma de extras con costo adicional
+    let extraCost = 0;
+    const chipsExtras = document.querySelectorAll('#modalExtrasOptions .option-chip');
+    chipsExtras.forEach(chip => {
+        const input = chip.querySelector('input');
+        if (input && input.checked) {
+            extraCost += parseFloat(chip.getAttribute('data-costo') || 0);
+        }
+    });
+
+    const finalPrice = basePrice + extraCost;
+    const btnPriceEl = document.getElementById('modalBtnLivePrice');
+    if (btnPriceEl) btnPriceEl.textContent = `$${finalPrice.toFixed(2)}`;
+}
+
 function cerrarModal() {
     document.getElementById('productModal').classList.remove('active');
     productoSeleccionado = null;
@@ -464,32 +508,46 @@ function confirmarAgregarAlCarrito() {
     if (!productoSeleccionado) return;
 
     const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(productoSeleccionado, ['venta_por_monto', 'por_monto'])) === 'SI';
-    let precioFinal = parseFloat(productoSeleccionado.precio || 0);
+    let basePrice = esPorMonto ? montoSeleccionadoActual : parseFloat(productoSeleccionado.precio || 0);
 
-    if (esPorMonto) {
-        if (isNaN(montoSeleccionadoActual) || montoSeleccionadoActual < montoMinimoActual) {
-            alert(`El monto mínimo para este producto es de $${montoMinimoActual.toFixed(2)}`);
-            return;
-        }
-        precioFinal = montoSeleccionadoActual;
+    if (esPorMonto && (isNaN(montoSeleccionadoActual) || montoSeleccionadoActual < montoMinimoActual)) {
+        alert(`El monto mínimo para este producto es de $${montoMinimoActual.toFixed(2)}`);
+        return;
     }
 
     const baseSeleccionada = document.querySelector('#modalBaseOptions input[type="radio"]:checked')?.value || '';
     const ingredientesSeleccionados = Array.from(document.querySelectorAll('#modalIngredientsOptions input[type="checkbox"]:checked')).map(cb => cb.value);
     const salsaSeleccionada = document.querySelector('#modalSaucesOptions input[type="radio"]:checked')?.value || '';
 
+    // Extras seleccionados con desglose
+    let extraCostTotal = 0;
+    let extrasDetalle = [];
+    const chipsExtras = document.querySelectorAll('#modalExtrasOptions .option-chip');
+    chipsExtras.forEach(chip => {
+        const input = chip.querySelector('input');
+        if (input && input.checked) {
+            const cost = parseFloat(chip.getAttribute('data-costo') || 0);
+            extraCostTotal += cost;
+            extrasDetalle.push(cost > 0 ? `${chip.getAttribute('data-value')} (+$${cost})` : chip.getAttribute('data-value'));
+        }
+    });
+
     if (limiteIngredientesActual > 0 && ingredientesSeleccionados.length === 0) {
         alert(`Por favor elige al menos 1 ingrediente para tu orden.`);
         return;
     }
 
+    const estacion = obtenerPropiedadFlexible(productoSeleccionado, ['estacion_cocina', 'estacion']) || 'CALIENTE';
+
     carrito.push({
         id_unico: Date.now() + Math.random(),
         nombre: productoSeleccionado.nombre,
-        precio: precioFinal,
+        precio: basePrice + extraCostTotal,
         base: baseSeleccionada,
         ingredientes: ingredientesSeleccionados,
+        extras: extrasDetalle,
         salsa: salsaSeleccionada,
+        estacion: estacion,
         esPorMonto: esPorMonto
     });
 
@@ -514,7 +572,134 @@ function actualizarBarraCarrito() {
 }
 
 // ======================================================
-// 3. CHECKOUT, TURNOS Y REINICIO KIOSKO
+// 3. UPSELLING AUTOMÁTICO (SUGERENCIAS CRUZADAS)
+// ======================================================
+function iniciarFlujoCheckout() {
+    if (carrito.length === 0) {
+        alert("¡Tu pedido está vacío! Elige una botana para comenzar.");
+        return;
+    }
+
+    // Buscar productos marcados con es_upsell = SI que no estén ya en el carrito
+    const upsellCandidates = productosGlobales.filter(p => {
+        const esUp = limpiarTexto(obtenerPropiedadFlexible(p, ['es_upsell', 'upsell'])) === 'SI';
+        const estaDisp = limpiarTexto(obtenerPropiedadFlexible(p, ['disponible', 'activo'])) === 'SI';
+        const yaEnCarrito = carrito.some(item => item.nombre === p.nombre);
+        return esUp && estaDisp && !yaEnCarrito;
+    });
+
+    if (upsellCandidates.length > 0) {
+        mostrarModalUpsell(upsellCandidates);
+    } else {
+        abrirModalCheckout();
+    }
+}
+
+function mostrarModalUpsell(candidatos) {
+    const list = document.getElementById('upsellItemsList');
+    if (!list) {
+        abrirModalCheckout();
+        return;
+    }
+
+    list.innerHTML = '';
+    candidatos.slice(0, 3).forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'upsell-card';
+        card.innerHTML = `
+            <div class="upsell-info">
+                <strong>${prod.nombre}</strong>
+                <span>+$${parseFloat(prod.precio || 0).toFixed(2)}</span>
+            </div>
+            <button class="btn-add-upsell" onclick="agregarUpsellDirecto(${prod.id})">
+                + Agregar
+            </button>
+        `;
+        list.appendChild(card);
+    });
+
+    document.getElementById('upsellModal').classList.add('active');
+}
+
+function agregarUpsellDirecto(prodId) {
+    const prod = productosGlobales.find(p => p.id == prodId);
+    if (prod) {
+        carrito.push({
+            id_unico: Date.now() + Math.random(),
+            nombre: prod.nombre,
+            precio: parseFloat(prod.precio || 0),
+            base: '',
+            ingredientes: [],
+            extras: [],
+            salsa: '',
+            estacion: obtenerPropiedadFlexible(prod, ['estacion_cocina', 'estacion']) || 'FRIA',
+            esPorMonto: false
+        });
+        actualizarBarraCarrito();
+    }
+    cerrarUpsellYAbrirCheckout();
+}
+
+function cerrarUpsellYAbrirCheckout() {
+    document.getElementById('upsellModal').classList.remove('active');
+    abrirModalCheckout();
+}
+
+// ======================================================
+// 4. TARJETA DE LEALTAD DIGITAL (SELLOS 1-8)
+// ======================================================
+function obtenerSellosActuales() {
+    return parseInt(localStorage.getItem('engordadera_sellos_lealtad') || '0', 10);
+}
+
+function agregarSelloLealtad() {
+    let sellos = obtenerSellosActuales() + 1;
+    if (sellos > 8) sellos = 1; // Reinicia ciclo
+    localStorage.setItem('engordadera_sellos_lealtad', sellos);
+    actualizarUILealtad();
+}
+
+function actualizarUILealtad() {
+    const sellos = obtenerSellosActuales();
+    const heroEl = document.getElementById('heroStampCount');
+    if (heroEl) heroEl.textContent = `${sellos}/8`;
+
+    const container = document.getElementById('loyaltyStampsContainer');
+    const progressBar = document.getElementById('loyaltyProgressBar');
+    const progressText = document.getElementById('loyaltyProgressText');
+
+    if (container) {
+        container.innerHTML = '';
+        for (let i = 1; i <= 8; i++) {
+            const slot = document.createElement('div');
+            slot.className = `stamp-slot ${i <= sellos ? 'stamped' : ''}`;
+            slot.innerHTML = i <= sellos ? '<i class="fa-solid fa-stamp"></i>' : `${i}`;
+            container.appendChild(slot);
+        }
+    }
+
+    if (progressBar) {
+        progressBar.style.width = `${(sellos / 8) * 100}%`;
+    }
+
+    if (progressText) {
+        progressText.textContent = sellos === 8 
+            ? "🎉 ¡Felicidades! Tienes 8 sellos. Tu próxima botana mediana es GRATIS." 
+            : `${sellos} de 8 sellos acumulados`;
+    }
+}
+
+function abrirModalLealtad() {
+    actualizarUILealtad();
+    document.getElementById('loyaltyModal').classList.add('active');
+}
+
+function cerrarModalLealtad() {
+    document.getElementById('loyaltyModal').classList.remove('active');
+}
+
+// ======================================================
+// 5. CHECKOUT, TURNOS Y RESPALDO EN LA NUBE
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -534,12 +719,13 @@ function abrirModalCheckout() {
         let extras = [];
         if (item.base) extras.push(`Base: ${item.base}`);
         if (item.ingredientes.length > 0) extras.push(`Con: ${item.ingredientes.join(', ')}`);
+        if (item.extras && item.extras.length > 0) extras.push(`Extras: ${item.extras.join(', ')}`);
         if (item.salsa) extras.push(`Salsa: ${item.salsa}`);
 
         div.innerHTML = `
             <div class="checkout-item-details">
                 <strong>${item.nombre}</strong>
-                <p>${extras.join(' | ') || 'Sin ingredientes adicionales'}</p>
+                <p>${extras.join(' | ') || 'Clásico'}</p>
             </div>
             <div style="display:flex; align-items:center;">
                 <span class="checkout-item-price">$${item.precio.toFixed(2)}</span>
@@ -594,7 +780,7 @@ function obtenerSiguienteTurno(tipo) {
     return `#${prefijo}-${numeroFormateado}`;
 }
 
-function procesarGeneracionTurno() {
+async function procesarGeneracionTurno() {
     const nombreCliente = document.getElementById('clientNameInput').value.trim();
     if (!nombreCliente) {
         alert("Por favor ingresa tu nombre para identificar tu pedido.");
@@ -620,17 +806,51 @@ function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
+    // 1. Guardar en Storage para KDS local
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
+
+    // 2. Sumar sello de lealtad
+    agregarSelloLealtad();
+
+    // 3. Respaldo asíncrono en Google Sheets (Ventas_Historicas)
+    respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
     cerrarModalCheckout();
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
+// Envío a Google Sheets sin congelar la pantalla
+async function respaldarVentaEnGoogleSheets(pedido) {
+    if (!SHEETDB_VENTAS_URL || SHEETDB_VENTAS_URL.includes("TU_ID_AQUI")) return;
+    try {
+        const payload = {
+            data: [{
+                turno: pedido.turno,
+                cliente: pedido.cliente,
+                telefono: pedido.telefono || '',
+                tipo: pedido.tipo,
+                total: pedido.total,
+                fecha: pedido.fecha_completa,
+                detalle: pedido.items.map(i => `${i.nombre} ($${i.precio})`).join(', ')
+            }]
+        };
+
+        fetch(SHEETDB_VENTAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.warn("Error en respaldo de Sheets:", err));
+    } catch (e) {
+        console.warn("No se pudo enviar respaldo de venta:", e);
+    }
+}
+
 function mostrarBoletoTurno(pedido) {
     const badgeType = document.getElementById('ticketBadgeType');
     const paymentAlert = document.getElementById('ticketPaymentAlert');
+    const qrContainer = document.getElementById('qrPaymentContainer');
 
     document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
     document.getElementById('ticketClientName').textContent = `Cliente: ${pedido.cliente}`;
@@ -643,18 +863,23 @@ function mostrarBoletoTurno(pedido) {
             <strong>💵 Pago en Mostrador:</strong><br>
             Pagarás <strong>$${pedido.total.toFixed(2)}</strong> al momento de recibir tus botanas preparadas.
         `;
+        if (qrContainer) qrContainer.style.display = 'none';
     } else {
         badgeType.textContent = '🛍️ PARA RECOGER';
         badgeType.className = 'ticket-badge badge-recoger';
         paymentAlert.className = 'ticket-payment-alert alert-recoger';
         paymentAlert.innerHTML = `
             <strong>⚠️ Pago Previo Requerido:</strong><br>
-            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, por favor envía tu pedido por WhatsApp y adjunta tu comprobante.
+            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, realiza tu pago por transferencia o QR y envía el comprobante por WhatsApp.
         `;
+        if (qrContainer) {
+            qrContainer.style.display = 'block';
+            document.getElementById('qrConceptoTurno').textContent = pedido.turno;
+        }
     }
 
     document.getElementById('ticketModal').classList.add('active');
-    iniciarCuentaRegresivaKiosko(7);
+    iniciarCuentaRegresivaKiosko(10);
 }
 
 function iniciarCuentaRegresivaKiosko(segundosRestantes) {
@@ -707,6 +932,7 @@ function enviarComprobanteWhatsApp() {
         mensaje += `\n*${index + 1}. ${item.nombre}* ($${item.precio.toFixed(2)})\n`;
         if (item.base) mensaje += `   • Base: ${item.base}\n`;
         if (item.ingredientes.length > 0) mensaje += `   • Con: ${item.ingredientes.join(', ')}\n`;
+        if (item.extras && item.extras.length > 0) mensaje += `   • Extras: ${item.extras.join(', ')}\n`;
         if (item.salsa) mensaje += `   • Salsa: ${item.salsa}\n`;
     });
 
@@ -724,7 +950,7 @@ function enviarComprobanteWhatsApp() {
 }
 
 // ======================================================
-// 4. AUTOSCROLL HORIZONTAL DE NAVEGACIÓN
+// 6. AUTOSCROLL HORIZONTAL DE NAVEGACIÓN
 // ======================================================
 function iniciarNavegacionScroll() {
     const navButtons = document.querySelectorAll('.nav-btn');
