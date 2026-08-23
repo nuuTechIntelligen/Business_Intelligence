@@ -1,9 +1,13 @@
 // ======================================================
-// CONFIGURACIÓN DE SHEETDB & WHATSAPP
+// CONFIGURACIÓN GENERAL, SHEETDB & REGLAS DE LEALTAD
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Tu URL de Productos
-const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Ventas_Historicas"; // <-- URL para respaldo en la nube
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Productos
+const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Ventas_Historicas"; // <-- Ventas
+const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Clientes_Lealtad"; // <-- Clientes Lealtad
 const NUMERO_WHATSAPP = "5215512345678"; 
+
+// REGLA DE NEGOCIO: Monto mínimo para otorgar sello de lealtad
+const MONTO_MINIMO_SELLO = 80.00;
 
 let productosGlobales = [];
 let productoSeleccionado = null;
@@ -40,7 +44,6 @@ function obtenerPropiedadFlexible(obj, clavesPosibles) {
     return '';
 }
 
-// Extrae el nombre y el costo extra de cadenas como: "Queso extra (+$8)"
 function parsearExtraConCosto(textoOpcion) {
     const match = String(textoOpcion).match(/^(.*?)(?:\s*\(\s*\+\s*\$?\s*([\d\.]+)\s*\))?$/);
     if (match) {
@@ -54,11 +57,10 @@ function parsearExtraConCosto(textoOpcion) {
 }
 
 // ======================================================
-// 1. CARGA DINÁMICA Y FILTRADO POR DÍA
+// 1. CARGA DINÁMICA DEL MENÚ
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeSheetDB();
-    actualizarUILealtad();
 });
 
 async function cargarMenuDesdeSheetDB() {
@@ -231,7 +233,6 @@ function abrirModalPersonalizacion(productoId) {
     const numMax = parseInt(String(rawMax).trim(), 10);
     limiteIngredientesActual = (!isNaN(numMax) && numMax > 0) ? numMax : 0;
 
-    // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
     if (esPorMonto) {
         amountGroup.style.display = 'block';
@@ -241,7 +242,6 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Opciones
     const baseNombre = obtenerPropiedadFlexible(prod, ['grupo_base_nombre', 'base_nombre']) || 'Selecciona tu Base';
     const baseOpciones = obtenerPropiedadFlexible(prod, ['grupo_base_opciones', 'base_opciones', 'bases']);
 
@@ -484,7 +484,6 @@ function actualizarPrecioEnVivoModal() {
     const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(productoSeleccionado, ['venta_por_monto', 'por_monto'])) === 'SI';
     let basePrice = esPorMonto ? montoSeleccionadoActual : parseFloat(productoSeleccionado.precio || 0);
 
-    // Suma de extras con costo adicional
     let extraCost = 0;
     const chipsExtras = document.querySelectorAll('#modalExtrasOptions .option-chip');
     chipsExtras.forEach(chip => {
@@ -519,7 +518,6 @@ function confirmarAgregarAlCarrito() {
     const ingredientesSeleccionados = Array.from(document.querySelectorAll('#modalIngredientsOptions input[type="checkbox"]:checked')).map(cb => cb.value);
     const salsaSeleccionada = document.querySelector('#modalSaucesOptions input[type="radio"]:checked')?.value || '';
 
-    // Extras seleccionados con desglose
     let extraCostTotal = 0;
     let extrasDetalle = [];
     const chipsExtras = document.querySelectorAll('#modalExtrasOptions .option-chip');
@@ -580,7 +578,6 @@ function iniciarFlujoCheckout() {
         return;
     }
 
-    // Buscar productos marcados con es_upsell = SI que no estén ya en el carrito
     const upsellCandidates = productosGlobales.filter(p => {
         const esUp = limpiarTexto(obtenerPropiedadFlexible(p, ['es_upsell', 'upsell'])) === 'SI';
         const estaDisp = limpiarTexto(obtenerPropiedadFlexible(p, ['disponible', 'activo'])) === 'SI';
@@ -646,29 +643,38 @@ function cerrarUpsellYAbrirCheckout() {
 }
 
 // ======================================================
-// 4. TARJETA DE LEALTAD DIGITAL (SELLOS 1-8)
+// 4. CONSULTA PÚBLICA DE SELLOS (MODAL HERO)
 // ======================================================
-function obtenerSellosActuales() {
-    return parseInt(localStorage.getItem('engordadera_sellos_lealtad') || '0', 10);
+function abrirModalConsultaLealtad() {
+    document.getElementById('loyaltyQueryResult').style.display = 'none';
+    document.getElementById('queryPhoneInput').value = '';
+    document.getElementById('loyaltyQueryModal').classList.add('active');
 }
 
-function agregarSelloLealtad() {
-    let sellos = obtenerSellosActuales() + 1;
-    if (sellos > 8) sellos = 1; // Reinicia ciclo
-    localStorage.setItem('engordadera_sellos_lealtad', sellos);
-    actualizarUILealtad();
+function cerrarModalConsultaLealtad() {
+    document.getElementById('loyaltyQueryModal').classList.remove('active');
 }
 
-function actualizarUILealtad() {
-    const sellos = obtenerSellosActuales();
-    const heroEl = document.getElementById('heroStampCount');
-    if (heroEl) heroEl.textContent = `${sellos}/8`;
+async function consultarSellosEnSheets() {
+    const tel = document.getElementById('queryPhoneInput').value.trim().replace(/\D/g, '');
+    if (!tel || tel.length < 10) {
+        alert("Por favor ingresa tu número de celular a 10 dígitos.");
+        return;
+    }
 
-    const container = document.getElementById('loyaltyStampsContainer');
-    const progressBar = document.getElementById('loyaltyProgressBar');
-    const progressText = document.getElementById('loyaltyProgressText');
+    try {
+        const res = await fetch(`${SHEETDB_LEALTAD_URL}/search?telefono=${tel}`);
+        const data = await res.json();
+        
+        let sellos = 0;
+        let nombre = 'Cliente';
 
-    if (container) {
+        if (Array.isArray(data) && data.length > 0) {
+            sellos = parseInt(data[0].sellos_acumulados || '0', 10);
+            nombre = data[0].nombre || 'Cliente';
+        }
+
+        const container = document.getElementById('queryStampsContainer');
         container.innerHTML = '';
         for (let i = 1; i <= 8; i++) {
             const slot = document.createElement('div');
@@ -676,30 +682,20 @@ function actualizarUILealtad() {
             slot.innerHTML = i <= sellos ? '<i class="fa-solid fa-stamp"></i>' : `${i}`;
             container.appendChild(slot);
         }
+
+        document.getElementById('queryProgressBar').style.width = `${(sellos / 8) * 100}%`;
+        document.getElementById('queryProgressText').textContent = sellos === 8 
+            ? `🎉 ¡Felicidades ${nombre}! Tienes 8 sellos. Tu próxima botana mediana es GRATIS.` 
+            : `Hola ${nombre}, llevas ${sellos} de 8 sellos acumulados.`;
+
+        document.getElementById('loyaltyQueryResult').style.display = 'block';
+    } catch (e) {
+        alert("No se pudo consultar el saldo en este momento.");
     }
-
-    if (progressBar) {
-        progressBar.style.width = `${(sellos / 8) * 100}%`;
-    }
-
-    if (progressText) {
-        progressText.textContent = sellos === 8 
-            ? "🎉 ¡Felicidades! Tienes 8 sellos. Tu próxima botana mediana es GRATIS." 
-            : `${sellos} de 8 sellos acumulados`;
-    }
-}
-
-function abrirModalLealtad() {
-    actualizarUILealtad();
-    document.getElementById('loyaltyModal').classList.add('active');
-}
-
-function cerrarModalLealtad() {
-    document.getElementById('loyaltyModal').classList.remove('active');
 }
 
 // ======================================================
-// 5. CHECKOUT, TURNOS Y RESPALDO EN LA NUBE
+// 5. CHECKOUT, PROCESAMIENTO DE LEALTAD Y TURNOS
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -736,6 +732,31 @@ function abrirModalCheckout() {
     });
 
     document.getElementById('checkoutTotalPrice').textContent = `$${total.toFixed(2)}`;
+
+    // Regla visual de fidelidad en el Checkout
+    const loyaltyBox = document.getElementById('loyaltyCheckoutBox');
+    const phoneInput = document.getElementById('clientPhoneInput');
+    const phoneHint = document.getElementById('loyaltyPhoneHint');
+
+    if (total >= MONTO_MINIMO_SELLO) {
+        loyaltyBox.style.display = 'block';
+        loyaltyBox.innerHTML = `
+            <strong style="color:#854D0E;">⭐ ¡Felicidades! Tu compra califica para 1 Sello de Lealtad</strong><br>
+            <small style="color:#A16207;">Ingresa tu celular abajo para registrar tu sello en Google Sheets (8 sellos = Botana Gratis 🎁).</small>
+        `;
+        phoneInput.required = true;
+        phoneHint.textContent = "* Requerido para acumular tu sello en este pedido.";
+    } else {
+        const falta = (MONTO_MINIMO_SELLO - total).toFixed(2);
+        loyaltyBox.style.display = 'block';
+        loyaltyBox.innerHTML = `
+            <strong style="color:#4B5563;">⭐ Programa de Lealtad (Mínimo $${MONTO_MINIMO_SELLO.toFixed(2)})</strong><br>
+            <small style="color:#6B7280;">Te faltan <strong>$${falta}</strong> en tu orden para ganar 1 sello de fidelidad hoy.</small>
+        `;
+        phoneInput.required = false;
+        phoneHint.textContent = "(Opcional para consumo en tienda)";
+    }
+
     document.getElementById('checkoutModal').classList.add('active');
 }
 
@@ -756,16 +777,13 @@ function eliminarDelCarrito(index) {
 function cambiarTipoPedido(tipo) {
     const storeLabel = document.getElementById('typeStoreLabel');
     const pickupLabel = document.getElementById('typePickupLabel');
-    const phoneGroup = document.getElementById('phoneInputGroup');
 
     if (tipo === 'tienda') {
         storeLabel.classList.add('active');
         pickupLabel.classList.remove('active');
-        if (phoneGroup) phoneGroup.style.display = 'none';
     } else {
         pickupLabel.classList.add('active');
         storeLabel.classList.remove('active');
-        if (phoneGroup) phoneGroup.style.display = 'block';
     }
 }
 
@@ -788,9 +806,25 @@ async function procesarGeneracionTurno() {
     }
 
     const tipoPedido = document.querySelector('input[name="orderType"]:checked').value;
-    const telefonoCliente = document.getElementById('clientPhoneInput') ? document.getElementById('clientPhoneInput').value.trim() : '';
-    const numeroTurno = obtenerSiguienteTurno(tipoPedido);
+    const telefonoCliente = document.getElementById('clientPhoneInput').value.trim().replace(/\D/g, '');
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
+
+    if (total >= MONTO_MINIMO_SELLO && (!telefonoCliente || telefonoCliente.length < 10)) {
+        alert("Para acumular tu sello de lealtad, por favor ingresa tu celular a 10 dígitos.");
+        return;
+    }
+
+    const btnSubmit = document.getElementById('btnSubmitOrder');
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...';
+
+    // 1. Procesar Registro/Suma de Sellos en Sheets
+    let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
+    if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
+        infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
+    }
+
+    const numeroTurno = obtenerSiguienteTurno(tipoPedido);
 
     ultimoPedidoGenerado = {
         id_pedido: 'PED-' + Date.now(),
@@ -802,26 +836,87 @@ async function procesarGeneracionTurno() {
         total: total,
         estado: 'cola',
         pagado: tipoPedido === 'tienda',
+        lealtad: infoLealtad,
         fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         fecha_completa: new Date().toISOString()
     };
 
-    // 1. Guardar en Storage para KDS local
+    // 2. Guardar en KDS Local
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
-    // 2. Sumar sello de lealtad
-    agregarSelloLealtad();
-
-    // 3. Respaldo asíncrono en Google Sheets (Ventas_Historicas)
+    // 3. Respaldo en Ventas_Historicas
     respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
+
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = '<i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno';
 
     cerrarModalCheckout();
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
-// Envío a Google Sheets sin congelar la pantalla
+// Lógica de Lealtad en SheetDB (Pestaña Clientes_Lealtad)
+async function procesarSelloEnGoogleSheets(telefono, nombre) {
+    if (!SHEETDB_LEALTAD_URL || SHEETDB_LEALTAD_URL.includes("TU_ID_AQUI")) {
+        return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
+    }
+
+    try {
+        const searchRes = await fetch(`${SHEETDB_LEALTAD_URL}/search?telefono=${telefono}`);
+        const clientes = await searchRes.json();
+        const fechaHoy = new Date().toISOString().split('T')[0];
+
+        if (Array.isArray(clientes) && clientes.length > 0) {
+            // Cliente existente: sumar sello
+            const c = clientes[0];
+            let sellos = parseInt(c.sellos_acumulados || '0', 10) + 1;
+            let regalos = parseInt(c.recompensas_canjeadas || '0', 10);
+            let esRegalo = false;
+
+            if (sellos >= 8) {
+                esRegalo = true;
+                sellos = 0; // Reinicia ciclo tras completar 8
+                regalos += 1;
+            }
+
+            await fetch(`${SHEETDB_LEALTAD_URL}/telefono/${telefono}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: {
+                        sellos_acumulados: sellos,
+                        recompensas_canjeadas: regalos,
+                        ultima_visita: fechaHoy
+                    }
+                })
+            });
+
+            return { aplicaSello: true, sellosActuales: esRegalo ? 8 : sellos, regaloDesbloqueado: esRegalo };
+        } else {
+            // Cliente nuevo: registrar con 1 sello
+            await fetch(SHEETDB_LEALTAD_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: [{
+                        telefono: telefono,
+                        nombre: nombre,
+                        sellos_acumulados: 1,
+                        recompensas_canjeadas: 0,
+                        ultima_visita: fechaHoy
+                    }]
+                })
+            });
+
+            return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
+        }
+    } catch (err) {
+        console.warn("Error en lealtad:", err);
+        return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
+    }
+}
+
 async function respaldarVentaEnGoogleSheets(pedido) {
     if (!SHEETDB_VENTAS_URL || SHEETDB_VENTAS_URL.includes("TU_ID_AQUI")) return;
     try {
@@ -851,9 +946,31 @@ function mostrarBoletoTurno(pedido) {
     const badgeType = document.getElementById('ticketBadgeType');
     const paymentAlert = document.getElementById('ticketPaymentAlert');
     const qrContainer = document.getElementById('qrPaymentContainer');
+    const loyaltyBanner = document.getElementById('ticketLoyaltyBanner');
 
     document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
     document.getElementById('ticketClientName').textContent = `Cliente: ${pedido.cliente}`;
+
+    // Despliegue de estado de sellos o premio
+    if (pedido.lealtad && pedido.lealtad.aplicaSello) {
+        loyaltyBanner.style.display = 'block';
+        if (pedido.lealtad.regaloDesbloqueado) {
+            loyaltyBanner.innerHTML = `
+                <div class="reward-unlocked-card">
+                    <h4>🎁 ¡RECOMPENSA DE 8 SELLOS DESBLOQUEADA!</h4>
+                    <p>¡Felicidades! Has completado tu tarjeta. <strong>Muestra este boleto en mostrador para recibir tu botana gratis</strong>.</p>
+                </div>
+            `;
+        } else {
+            loyaltyBanner.innerHTML = `
+                <div style="background:#FEF9C3; border:1px solid #FDE047; border-radius:10px; padding:8px; font-size:0.8rem; color:#854D0E;">
+                    ⭐ <strong>¡Sumaste 1 sello!</strong> Llevas <strong>${pedido.lealtad.sellosActuales} de 8 sellos</strong> acumulados.
+                </div>
+            `;
+        }
+    } else {
+        loyaltyBanner.style.display = 'none';
+    }
 
     if (pedido.tipo === 'tienda') {
         badgeType.textContent = '🏪 CONSUMO EN TIENDA';
@@ -879,7 +996,7 @@ function mostrarBoletoTurno(pedido) {
     }
 
     document.getElementById('ticketModal').classList.add('active');
-    iniciarCuentaRegresivaKiosko(10);
+    iniciarCuentaRegresivaKiosko(12);
 }
 
 function iniciarCuentaRegresivaKiosko(segundosRestantes) {
@@ -910,7 +1027,7 @@ function reiniciarParaNuevoPedido() {
     carrito = [];
     actualizarBarraCarrito();
     document.getElementById('clientNameInput').value = '';
-    if (document.getElementById('clientPhoneInput')) document.getElementById('clientPhoneInput').value = '';
+    document.getElementById('clientPhoneInput').value = '';
     document.getElementById('ticketModal').classList.remove('active');
 }
 
@@ -937,7 +1054,17 @@ function enviarComprobanteWhatsApp() {
     });
 
     mensaje += `\n━━━━━━━━━━━━━━━━━━━━━\n`;
-    mensaje += `💰 *TOTAL A PAGAR:* *$${p.total.toFixed(2)}*\n\n`;
+    mensaje += `💰 *TOTAL A PAGAR:* *$${p.total.toFixed(2)}*\n`;
+
+    if (p.lealtad && p.lealtad.aplicaSello) {
+        if (p.lealtad.regaloDesbloqueado) {
+            mensaje += `🎁 *¡RECOMPENSA GANADA!:* 8/8 sellos acumulados (Reclamar botana gratis en mostrador)\n`;
+        } else {
+            mensaje += `⭐ *SELLOS DE FIDELIDAD:* Llevo ${p.lealtad.sellosActuales}/8 sellos\n`;
+        }
+    }
+
+    mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
     if (p.tipo === 'recoger') {
         mensaje += `📸 *(Adjunto aquí mi comprobante de pago para iniciar la preparación)*`;
