@@ -1,10 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Productos";
-const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Ventas_Historicas";
-const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Clientes_Lealtad";
-const SHEETDB_CONFIG_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Configuracion";
+const SHEETDB_BASE = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega aquí tu ID de SheetDB (solo el ID sin sufijos)
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Monto mínimo dinámico (se actualiza desde Google Sheets)
@@ -45,7 +42,6 @@ function obtenerPropiedadFlexible(obj, clavesPosibles) {
     return '';
 }
 
-// Parsea opciones como "Queso extra (+$8)" o "Carne seca (+$15)"
 function parsearExtraConCosto(textoOpcion) {
     const str = String(textoOpcion).trim();
     const match = str.match(/^(.*?)(?:\s*\(\s*\+\s*\$?\s*([\d\.]+)\s*\))?$/);
@@ -68,14 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarConfiguracionMontoMinimo() {
-    if (!SHEETDB_CONFIG_URL || SHEETDB_CONFIG_URL.includes("TU_ID_AQUI")) return;
+    if (!SHEETDB_BASE || SHEETDB_BASE.includes("TU_ID_AQUI")) return;
     try {
-        const res = await fetch(SHEETDB_CONFIG_URL);
+        const res = await fetch(`${SHEETDB_BASE}?sheet=Configuracion`);
         const config = await res.json();
         if (Array.isArray(config)) {
             const fila = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
             if (fila && !isNaN(parseFloat(fila.valor))) {
                 MONTO_MINIMO_SELLO = parseFloat(fila.valor);
+                console.log("⚙️ Monto mínimo cargado desde Sheets: $" + MONTO_MINIMO_SELLO);
             }
         }
     } catch (e) {
@@ -85,7 +82,7 @@ async function cargarConfiguracionMontoMinimo() {
 
 async function cargarMenuDesdeSheetDB() {
     try {
-        const respuesta = await fetch(SHEETDB_URL);
+        const respuesta = await fetch(`${SHEETDB_BASE}?sheet=Productos`);
         const productos = await respuesta.json();
         
         if (!Array.isArray(productos)) {
@@ -262,7 +259,6 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Mapeo flexible de columnas de Google Sheets
     const baseNombre = obtenerPropiedadFlexible(prod, ['grupo_base_nombre', 'base_nombre']) || 'Selecciona tu Base';
     const baseOpciones = obtenerPropiedadFlexible(prod, ['grupo_base_opciones', 'base_opciones', 'bases']);
 
@@ -684,7 +680,7 @@ async function consultarSellosEnSheets() {
     }
 
     try {
-        const res = await fetch(`${SHEETDB_LEALTAD_URL}/search?telefono=${tel}`);
+        const res = await fetch(`${SHEETDB_BASE}/search?telefono=${tel}&sheet=Clientes_Lealtad`);
         const data = await res.json();
         
         let sellos = 0;
@@ -716,7 +712,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT, TURNOS Y SINCRONIZACIÓN
+// 5. CHECKOUT, TURNOS Y SINCRONIZACIÓN (SHEETDB)
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -836,9 +832,9 @@ async function procesarGeneracionTurno() {
 
     const btnSubmit = document.getElementById('btnSubmitOrder');
     btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...';
+    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando en Google Sheets...';
 
-    // 1. Procesar Registro/Suma de Sellos en Sheets
+    // 1. Procesar Registro/Suma de Sellos en Sheets (Clientes_Lealtad)
     let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
     if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
         infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
@@ -876,13 +872,15 @@ async function procesarGeneracionTurno() {
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
+// Procesa y actualiza sellos en Clientes_Lealtad
 async function procesarSelloEnGoogleSheets(telefono, nombre) {
-    if (!SHEETDB_LEALTAD_URL || SHEETDB_LEALTAD_URL.includes("TU_ID_AQUI")) {
+    if (!SHEETDB_BASE || SHEETDB_BASE.includes("TU_ID_AQUI")) {
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
     }
 
     try {
-        const searchRes = await fetch(`${SHEETDB_LEALTAD_URL}/search?telefono=${telefono}`);
+        const searchUrl = `${SHEETDB_BASE}/search?telefono=${telefono}&sheet=Clientes_Lealtad`;
+        const searchRes = await fetch(searchUrl);
         const clientes = await searchRes.json();
         const fechaHoy = new Date().toISOString().split('T')[0];
 
@@ -898,7 +896,8 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
                 regalos += 1;
             }
 
-            await fetch(`${SHEETDB_LEALTAD_URL}/telefono/${telefono}`, {
+            const patchUrl = `${SHEETDB_BASE}/telefono/${telefono}?sheet=Clientes_Lealtad`;
+            const patchRes = await fetch(patchUrl, {
                 method: 'PATCH',
                 headers: {
                     'Accept': 'application/json',
@@ -912,10 +911,11 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
                     }
                 })
             });
-
+            console.log("⭐ Sello actualizado en Sheets:", await patchRes.json());
             return { aplicaSello: true, sellosActuales: esRegalo ? 8 : sellos, regaloDesbloqueado: esRegalo };
         } else {
-            await fetch(SHEETDB_LEALTAD_URL, {
+            const postUrl = `${SHEETDB_BASE}?sheet=Clientes_Lealtad`;
+            const postRes = await fetch(postUrl, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -931,18 +931,18 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
                     }]
                 })
             });
-
+            console.log("⭐ Nuevo cliente registrado en Clientes_Lealtad:", await postRes.json());
             return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
         }
     } catch (err) {
-        console.warn("Error en lealtad:", err);
+        console.error("❌ Error en lealtad:", err);
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
     }
 }
 
-// Respaldo asíncrono robusto en Google Sheets
+// Inserción asegurada en Ventas_Historicas
 async function respaldarVentaEnGoogleSheets(pedido) {
-    if (!SHEETDB_VENTAS_URL || SHEETDB_VENTAS_URL.includes("TU_ID_AQUI")) return;
+    if (!SHEETDB_BASE || SHEETDB_BASE.includes("TU_ID_AQUI")) return;
     try {
         const payload = {
             data: [{
@@ -960,7 +960,8 @@ async function respaldarVentaEnGoogleSheets(pedido) {
             }]
         };
 
-        const res = await fetch(SHEETDB_VENTAS_URL, {
+        const postUrl = `${SHEETDB_BASE}?sheet=Ventas_Historicas`;
+        const res = await fetch(postUrl, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -969,9 +970,9 @@ async function respaldarVentaEnGoogleSheets(pedido) {
             body: JSON.stringify(payload)
         });
         const resJson = await res.json();
-        console.log("✅ Venta respaldada en Google Sheets:", resJson);
+        console.log("✅ Venta insertada en Ventas_Historicas:", resJson);
     } catch (e) {
-        console.error("❌ Error al respaldar venta en Sheets:", e);
+        console.error("❌ Error al insertar venta en Sheets:", e);
     }
 }
 
