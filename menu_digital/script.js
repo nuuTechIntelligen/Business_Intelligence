@@ -1,13 +1,14 @@
 // ======================================================
-// CONFIGURACIÓN GENERAL, SHEETDB & REGLAS DE LEALTAD
+// CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Productos"; // <-- Productos
-const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Ventas_Historicas"; // <-- Ventas
-const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Clientes_Lealtad"; // <-- Clientes Lealtad
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos";
+const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Ventas_Historicas";
+const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Clientes_Lealtad";
+const SHEETDB_CONFIG_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Configuracion";
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// REGLA DE NEGOCIO: Monto mínimo para otorgar sello de lealtad
-const MONTO_MINIMO_SELLO = 80.00;
+// Monto mínimo dinámico (se actualiza desde Google Sheets)
+let MONTO_MINIMO_SELLO = 80.00;
 
 let productosGlobales = [];
 let productoSeleccionado = null;
@@ -44,24 +45,43 @@ function obtenerPropiedadFlexible(obj, clavesPosibles) {
     return '';
 }
 
+// Parsea opciones como "Queso extra (+$8)" o "Carne seca (+$15)"
 function parsearExtraConCosto(textoOpcion) {
-    const match = String(textoOpcion).match(/^(.*?)(?:\s*\(\s*\+\s*\$?\s*([\d\.]+)\s*\))?$/);
-    if (match) {
+    const str = String(textoOpcion).trim();
+    const match = str.match(/^(.*?)(?:\s*\(\s*\+\s*\$?\s*([\d\.]+)\s*\))?$/);
+    if (match && match[2]) {
         return {
             nombreLimpio: match[1].trim(),
-            costoExtra: match[2] ? parseFloat(match[2]) : 0,
-            textoCompleto: textoOpcion
+            costoExtra: parseFloat(match[2]),
+            textoCompleto: str
         };
     }
-    return { nombreLimpio: textoOpcion, costoExtra: 0, textoCompleto: textoOpcion };
+    return { nombreLimpio: str, costoExtra: 0, textoCompleto: str };
 }
 
 // ======================================================
-// 1. CARGA DINÁMICA DEL MENÚ
+// 1. CARGA DINÁMICA DEL MENÚ Y CONFIGURACIÓN
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeSheetDB();
+    cargarConfiguracionMontoMinimo();
 });
+
+async function cargarConfiguracionMontoMinimo() {
+    if (!SHEETDB_CONFIG_URL || SHEETDB_CONFIG_URL.includes("TU_ID_AQUI")) return;
+    try {
+        const res = await fetch(SHEETDB_CONFIG_URL);
+        const config = await res.json();
+        if (Array.isArray(config)) {
+            const fila = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
+            if (fila && !isNaN(parseFloat(fila.valor))) {
+                MONTO_MINIMO_SELLO = parseFloat(fila.valor);
+            }
+        }
+    } catch (e) {
+        console.warn("Usando monto mínimo por defecto:", MONTO_MINIMO_SELLO);
+    }
+}
 
 async function cargarMenuDesdeSheetDB() {
     try {
@@ -69,7 +89,7 @@ async function cargarMenuDesdeSheetDB() {
         const productos = await respuesta.json();
         
         if (!Array.isArray(productos)) {
-            throw new Error("Formato de datos no válido desde SheetDB");
+            throw new Error("Formato de datos no válido");
         }
 
         productosGlobales = productos;
@@ -86,10 +106,10 @@ async function cargarMenuDesdeSheetDB() {
         renderizarMenu(productosHoy.length > 0 ? productosHoy : productos);
         iniciarNavegacionScroll();
     } catch (error) {
-        console.error("Error al cargar datos desde SheetDB:", error);
+        console.error("Error al cargar datos:", error);
         document.getElementById('menu-sections-container').innerHTML = `
             <div class="loading-state">
-                <p style="color: #D32F2F; font-weight: 700;">⚠️ No se pudo cargar el menú en este momento. Por favor recarga la página.</p>
+                <p style="color: #D32F2F; font-weight: 700;">⚠️ No se pudo cargar el menú. Por favor recarga la página.</p>
             </div>
         `;
     }
@@ -215,7 +235,7 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 }
 
 // ======================================================
-// 2. MODAL Y PERSONALIZACIÓN DE INGREDIENTES Y EXTRAS
+// 2. MODAL Y PERSONALIZACIÓN (INGREDIENTES Y EXTRAS)
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
@@ -242,14 +262,15 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
+    // Mapeo flexible de columnas de Google Sheets
     const baseNombre = obtenerPropiedadFlexible(prod, ['grupo_base_nombre', 'base_nombre']) || 'Selecciona tu Base';
     const baseOpciones = obtenerPropiedadFlexible(prod, ['grupo_base_opciones', 'base_opciones', 'bases']);
 
     const ingNombre = obtenerPropiedadFlexible(prod, ['grupo_ingredientes_nombre', 'ingredientes_nombre', 'grupo_ingrediente_nombre']) || '¿Qué ingredientes le ponemos?';
     const ingOpciones = obtenerPropiedadFlexible(prod, ['grupo_ingredientes_opciones', 'ingredientes_opciones', 'grupo_ingrediente_opciones', 'ingredientes']);
 
-    const extrasNombre = obtenerPropiedadFlexible(prod, ['grupo_extras_nombre', 'extras_nombre']) || '🧀 Extras / Toppings Adicionales';
-    const extrasOpciones = obtenerPropiedadFlexible(prod, ['grupo_extras_opciones', 'extras_opciones', 'extras']);
+    const extrasNombre = obtenerPropiedadFlexible(prod, ['grupo_extras_nombre', 'extras_nombre', 'grupo_extra_nombre']) || '🧀 Extras / Toppings Adicionales';
+    const extrasOpciones = obtenerPropiedadFlexible(prod, ['grupo_extras_opciones', 'extras_opciones', 'grupo_extra_opciones', 'extras']);
 
     const salsaNombre = obtenerPropiedadFlexible(prod, ['grupo_salsas_nombre', 'salsa_nombre', 'grupo_salsa_nombre']) || 'Selecciona tu Salsa';
     const salsaOpciones = obtenerPropiedadFlexible(prod, ['grupo_salsas_opciones', 'salsas_opciones', 'grupo_salsa_opciones', 'salsas']);
@@ -643,7 +664,7 @@ function cerrarUpsellYAbrirCheckout() {
 }
 
 // ======================================================
-// 4. CONSULTA PÚBLICA DE SELLOS (MODAL HERO)
+// 4. CONSULTA PÚBLICA DE SELLOS
 // ======================================================
 function abrirModalConsultaLealtad() {
     document.getElementById('loyaltyQueryResult').style.display = 'none';
@@ -695,7 +716,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT, PROCESAMIENTO DE LEALTAD Y TURNOS
+// 5. CHECKOUT, TURNOS Y SINCRONIZACIÓN
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -733,7 +754,6 @@ function abrirModalCheckout() {
 
     document.getElementById('checkoutTotalPrice').textContent = `$${total.toFixed(2)}`;
 
-    // Regla visual de fidelidad en el Checkout
     const loyaltyBox = document.getElementById('loyaltyCheckoutBox');
     const phoneInput = document.getElementById('clientPhoneInput');
     const phoneHint = document.getElementById('loyaltyPhoneHint');
@@ -741,7 +761,7 @@ function abrirModalCheckout() {
     if (total >= MONTO_MINIMO_SELLO) {
         loyaltyBox.style.display = 'block';
         loyaltyBox.innerHTML = `
-            <strong style="color:#854D0E;">⭐ ¡Felicidades! Tu compra califica para 1 Sello de Lealtad</strong><br>
+            <strong style="color:#854D0E;">⭐ ¡Felicidades! Tu compra califica para 1 Sello de Lealtad (Mínimo: $${MONTO_MINIMO_SELLO.toFixed(2)})</strong><br>
             <small style="color:#A16207;">Ingresa tu celular abajo para registrar tu sello en Google Sheets (8 sellos = Botana Gratis 🎁).</small>
         `;
         phoneInput.required = true;
@@ -846,8 +866,8 @@ async function procesarGeneracionTurno() {
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
-    // 3. Respaldo en Ventas_Historicas
-    respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
+    // 3. Respaldo asegurado en Google Sheets (Ventas_Historicas)
+    await respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = '<i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno';
@@ -856,7 +876,6 @@ async function procesarGeneracionTurno() {
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
-// Lógica de Lealtad en SheetDB (Pestaña Clientes_Lealtad)
 async function procesarSelloEnGoogleSheets(telefono, nombre) {
     if (!SHEETDB_LEALTAD_URL || SHEETDB_LEALTAD_URL.includes("TU_ID_AQUI")) {
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
@@ -868,7 +887,6 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
         const fechaHoy = new Date().toISOString().split('T')[0];
 
         if (Array.isArray(clientes) && clientes.length > 0) {
-            // Cliente existente: sumar sello
             const c = clientes[0];
             let sellos = parseInt(c.sellos_acumulados || '0', 10) + 1;
             let regalos = parseInt(c.recompensas_canjeadas || '0', 10);
@@ -876,13 +894,16 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
 
             if (sellos >= 8) {
                 esRegalo = true;
-                sellos = 0; // Reinicia ciclo tras completar 8
+                sellos = 0;
                 regalos += 1;
             }
 
             await fetch(`${SHEETDB_LEALTAD_URL}/telefono/${telefono}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     data: {
                         sellos_acumulados: sellos,
@@ -894,10 +915,12 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
 
             return { aplicaSello: true, sellosActuales: esRegalo ? 8 : sellos, regaloDesbloqueado: esRegalo };
         } else {
-            // Cliente nuevo: registrar con 1 sello
             await fetch(SHEETDB_LEALTAD_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     data: [{
                         telefono: telefono,
@@ -917,6 +940,7 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
     }
 }
 
+// Respaldo asíncrono robusto en Google Sheets
 async function respaldarVentaEnGoogleSheets(pedido) {
     if (!SHEETDB_VENTAS_URL || SHEETDB_VENTAS_URL.includes("TU_ID_AQUI")) return;
     try {
@@ -928,17 +952,26 @@ async function respaldarVentaEnGoogleSheets(pedido) {
                 tipo: pedido.tipo,
                 total: pedido.total,
                 fecha: pedido.fecha_completa,
-                detalle: pedido.items.map(i => `${i.nombre} ($${i.precio})`).join(', ')
+                detalle: pedido.items.map(i => {
+                    let txt = `${i.nombre} ($${i.precio})`;
+                    if (i.extras && i.extras.length > 0) txt += ` [Extras: ${i.extras.join(', ')}]`;
+                    return txt;
+                }).join(' | ')
             }]
         };
 
-        fetch(SHEETDB_VENTAS_URL, {
+        const res = await fetch(SHEETDB_VENTAS_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(payload)
-        }).catch(err => console.warn("Error en respaldo de Sheets:", err));
+        });
+        const resJson = await res.json();
+        console.log("✅ Venta respaldada en Google Sheets:", resJson);
     } catch (e) {
-        console.warn("No se pudo enviar respaldo de venta:", e);
+        console.error("❌ Error al respaldar venta en Sheets:", e);
     }
 }
 
@@ -951,7 +984,6 @@ function mostrarBoletoTurno(pedido) {
     document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
     document.getElementById('ticketClientName').textContent = `Cliente: ${pedido.cliente}`;
 
-    // Despliegue de estado de sellos o premio
     if (pedido.lealtad && pedido.lealtad.aplicaSello) {
         loyaltyBanner.style.display = 'block';
         if (pedido.lealtad.regaloDesbloqueado) {
