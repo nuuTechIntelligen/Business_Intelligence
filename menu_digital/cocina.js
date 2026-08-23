@@ -1,9 +1,10 @@
 // ======================================================
-// GESTOR KDS, NOTIFICACIONES Y FINANZAS (COMPLETO)
+// GESTOR KDS, SEMÁFOROS DE TIEMPO, ESTACIONES Y FINANZAS
 // ======================================================
 
 let pedidos = [];
 let pedidoEnProcesoTiempo = null;
+let estacionFiltroActual = 'TODAS';
 let chartVentasInstancia = null;
 let chartProductosInstancia = null;
 
@@ -11,7 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     iniciarReloj();
     cargarPedidosDesdeStorage();
 
-    // Escucha cambios automáticos emitidos desde index.html
+    // Actualiza cronómetros y semáforos cada 30 segundos
+    setInterval(() => {
+        renderizarTablero();
+    }, 30000);
+
+    // Escucha eventos automáticos de pedidos desde index.html
     window.addEventListener('storage', (event) => {
         if (event.key === 'engordadera_pedidos_cocina') {
             cargarPedidosDesdeStorage(true);
@@ -54,8 +60,32 @@ function guardarPedidosEnStorage() {
 }
 
 // ======================================================
-// 1. RENDERIZADO DEL TABLERO KANBAN DE COMANDAS
+// 1. FILTRADO POR ESTACIÓN
 // ======================================================
+function filtrarPorEstacion(estacion) {
+    estacionFiltroActual = estacion;
+    const btns = document.querySelectorAll('.btn-station');
+    btns.forEach(b => {
+        if (b.getAttribute('data-station') === estacion) {
+            b.classList.add('active');
+        } else {
+            b.classList.remove('active');
+        }
+    });
+    renderizarTablero();
+}
+
+// ======================================================
+// 2. RENDERIZADO DEL TABLERO KANBAN CON SEMÁFORO
+// ======================================================
+function calcularMinutosTranscurridos(fechaCompleta) {
+    if (!fechaCompleta) return 0;
+    const inicio = new Date(fechaCompleta).getTime();
+    const ahora = Date.now();
+    const difMinutos = Math.floor((ahora - inicio) / 60000);
+    return isNaN(difMinutos) || difMinutos < 0 ? 0 : difMinutos;
+}
+
 function renderizarTablero() {
     const containerCola = document.getElementById('containerCola');
     const containerPrep = document.getElementById('containerPrep');
@@ -73,6 +103,15 @@ function renderizarTablero() {
 
     pedidos.forEach(p => {
         if (p.estado === 'entregado') return;
+
+        // Filtro por estación (Caliente / Fría)
+        if (estacionFiltroActual !== 'TODAS') {
+            const tieneItemEstacion = (p.items || []).some(i => {
+                const est = (i.estacion || 'CALIENTE').toUpperCase();
+                return est === estacionFiltroActual;
+            });
+            if (!tieneItemEstacion) return;
+        }
 
         const card = crearTarjetaComanda(p);
 
@@ -100,7 +139,22 @@ function renderizarTablero() {
 function crearTarjetaComanda(pedido) {
     const card = document.createElement('div');
     const esTienda = pedido.tipo === 'tienda';
-    card.className = `order-card ${esTienda ? 'tienda' : 'recoger'}`;
+    
+    // Cálculo de Semáforo de Tiempo
+    const minutos = calcularMinutosTranscurridos(pedido.fecha_completa);
+    let timerClass = 'timer-green';
+    let borderRedClass = '';
+
+    if (pedido.estado !== 'listo') {
+        if (minutos >= 12) {
+            timerClass = 'timer-red';
+            borderRedClass = 'timer-border-red';
+        } else if (minutos >= 5) {
+            timerClass = 'timer-yellow';
+        }
+    }
+
+    card.className = `order-card ${esTienda ? 'tienda' : 'recoger'} ${borderRedClass}`;
 
     let itemsHTML = '';
     (pedido.items || []).forEach((item, idx) => {
@@ -109,10 +163,16 @@ function crearTarjetaComanda(pedido) {
         if (item.ingredientes && item.ingredientes.length > 0) details.push(`Con: ${item.ingredientes.join(', ')}`);
         if (item.salsa) details.push(`Salsa: ${item.salsa}`);
 
+        let extrasHTML = '';
+        if (item.extras && item.extras.length > 0) {
+            extrasHTML = `<div class="order-item-extras">🧀 Extras: ${item.extras.join(', ')}</div>`;
+        }
+
         itemsHTML += `
             <div class="order-item-row">
                 <div class="order-item-title">${idx + 1}. ${item.nombre}</div>
                 <div class="order-item-details">${details.join('<br>') || 'Clásico'}</div>
+                ${extrasHTML}
             </div>
         `;
     });
@@ -124,7 +184,7 @@ function crearTarjetaComanda(pedido) {
             <div class="payment-status-box ${pagado ? 'payment-done' : 'payment-pending'}">
                 <span>${pagado ? '✓ Pago Confirmado' : '⚠️ Pago Pendiente'}</span>
                 <button class="btn-toggle-pay" onclick="alternarEstadoPago('${pedido.id_pedido}')">
-                    ${pagado ? 'Cambiar a Pendiente' : 'Marcar Pagado'}
+                    ${pagado ? 'Pendiente' : 'Marcar Pagado'}
                 </button>
             </div>
         `;
@@ -162,8 +222,8 @@ function crearTarjetaComanda(pedido) {
         <div class="order-card-header">
             <span class="order-turn-badge ${esTienda ? 'badge-tienda' : 'badge-recoger'}">${pedido.turno}</span>
             <div class="order-meta">
-                <span class="order-type-tag ${esTienda ? 'tag-tienda' : 'tag-recoger'}">${esTienda ? '🏪 En Tienda' : '🛍️ Para Recoger'}</span>
-                <span class="order-time">${pedido.fecha || ''}</span>
+                <span class="timer-pill ${timerClass}"><i class="fa-solid fa-stopwatch"></i> ${minutos}m</span>
+                <span class="order-type-tag ${esTienda ? 'tag-tienda' : 'tag-recoger'}">${esTienda ? '🏪 Tienda' : '🛍️ Recoger'}</span>
             </div>
         </div>
 
@@ -184,7 +244,7 @@ function crearTarjetaComanda(pedido) {
 }
 
 // ======================================================
-// 2. NOTIFICACIONES DE TIEMPO ESTIMADO & LISTO (WHATSAPP)
+// 3. NOTIFICACIONES DE TIEMPO ESTIMADO & WHATSAPP
 // ======================================================
 function solicitarTiempoOIniciar(idPedido) {
     const p = pedidos.find(item => item.id_pedido === idPedido);
@@ -276,13 +336,14 @@ function limpiarEntregadosAntiguos() {
 }
 
 // ======================================================
-// 3. PANEL DE FINANZAS, ANALÍTICA Y GRÁFICAS
+// 4. PANEL DE FINANZAS, ANALÍTICA Y GRÁFICAS
 // ======================================================
 function mostrarVista(vista) {
     const vKDS = document.getElementById('vistaKDS');
     const vFin = document.getElementById('vistaFinanzas');
     const bKDS = document.getElementById('tabBtnKDS');
     const bFin = document.getElementById('tabBtnFinanzas');
+    const sFilters = document.getElementById('stationFiltersHeader');
     const mHead = document.getElementById('kdsMetricsHeader');
 
     if (!vKDS || !vFin) return;
@@ -292,12 +353,14 @@ function mostrarVista(vista) {
         vFin.style.display = 'none';
         bKDS.classList.add('active');
         bFin.classList.remove('active');
+        if (sFilters) sFilters.style.display = 'flex';
         if (mHead) mHead.style.display = 'flex';
     } else {
         vKDS.style.display = 'none';
         vFin.style.display = 'block';
         bFin.classList.add('active');
         bKDS.classList.remove('active');
+        if (sFilters) sFilters.style.display = 'none';
         if (mHead) mHead.style.display = 'none';
         actualizarMetricasFinancieras();
     }
