@@ -2,11 +2,12 @@
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
 // Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
-const SHEETDB_INPUT = "sq3j6nb77cl27"; 
+const SHEETDB_INPUT = "TU_ID_O_URL_AQUI"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// Monto mínimo dinámico (se actualiza desde Google Sheets)
+// Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
 let MONTO_MINIMO_SELLO = 80.00;
+let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 
 // Extractor seguro de ID de SheetDB
 function obtenerIdLimpioSheetDB(input) {
@@ -74,23 +75,31 @@ function parsearExtraConCosto(textoOpcion) {
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeSheetDB();
-    cargarConfiguracionMontoMinimo();
+    cargarConfiguracionMontoYPremio();
 });
 
-async function cargarConfiguracionMontoMinimo() {
+async function cargarConfiguracionMontoYPremio() {
     if (!SHEETDB_ID) return;
     try {
         const res = await fetch(obtenerUrlSheetDB('Configuracion'));
         const config = await res.json();
         if (Array.isArray(config)) {
-            const fila = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
-            if (fila && !isNaN(parseFloat(fila.valor))) {
-                MONTO_MINIMO_SELLO = parseFloat(fila.valor);
+            // 1. Monto mínimo de lealtad
+            const filaMonto = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
+            if (filaMonto && !isNaN(parseFloat(filaMonto.valor))) {
+                MONTO_MINIMO_SELLO = parseFloat(filaMonto.valor);
                 console.log("⚙️ Monto mínimo cargado desde Sheets: $" + MONTO_MINIMO_SELLO);
+            }
+
+            // 2. Premio o recompensa configurable
+            const filaPremio = config.find(c => limpiarTexto(c.clave) === 'PREMIO_LEALTAD');
+            if (filaPremio && filaPremio.valor && filaPremio.valor.trim() !== '') {
+                PREMIO_LEALTAD = filaPremio.valor.trim();
+                console.log("🎁 Premio de lealtad cargado desde Sheets:", PREMIO_LEALTAD);
             }
         }
     } catch (e) {
-        console.warn("Usando monto mínimo por defecto:", MONTO_MINIMO_SELLO);
+        console.warn("Usando configuración por defecto");
     }
 }
 
@@ -716,7 +725,7 @@ async function consultarSellosEnSheets() {
 
         document.getElementById('queryProgressBar').style.width = `${(sellos / 8) * 100}%`;
         document.getElementById('queryProgressText').textContent = sellos === 8 
-            ? `🎉 ¡Felicidades ${nombre}! Tienes 8 sellos. Tu próxima botana mediana es GRATIS.` 
+            ? `🎉 ¡Felicidades ${nombre}! Tienes 8 sellos. Tu recompensa disponible: ${PREMIO_LEALTAD}.` 
             : `Hola ${nombre}, llevas ${sellos} de 8 sellos acumulados.`;
 
         document.getElementById('loyaltyQueryResult').style.display = 'block';
@@ -726,7 +735,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT, TURNOS Y SINCRONIZACIÓN CORREGIDA
+// 5. CHECKOUT, TURNOS Y SINCRONIZACIÓN
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -772,7 +781,7 @@ function abrirModalCheckout() {
         loyaltyBox.style.display = 'block';
         loyaltyBox.innerHTML = `
             <strong style="color:#854D0E;">⭐ ¡Felicidades! Tu compra califica para 1 Sello de Lealtad (Mínimo: $${MONTO_MINIMO_SELLO.toFixed(2)})</strong><br>
-            <small style="color:#A16207;">Ingresa tu celular abajo para registrar tu sello en Google Sheets (8 sellos = Botana Gratis 🎁).</small>
+            <small style="color:#A16207;">Ingresa tu celular abajo para registrar tu sello en Google Sheets (8 sellos = ${PREMIO_LEALTAD}).</small>
         `;
         phoneInput.required = true;
         phoneHint.textContent = "* Requerido para acumular tu sello en este pedido.";
@@ -1007,7 +1016,7 @@ function mostrarBoletoTurno(pedido) {
             loyaltyBanner.innerHTML = `
                 <div class="reward-unlocked-card">
                     <h4>🎁 ¡RECOMPENSA DE 8 SELLOS DESBLOQUEADA!</h4>
-                    <p>¡Felicidades! Has completado tu tarjeta. <strong>Muestra este boleto en mostrador para recibir tu botana gratis</strong>.</p>
+                    <p>¡Felicidades! Has completado tu tarjeta. <strong>Reclama en mostrador: ${PREMIO_LEALTAD}</strong>.</p>
                 </div>
             `;
         } else {
@@ -1107,7 +1116,7 @@ function enviarComprobanteWhatsApp() {
 
     if (p.lealtad && p.lealtad.aplicaSello) {
         if (p.lealtad.regaloDesbloqueado) {
-            mensaje += `🎁 *¡RECOMPENSA GANADA!:* 8/8 sellos acumulados (Reclamar botana gratis en mostrador)\n`;
+            mensaje += `🎁 *¡RECOMPENSA GANADA!:* 8/8 sellos acumulados (Premio: ${PREMIO_LEALTAD})\n`;
         } else {
             mensaje += `⭐ *SELLOS DE FIDELIDAD:* Llevo ${p.lealtad.sellosActuales}/8 sellos\n`;
         }
