@@ -149,7 +149,7 @@ async function cargarMenuDesdeSheetDB() {
 }
 
 // ======================================================
-// CARRUSEL LIMPIO (SOLO IMAGEN + BOTÓN FLOTANTE)
+// CARRUSEL DE PROMOS (TEXTO PC + BOTÓN RESPONSIVO)
 // ======================================================
 function renderizarGaleriaPromos(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
@@ -177,6 +177,9 @@ function renderizarGaleriaPromos(productos) {
 
     bannersPromoActivos.forEach((prod, idx) => {
         const imgBanner = obtenerPropiedadFlexible(prod, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
+        const tituloPromo = obtenerPropiedadFlexible(prod, ['titulo_promo', 'promo_titulo', 'titulo_banner', 'promo']) || prod.nombre;
+        const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
+        const precioDisplay = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
         const slide = document.createElement('div');
         slide.className = 'promo-slide';
@@ -184,9 +187,15 @@ function renderizarGaleriaPromos(productos) {
 
         slide.innerHTML = `
             <img src="${imgBanner}" alt="${prod.nombre}" class="promo-banner-image">
-            <button type="button" class="btn-promo-floating">
-                <i class="fa-solid fa-cart-plus"></i> Pedir Promo
-            </button>
+            <div class="promo-slide-overlay">
+                <div class="promo-slide-info">
+                    <h4>${tituloPromo}</h4>
+                    <p>${prod.nombre} | ${precioDisplay}</p>
+                </div>
+                <button type="button" class="btn-promo-action">
+                    <i class="fa-solid fa-cart-plus"></i> Pedir Promo
+                </button>
+            </div>
         `;
         sliderTrack.appendChild(slide);
 
