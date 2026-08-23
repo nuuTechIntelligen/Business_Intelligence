@@ -2,7 +2,7 @@
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
 // Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
-const SHEETDB_INPUT = "TU_ID_O_URL_AQUI"; 
+const SHEETDB_INPUT = "sq3j6nb77cl27"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
