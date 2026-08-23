@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN DE SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- Pega tu URL de SheetDB aquí
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Pega tu URL de SheetDB aquí
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let productosGlobales = [];
@@ -24,7 +24,6 @@ function limpiarTexto(txt) {
         .trim();
 }
 
-// Busca propiedades en el objeto JSON de SheetDB sin importar mayúsculas, espacios o guiones
 function obtenerPropiedadFlexible(obj, clavesPosibles) {
     if (!obj || typeof obj !== 'object') return '';
     const llaves = Object.keys(obj);
@@ -215,6 +214,8 @@ function abrirModalPersonalizacion(productoId) {
     const numMax = parseInt(String(rawMax).trim(), 10);
     limiteIngredientesActual = (!isNaN(numMax) && numMax > 0) ? numMax : 0;
 
+    console.log(`🔎 Producto: "${prod.nombre}" | Límite de ingredientes: ${limiteIngredientesActual}`);
+
     // Venta por Monto
     const amountGroup = document.getElementById('modalAmountGroup');
     if (esPorMonto) {
@@ -389,7 +390,6 @@ function toggleOpcion(containerId, chipDiv, inputType) {
         return;
     }
 
-    // Comportamiento Checkbox (Ingredientes)
     if (chipDiv.classList.contains('disabled') && !input.checked) {
         return;
     }
