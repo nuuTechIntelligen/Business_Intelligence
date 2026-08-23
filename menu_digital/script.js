@@ -193,11 +193,13 @@ function abrirModalPersonalizacion(productoId) {
     document.getElementById('modalProductDesc').textContent = prod.descripcion || '';
     document.getElementById('modalProductPrice').textContent = esPorMonto ? '$20.00' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
-    // Parseo robusto del valor numérico de max_ingredientes
+    // Parseo numérico estricto de max_ingredientes
     let maxVal = 0;
-    if (prod.max_ingredientes !== undefined && prod.max_ingredientes !== null) {
-        const num = parseInt(String(prod.max_ingredientes).trim(), 10);
-        if (!isNaN(num)) maxVal = num;
+    if (prod.max_ingredientes !== undefined && prod.max_ingredientes !== null && String(prod.max_ingredientes).trim() !== '') {
+        const parsed = parseInt(String(prod.max_ingredientes).trim(), 10);
+        if (!isNaN(parsed) && parsed > 0) {
+            maxVal = parsed;
+        }
     }
     limiteIngredientesActual = maxVal;
 
@@ -211,7 +213,7 @@ function abrirModalPersonalizacion(productoId) {
         amountGroup.style.display = 'none';
     }
 
-    // Grupos de opciones
+    // Opciones
     const baseNombre = prod.grupo_base_nombre || 'Selecciona tu Base';
     const baseOpciones = prod.grupo_base_opciones || prod.grupo_bases_opciones || '';
 
@@ -221,9 +223,9 @@ function abrirModalPersonalizacion(productoId) {
     const salsaNombre = prod.grupo_salsas_nombre || prod.grupo_salsa_nombre || 'Selecciona tu Salsa';
     const salsaOpciones = prod.grupo_salsas_opciones || prod.grupo_salsa_opciones || '';
 
-    renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', baseNombre, baseOpciones, 'radio', 'grupo_base');
-    renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', ingNombre, ingOpciones, 'checkbox', 'grupo_ing');
-    renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', salsaNombre, salsaOpciones, 'radio', 'grupo_salsa');
+    renderizarOpcionesModal('modalBaseGroup', 'modalBaseTitle', 'modalBaseOptions', baseNombre, baseOpciones, 'radio', 'grupo_base_input');
+    renderizarOpcionesModal('modalIngredientsGroup', 'modalIngredientsTitle', 'modalIngredientsOptions', ingNombre, ingOpciones, 'checkbox', 'grupo_ing_input');
+    renderizarOpcionesModal('modalSaucesGroup', 'modalSaucesTitle', 'modalSaucesOptions', salsaNombre, salsaOpciones, 'radio', 'grupo_salsa_input');
 
     actualizarBadgeLimiteIngredientes(0);
 
@@ -339,53 +341,97 @@ function renderizarOpcionesModal(groupId, titleId, containerId, nombreGrupo, opc
     }
 
     opciones.forEach((op, index) => {
-        const label = document.createElement('label');
-        label.className = 'option-chip';
-        
-        const isChecked = (inputType === 'radio' && index === 0) ? 'checked' : '';
+        const chipDiv = document.createElement('div');
+        chipDiv.className = 'option-chip';
 
-        label.innerHTML = `
-            <input type="${inputType}" name="${inputName}" value="${op}" ${isChecked}>
+        const isRadioDefault = (inputType === 'radio' && index === 0);
+        if (isRadioDefault) chipDiv.classList.add('selected');
+
+        const inputId = `${inputName}_${index}_${Date.now()}`;
+
+        chipDiv.innerHTML = `
+            <input type="${inputType}" name="${inputName}" id="${inputId}" value="${op}" ${isRadioDefault ? 'checked' : ''}>
             <span>${op}</span>
         `;
 
-        const inputInside = label.querySelector('input');
-        inputInside.addEventListener('change', () => {
+        const inputInside = chipDiv.querySelector('input');
+
+        // Manejador de clic directo sobre el chip
+        chipDiv.onclick = (e) => {
+            if (e.target !== inputInside) {
+                if (inputType === 'checkbox') {
+                    if (!inputInside.disabled) {
+                        inputInside.checked = !inputInside.checked;
+                        inputInside.dispatchEvent(new Event('change'));
+                    }
+                } else if (inputType === 'radio') {
+                    inputInside.checked = true;
+                    inputInside.dispatchEvent(new Event('change'));
+                }
+            }
+        };
+
+        inputInside.onchange = () => {
             if (inputType === 'checkbox') {
                 controlarCheckboxesIngredientes();
+            } else if (inputType === 'radio') {
+                const siblingChips = containerEl.querySelectorAll('.option-chip');
+                siblingChips.forEach(c => c.classList.remove('selected'));
+                chipDiv.classList.add('selected');
             }
-        });
+        };
 
-        containerEl.appendChild(label);
+        containerEl.appendChild(chipDiv);
     });
 }
 
 function controlarCheckboxesIngredientes() {
-    const checkboxes = Array.from(document.querySelectorAll('#modalIngredientsOptions input[type="checkbox"]'));
+    const container = document.getElementById('modalIngredientsOptions');
+    if (!container) return;
+
+    const chips = Array.from(container.querySelectorAll('.option-chip'));
+    const checkboxes = chips.map(c => c.querySelector('input[type="checkbox"]'));
     const seleccionados = checkboxes.filter(cb => cb.checked);
     const totalSeleccionados = seleccionados.length;
 
+    // Actualizar estilos seleccionados
+    chips.forEach(chip => {
+        const cb = chip.querySelector('input[type="checkbox"]');
+        if (cb.checked) {
+            chip.classList.add('selected');
+        } else {
+            chip.classList.remove('selected');
+        }
+    });
+
     actualizarBadgeLimiteIngredientes(totalSeleccionados);
 
+    // Límite de ingredientes activo
     if (limiteIngredientesActual > 0) {
         if (totalSeleccionados >= limiteIngredientesActual) {
-            checkboxes.forEach(cb => {
-                const chip = cb.closest('.option-chip');
+            chips.forEach(chip => {
+                const cb = chip.querySelector('input[type="checkbox"]');
                 if (!cb.checked) {
                     cb.disabled = true;
-                    if (chip) chip.classList.add('disabled');
+                    chip.classList.add('disabled');
                 } else {
                     cb.disabled = false;
-                    if (chip) chip.classList.remove('disabled');
+                    chip.classList.remove('disabled');
                 }
             });
         } else {
-            checkboxes.forEach(cb => {
+            chips.forEach(chip => {
+                const cb = chip.querySelector('input[type="checkbox"]');
                 cb.disabled = false;
-                const chip = cb.closest('.option-chip');
-                if (chip) chip.classList.remove('disabled');
+                chip.classList.remove('disabled');
             });
         }
+    } else {
+        chips.forEach(chip => {
+            const cb = chip.querySelector('input[type="checkbox"]');
+            cb.disabled = false;
+            chip.classList.remove('disabled');
+        });
     }
 }
 
