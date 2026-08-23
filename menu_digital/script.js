@@ -1,9 +1,9 @@
 // ======================================================
 // CONFIGURACIÓN GENERAL, SHEETDB & REGLAS DE LEALTAD
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos"; // <-- Productos
-const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Ventas_Historicas"; // <-- Ventas
-const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Clientes_Lealtad"; // <-- Clientes Lealtad
+const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Productos"; // <-- Productos
+const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Ventas_Historicas"; // <-- Ventas
+const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Clientes_Lealtad"; // <-- Clientes Lealtad
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // REGLA DE NEGOCIO: Monto mínimo para otorgar sello de lealtad
