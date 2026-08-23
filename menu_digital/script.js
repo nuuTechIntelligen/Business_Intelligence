@@ -103,8 +103,12 @@ function renderizarBannerEspeciales(productos) {
         const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
         const precioTxt = esPorMonto ? 'A Granel' : `$${parseFloat(prod.precio || 0).toFixed(2)}`;
 
+        // Prioridad: 1. imagen_banner -> 2. imagen regular -> 3. imagen por defecto
+        const imgBannerCustom = obtenerPropiedadFlexible(prod, ['imagen_banner', 'img_banner', 'banner_img', 'banner_imagen']);
+        const imgFinal = imgBannerCustom && imgBannerCustom.trim() !== '' ? imgBannerCustom : (prod.imagen || 'images/exhibidor_botanas.jpg');
+
         card.innerHTML = `
-            <div class="banner-img" style="background-image: url('${prod.imagen || 'images/exhibidor_botanas.jpg'}');"></div>
+            <div class="banner-img" style="background-image: url('${imgFinal}');"></div>
             <div class="banner-info">
                 <strong>${prod.nombre}</strong>
                 <span>${precioTxt}</span>
