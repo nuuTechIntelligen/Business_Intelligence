@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -27,14 +27,12 @@
                 <i class="fa-solid fa-utensils"></i> Ver Menú Interactivo
             </a>
 
-            <!-- BANNER DE ESPECIALES DEL DÍA (Justo debajo del botón amarillo) -->
+            <!-- BANNER DE ESPECIALES DEL DÍA -->
             <div class="hero-banner-container" id="heroBannerContainer" style="display: none;">
                 <div class="banner-badge-title">
                     <span>🔥 ESPECIALES DE HOY 🔥</span>
                 </div>
-                <div class="banner-slider-track" id="bannerSliderTrack">
-                    <!-- Las imágenes de promociones del día se inyectan aquí -->
-                </div>
+                <div class="banner-slider-track" id="bannerSliderTrack"></div>
             </div>
         </div>
     </header>
@@ -44,7 +42,7 @@
         <div class="nav-scroll-wrapper" id="nav-categories-container"></div>
     </nav>
 
-    <!-- CONTENIDO PRINCIPAL DINÁMICO -->
+    <!-- CONTENIDO DINÁMICO -->
     <main class="container main-content" id="menu-sections-container">
         <div class="loading-state">
             <div class="spinner"></div>
@@ -90,7 +88,7 @@
             <p class="modal-desc" id="modalProductDesc">Descripción del producto</p>
 
             <form id="modalForm" onsubmit="event.preventDefault(); confirmarAgregarAlCarrito();">
-                <!-- Selector de Monto a Granel Dinámico -->
+                <!-- Selector de Monto a Granel -->
                 <div id="modalAmountGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
                     <div class="amount-pills-grid" id="modalAmountPills"></div>
@@ -223,6 +221,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>
