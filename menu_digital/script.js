@@ -1,11 +1,21 @@
 // ======================================================
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_ID = "sq3j6nb77cl27"; // <-- PEGA SOLO TU ID DE SHEETDB (ej. a1b2c3d4e5f6g)
+// Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
+const SHEETDB_INPUT = "TU_ID_O_URL_AQUI"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Monto mínimo dinámico (se actualiza desde Google Sheets)
 let MONTO_MINIMO_SELLO = 80.00;
+
+// Extractor seguro de ID de SheetDB
+function obtenerIdLimpioSheetDB(input) {
+    if (!input || input.includes("TU_ID")) return "";
+    const limpio = input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
+    return limpio;
+}
+
+const SHEETDB_ID = obtenerIdLimpioSheetDB(SHEETDB_INPUT);
 
 let productosGlobales = [];
 let productoSeleccionado = null;
@@ -68,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarConfiguracionMontoMinimo() {
-    if (!SHEETDB_ID || SHEETDB_ID.includes("TU_ID_AQUI")) return;
+    if (!SHEETDB_ID) return;
     try {
         const res = await fetch(obtenerUrlSheetDB('Configuracion'));
         const config = await res.json();
@@ -90,7 +100,7 @@ async function cargarMenuDesdeSheetDB() {
         const productos = await respuesta.json();
         
         if (!Array.isArray(productos)) {
-            throw new Error("Formato de datos no válido");
+            throw new Error("Formato de datos no válido desde SheetDB");
         }
 
         productosGlobales = productos;
@@ -836,7 +846,7 @@ async function procesarGeneracionTurno() {
 
     const btnSubmit = document.getElementById('btnSubmitOrder');
     btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando pedido...';
 
     // 1. Procesar Registro en Clientes_Lealtad
     let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
@@ -878,13 +888,13 @@ async function procesarGeneracionTurno() {
 
 // Inserción / Actualización de Clientes_Lealtad
 async function procesarSelloEnGoogleSheets(telefono, nombre) {
-    if (!SHEETDB_ID || SHEETDB_ID.includes("TU_ID_AQUI")) {
+    if (!SHEETDB_ID) {
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
     }
 
     try {
-        const urlPestana = obtenerUrlSheetDB('Clientes_Lealtad');
-        const searchRes = await fetch(`https://sheetdb.io/api/v1/${SHEETDB_ID}/search?telefono=${telefono}&sheet=Clientes_Lealtad`);
+        const urlBusqueda = `https://sheetdb.io/api/v1/${SHEETDB_ID}/search?telefono=${telefono}&sheet=Clientes_Lealtad`;
+        const searchRes = await fetch(urlBusqueda);
         const clientes = await searchRes.json();
         const fechaHoy = new Date().toISOString().split('T')[0];
 
@@ -916,10 +926,11 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
                     }
                 })
             });
-            console.log("⭐ [SheetDB] Sello actualizado en Clientes_Lealtad:", await patchRes.json());
+            console.log("⭐ [SheetDB] Sello actualizado:", await patchRes.json());
             return { aplicaSello: true, sellosActuales: esRegalo ? 8 : sellos, regaloDesbloqueado: esRegalo };
         } else {
-            const postRes = await fetch(urlPestana, {
+            const postUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Clientes_Lealtad`;
+            const postRes = await fetch(postUrl, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -935,7 +946,7 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
                     }]
                 })
             });
-            console.log("⭐ [SheetDB] Nuevo cliente en Clientes_Lealtad:", await postRes.json());
+            console.log("⭐ [SheetDB] Nuevo cliente registrado:", await postRes.json());
             return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
         }
     } catch (err) {
@@ -946,7 +957,7 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
 
 // Inserción en Ventas_Historicas
 async function respaldarVentaEnGoogleSheets(pedido) {
-    if (!SHEETDB_ID || SHEETDB_ID.includes("TU_ID_AQUI")) return;
+    if (!SHEETDB_ID) return;
     try {
         const payload = {
             data: [{
@@ -964,7 +975,7 @@ async function respaldarVentaEnGoogleSheets(pedido) {
             }]
         };
 
-        const postUrl = obtenerUrlSheetDB('Ventas_Historicas');
+        const postUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`;
         const res = await fetch(postUrl, {
             method: 'POST',
             headers: {
@@ -973,10 +984,11 @@ async function respaldarVentaEnGoogleSheets(pedido) {
             },
             body: JSON.stringify(payload)
         });
+
         const resJson = await res.json();
         console.log("✅ [SheetDB] Venta registrada en Ventas_Historicas:", resJson);
     } catch (e) {
-        console.error("❌ Error al insertar venta en Ventas_Historicas:", e);
+        console.error("❌ Error al insertar venta en Sheets:", e);
     }
 }
 
