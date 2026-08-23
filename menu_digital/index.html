@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
 
@@ -23,9 +23,15 @@
                 <img src="images/logo.png" alt="Frituras y Botanas La Engordadera" class="hero-logo-img">
             </div>
             <p class="hero-tagline">🔥 ¡Las botanas más antojables, picantes y crujientes! 🔥</p>
-            <a href="#menu-nav" class="btn-primary glow-btn">
-                <i class="fa-solid fa-utensils"></i> Ver Menú Interactivo
-            </a>
+            
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <a href="#menu-nav" class="btn-primary glow-btn">
+                    <i class="fa-solid fa-utensils"></i> Ver Menú Interactivo
+                </a>
+                <button class="btn-loyalty-hero" onclick="abrirModalLealtad()">
+                    <i class="fa-solid fa-stamp"></i> Mis Sellos (<span id="heroStampCount">0/8</span>)
+                </button>
+            </div>
 
             <!-- BANNER DE ESPECIALES DEL DÍA -->
             <div class="hero-banner-container" id="heroBannerContainer" style="display: none;">
@@ -65,13 +71,13 @@
             <i class="fa-solid fa-basket-shopping"></i>
             <span id="cartCount">0 productos</span> | <strong id="cartTotal">$0.00</strong>
         </div>
-        <button class="btn-whatsapp" onclick="abrirModalCheckout()">
+        <button class="btn-whatsapp" onclick="iniciarFlujoCheckout()">
             <i class="fa-solid fa-receipt"></i> Ver Pedido / Turno
         </button>
     </div>
 
     <!-- BOTÓN FLOTANTE INDEPENDIENTE -->
-    <a href="javascript:void(0)" class="wa-float-btn" onclick="abrirModalCheckout()" title="Ver Pedido">
+    <a href="javascript:void(0)" class="wa-float-btn" onclick="iniciarFlujoCheckout()" title="Ver Pedido">
         <i class="fa-solid fa-basket-shopping"></i>
     </a>
 
@@ -113,6 +119,14 @@
                     <div class="options-grid" id="modalIngredientsOptions"></div>
                 </div>
 
+                <!-- Extras con costo adicional -->
+                <div id="modalExtrasGroup" class="modal-group" style="display: none;">
+                    <div class="group-title-flex">
+                        <label class="modal-group-title" id="modalExtrasTitle">🧀 Extras / Toppings Adicionales</label>
+                    </div>
+                    <div class="options-grid" id="modalExtrasOptions"></div>
+                </div>
+
                 <div id="modalSaucesGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title" id="modalSaucesTitle">Selecciona tu Salsa</label>
                     <div class="options-grid" id="modalSaucesOptions"></div>
@@ -120,7 +134,7 @@
 
                 <div class="modal-actions">
                     <button type="submit" class="btn-confirm-add" id="btnConfirmProduct">
-                        <i class="fa-solid fa-cart-plus"></i> Agregar al Pedido
+                        <i class="fa-solid fa-cart-plus"></i> Agregar al Pedido (<span id="modalBtnLivePrice">$0.00</span>)
                     </button>
                 </div>
             </form>
@@ -128,7 +142,52 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 2. MODAL DE CHECKOUT                       -->
+    <!-- 2. MODAL DE UPSELLING / SUGERENCIA CRUZADA -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="upsellModal">
+        <div class="modal-card" style="max-width: 440px; text-align: center;">
+            <button class="modal-close" onclick="cerrarUpsellYAbrirCheckout()">&times;</button>
+            <div style="font-size: 2.2rem; margin-bottom: 6px;">🥤🍰</div>
+            <h3 style="font-family: var(--font-heading); color: #222; font-size: 1.2rem;">¿Se te antoja algo más?</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Completa tu antojo con una bebida fría o un postre dulce:</p>
+
+            <div class="upsell-items-list" id="upsellItemsList"></div>
+
+            <div class="modal-actions" style="display: flex; gap: 8px;">
+                <button class="btn-secondary w-100" onclick="cerrarUpsellYAbrirCheckout()">Continuar con mi orden</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. MODAL DE TARJETA DIGITAL DE LEALTAD     -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="loyaltyModal">
+        <div class="modal-card ticket-card" style="max-width: 420px;">
+            <button class="modal-close" onclick="cerrarModalLealtad()">&times;</button>
+            <div class="ticket-header">
+                <span class="ticket-badge" style="background:#FEF08A; color:#854D0E;">⭐ PROGRAMA DE RECOMPENSAS</span>
+                <h4>Tarjeta de Sellos La Engordadera</h4>
+                <p>Acumula 8 sellos y llévate una botana gratis 🍿</p>
+            </div>
+            
+            <div class="loyalty-grid" id="loyaltyStampsContainer"></div>
+            
+            <div class="loyalty-progress-box">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="loyaltyProgressBar"></div>
+                </div>
+                <small id="loyaltyProgressText">0 de 8 pedidos completados</small>
+            </div>
+
+            <button class="btn-secondary w-100" onclick="cerrarModalLealtad()" style="margin-top: 15px;">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. MODAL DE CHECKOUT                       -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-card">
@@ -184,7 +243,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 3. MODAL DE BOLETO DIGITAL                 -->
+    <!-- 5. MODAL DE BOLETO DIGITAL                 -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="ticketModal">
         <div class="modal-card ticket-card">
@@ -207,6 +266,17 @@
 
                 <div class="ticket-payment-alert" id="ticketPaymentAlert"></div>
 
+                <!-- CONTENEDOR DE PAGO POR QR / CLABE (PARA RECOGER) -->
+                <div class="qr-payment-card" id="qrPaymentContainer" style="display: none;">
+                    <h5>💳 Paga rápido para iniciar preparación</h5>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mercadopago.com.mx" alt="Código QR de Pago" class="qr-code-img" id="qrPayImage">
+                    <div class="bank-details">
+                        <p><strong>Mercado Pago / Transferencia:</strong></p>
+                        <p>CLABE: <code>1234 5678 9012 3456 78</code></p>
+                        <p>Concepto: <strong id="qrConceptoTurno">#R-01</strong></p>
+                    </div>
+                </div>
+
                 <small id="kioskCountdown" style="display: block; color: #888; margin-bottom: 10px; font-weight: 600;"></small>
 
                 <div class="ticket-actions">
@@ -221,6 +291,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
 </body>
 </html>
