@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_ID = "https://sheetdb.io/api/v1/sq3j6nb77cl27"; // <-- PEGA SOLO TU ID DE SHEETDB (ej. a1b2c3d4e5f6g)
+const SHEETDB_ID = "sq3j6nb77cl27"; // <-- PEGA SOLO TU ID DE SHEETDB (ej. a1b2c3d4e5f6g)
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Monto mínimo dinámico (se actualiza desde Google Sheets)
