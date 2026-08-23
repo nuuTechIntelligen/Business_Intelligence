@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
 
@@ -33,12 +33,22 @@
                 </button>
             </div>
 
-            <!-- BANNER DE ESPECIALES DEL DÍA -->
-            <div class="hero-banner-container" id="heroBannerContainer" style="display: none;">
-                <div class="banner-badge-title">
-                    <span>🔥 ESPECIALES DE HOY 🔥</span>
+            <!-- GALERÍA / CARRUSEL DE PROMOS DEL DÍA -->
+            <div class="promo-gallery-container" id="heroBannerContainer" style="display: none;">
+                <div class="promo-header-badge">
+                    <span>🔥 PROMOCIONES Y ESPECIALES 🔥</span>
                 </div>
-                <div class="banner-slider-track" id="bannerSliderTrack"></div>
+                
+                <div class="promo-slider-viewport" id="promoSliderViewport">
+                    <div class="promo-slider-wrapper" id="bannerSliderTrack"></div>
+                    
+                    <!-- Flechas de navegación -->
+                    <button class="slider-arrow prev" onclick="moverBannerManual(-1)" aria-label="Anterior">&#10094;</button>
+                    <button class="slider-arrow next" onclick="moverBannerManual(1)" aria-label="Siguiente">&#10095;</button>
+                </div>
+                
+                <!-- Indicadores Dots -->
+                <div class="promo-dots" id="promoDotsContainer"></div>
             </div>
         </div>
     </header>
@@ -94,7 +104,6 @@
             <p class="modal-desc" id="modalProductDesc">Descripción del producto</p>
 
             <form id="modalForm" onsubmit="event.preventDefault(); confirmarAgregarAlCarrito();">
-                <!-- Selector de Monto a Granel -->
                 <div id="modalAmountGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
                     <div class="amount-pills-grid" id="modalAmountPills"></div>
@@ -105,7 +114,6 @@
                     <small id="modalMinAmountMsg" class="min-amount-hint"></small>
                 </div>
 
-                <!-- Grupos de Opciones -->
                 <div id="modalBaseGroup" class="modal-group" style="display: none;">
                     <label class="modal-group-title" id="modalBaseTitle">Selecciona tu Base</label>
                     <div class="options-grid" id="modalBaseOptions"></div>
@@ -141,7 +149,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 2. MODAL DE UPSELLING / SUGERENCIA CRUZADA -->
+    <!-- 2. MODAL DE UPSELLING                      -->
     <!-- ========================================== -->
     <div class="modal-overlay" id="upsellModal">
         <div class="modal-card" style="max-width: 440px; text-align: center;">
@@ -149,9 +157,7 @@
             <div style="font-size: 2.2rem; margin-bottom: 6px;">🥤🍰</div>
             <h3 style="font-family: var(--font-heading); color: #222; font-size: 1.2rem;">¿Se te antoja algo más?</h3>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Completa tu antojo con una bebida fría o un postre dulce:</p>
-
             <div class="upsell-items-list" id="upsellItemsList"></div>
-
             <div class="modal-actions" style="display: flex; gap: 8px;">
                 <button class="btn-secondary w-100" onclick="cerrarUpsellYAbrirCheckout()">Continuar con mi orden</button>
             </div>
@@ -209,7 +215,6 @@
 
             <div class="checkout-items-list" id="checkoutItemsList"></div>
 
-            <!-- AVISO / REQUISITO DE PROGRAMA DE SELLOS -->
             <div class="loyalty-checkout-box" id="loyaltyCheckoutBox"></div>
 
             <form id="checkoutForm" onsubmit="event.preventDefault(); procesarGeneracionTurno();">
@@ -269,8 +274,6 @@
             </div>
 
             <div class="ticket-body">
-                
-                <!-- BANNER DE RECOMPENSA DESBLOQUEADA O SELLO SUMADO -->
                 <div id="ticketLoyaltyBanner" style="display: none; margin-top: 10px;"></div>
 
                 <div class="ticket-status-box" id="ticketStatusBox">
@@ -283,7 +286,6 @@
 
                 <div class="ticket-payment-alert" id="ticketPaymentAlert"></div>
 
-                <!-- CONTENEDOR DE PAGO MÓVIL (MERCADO PAGO Y CLABE) -->
                 <div class="online-payment-card" id="onlinePaymentContainer" style="display: none;">
                     <span class="step-badge">Paso 1: Realiza tu pago</span>
                     
@@ -324,6 +326,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
 </body>
 </html>
