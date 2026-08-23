@@ -1,10 +1,10 @@
 // ======================================================
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Productos";
-const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Ventas_Historicas";
-const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Clientes_Lealtad";
-const SHEETDB_CONFIG_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI?sheet=Configuracion";
+const SHEETDB_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Productos";
+const SHEETDB_VENTAS_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Ventas_Historicas";
+const SHEETDB_LEALTAD_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Clientes_Lealtad";
+const SHEETDB_CONFIG_URL = "https://sheetdb.io/api/v1/sq3j6nb77cl27?sheet=Configuracion";
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Monto mínimo dinámico (se actualiza desde Google Sheets)
