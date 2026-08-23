@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=6">
+    <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
 
@@ -283,21 +283,38 @@
 
                 <div class="ticket-payment-alert" id="ticketPaymentAlert"></div>
 
-                <div class="qr-payment-card" id="qrPaymentContainer" style="display: none;">
-                    <h5>💳 Paga rápido para iniciar preparación</h5>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://mercadopago.com.mx" alt="Código QR de Pago" class="qr-code-img" id="qrPayImage">
-                    <div class="bank-details">
-                        <p><strong>Mercado Pago / Transferencia:</strong></p>
-                        <p>CLABE: <code>1234 5678 9012 3456 78</code></p>
-                        <p>Concepto: <strong id="qrConceptoTurno">#R-01</strong></p>
+                <!-- CONTENEDOR DE PAGO MÓVIL (MERCADO PAGO Y CLABE) -->
+                <div class="online-payment-card" id="onlinePaymentContainer" style="display: none;">
+                    <span class="step-badge">Paso 1: Realiza tu pago</span>
+                    
+                    <a href="https://mercadopago.com.mx" target="_blank" class="btn-mp-pay" id="btnMercadoPagoLink">
+                        <i class="fa-solid fa-bolt"></i> Pagar con Mercado Pago (<span id="ticketMpTotal">$0.00</span>)
+                    </a>
+
+                    <div class="bank-transfer-box">
+                        <div class="bank-transfer-header">
+                            <span>o Transferencia Bancaria Directa:</span>
+                        </div>
+                        <div class="clabe-row">
+                            <div>
+                                <small id="bankTitularText">Mercado Pago / La Engordadera</small>
+                                <strong id="clabeNumberText">123456789012345678</strong>
+                            </div>
+                            <button type="button" class="btn-copy-clabe" onclick="copiarClabeAlPortapapeles()" id="btnCopyClabe">
+                                <i class="fa-solid fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                        <small style="display: block; font-size: 0.7rem; color: #666; margin-top: 4px;">Concepto: <strong id="transferConceptoTurno">#R-01</strong></small>
                     </div>
+                    
+                    <span class="step-badge" style="margin-top: 12px;">Paso 2: Envía tu comprobante</span>
                 </div>
 
                 <small id="kioskCountdown" style="display: block; color: #888; margin-bottom: 10px; font-weight: 600;"></small>
 
                 <div class="ticket-actions">
                     <button class="btn-whatsapp w-100" id="btnTicketWhatsApp" onclick="enviarComprobanteWhatsApp()">
-                        <i class="fa-brands fa-whatsapp"></i> Enviar a WhatsApp
+                        <i class="fa-brands fa-whatsapp"></i> Enviar Pedido a WhatsApp
                     </button>
                     <button class="btn-secondary w-100" onclick="cerrarTicketModal()">
                         <i class="fa-solid fa-check"></i> Terminar y Hacer Nuevo Pedido
@@ -307,6 +324,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>
