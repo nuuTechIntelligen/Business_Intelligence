@@ -154,14 +154,14 @@ body {
     text-align: left;
 }
 
-/* ENCUADRE BANNER ESPECIALES */
+/* BANNER DE ESPECIALES */
 .banner-img {
     width: 100%;
-    height: 115px;
+    aspect-ratio: 16 / 10;
     background-size: cover;
-    background-position: center center;
+    background-position: center bottom;
     background-repeat: no-repeat;
-    background-color: #E5E7EB;
+    background-color: #FFF5F7;
 }
 
 .banner-info { padding: 8px 10px; }
@@ -208,14 +208,15 @@ body {
 }
 .card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
 
-/* ENCUADRE DE IMÁGENES DEL MENÚ */
+/* AJUSTE Y ENCUADRE DE FOTOS (1:1 CUADRADO, ENFOCADO AL FONDO) */
 .card-img-placeholder {
     width: 100%;
-    height: 140px;
+    aspect-ratio: 1 / 1;
+    height: auto;
     background-size: cover;
-    background-position: center center;
+    background-position: center bottom;
     background-repeat: no-repeat;
-    background-color: #F3F4F6;
+    background-color: #FFF5F7;
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
     position: relative;
@@ -442,13 +443,11 @@ body {
 /* ====================================================== */
 @media (min-width: 600px) {
     .grid-container { grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .card-img-placeholder { height: 160px; }
-    .banner-img { height: 130px; }
+    .banner-img { aspect-ratio: 16 / 9; }
 }
 
 @media (min-width: 992px) {
     .grid-container { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-    .card-img-placeholder { height: 175px; }
     .hero { padding: 50px 20px 30px 20px; }
     .nav-scroll-wrapper { justify-content: center; }
 }
