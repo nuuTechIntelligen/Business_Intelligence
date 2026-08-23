@@ -10,13 +10,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 
     <!-- HERO -->
     <header class="hero">
         <div class="hero-overlay"></div>
+        
+        <!-- BOTÓN DE SELLOS SUPERIOR DERECHO (ESTILO APP MÓVIL) -->
+        <button class="btn-loyalty-corner" onclick="abrirModalConsultaLealtad()" title="Consultar Sellos">
+            <i class="fa-solid fa-star"></i> <span>Mis Sellos</span>
+        </button>
+
         <div class="container hero-content">
             <div class="logo-container">
                 <span class="sub-logo">FRITURAS Y BOTANAS</span>
@@ -24,30 +30,21 @@
             </div>
             <p class="hero-tagline">🔥 ¡Las botanas más antojables, picantes y crujientes! 🔥</p>
             
-            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; justify-content: center;">
                 <a href="#menu-nav" class="btn-primary glow-btn">
                     <i class="fa-solid fa-utensils"></i> Ver Menú Interactivo
                 </a>
-                <button class="btn-loyalty-hero" onclick="abrirModalConsultaLealtad()">
-                    <i class="fa-solid fa-star"></i> Consultar Mis Sellos
-                </button>
             </div>
 
-            <!-- GALERÍA / CARRUSEL DE PROMOS DEL DÍA -->
+            <!-- CARRUSEL DE PROMOS LIMPIO (SOLO IMAGEN + BOTÓN) -->
             <div class="promo-gallery-container" id="heroBannerContainer" style="display: none;">
-                <div class="promo-header-badge">
-                    <span>🔥 PROMOCIONES Y ESPECIALES 🔥</span>
-                </div>
-                
                 <div class="promo-slider-viewport" id="promoSliderViewport">
                     <div class="promo-slider-wrapper" id="bannerSliderTrack"></div>
                     
-                    <!-- Flechas de navegación -->
                     <button class="slider-arrow prev" onclick="moverBannerManual(-1)" aria-label="Anterior">&#10094;</button>
                     <button class="slider-arrow next" onclick="moverBannerManual(1)" aria-label="Siguiente">&#10095;</button>
                 </div>
                 
-                <!-- Indicadores Dots -->
                 <div class="promo-dots" id="promoDotsContainer"></div>
             </div>
         </div>
@@ -91,9 +88,7 @@
         <i class="fa-solid fa-basket-shopping"></i>
     </a>
 
-    <!-- ========================================== -->
-    <!-- 1. MODAL DE PERSONALIZACIÓN                -->
-    <!-- ========================================== -->
+    <!-- 1. MODAL DE PERSONALIZACIÓN -->
     <div class="modal-overlay" id="productModal">
         <div class="modal-card">
             <button class="modal-close" onclick="cerrarModal()">&times;</button>
@@ -148,9 +143,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 2. MODAL DE UPSELLING                      -->
-    <!-- ========================================== -->
+    <!-- 2. MODAL DE UPSELLING -->
     <div class="modal-overlay" id="upsellModal">
         <div class="modal-card" style="max-width: 440px; text-align: center;">
             <button class="modal-close" onclick="cerrarUpsellYAbrirCheckout()">&times;</button>
@@ -164,9 +157,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 3. MODAL DE CONSULTA DE SELLOS             -->
-    <!-- ========================================== -->
+    <!-- 3. MODAL DE CONSULTA DE SELLOS -->
     <div class="modal-overlay" id="loyaltyQueryModal">
         <div class="modal-card ticket-card" style="max-width: 420px;">
             <button class="modal-close" onclick="cerrarModalConsultaLealtad()">&times;</button>
@@ -201,9 +192,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 4. MODAL DE CHECKOUT                       -->
-    <!-- ========================================== -->
+    <!-- 4. MODAL DE CHECKOUT -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-card">
             <button class="modal-close" onclick="cerrarModalCheckout()">&times;</button>
@@ -214,7 +203,6 @@
             <p class="modal-desc">Revisa tus botanas y elige cómo deseas recibir tu orden.</p>
 
             <div class="checkout-items-list" id="checkoutItemsList"></div>
-
             <div class="loyalty-checkout-box" id="loyaltyCheckoutBox"></div>
 
             <form id="checkoutForm" onsubmit="event.preventDefault(); procesarGeneracionTurno();">
@@ -260,9 +248,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 5. MODAL DE BOLETO DIGITAL                 -->
-    <!-- ========================================== -->
+    <!-- 5. MODAL DE BOLETO DIGITAL -->
     <div class="modal-overlay" id="ticketModal">
         <div class="modal-card ticket-card">
             <button class="modal-close" onclick="cerrarTicketModal()">&times;</button>
@@ -326,6 +312,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=9"></script>
 </body>
 </html>
