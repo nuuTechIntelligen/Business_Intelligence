@@ -47,7 +47,7 @@ body {
     background-attachment: fixed;
     color: var(--text-dark);
     line-height: 1.4;
-    padding-bottom: 110px;
+    padding-bottom: 120px;
 }
 
 .container {
@@ -104,7 +104,6 @@ body {
     transition: transform 0.2s, background-color 0.2s;
     outline: none;
 }
-
 .btn-social-drawer-trigger:active {
     transform: scale(0.92);
     background: rgba(255, 255, 255, 0.45);
@@ -128,7 +127,6 @@ body {
     transition: transform 0.2s, background-color 0.2s;
     outline: none;
 }
-
 .btn-loyalty-corner i { color: var(--primary-yellow); }
 .btn-loyalty-corner:active {
     transform: scale(0.95);
@@ -413,125 +411,136 @@ body {
 /* 5. BARRA FLOTANTE HÍBRIDA PÍLDORA                     */
 /* ====================================================== */
 .cart-pill-bar {
-    position: fixed !important;
-    bottom: 18px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: calc(100% - 24px) !important;
-    max-width: 620px !important;
-    background: #FFFFFF !important;
-    border: 2px solid var(--primary-pink) !important;
-    border-radius: 50px !important;
-    padding: 8px 12px 8px 14px !important;
-    display: none;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: 12px !important;
-    box-shadow: 0 10px 30px rgba(233, 30, 99, 0.35) !important;
-    z-index: 9999 !important;
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+    max-width: 620px;
+    background: #FFFFFF;
+    border: 2px solid var(--primary-pink);
+    border-radius: 50px;
+    padding: 8px 12px 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(233, 30, 99, 0.35);
+    z-index: 9999;
     cursor: pointer;
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(30px);
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cart-pill-bar.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
 }
 
 .cart-pill-left {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    flex: 1 !important;
-    overflow: hidden !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    overflow: hidden;
 }
 
 .cart-badge-circle {
-    position: relative !important;
-    background: #FFF0F5 !important;
-    color: var(--primary-pink) !important;
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 1.1rem !important;
-    border: 1.5px solid var(--primary-pink) !important;
-    flex-shrink: 0 !important;
+    position: relative;
+    background: #FFF0F5;
+    color: var(--primary-pink);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    border: 1.5px solid var(--primary-pink);
+    flex-shrink: 0;
 }
 
 .cart-badge-circle span {
-    position: absolute !important;
-    top: -4px !important;
-    right: -4px !important;
-    background: var(--primary-pink) !important;
-    color: #FFFFFF !important;
-    font-family: var(--font-heading) !important;
-    font-size: 0.7rem !important;
-    font-weight: 700 !important;
-    width: 18px !important;
-    height: 18px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--primary-pink);
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cart-price-column {
-    display: flex !important;
-    flex-direction: column !important;
-    line-height: 1.1 !important;
-    flex-shrink: 0 !important;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    flex-shrink: 0;
 }
 
 .cart-price-column small {
-    font-size: 0.65rem !important;
-    color: var(--text-muted) !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .cart-price-column strong {
-    font-family: var(--font-heading) !important;
-    font-size: 1.15rem !important;
-    color: var(--primary-pink) !important;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--primary-pink);
 }
 
 .cart-mini-chips {
-    display: flex !important;
-    gap: 6px !important;
-    overflow-x: auto !important;
-    scrollbar-width: none !important;
-    white-space: nowrap !important;
-    flex: 1 !important;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+    flex: 1;
 }
 .cart-mini-chips::-webkit-scrollbar { display: none; }
 
 .mini-snack-chip {
-    background: #FFF0F5 !important;
-    border: 1px solid #F8BBD0 !important;
-    color: #880E4F !important;
-    padding: 3px 8px !important;
-    border-radius: 12px !important;
-    font-size: 0.7rem !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 3px !important;
+    background: #FFF0F5;
+    border: 1px solid #F8BBD0;
+    color: #880E4F;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 
 .btn-pill-checkout {
-    background: linear-gradient(135deg, #FFC107, #FFA000) !important;
-    color: #000000 !important;
-    border: none !important;
-    padding: 9px 16px !important;
-    border-radius: 30px !important;
-    font-family: var(--font-heading) !important;
-    font-size: 0.85rem !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    flex-shrink: 0 !important;
-    box-shadow: 0 3px 10px rgba(255, 160, 0, 0.4) !important;
-    white-space: nowrap !important;
+    background: linear-gradient(135deg, #FFC107, #FFA000);
+    color: #000000;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 30px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(255, 160, 0, 0.4);
+    white-space: nowrap;
 }
 
 /* ====================================================== */
