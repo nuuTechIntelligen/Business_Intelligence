@@ -558,81 +558,81 @@ body {
 .btn-secondary { background: #F3F4F6; color: #333; border: 1px solid #DDD; padding: 8px; border-radius: 25px; font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
 
 /* ====================================================== */
-/* 9. FOOTER OPCIÓN 1: TARJETA COMUNIDAD (PC ONLY)        */
+/* 9. FOOTER ANCHO COMPLETO PARA PC (OPCIÓN 1)            */
 /* ====================================================== */
 .footer-community {
-    margin-top: 40px;
-    padding: 0 16px 30px;
+    width: 100%;
+    margin-top: 50px;
+    padding: 0 0 40px 0;
 }
 
-.community-card {
-    max-width: 900px;
-    margin: 0 auto;
+.community-fullwidth-card {
+    width: 100%;
     background: #FFF0F5;
-    border: 2px dashed #F8BBD0;
-    border-radius: 24px;
-    padding: 30px 24px;
+    border-top: 2px dashed #F8BBD0;
+    border-bottom: 2px dashed #F8BBD0;
+    padding: 40px 20px 30px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(233, 30, 99, 0.08);
+    box-shadow: 0 4px 20px rgba(233, 30, 99, 0.05);
 }
 
 .community-badge {
-    background: #E91E63;
+    background: var(--primary-pink);
     color: #FFFFFF;
     font-family: var(--font-heading);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
     display: inline-block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .community-header h3 {
     font-family: var(--font-heading);
     color: #C2185B;
-    font-size: 1.45rem;
-    margin-bottom: 4px;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
 }
 
 .community-header p {
     color: #666666;
-    font-size: 0.85rem;
-    max-width: 500px;
-    margin: 0 auto 18px;
+    font-size: 0.9rem;
+    max-width: 650px;
+    margin: 0 auto 22px;
 }
 
 .community-social-pills {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
     flex-wrap: wrap;
-    margin-bottom: 22px;
+    margin-bottom: 26px;
 }
 
 .social-pill-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
+    padding: 10px 22px;
     border-radius: 25px;
     color: #FFFFFF;
     text-decoration: none;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 0.92rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.14);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .social-pill-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.22);
 }
 
 .community-bottom {
     border-top: 1px solid #F8BBD0;
-    padding-top: 14px;
-    font-size: 0.8rem;
+    padding-top: 18px;
+    font-size: 0.82rem;
     color: #777777;
 }
 
@@ -643,98 +643,33 @@ body {
 }
 
 /* ====================================================== */
-/* 10. DRAWER OPCIÓN 3: BOTTOM SHEET REDES (MÓVIL)        */
+/* 10. MODAL FLOTANTE CENTRADO DE REDES (MÓVIL)          */
 /* ====================================================== */
-.social-drawer-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 3000;
-    display: none;
-    align-items: flex-end;
-}
-.social-drawer-overlay.active {
+.social-modal-links-grid {
     display: flex;
-}
-
-.social-drawer-sheet {
-    background: #FFFFFF;
-    width: 100%;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    padding: 14px 18px 28px;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
-    animation: slideUp 0.25s ease-out;
-}
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-
-.drawer-handle {
-    width: 40px;
-    height: 5px;
-    background: #E0E0E0;
-    border-radius: 10px;
-    margin: 0 auto 12px;
-}
-
-.drawer-header {
-    text-align: center;
-    margin-bottom: 16px;
-}
-.drawer-emoji {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 4px;
-}
-.drawer-header h4 {
-    font-family: var(--font-heading);
-    color: var(--primary-orange);
-    font-size: 1.2rem;
-    margin-bottom: 2px;
-}
-.drawer-header p {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-}
-
-.drawer-social-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: column;
     gap: 10px;
-    margin-bottom: 16px;
 }
 
-.drawer-social-card {
+.social-modal-card-btn {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 16px;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
     color: #FFFFFF;
     text-decoration: none;
     font-family: var(--font-heading);
-    font-size: 0.88rem;
+    font-size: 0.92rem;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: transform 0.15s ease;
 }
-.drawer-social-card i {
+.social-modal-card-btn:hover {
+    transform: scale(1.02);
+}
+.social-modal-card-btn i {
     font-size: 1.3rem;
-}
-
-.btn-close-drawer {
-    width: 100%;
-    background: #F3F4F6;
-    border: none;
-    color: #333333;
-    padding: 12px;
-    border-radius: 20px;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 0.88rem;
-    cursor: pointer;
 }
 
 /* ====================================================== */
