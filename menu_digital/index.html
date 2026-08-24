@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=45">
+    <link rel="stylesheet" href="styles.css?v=50">
 </head>
 <body>
 
@@ -44,7 +44,7 @@
                 </a>
             </div>
 
-            <!-- CARRUSEL DE PROMOS LIMPIO (SOLO IMAGEN + BOTÓN) -->
+            <!-- CARRUSEL DE PROMOS LIMPIO -->
             <div class="promo-gallery-container" id="heroBannerContainer" style="display: none;">
                 <div class="promo-slider-viewport" id="promoSliderViewport">
                     <div class="promo-slider-wrapper" id="bannerSliderTrack"></div>
@@ -71,7 +71,7 @@
         </div>
     </main>
 
-    <!-- FOOTER ANCHO COMPLETO PARA VERSIÓN PC -->
+    <!-- FOOTER ANCHO COMPLETO PARA PC -->
     <footer class="footer-community desktop-only">
         <div class="community-fullwidth-card">
             <div class="community-header">
@@ -89,23 +89,30 @@
         </div>
     </footer>
 
-    <!-- BARRA FLOTANTE DE PEDIDO -->
-    <div class="cart-floating-bar" id="cartBar">
-        <div class="cart-info">
-            <i class="fa-solid fa-basket-shopping"></i>
-            <span id="cartCount">0 productos</span> | <strong id="cartTotal">$0.00</strong>
+    <!-- ========================================== -->
+    <!-- BARRA FLOTANTE HÍBRIDA PÍLDORA (OPCIÓN A + B) -->
+    <!-- ========================================== -->
+    <div class="cart-pill-bar" id="cartBar" onclick="iniciarFlujoCheckout()">
+        <div class="cart-pill-left">
+            <div class="cart-badge-circle" id="cartBadgeCircle">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span id="cartCountBadge">0</span>
+            </div>
+            <div class="cart-price-column">
+                <small id="cartItemsLabel">Tu Antojo</small>
+                <strong id="cartTotalDisplay">$0.00</strong>
+            </div>
+            <!-- Carrusel horizontal de mini botanas en canasta -->
+            <div class="cart-mini-chips" id="cartMiniChipsContainer"></div>
         </div>
-        <button class="btn-whatsapp" onclick="iniciarFlujoCheckout()">
-            <i class="fa-solid fa-receipt"></i> Ver Pedido / Turno
+
+        <button class="btn-pill-checkout" type="button">
+            <span>Ver mi Antojo</span>
+            <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
-    <!-- BOTÓN FLOTANTE INDEPENDIENTE -->
-    <a href="javascript:void(0)" class="wa-float-btn" onclick="iniciarFlujoCheckout()" title="Ver Pedido">
-        <i class="fa-solid fa-basket-shopping"></i>
-    </a>
-
-    <!-- MODAL FLOTANTE CENTRADO DE REDES Y OPINIONES (MÓVIL) -->
+    <!-- MODAL FLOTANTE CENTRADO DE REDES (MÓVIL) -->
     <div class="modal-overlay" id="socialModalOverlay">
         <div class="modal-card social-modal-center" style="max-width: 400px; text-align: center;">
             <button class="modal-close" onclick="cerrarModalRedesMovil()">&times;</button>
@@ -281,10 +288,11 @@
         </div>
     </div>
 
-    <!-- 5. MODAL DE BOLETO DIGITAL -->
+    <!-- 5. MODAL DE BOLETO DIGITAL CON PERSISTENCIA Y TOTAL GIGANTE -->
     <div class="modal-overlay" id="ticketModal">
         <div class="modal-card ticket-card">
-            <button class="modal-close" onclick="cerrarTicketModal()">&times;</button>
+            <button class="modal-close" id="btnTicketModalClose" onclick="cerrarTicketModal()">&times;</button>
+            
             <div class="ticket-header">
                 <span class="ticket-badge" id="ticketBadgeType">🏪 EN TIENDA</span>
                 <p>¡Pedido registrado con éxito!</p>
@@ -305,46 +313,79 @@
 
                 <div class="ticket-payment-alert" id="ticketPaymentAlert"></div>
 
+                <!-- SECCIÓN ESPECIAL PARA RECOGER (TOTAL GIGANTE + LINK MP + DATOS COPIABLES) -->
                 <div class="online-payment-card" id="onlinePaymentContainer" style="display: none;">
-                    <span class="step-badge">Paso 1: Realiza tu pago</span>
                     
-                    <a href="https://mercadopago.com.mx" target="_blank" class="btn-mp-pay" id="btnMercadoPagoLink">
+                    <!-- TOTAL GIGANTE -->
+                    <div class="giant-total-box">
+                        <small>TOTAL EXACTO A PAGAR:</small>
+                        <div class="giant-amount" id="ticketGiantAmountDisplay">$0.00</div>
+                        <button type="button" class="btn-copy-amount" onclick="copiarMontoExacto()">
+                            <i class="fa-solid fa-copy"></i> Copiar Monto Exacto
+                        </button>
+                    </div>
+
+                    <span class="step-badge">Opción 1: Pago en línea dinámico</span>
+                    
+                    <!-- Botón Dinámico de Mercado Pago -->
+                    <a href="#" target="_blank" class="btn-mp-pay" id="btnMercadoPagoLink">
                         <i class="fa-solid fa-bolt"></i> Pagar con Mercado Pago (<span id="ticketMpTotal">$0.00</span>)
                     </a>
+                    <small id="mpLoadingHint" style="display: none; color: #0284C7; font-size: 0.72rem; margin-bottom: 8px;">⏳ Generando enlace dinámico seguro...</small>
 
+                    <span class="step-badge" style="margin-top: 10px;">Opción 2: Transferencia SPEI</span>
+
+                    <!-- Datos Bancarios Copiables en 1 Clic -->
                     <div class="bank-transfer-box">
                         <div class="bank-transfer-header">
-                            <span>o Transferencia Bancaria Directa:</span>
+                            <span>Datos de Transferencia:</span>
                         </div>
+                        
+                        <div class="clabe-row" style="margin-bottom: 8px;">
+                            <div>
+                                <small>Banco / Titular:</small>
+                                <strong id="bankTitularText" style="font-size: 0.78rem;">Mercado Pago / La Engordadera</strong>
+                            </div>
+                        </div>
+
                         <div class="clabe-row">
                             <div>
-                                <small id="bankTitularText">Mercado Pago / La Engordadera</small>
+                                <small>CLABE Interbancaria:</small>
                                 <strong id="clabeNumberText">123456789012345678</strong>
                             </div>
                             <button type="button" class="btn-copy-clabe" onclick="copiarClabeAlPortapapeles()" id="btnCopyClabe">
-                                <i class="fa-solid fa-copy"></i> Copiar
+                                <i class="fa-solid fa-copy"></i> Copiar CLABE
                             </button>
                         </div>
-                        <small style="display: block; font-size: 0.7rem; color: #666; margin-top: 4px;">Concepto: <strong id="transferConceptoTurno">#R-01</strong></small>
+
+                        <div class="clabe-row" style="margin-top: 8px; border-top: 1px dashed #E2E8F0; padding-top: 6px;">
+                            <div>
+                                <small>Concepto obligatorio:</small>
+                                <strong id="transferConceptoTurno" style="color: var(--primary-pink); font-size: 0.95rem;">#R-01</strong>
+                            </div>
+                            <button type="button" class="btn-copy-clabe" onclick="copiarConceptoTurno()" id="btnCopyConcept">
+                                <i class="fa-solid fa-copy"></i> Copiar Turno
+                            </button>
+                        </div>
                     </div>
                     
-                    <span class="step-badge" style="margin-top: 12px;">Paso 2: Envía tu comprobante</span>
+                    <span class="step-badge" style="margin-top: 14px; color: #166534;">Paso Final: Envía tu comprobante</span>
                 </div>
 
                 <small id="kioskCountdown" style="display: block; color: #888; margin-bottom: 10px; font-weight: 600;"></small>
 
                 <div class="ticket-actions">
                     <button class="btn-whatsapp w-100" id="btnTicketWhatsApp" onclick="enviarComprobanteWhatsApp()">
-                        <i class="fa-brands fa-whatsapp"></i> Enviar Pedido a WhatsApp
+                        <i class="fa-brands fa-whatsapp"></i> <span id="btnWaText">Enviar Pedido y Comprobante por WhatsApp</span>
                     </button>
-                    <button class="btn-secondary w-100" onclick="cerrarTicketModal()">
-                        <i class="fa-solid fa-check"></i> Terminar y Hacer Nuevo Pedido
+                    <button class="btn-secondary w-100" id="btnFinishOrder" onclick="cerrarTicketModal()">
+                        <i class="fa-solid fa-check"></i> <span id="btnFinishText">Terminar y Hacer Nuevo Pedido</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=45"></script>
+    <script src="script.js?v=50"></script>
 </body>
 </html>
