@@ -1,15 +1,9 @@
 // ======================================================
-// KDS & FINANZAS LA ENGORDADERA (NUBE GOOGLE SHEETS + ANALÍTICA)
+// KDS & FINANZAS LA ENGORDADERA (GOOGLE APPS SCRIPT WEB APP)
 // ======================================================
-const SHEETDB_INPUT = "sq3j6nb77cl27"; 
-const INTERVALO_SEGUNDOS = 4;
-
-function obtenerIdLimpioSheetDB(input) {
-    if (!input || input.includes("TU_ID")) return "";
-    return input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
-}
-
-const SHEETDB_ID = obtenerIdLimpioSheetDB(SHEETDB_INPUT);
+// Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+let INTERVALO_SEGUNDOS = 4;
 
 let pedidosGlobalesSheets = [];
 let filtroEstacionActual = 'TODAS';
@@ -17,7 +11,6 @@ let ultimoTurnoRegistrado = '';
 let audioAlerta = null;
 let pedidoTemporalParaTiempo = null;
 
-// Instancias de Chart.js
 let chartVentasDiasInstance = null;
 let chartTopProductosInstance = null;
 
@@ -43,44 +36,58 @@ function obtenerCampoFlexible(obj, posiblesNombres) {
 document.addEventListener('DOMContentLoaded', () => {
     audioAlerta = document.getElementById('orderNotificationSound') || new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     
+    crearBarraDiagnostico();
     iniciarReloj();
     iniciarKDS();
     setInterval(consultarPedidosNube, INTERVALO_SEGUNDOS * 1000);
     setInterval(actualizarSemaforosTiempo, 1000);
 });
 
+// 1. Etiqueta de Conexión en Pantalla
+function crearBarraDiagnostico() {
+    if (document.getElementById('kdsDebugBar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'kdsDebugBar';
+    bar.style.cssText = 'position:fixed; bottom:12px; left:12px; background:#0F172A; color:#F8FAFC; padding:8px 14px; border-radius:12px; font-family:monospace; font-size:0.75rem; z-index:99999; box-shadow:0 4px 14px rgba(0,0,0,0.5); border:1px solid #334155; display:flex; align-items:center; gap:8px;';
+    bar.innerHTML = `<span>⏳ Conectando con Google Apps Script...</span>`;
+    document.body.appendChild(bar);
+}
+
+function actualizarBarraDiagnostico(mensaje, esError = false) {
+    const bar = document.getElementById('kdsDebugBar');
+    if (!bar) return;
+    bar.style.background = esError ? '#991B1B' : '#0F172A';
+    bar.innerHTML = `${esError ? '⚠️' : '🟢'} ${mensaje}`;
+}
+
 function iniciarReloj() {
     setInterval(() => {
         const clockEl = document.getElementById('liveClock');
-        if (clockEl) {
-            clockEl.textContent = new Date().toLocaleTimeString();
-        }
+        if (clockEl) clockEl.textContent = new Date().toLocaleTimeString();
     }, 1000);
 }
 
 async function iniciarKDS() {
-    if (!SHEETDB_ID) {
-        console.error("❌ Falta configurar SHEETDB_ID en kds.js");
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
+        actualizarBarraDiagnostico("ERROR: Falta colocar tu URL de Web App en kds.js", true);
         return;
     }
     await consultarPedidosNube();
 }
 
 async function consultarPedidosNube() {
-    if (!SHEETDB_ID) return;
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
 
     try {
-        let url = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`;
-        let res = await fetch(url);
+        let res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas`);
         let data = await res.json();
 
-        if (data && data.error && data.error.includes("not found")) {
-            url = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas%20Historicas`;
-            res = await fetch(url);
-            data = await res.json();
+        if (!Array.isArray(data)) {
+            actualizarBarraDiagnostico(`Apps Script: ${data.error || 'Respuesta inválida'}`, true);
+            return;
         }
 
-        if (!Array.isArray(data)) return;
+        actualizarBarraDiagnostico(`Google Sheets Conectado (Ilimitado) | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
 
         pedidosGlobalesSheets = data.map((fila, index) => {
             const turnoVal = obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
@@ -100,7 +107,7 @@ async function consultarPedidosNube() {
                     items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], precio: 0 }));
                 }
             } catch (e) {
-                items = [{ nombre: detalleVal || 'Botana Preparada', extras: [], precio: totalVal }];
+                items = [{ nombre: detalleVal || 'Botana', extras: [], precio: totalVal }];
             }
 
             let estadoRaw = String(obtenerCampoFlexible(fila, ['estado', 'status']) || 'cola').toLowerCase().trim();
@@ -118,7 +125,6 @@ async function consultarPedidosNube() {
             };
         });
 
-        // Alerta de nuevo pedido en cola
         const pedidosCola = pedidosGlobalesSheets.filter(p => p.estado === 'cola');
         if (pedidosCola.length > 0) {
             const ultimoTurno = pedidosCola[pedidosCola.length - 1].turno;
@@ -131,18 +137,17 @@ async function consultarPedidosNube() {
         renderizarTableroKanban();
         actualizarMetricasHeader();
 
-        // Actualizar analítica si la pestaña de finanzas está activa
         const vistaFin = document.getElementById('vistaFinanzas');
         if (vistaFin && vistaFin.style.display !== 'none') {
             actualizarModuloFinanzas();
         }
     } catch (error) {
-        console.error("Error al consultar Sheets:", error);
+        actualizarBarraDiagnostico(`Fallo de Red: ${error.message}`, true);
     }
 }
 
 // ======================================================
-// RENDERIZADO KANBAN
+// 2. RENDERIZADO KANBAN CON BOTÓN DE ELIMINAR
 // ======================================================
 function renderizarTableroKanban() {
     const contCola = document.getElementById('containerCola');
@@ -151,7 +156,7 @@ function renderizarTableroKanban() {
 
     if (!contCola || !contPrep || !contListos) return;
 
-    let pedidos = pedidosGlobalesSheets;
+    let pedidos = pedidosGlobalesSheets.filter(p => p.estado !== 'cancelado');
     if (filtroEstacionActual !== 'TODAS') {
         pedidos = pedidos.filter(p => {
             return p.items.some(it => (it.estacion || 'CALIENTE').toUpperCase() === filtroEstacionActual);
@@ -194,20 +199,20 @@ function crearTarjetaHTML(pedido) {
     let botonAccion = '';
     if (pedido.estado === 'cola') {
         botonAccion = `
-            <button class="btn-card-action" style="width:100%; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="iniciarPreparacionPedido('${turnoEscapado}', '${pedido.tipo}', '${pedido.telefono}')">
-                <i class="fa-solid fa-fire"></i> Iniciar Preparación
+            <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="iniciarPreparacionPedido('${turnoEscapado}', '${pedido.tipo}', '${pedido.telefono}')">
+                <i class="fa-solid fa-fire"></i> Preparar
             </button>
         `;
     } else if (pedido.estado === 'preparando') {
         botonAccion = `
-            <button class="btn-card-action" style="width:100%; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
-                <i class="fa-solid fa-check-double"></i> Marcar Listo
+            <button class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
+                <i class="fa-solid fa-check-double"></i> Listo
             </button>
         `;
     } else {
         botonAccion = `
-            <button class="btn-card-action" style="width:100%; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'entregado')">
-                <i class="fa-solid fa-box-archive"></i> Entregar / Archivar
+            <button class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'entregado')">
+                <i class="fa-solid fa-box-archive"></i> Entregar
             </button>
         `;
     }
@@ -232,9 +237,51 @@ function crearTarjetaHTML(pedido) {
                 ${itemsHTML}
             </div>
 
-            ${botonAccion}
+            <div style="display:flex; gap:6px; margin-top:8px;">
+                ${botonAccion}
+                <button title="Eliminar / Cancelar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="eliminarPedidoIndividual('${turnoEscapado}')">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
         </div>
     `;
+}
+
+// 2. Eliminar Pedido en Google Sheets
+async function eliminarPedidoIndividual(turnoEncoded) {
+    const turnoReal = decodeURIComponent(turnoEncoded);
+    if (!confirm(`¿Deseas eliminar el pedido ${turnoReal}?`)) return;
+
+    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
+    if (index !== -1) {
+        pedidosGlobalesSheets.splice(index, 1);
+        renderizarTableroKanban();
+        actualizarMetricasHeader();
+    }
+
+    if (!WEB_APP_URL) return;
+
+    try {
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'eliminar_pedido',
+                sheet: 'Ventas_Historicas',
+                turno: turnoReal
+            })
+        });
+        console.log(`🗑️ Pedido ${turnoReal} eliminado de Sheets`);
+    } catch (e) {
+        console.warn("Error eliminando pedido:", e);
+    }
+}
+
+// 3. Reiniciar el Contador de Turnos
+function reiniciarContadorTurnos() {
+    if (!confirm("¿Deseas reiniciar los turnos? El siguiente pedido volverá a comenzar en #T-01 y #R-01.")) return;
+    localStorage.removeItem('turno_T_consecutivo');
+    localStorage.removeItem('turno_R_consecutivo');
+    alert("✅ Consecutivos de turno reiniciados a 0.");
 }
 
 function iniciarPreparacionPedido(turnoEscapado, tipo, telefono) {
@@ -267,9 +314,6 @@ function cerrarModalTiempo() {
     pedidoTemporalParaTiempo = null;
 }
 
-// ======================================================
-// ACTUALIZACIÓN DIRECTA A GOOGLE SHEETS
-// ======================================================
 async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
     const turnoReal = decodeURIComponent(turnoEncoded);
 
@@ -280,18 +324,16 @@ async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
         actualizarMetricasHeader();
     }
 
-    if (!SHEETDB_ID) return;
+    if (!WEB_APP_URL) return;
 
     try {
-        const patchUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/turno/${encodeURIComponent(turnoReal)}?sheet=Ventas_Historicas`;
-        await fetch(patchUrl, {
-            method: 'PATCH',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
             body: JSON.stringify({
-                data: { estado: nuevoEstado }
+                action: 'actualizar_estado',
+                sheet: 'Ventas_Historicas',
+                turno: turnoReal,
+                estado: nuevoEstado
             })
         });
     } catch (e) {
@@ -305,9 +347,6 @@ function limpiarEntregadosAntiguos() {
     actualizarMetricasHeader();
 }
 
-// ======================================================
-// UTILIDADES: SEMÁFORO Y TIEMPOS
-// ======================================================
 function calcularSemaforoTiempo(fechaISO) {
     const ahora = new Date();
     const creacion = new Date(fechaISO);
@@ -345,9 +384,6 @@ function actualizarSemaforosTiempo() {
     });
 }
 
-// ======================================================
-// VISTAS Y FILTROS
-// ======================================================
 function mostrarVista(vista) {
     const vistaKDS = document.getElementById('vistaKDS');
     const vistaFin = document.getElementById('vistaFinanzas');
@@ -398,9 +434,6 @@ function actualizarMetricasHeader() {
     if (mListos) mListos.textContent = listos;
 }
 
-// ======================================================
-// MÓDULO DE CORTE, FINANZAS Y GRÁFICAS (CHART.JS)
-// ======================================================
 function actualizarModuloFinanzas() {
     const ventas = pedidosGlobalesSheets;
     let totalGeneral = 0;
@@ -438,7 +471,6 @@ function actualizarModuloFinanzas() {
     if (finPedRecoger) finPedRecoger.textContent = `${pedidosRecogerCount} órdenes`;
     if (finTicket) finTicket.textContent = `$${ticketProm.toFixed(2)}`;
 
-    // Renderizar tabla
     const tbody = document.getElementById('financeTableBody');
     if (tbody) {
         tbody.innerHTML = ventas.map(v => `
@@ -453,17 +485,12 @@ function actualizarModuloFinanzas() {
         `).join('');
     }
 
-    // Renderizar Gráficas
     renderizarGraficasFinancieras(ventas);
 }
 
 function renderizarGraficasFinancieras(ventas) {
-    if (typeof Chart === 'undefined') {
-        console.warn("Chart.js no está cargado");
-        return;
-    }
+    if (typeof Chart === 'undefined') return;
 
-    // 1. Agrupar Ventas por Fecha (YYYY-MM-DD)
     const ventasPorFecha = {};
     ventas.forEach(v => {
         const fechaDia = v.fecha_completa ? v.fecha_completa.split('T')[0] : 'Hoy';
@@ -473,7 +500,6 @@ function renderizarGraficasFinancieras(ventas) {
     const labelsDias = Object.keys(ventasPorFecha);
     const dataDias = Object.values(ventasPorFecha);
 
-    // 2. Agrupar Conteo por Producto
     const productosConteo = {};
     ventas.forEach(v => {
         v.items.forEach(it => {
@@ -489,7 +515,6 @@ function renderizarGraficasFinancieras(ventas) {
     const labelsProds = topProductosSorted.map(p => p[0]);
     const dataProds = topProductosSorted.map(p => p[1]);
 
-    // Canvas 1: Ventas por Día
     const canvasDias = document.getElementById('chartVentasDias');
     if (canvasDias) {
         if (chartVentasDiasInstance) chartVentasDiasInstance.destroy();
@@ -523,7 +548,6 @@ function renderizarGraficasFinancieras(ventas) {
         });
     }
 
-    // Canvas 2: Top Productos
     const canvasProds = document.getElementById('chartTopProductos');
     if (canvasProds) {
         if (chartTopProductosInstance) chartTopProductosInstance.destroy();
@@ -574,31 +598,25 @@ function exportarReporteVentasCSV() {
     document.body.removeChild(link);
 }
 
-// ======================================================
-// REINICIAR / BORRAR HISTORIAL FINANCIERO
-// ======================================================
 async function borrarHistorialFinanciero() {
-    const confirmar = confirm("⚠️ ¿Estás seguro de que deseas reiniciar todo el historial de ventas? Esta acción limpiará la tabla de finanzas y las gráficas.");
-    if (!confirmar) return;
+    if (!confirm("⚠️ ¿Estás seguro de reiniciar todo el historial? Se borrarán los datos de la tabla y las gráficas.")) return;
 
-    // 1. Limpiar datos locales en memoria
     pedidosGlobalesSheets = [];
-    
-    // 2. Refrescar vistas, métricas y gráficas
     renderizarTableroKanban();
     actualizarMetricasHeader();
     actualizarModuloFinanzas();
 
-    // 3. Eliminar registros en Google Sheets vía SheetDB
-    if (SHEETDB_ID) {
+    if (WEB_APP_URL) {
         try {
-            const deleteUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/all?sheet=Ventas_Historicas`;
-            await fetch(deleteUrl, { method: 'DELETE' });
-            console.log("✅ Historial eliminado de Google Sheets.");
-        } catch (e) {
-            console.warn("No se pudo vaciar la hoja en Google Sheets directamente:", e);
-        }
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'borrar_historial',
+                    sheet: 'Ventas_Historicas'
+                })
+            });
+        } catch (e) {}
     }
 
-    alert("✅ El historial financiero ha sido reiniciado correctamente.");
+    alert("✅ El historial financiero ha sido reiniciado.");
 }
