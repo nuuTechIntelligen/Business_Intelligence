@@ -2,7 +2,7 @@
 // KDS & FINANZAS LA ENGORDADERA (GOOGLE APPS SCRIPT WEB APP)
 // ======================================================
 // Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
-const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 let INTERVALO_SEGUNDOS = 4;
 
 let pedidosGlobalesSheets = [];
