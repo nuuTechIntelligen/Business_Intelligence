@@ -15,8 +15,7 @@ let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 // Extractor seguro de ID de SheetDB
 function obtenerIdLimpioSheetDB(input) {
     if (!input || input.includes("TU_ID")) return "";
-    const limpio = input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
-    return limpio;
+    return input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
 }
 
 const SHEETDB_ID = obtenerIdLimpioSheetDB(SHEETDB_INPUT);
@@ -901,15 +900,48 @@ function cambiarTipoPedido(tipo) {
     }
 }
 
-function obtenerSiguienteTurno(tipo) {
+// ======================================================
+// GENERACIÓN DE TURNO GLOBAL Y ÚNICO DESDE GOOGLE SHEETS
+// ======================================================
+async function obtenerSiguienteTurnoGlobal(tipo) {
     const prefijo = tipo === 'tienda' ? 'T' : 'R';
-    const claveStorage = `turno_${prefijo}_consecutivo`;
-    let actual = parseInt(localStorage.getItem(claveStorage) || '0') + 1;
-    if (actual > 99) actual = 1;
-    localStorage.setItem(claveStorage, actual);
+    
+    if (!SHEETDB_ID) {
+        const rnd = Math.floor(Math.random() * 90 + 10);
+        return `#${prefijo}-${rnd}`;
+    }
 
-    const numeroFormateado = actual < 10 ? `0${actual}` : `${actual}`;
-    return `#${prefijo}-${numeroFormateado}`;
+    try {
+        const res = await fetch(`https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`);
+        const ventas = await res.json();
+
+        if (Array.isArray(ventas) && ventas.length > 0) {
+            let maxConsecutivo = 0;
+            const regexTurno = new RegExp(`^#?${prefijo}-(\\d+)`, 'i');
+
+            ventas.forEach(v => {
+                const turnoStr = String(v.turno || '').trim();
+                const match = turnoStr.match(regexTurno);
+                if (match && match[1]) {
+                    const num = parseInt(match[1], 10);
+                    if (!isNaN(num) && num > maxConsecutivo) {
+                        maxConsecutivo = num;
+                    }
+                }
+            });
+
+            const siguiente = maxConsecutivo + 1;
+            const formateado = siguiente < 10 ? `0${siguiente}` : `${siguiente}`;
+            return `#${prefijo}-${formateado}`;
+        }
+    } catch (e) {
+        console.warn("No se pudo consultar el consecutivo global, usando respaldo:", e);
+    }
+
+    // Respaldo por marca de tiempo para evitar duplicados
+    const horaFallback = new Date().getMinutes();
+    const segFallback = new Date().getSeconds();
+    return `#${prefijo}-${horaFallback}${segFallback}`;
 }
 
 async function procesarGeneracionTurno() {
@@ -930,15 +962,16 @@ async function procesarGeneracionTurno() {
 
     const btnSubmit = document.getElementById('btnSubmitOrder');
     btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando pedido...';
+    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando turno...';
 
-    // 1. Procesar Registro en Clientes_Lealtad
+    // 1. Obtener número de turno consecutivo global desde Google Sheets
+    const numeroTurno = await obtenerSiguienteTurnoGlobal(tipoPedido);
+
+    // 2. Procesar Registro en Clientes_Lealtad
     let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
     if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
         infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
     }
-
-    const numeroTurno = obtenerSiguienteTurno(tipoPedido);
 
     ultimoPedidoGenerado = {
         id_pedido: 'PED-' + Date.now(),
@@ -955,12 +988,12 @@ async function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    // 2. Guardar en KDS Local de respaldo
+    // 3. Guardar en KDS Local de respaldo
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
-    // 3. Respaldo asegurado en Ventas_Historicas para KDS en la Nube
+    // 4. Respaldo asegurado en Ventas_Historicas para KDS en la Nube
     await respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
     btnSubmit.disabled = false;
