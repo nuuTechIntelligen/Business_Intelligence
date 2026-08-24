@@ -421,7 +421,7 @@ body {
     border: 2px solid var(--primary-pink);
     border-radius: 50px;
     padding: 8px 12px 8px 14px;
-    display: flex;
+    display: none; /* Controlado directamente por script.js */
     justify-content: space-between;
     align-items: center;
     gap: 12px;
@@ -429,16 +429,8 @@ body {
     z-index: 9999;
     cursor: pointer;
     box-sizing: border-box;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-50%) translateY(30px);
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.cart-pill-bar.visible {
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
 }
 
 .cart-pill-left {
@@ -873,7 +865,6 @@ body {
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Control de Visibilidad Desktop vs Móvil */
 .desktop-only { display: none; }
 .mobile-only { display: flex; }
 
