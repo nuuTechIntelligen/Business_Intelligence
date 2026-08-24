@@ -1,7 +1,7 @@
 // ======================================================
 // MENU LA ENGORDADERA (BARRA PÍLDORA + MERCADO PAGO DINÁMICO + PERSISTENCIA)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -722,34 +722,29 @@ function confirmarAgregarAlCarrito() {
 }
 
 // ======================================================
-// 4. RENDERIZADO DE BARRA PÍLDORA HÍBRIDA
+// 4. RENDERIZADO DE BARRA PÍLDORA (ESTRUCTURA VISIBLE)
 // ======================================================
 function actualizarBarraPildoraCarrito() {
     const totalCount = carrito.length;
     const totalPrice = carrito.reduce((sum, item) => sum + item.precio, 0);
 
-    const barEl = document.getElementById('cartBar');
     const badgeEl = document.getElementById('cartCountBadge');
     const totalDisplayEl = document.getElementById('cartTotalDisplay');
     const chipsContainer = document.getElementById('cartMiniChipsContainer');
 
-    if (!barEl) return;
-
-    if (totalCount === 0) {
-        barEl.style.setProperty('display', 'none', 'important');
-        return;
-    }
-
-    barEl.style.setProperty('display', 'flex', 'important');
     if (badgeEl) badgeEl.textContent = totalCount;
     if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
 
     if (chipsContainer) {
-        chipsContainer.innerHTML = carrito.slice(-3).map(item => `
-            <span class="mini-snack-chip">
-                🍿 ${item.nombre.length > 14 ? item.nombre.substring(0, 12) + '...' : item.nombre}
-            </span>
-        `).join('');
+        if (totalCount === 0) {
+            chipsContainer.innerHTML = `<span style="font-size:0.7rem; color:#888; font-style:italic;">Tu canasta está vacía</span>`;
+        } else {
+            chipsContainer.innerHTML = carrito.slice(-3).map(item => `
+                <span class="mini-snack-chip">
+                    🍿 ${item.nombre.length > 14 ? item.nombre.substring(0, 12) + '...' : item.nombre}
+                </span>
+            `).join('');
+        }
     }
 }
 
@@ -758,7 +753,7 @@ function actualizarBarraPildoraCarrito() {
 // ======================================================
 function iniciarFlujoCheckout() {
     if (carrito.length === 0) {
-        alert("¡Tu pedido está vacío! Elige una botana para comenzar.");
+        alert("¡Tu canasta está vacía! Elige una botana para comenzar.");
         return;
     }
 
@@ -888,7 +883,7 @@ async function consultarSellosEnSheets() {
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
-        alert("¡Tu pedido está vacío! Elige una botana para comenzar.");
+        alert("¡Tu canasta está vacía! Elige una botana para comenzar.");
         return;
     }
 
