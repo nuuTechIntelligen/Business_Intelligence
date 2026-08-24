@@ -13,19 +13,18 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Estilos CSS Originales -->
-    <link rel="stylesheet" href="styles.css?v=30">
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="styles.css?v=25">
 </head>
 <body>
 
     <!-- ========================================== -->
-    <!-- 1. ENCABEZADO CON LOGO DE LA ENGORDADERA  -->
+    <!-- 1. ENCABEZADO Y BOTÓN DE PUNTOS            -->
     <!-- ========================================== -->
     <header class="main-header">
         <div class="header-container">
             <div class="brand-logo">
-                <img src="images/logo_engordadera.png" alt="La Engordadera" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallbackEmoji').style.display='inline-block';">
-                <span id="fallbackEmoji" class="brand-emoji" style="display: none;">🍿</span>
+                <span class="brand-emoji">🍿</span>
                 <div class="brand-titles">
                     <h1>LA ENGORDADERA</h1>
                     <p>Botanas, Antojos & Preparados</p>
@@ -62,9 +61,9 @@
     <!-- 4. SECCIONES DEL MENÚ                     -->
     <!-- ========================================== -->
     <main class="menu-container" id="menu-sections-container">
-        <div class="loading-state">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            <p>Cargando botanas deliciosas...</p>
+        <div class="loading-state" style="text-align: center; padding: 60px 20px;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: #F59E0B; margin-bottom: 12px;"></i>
+            <p style="color: #64748B; font-weight: 600;">Cargando botanas deliciosas...</p>
         </div>
     </main>
 
@@ -84,22 +83,23 @@
     <!-- ========================================== -->
     <!-- 6. PIE DE PÁGINA Y REDES SOCIALES          -->
     <!-- ========================================== -->
-    <footer class="main-footer">
-        <div class="footer-brand">
-            <img src="images/logo_engordadera.png" alt="La Engordadera" style="height: 40px; margin-bottom: 6px;" onerror="this.style.display='none'">
-            <h3>LA ENGORDADERA</h3>
-            <p>¡El auténtico sabor que te consiente!</p>
+    <footer class="main-footer" style="text-align: center; padding: 40px 20px 100px; margin-top: 40px; border-top: 1px solid #E2E8F0; background: #FFFFFF; position: relative; z-index: 10;">
+        <div class="footer-brand" style="margin-bottom: 16px;">
+            <span style="font-size: 2rem;">🍿</span>
+            <h3 style="font-family: 'Fredoka', cursive; color: #1E293B; margin: 4px 0 0 0;">LA ENGORDADERA</h3>
+            <p style="color: #64748B; font-size: 0.85rem; margin: 2px 0 0 0;">¡El sabor que te consiente!</p>
         </div>
 
-        <div class="footer-social" id="footerSocialIcons">
+        <!-- Contenedor Dinámico de Redes Sociales -->
+        <div class="footer-social" id="footerSocialIcons" style="display: flex; justify-content: center; gap: 14px; margin-bottom: 20px;">
             <!-- Renderizado dinámico desde script.js -->
         </div>
 
-        <p class="footer-copy">&copy; 2026 La Engordadera. Todos los derechos reservados.</p>
+        <p style="color: #94A3B8; font-size: 0.75rem; margin: 0;">&copy; 2026 La Engordadera. Todos los derechos reservados.</p>
     </footer>
 
     <!-- ========================================== -->
-    <!-- 7. MODALES                                -->
+    <!-- 7. MODALES (PRODUCTO, UPSELL, PUNTOS, CHECKOUT, TICKET) -->
     <!-- ========================================== -->
     
     <!-- Modal Personalizar Producto -->
@@ -120,7 +120,7 @@
                     <div class="custom-amount-wrapper" id="modalCustomWrapper" style="display: none; margin-top: 10px;">
                         <input type="number" id="modalCustomAmount" class="custom-amount-input" placeholder="Ingresa monto...">
                     </div>
-                    <small id="modalMinAmountMsg" class="hint-min-amount"></small>
+                    <small id="modalMinAmountMsg" style="color: #D97706; display: block; margin-top: 4px;"></small>
                 </div>
 
                 <!-- Grupo Base -->
@@ -131,8 +131,8 @@
 
                 <!-- Grupo Ingredientes -->
                 <div class="modal-group" id="modalIngredientsGroup" style="display: none;">
-                    <div class="group-header-flex">
-                        <label class="modal-group-title" id="modalIngredientsTitle">Ingredientes</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label class="modal-group-title" id="modalIngredientsTitle" style="margin: 0;">Ingredientes</label>
                         <span class="limit-badge" id="modalIngredientsLimitBadge" style="display: none;"></span>
                     </div>
                     <div class="options-container" id="modalIngredientsOptions"></div>
@@ -168,7 +168,7 @@
                 <p>Complementa tu orden antes de continuar</p>
             </div>
             <div class="upsell-list" id="upsellItemsList"></div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="margin-top: 14px;">
                 <button class="btn-skip-upsell" onclick="cerrarUpsellYAbrirCheckout()">No, gracias, continuar al pedido</button>
             </div>
         </div>
@@ -183,17 +183,17 @@
                 <p>Consulta tus puntos acumulados en el cuatrimestre vigente</p>
             </div>
             <div class="modal-body">
-                <div class="query-box-flex">
-                    <input type="tel" id="queryPhoneInput" placeholder="Número celular (10 dígitos)" maxlength="10">
-                    <button type="button" class="btn-query-search" onclick="consultarSellosEnSheets()">Buscar</button>
+                <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                    <input type="tel" id="queryPhoneInput" placeholder="Número celular (10 dígitos)" maxlength="10" style="flex: 1; padding: 12px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 0.95rem;">
+                    <button type="button" class="btn-submit-order" style="width: auto; padding: 0 16px;" onclick="consultarSellosEnSheets()">Buscar</button>
                 </div>
                 
-                <div id="loyaltyQueryResult" class="loyalty-result-card" style="display: none;">
+                <div id="loyaltyQueryResult" style="display: none; background: #F8FAFC; padding: 14px; border-radius: 12px; border: 1px solid #E2E8F0;">
                     <div id="queryStampsContainer"></div>
-                    <div class="loyalty-progress-wrapper">
-                        <div id="queryProgressBar"></div>
+                    <div class="loyalty-progress-wrapper" style="margin-top: 10px; background: #E2E8F0; height: 10px; border-radius: 10px; overflow: hidden;">
+                        <div id="queryProgressBar" style="width: 0%; height: 100%; background: #F59E0B; transition: width 0.4s ease;"></div>
                     </div>
-                    <p id="queryProgressText"></p>
+                    <p id="queryProgressText" style="font-size: 0.82rem; color: #475569; margin: 8px 0 0 0; text-align: center;"></p>
                 </div>
             </div>
         </div>
@@ -209,36 +209,36 @@
             <div class="modal-body">
                 <div class="checkout-items-list" id="checkoutItemsList"></div>
 
-                <div class="checkout-total-row">
+                <div class="checkout-total-row" style="display: flex; justify-content: space-between; align-items: center; margin: 14px 0; font-size: 1.2rem; font-weight: 700;">
                     <span>Total a Pagar:</span>
-                    <span id="checkoutTotalPrice">$0.00</span>
+                    <span id="checkoutTotalPrice" style="color: #F59E0B;">$0.00</span>
                 </div>
 
-                <div class="loyalty-checkout-box" id="loyaltyCheckoutBox" style="display: none;"></div>
+                <div class="loyalty-checkout-box" id="loyaltyCheckoutBox" style="display: none; background: #FEF3C7; border: 1px solid #FDE68A; padding: 10px; border-radius: 10px; font-size: 0.82rem; margin-bottom: 14px;"></div>
 
                 <!-- Tipo de Entrega -->
-                <div class="order-type-selector">
-                    <label class="type-btn active" id="typeStoreLabel">
+                <div class="order-type-selector" style="display: flex; gap: 8px; margin-bottom: 14px;">
+                    <label class="type-btn active" id="typeStoreLabel" style="flex: 1; text-align: center; padding: 10px; border: 1.5px solid #CBD5E1; border-radius: 10px; cursor: pointer;">
                         <input type="radio" name="orderType" value="tienda" checked onchange="cambiarTipoPedido('tienda')" style="display: none;">
                         🏪 Consumo en Tienda
                     </label>
-                    <label class="type-btn" id="typePickupLabel">
+                    <label class="type-btn" id="typePickupLabel" style="flex: 1; text-align: center; padding: 10px; border: 1.5px solid #CBD5E1; border-radius: 10px; cursor: pointer;">
                         <input type="radio" name="orderType" value="recoger" onchange="cambiarTipoPedido('recoger')" style="display: none;">
                         🛍️ Para Recoger
                     </label>
                 </div>
 
-                <div class="form-group">
-                    <label>Tu Nombre:</label>
-                    <input type="text" id="clientNameInput" placeholder="¿A nombre de quién?">
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Tu Nombre:</label>
+                    <input type="text" id="clientNameInput" placeholder="¿A nombre de quién?" style="width: 100%; padding: 12px; border: 1.5px solid #CBD5E1; border-radius: 10px; box-sizing: border-box;">
                 </div>
 
-                <div class="form-group">
-                    <label>Celular WhatsApp: <small id="loyaltyPhoneHint"></small></label>
-                    <input type="tel" id="clientPhoneInput" placeholder="10 dígitos para tus puntos" maxlength="10">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Celular WhatsApp: <small id="loyaltyPhoneHint" style="color: #94A3B8; font-weight: 400;"></small></label>
+                    <input type="tel" id="clientPhoneInput" placeholder="10 dígitos para tus puntos" maxlength="10" style="width: 100%; padding: 12px; border: 1.5px solid #CBD5E1; border-radius: 10px; box-sizing: border-box;">
                 </div>
 
-                <button type="button" class="btn-submit-order" id="btnSubmitOrder" onclick="procesarGeneracionTurno()">
+                <button type="button" class="btn-submit-order" id="btnSubmitOrder" onclick="procesarGeneracionTurno()" style="width: 100%; background: #F59E0B; color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer;">
                     <i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno
                 </button>
             </div>
@@ -247,47 +247,47 @@
 
     <!-- Modal Ticket / Turno Generado -->
     <div class="modal-overlay" id="ticketModal">
-        <div class="modal-card ticket-card">
-            <span class="ticket-badge" id="ticketBadgeType"></span>
+        <div class="modal-card" style="text-align: center;">
+            <span class="ticket-badge" id="ticketBadgeType" style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 8px;"></span>
             
-            <h1 id="ticketNumberDisplay">#T-01</h1>
-            <p id="ticketClientName"></p>
+            <h1 id="ticketNumberDisplay" style="font-family: 'Fredoka', cursive; font-size: 3.5rem; color: #F59E0B; margin: 4px 0;">#T-01</h1>
+            <p id="ticketClientName" style="font-weight: 600; color: #334155; margin: 0 0 12px 0;"></p>
 
-            <div id="ticketLoyaltyBanner" style="display: none;"></div>
-            <div id="ticketPaymentAlert" class="ticket-payment-alert"></div>
+            <div id="ticketLoyaltyBanner" style="display: none; margin-bottom: 12px;"></div>
+            <div id="ticketPaymentAlert" class="ticket-payment-alert" style="padding: 10px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 14px; text-align: left;"></div>
 
             <!-- Pago en Línea (Para Recoger) -->
-            <div id="onlinePaymentContainer" class="online-pay-box" style="display: none;">
-                <h4>💳 Opciones de Pago Rápido</h4>
+            <div id="onlinePaymentContainer" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px; margin-bottom: 14px; text-align: left;">
+                <h4 style="margin: 0 0 8px 0; color: #1E293B;">💳 Opciones de Pago Rápido</h4>
                 
-                <a id="btnMercadoPagoLink" href="#" target="_blank" class="btn-mp-pay">
+                <a id="btnMercadoPagoLink" href="#" target="_blank" class="btn-mp-pay" style="display: block; text-align: center; background: #009EE3; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 700; margin-bottom: 10px;">
                     Pagar con Mercado Pago (<span id="ticketMpTotal">$0.00</span>)
                 </a>
 
-                <div class="spei-info-box">
+                <div style="font-size: 0.8rem; color: #475569; background: #FFF; padding: 8px; border-radius: 8px; border: 1px dashed #CBD5E1;">
                     <strong>Transferencia SPEI:</strong><br>
                     Banco: <span id="bankTitularText"></span><br>
                     CLABE: <strong id="clabeNumberText"></strong>
-                    <button type="button" id="btnCopyClabe" class="btn-copy-clabe" onclick="copiarClabeAlPortapapeles()">
+                    <button type="button" id="btnCopyClabe" onclick="copiarClabeAlPortapapeles()" style="display: block; width: 100%; margin-top: 6px; background: #E2E8F0; border: none; padding: 6px; border-radius: 6px; font-weight: 600; cursor: pointer;">
                         📋 Copiar CLABE
                     </button>
-                    <small>Concepto: <span id="transferConceptoTurno"></span></small>
+                    <small style="display: block; margin-top: 4px; color: #94A3B8;">Concepto: <span id="transferConceptoTurno"></span></small>
                 </div>
             </div>
 
-            <button type="button" class="btn-wa-receipt" onclick="enviarComprobanteWhatsApp()">
+            <button type="button" class="btn-wa-receipt" onclick="enviarComprobanteWhatsApp()" style="width: 100%; background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-bottom: 8px;">
                 <i class="fa-brands fa-whatsapp"></i> Enviar Pedido por WhatsApp
             </button>
 
-            <button type="button" class="btn-ticket-close" onclick="cerrarTicketModal()">
+            <button type="button" onclick="cerrarTicketModal()" style="background: none; border: none; color: #64748B; font-weight: 600; cursor: pointer; font-size: 0.85rem;">
                 Cerrar y nuevo pedido
             </button>
             
-            <small id="kioskCountdown" class="kiosk-countdown"></small>
+            <small id="kioskCountdown" style="display: block; margin-top: 8px; color: #94A3B8; font-size: 0.75rem;"></small>
         </div>
     </div>
 
     <!-- Script Principal -->
-    <script src="script.js?v=30"></script>
+    <script src="script.js?v=25"></script>
 </body>
 </html>
