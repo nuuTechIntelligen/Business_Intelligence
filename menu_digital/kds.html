@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDS Cocina | La Engordadera</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=10">
+</head>
+<body style="background-color: #0F172A; color: #FFFFFF; padding: 16px;">
+
+    <!-- CABECERA Y MÉTRICAS -->
+    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px;">
+        <div>
+            <h1 style="font-size: 1.5rem; color: #F59E0B; margin: 0;">🍿 KDS - LA ENGORDADERA</h1>
+            <small style="color: #94A3B8;">Pantalla de Producción en Cocina</small>
+        </div>
+        <div style="display: flex; gap: 16px;">
+            <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color: #94A3B8; display: block;">Pendientes:</span>
+                <strong id="metricPendingCount" style="font-size: 1.2rem; color: #EF4444;">0</strong>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color: #94A3B8; display: block;">Listos:</span>
+                <strong id="metricReadyCount" style="font-size: 1.2rem; color: #10B981;">0</strong>
+            </div>
+        </div>
+    </header>
+
+    <!-- GRID DONDE SE DIBUJAN LAS COMANDAS -->
+    <main id="kdsOrdersGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+        <!-- Aquí kds.js inserta las comandas -->
+    </main>
+
+    <!-- VINCULACIÓN AL SCRIPT -->
+    <script src="kds.js?v=10"></script>
+</body>
+</html>
