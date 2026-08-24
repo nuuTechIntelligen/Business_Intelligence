@@ -1,24 +1,16 @@
 // ======================================================
-// CONFIGURACIÓN SHEETDB & WHATSAPP
+// CONFIGURACIÓN WEB APP (GOOGLE APPS SCRIPT) & WHATSAPP
 // ======================================================
-// Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
-const SHEETDB_INPUT = "sq3j6nb77cl27"; 
+// Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
+// Variables dinámicas
 let MONTO_MINIMO_SELLO = 80.00;
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
-
-// Extractor seguro de ID de SheetDB
-function obtenerIdLimpioSheetDB(input) {
-    if (!input || input.includes("TU_ID")) return "";
-    return input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
-}
-
-const SHEETDB_ID = obtenerIdLimpioSheetDB(SHEETDB_INPUT);
 
 let productosGlobales = [];
 let productoSeleccionado = null;
@@ -34,10 +26,6 @@ let indiceBannerActual = 0;
 let temporizadorAutoplayBanner = null;
 
 const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-
-function obtenerUrlSheetDB(pestana) {
-    return `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=${pestana}`;
-}
 
 function limpiarTexto(txt) {
     if (!txt) return '';
@@ -77,56 +65,46 @@ function parsearExtraConCosto(textoOpcion) {
 }
 
 // ======================================================
-// 1. CARGA DINÁMICA DEL MENÚ Y CONFIGURACIÓN
+// 1. CARGA DIRECTA DESDE GOOGLE APPS SCRIPT
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
-    cargarMenuDesdeSheetDB();
+    cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
 });
 
 async function cargarConfiguracionGlobal() {
-    if (!SHEETDB_ID) return;
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
     try {
-        const res = await fetch(obtenerUrlSheetDB('Configuracion'));
+        const res = await fetch(`${WEB_APP_URL}?sheet=Configuracion`);
         const config = await res.json();
         if (Array.isArray(config)) {
             const filaMonto = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
-            if (filaMonto && !isNaN(parseFloat(filaMonto.valor))) {
-                MONTO_MINIMO_SELLO = parseFloat(filaMonto.valor);
-            }
+            if (filaMonto && !isNaN(parseFloat(filaMonto.valor))) MONTO_MINIMO_SELLO = parseFloat(filaMonto.valor);
 
             const filaPremio = config.find(c => limpiarTexto(c.clave) === 'PREMIO_LEALTAD');
-            if (filaPremio && filaPremio.valor && filaPremio.valor.trim() !== '') {
-                PREMIO_LEALTAD = filaPremio.valor.trim();
-            }
+            if (filaPremio && filaPremio.valor) PREMIO_LEALTAD = filaPremio.valor.trim();
 
             const filaMp = config.find(c => limpiarTexto(c.clave) === 'LINK_MERCADOPAGO');
-            if (filaMp && filaMp.valor && filaMp.valor.trim() !== '') {
-                LINK_MERCADOPAGO = filaMp.valor.trim();
-            }
+            if (filaMp && filaMp.valor) LINK_MERCADOPAGO = filaMp.valor.trim();
 
             const filaClabe = config.find(c => limpiarTexto(c.clave) === 'CLABE_INTERBANCARIA' || limpiarTexto(c.clave) === 'CLABE');
-            if (filaClabe && filaClabe.valor && filaClabe.valor.trim() !== '') {
-                CLABE_BANCARIA = filaClabe.valor.trim();
-            }
+            if (filaClabe && filaClabe.valor) CLABE_BANCARIA = filaClabe.valor.trim();
 
             const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
-            if (filaBanco && filaBanco.valor && filaBanco.valor.trim() !== '') {
-                BANCO_TITULAR = filaBanco.valor.trim();
-            }
+            if (filaBanco && filaBanco.valor) BANCO_TITULAR = filaBanco.valor.trim();
         }
     } catch (e) {
-        console.warn("Usando configuración por defecto");
+        console.warn("Configuración por defecto cargada.");
     }
 }
 
-async function cargarMenuDesdeSheetDB() {
+async function cargarMenuDesdeWebApp() {
     try {
-        const respuesta = await fetch(obtenerUrlSheetDB('Productos'));
+        const respuesta = await fetch(`${WEB_APP_URL}?sheet=Productos`);
         const productos = await respuesta.json();
-        
-        if (!Array.isArray(productos)) {
-            throw new Error("Formato de datos no válido desde SheetDB");
+
+        if (!Array.isArray(productos) || productos.length === 0) {
+            throw new Error("No se pudieron obtener los productos.");
         }
 
         productosGlobales = productos;
@@ -142,17 +120,18 @@ async function cargarMenuDesdeSheetDB() {
         renderizarMenu(productosHoy.length > 0 ? productosHoy : productos);
         iniciarNavegacionScroll();
     } catch (error) {
-        console.error("Error al cargar datos:", error);
+        console.error("Error al cargar menú:", error);
         document.getElementById('menu-sections-container').innerHTML = `
-            <div class="loading-state">
-                <p style="color: #D32F2F; font-weight: 700;">⚠️ No se pudo cargar el menú. Por favor recarga la página.</p>
+            <div style="text-align:center; padding:50px 20px;">
+                <p style="color:#D32F2F; font-weight:700; font-size:1.1rem;">⚠️ No se pudo conectar con el menú en la nube.</p>
+                <small style="color:#666;">Verifica la URL de tu Google Apps Script.</small>
             </div>
         `;
     }
 }
 
 // ======================================================
-// CARRUSEL DE PROMOS (TEXTO EN PC + BOTÓN RESPONSIVO)
+// CARRUSEL DE PROMOS
 // ======================================================
 function renderizarGaleriaPromos(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
@@ -221,11 +200,8 @@ function renderizarGaleriaPromos(productos) {
 function moverBannerManual(direccion) {
     if (bannersPromoActivos.length <= 1) return;
     indiceBannerActual += direccion;
-    if (indiceBannerActual >= bannersPromoActivos.length) {
-        indiceBannerActual = 0;
-    } else if (indiceBannerActual < 0) {
-        indiceBannerActual = bannersPromoActivos.length - 1;
-    }
+    if (indiceBannerActual >= bannersPromoActivos.length) indiceBannerActual = 0;
+    else if (indiceBannerActual < 0) indiceBannerActual = bannersPromoActivos.length - 1;
     actualizarPosicionSlider();
 }
 
@@ -240,13 +216,9 @@ function actualizarPosicionSlider() {
     if (!sliderTrack) return;
 
     sliderTrack.style.transform = `translateX(-${indiceBannerActual * 100}%)`;
-
     dots.forEach((dot, idx) => {
-        if (idx === indiceBannerActual) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
+        if (idx === indiceBannerActual) dot.classList.add('active');
+        else dot.classList.remove('active');
     });
 }
 
@@ -329,14 +301,13 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 }
 
 // ======================================================
-// 2. MODAL Y PERSONALIZACIÓN (INGREDIENTES Y EXTRAS)
+// 2. MODAL Y PERSONALIZACIÓN
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
     if (!prod || limpiarTexto(obtenerPropiedadFlexible(prod, ['disponible', 'activo'])) !== 'SI') return;
 
     productoSeleccionado = prod;
-
     const esPorMonto = limpiarTexto(obtenerPropiedadFlexible(prod, ['venta_por_monto', 'por_monto'])) === 'SI';
 
     document.getElementById('modalProductTitle').textContent = prod.nombre;
@@ -429,11 +400,8 @@ function renderizarPillsMontoDinámicas(montosConfig, montoMinimo) {
         const val = parseFloat(inputCustom.value) || 0;
         montoSeleccionadoActual = val;
         document.getElementById('modalProductPrice').textContent = `$${val.toFixed(2)}`;
-        if (val < montoMinimo) {
-            hintMin.textContent = `⚠️ El monto mínimo es de $${montoMinimo.toFixed(2)}`;
-        } else {
-            hintMin.textContent = '';
-        }
+        if (val < montoMinimo) hintMin.textContent = `⚠️ El monto mínimo es de $${montoMinimo.toFixed(2)}`;
+        else hintMin.textContent = '';
         actualizarPrecioEnVivoModal();
     };
 }
@@ -530,20 +498,13 @@ function toggleOpcion(containerId, chipDiv, inputType) {
         return;
     }
 
-    if (chipDiv.classList.contains('disabled') && !input.checked) {
-        return;
-    }
+    if (chipDiv.classList.contains('disabled') && !input.checked) return;
 
     input.checked = !input.checked;
-    if (input.checked) {
-        chipDiv.classList.add('selected');
-    } else {
-        chipDiv.classList.remove('selected');
-    }
+    if (input.checked) chipDiv.classList.add('selected');
+    else chipDiv.classList.remove('selected');
 
-    if (containerId === 'modalIngredientsOptions') {
-        recalcularLimiteIngredientes();
-    }
+    if (containerId === 'modalIngredientsOptions') recalcularLimiteIngredientes();
     actualizarPrecioEnVivoModal();
 }
 
@@ -561,11 +522,8 @@ function recalcularLimiteIngredientes() {
         if (total >= limiteIngredientesActual) {
             chips.forEach(c => {
                 const cb = c.querySelector('input');
-                if (!cb.checked) {
-                    c.classList.add('disabled');
-                } else {
-                    c.classList.remove('disabled');
-                }
+                if (!cb.checked) c.classList.add('disabled');
+                else c.classList.remove('disabled');
             });
         } else {
             chips.forEach(c => c.classList.remove('disabled'));
@@ -582,11 +540,7 @@ function actualizarBadgeLimiteIngredientes(actuales) {
     if (limiteIngredientesActual > 0) {
         badge.style.display = 'inline-block';
         badge.textContent = `${actuales} de ${limiteIngredientesActual} permitidos`;
-        if (actuales >= limiteIngredientesActual) {
-            badge.className = 'limit-badge complete';
-        } else {
-            badge.className = 'limit-badge';
-        }
+        badge.className = actuales >= limiteIngredientesActual ? 'limit-badge complete' : 'limit-badge';
     } else {
         badge.style.display = 'none';
     }
@@ -602,9 +556,7 @@ function actualizarPrecioEnVivoModal() {
     const chipsExtras = document.querySelectorAll('#modalExtrasOptions .option-chip');
     chipsExtras.forEach(chip => {
         const input = chip.querySelector('input');
-        if (input && input.checked) {
-            extraCost += parseFloat(chip.getAttribute('data-costo') || 0);
-        }
+        if (input && input.checked) extraCost += parseFloat(chip.getAttribute('data-costo') || 0);
     });
 
     const finalPrice = basePrice + extraCost;
@@ -684,7 +636,7 @@ function actualizarBarraCarrito() {
 }
 
 // ======================================================
-// 3. UPSELLING AUTOMÁTICO
+// 3. UPSELLING
 // ======================================================
 function iniciarFlujoCheckout() {
     if (carrito.length === 0) {
@@ -699,11 +651,8 @@ function iniciarFlujoCheckout() {
         return esUp && estaDisp && !yaEnCarrito;
     });
 
-    if (upsellCandidates.length > 0) {
-        mostrarModalUpsell(upsellCandidates);
-    } else {
-        abrirModalCheckout();
-    }
+    if (upsellCandidates.length > 0) mostrarModalUpsell(upsellCandidates);
+    else abrirModalCheckout();
 }
 
 function mostrarModalUpsell(candidatos) {
@@ -757,7 +706,7 @@ function cerrarUpsellYAbrirCheckout() {
 }
 
 // ======================================================
-// 4. CONSULTA PÚBLICA DE SELLOS
+// 4. CONSULTA DE SELLOS DE LEALTAD
 // ======================================================
 function abrirModalConsultaLealtad() {
     document.getElementById('loyaltyQueryResult').style.display = 'none';
@@ -777,7 +726,7 @@ async function consultarSellosEnSheets() {
     }
 
     try {
-        const res = await fetch(`https://sheetdb.io/api/v1/${SHEETDB_ID}/search?telefono=${tel}&sheet=Clientes_Lealtad`);
+        const res = await fetch(`${WEB_APP_URL}?sheet=Clientes_Lealtad&action=search&telefono=${tel}`);
         const data = await res.json();
         
         let sellos = 0;
@@ -809,7 +758,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT, TURNOS Y PAGOS EN LÍNEA
+// 5. CHECKOUT Y TURNOS GLOBALES
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -880,11 +829,8 @@ function cerrarModalCheckout() {
 function eliminarDelCarrito(index) {
     carrito.splice(index, 1);
     actualizarBarraCarrito();
-    if (carrito.length === 0) {
-        cerrarModalCheckout();
-    } else {
-        abrirModalCheckout();
-    }
+    if (carrito.length === 0) cerrarModalCheckout();
+    else abrirModalCheckout();
 }
 
 function cambiarTipoPedido(tipo) {
@@ -900,19 +846,16 @@ function cambiarTipoPedido(tipo) {
     }
 }
 
-// ======================================================
-// GENERACIÓN DE TURNO GLOBAL Y ÚNICO DESDE GOOGLE SHEETS
-// ======================================================
 async function obtenerSiguienteTurnoGlobal(tipo) {
     const prefijo = tipo === 'tienda' ? 'T' : 'R';
     
-    if (!SHEETDB_ID) {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
         const rnd = Math.floor(Math.random() * 90 + 10);
         return `#${prefijo}-${rnd}`;
     }
 
     try {
-        const res = await fetch(`https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`);
+        const res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas`);
         const ventas = await res.json();
 
         if (Array.isArray(ventas) && ventas.length > 0) {
@@ -924,9 +867,7 @@ async function obtenerSiguienteTurnoGlobal(tipo) {
                 const match = turnoStr.match(regexTurno);
                 if (match && match[1]) {
                     const num = parseInt(match[1], 10);
-                    if (!isNaN(num) && num > maxConsecutivo) {
-                        maxConsecutivo = num;
-                    }
+                    if (!isNaN(num) && num > maxConsecutivo) maxConsecutivo = num;
                 }
             });
 
@@ -935,10 +876,9 @@ async function obtenerSiguienteTurnoGlobal(tipo) {
             return `#${prefijo}-${formateado}`;
         }
     } catch (e) {
-        console.warn("No se pudo consultar el consecutivo global, usando respaldo:", e);
+        console.warn("Usando respaldo de turno:", e);
     }
 
-    // Respaldo por marca de tiempo para evitar duplicados
     const horaFallback = new Date().getMinutes();
     const segFallback = new Date().getSeconds();
     return `#${prefijo}-${horaFallback}${segFallback}`;
@@ -964,10 +904,8 @@ async function procesarGeneracionTurno() {
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando turno...';
 
-    // 1. Obtener número de turno consecutivo global desde Google Sheets
     const numeroTurno = await obtenerSiguienteTurnoGlobal(tipoPedido);
 
-    // 2. Procesar Registro en Clientes_Lealtad
     let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
     if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
         infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
@@ -988,12 +926,10 @@ async function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    // 3. Guardar en KDS Local de respaldo
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
-    // 4. Respaldo asegurado en Ventas_Historicas para KDS en la Nube
     await respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
     btnSubmit.disabled = false;
@@ -1003,81 +939,34 @@ async function procesarGeneracionTurno() {
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
-// Inserción / Actualización de Clientes_Lealtad
 async function procesarSelloEnGoogleSheets(telefono, nombre) {
-    if (!SHEETDB_ID) {
-        return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
-    }
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
 
     try {
-        const urlBusqueda = `https://sheetdb.io/api/v1/${SHEETDB_ID}/search?telefono=${telefono}&sheet=Clientes_Lealtad`;
-        const searchRes = await fetch(urlBusqueda);
-        const clientes = await searchRes.json();
-        const fechaHoy = new Date().toISOString().split('T')[0];
+        const payload = {
+            action: 'procesar_sello',
+            sheet: 'Clientes_Lealtad',
+            telefono: telefono,
+            nombre: nombre
+        };
 
-        if (Array.isArray(clientes) && clientes.length > 0) {
-            const c = clientes[0];
-            let sellos = parseInt(c.sellos_acumulados || '0', 10) + 1;
-            let regalos = parseInt(c.recompensas_canjeadas || '0', 10);
-            let esRegalo = false;
-
-            if (sellos >= 8) {
-                esRegalo = true;
-                sellos = 0;
-                regalos += 1;
-            }
-
-            const patchUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/telefono/${telefono}?sheet=Clientes_Lealtad`;
-            const patchRes = await fetch(patchUrl, {
-                method: 'PATCH',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    data: {
-                        nombre: nombre || c.nombre,
-                        sellos_acumulados: sellos,
-                        recompensas_canjeadas: regalos,
-                        ultima_visita: fechaHoy
-                    }
-                })
-            });
-            console.log("⭐ [SheetDB] Sello actualizado:", await patchRes.json());
-            return { aplicaSello: true, sellosActuales: esRegalo ? 8 : sellos, regaloDesbloqueado: esRegalo };
-        } else {
-            const postUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Clientes_Lealtad`;
-            const postRes = await fetch(postUrl, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    data: [{
-                        telefono: telefono,
-                        nombre: nombre,
-                        sellos_acumulados: 1,
-                        recompensas_canjeadas: 0,
-                        ultima_visita: fechaHoy
-                    }]
-                })
-            });
-            console.log("⭐ [SheetDB] Nuevo cliente registrado:", await postRes.json());
-            return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
-        }
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        return await res.json();
     } catch (err) {
-        console.error("❌ Error en Clientes_Lealtad:", err);
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
     }
 }
 
-// Inserción en Ventas_Historicas con soporte para KDS en la Nube
 async function respaldarVentaEnGoogleSheets(pedido) {
-    if (!SHEETDB_ID) return;
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
     try {
         const payload = {
-            data: [{
+            action: 'insertar_venta',
+            sheet: 'Ventas_Historicas',
+            data: {
                 turno: pedido.turno,
                 cliente: pedido.cliente,
                 telefono: pedido.telefono || '',
@@ -1091,23 +980,16 @@ async function respaldarVentaEnGoogleSheets(pedido) {
                     if (i.extras && i.extras.length > 0) txt += ` [Extras: ${i.extras.join(', ')}]`;
                     return txt;
                 }).join(' | ')
-            }]
+            }
         };
 
-        const postUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`;
-        const res = await fetch(postUrl, {
+        await fetch(WEB_APP_URL, {
             method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(payload)
         });
-
-        const resJson = await res.json();
-        console.log("✅ [SheetDB] Venta registrada en la nube:", resJson);
+        console.log("✅ Venta guardada en Google Sheets");
     } catch (e) {
-        console.error("❌ Error al insertar venta en Sheets:", e);
+        console.error("Error al insertar venta en Sheets:", e);
     }
 }
 
@@ -1160,7 +1042,6 @@ function mostrarBoletoTurno(pedido) {
         
         if (onlinePaymentCard) {
             onlinePaymentCard.style.display = 'block';
-            
             const btnMp = document.getElementById('btnMercadoPagoLink');
             const mpTotalEl = document.getElementById('ticketMpTotal');
             if (btnMp) btnMp.href = LINK_MERCADOPAGO;
@@ -1188,9 +1069,7 @@ function copiarClabeAlPortapapeles() {
                 btn.classList.remove('copied');
             }, 2000);
         }
-    }).catch(err => {
-        alert(`CLABE: ${CLABE_BANCARIA}`);
-    });
+    }).catch(err => alert(`CLABE: ${CLABE_BANCARIA}`));
 }
 
 function iniciarCuentaRegresivaKiosko(segundosRestantes) {
@@ -1259,12 +1138,7 @@ function enviarComprobanteWhatsApp() {
     }
 
     mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-    if (p.tipo === 'recoger') {
-        mensaje += `📸 *(Adjunto aquí mi comprobante de pago para iniciar la preparación)*`;
-    } else {
-        mensaje += `📍 *(Pagaré en mostrador al recibir mi turno)*`;
-    }
+    mensaje += p.tipo === 'recoger' ? `📸 *(Adjunto aquí mi comprobante de pago para iniciar la preparación)*` : `📍 *(Pagaré en mostrador al recibir mi turno)*`;
 
     const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
