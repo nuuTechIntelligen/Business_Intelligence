@@ -1,14 +1,14 @@
 // ======================================================
 // KDS & FINANZAS LA ENGORDADERA (GOOGLE APPS SCRIPT WEB APP)
 // ======================================================
-// Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 let INTERVALO_SEGUNDOS = 4;
 
 let pedidosGlobalesSheets = [];
 let filtroEstacionActual = 'TODAS';
-let ultimoTurnoRegistrado = '';
-let audioAlerta = null;
+let turnosConocidosEnCola = new Set();
+let primerCargaRealizada = false;
+let audioContext = null;
 let pedidoTemporalParaTiempo = null;
 
 let chartVentasDiasInstance = null;
@@ -34,14 +34,66 @@ function obtenerCampoFlexible(obj, posiblesNombres) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    audioAlerta = document.getElementById('orderNotificationSound') || new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    
     crearBarraDiagnostico();
     iniciarReloj();
+    
+    // Desbloquear Audio al primer toque en cualquier parte del KDS
+    document.addEventListener('click', desbloquearAudioNativo, { once: true });
+    document.addEventListener('touchstart', desbloquearAudioNativo, { once: true });
+
     iniciarKDS();
     setInterval(consultarPedidosNube, INTERVALO_SEGUNDOS * 1000);
     setInterval(actualizarSemaforosTiempo, 1000);
 });
+
+// Síntesis de Sonido POS Nativo (Doble Tono Restaurantero)
+function desbloquearAudioNativo() {
+    try {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    } catch (e) {
+        console.warn("AudioContext no disponible:", e);
+    }
+}
+
+function emitirCampanaNuevoPedido() {
+    try {
+        desbloquearAudioNativo();
+        if (!audioContext) return;
+
+        const ahora = audioContext.currentTime;
+
+        // Tono 1 (880 Hz)
+        const osc1 = audioContext.createOscillator();
+        const gain1 = audioContext.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(880, ahora);
+        gain1.gain.setValueAtTime(0.3, ahora);
+        gain1.gain.exponentialRampToValueAtTime(0.001, ahora + 0.35);
+        osc1.connect(gain1);
+        gain1.connect(audioContext.destination);
+        osc1.start(ahora);
+        osc1.stop(ahora + 0.35);
+
+        // Tono 2 (1174.66 Hz)
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(1174.66, ahora + 0.12);
+        gain2.gain.setValueAtTime(0.4, ahora + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ahora + 0.6);
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.start(ahora + 0.12);
+        osc2.stop(ahora + 0.6);
+    } catch (e) {
+        console.warn("No se pudo reproducir el sintetizador:", e);
+    }
+}
 
 // 1. Etiqueta de Conexión en Pantalla
 function crearBarraDiagnostico() {
@@ -49,7 +101,7 @@ function crearBarraDiagnostico() {
     const bar = document.createElement('div');
     bar.id = 'kdsDebugBar';
     bar.style.cssText = 'position:fixed; bottom:12px; left:12px; background:#0F172A; color:#F8FAFC; padding:8px 14px; border-radius:12px; font-family:monospace; font-size:0.75rem; z-index:99999; box-shadow:0 4px 14px rgba(0,0,0,0.5); border:1px solid #334155; display:flex; align-items:center; gap:8px;';
-    bar.innerHTML = `<span>⏳ Conectando con Google Apps Script...</span>`;
+    bar.innerHTML = `<span>⏳ Conectando con Google Sheets...</span>`;
     document.body.appendChild(bar);
 }
 
@@ -87,14 +139,13 @@ async function consultarPedidosNube() {
             return;
         }
 
-        actualizarBarraDiagnostico(`Google Sheets Conectado (Ilimitado) | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
+        actualizarBarraDiagnostico(`Sheets Conectado (Ilimitado) | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
 
         pedidosGlobalesSheets = data.map((fila, index) => {
             const turnoVal = obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
             const clienteVal = obtenerCampoFlexible(fila, ['cliente', 'nombre']) || 'Cliente';
             const telefonoVal = String(obtenerCampoFlexible(fila, ['telefono', 'tel', 'celular']) || '');
             
-            // Normalización tolerante de Tipo (tienda vs recoger)
             const tipoRaw = normalizarTextoClave(obtenerCampoFlexible(fila, ['tipo', 'tipo_pedido']) || 'tienda');
             const tipoVal = (tipoRaw.includes('recog') || tipoRaw.includes('llevar')) ? 'recoger' : 'tienda';
 
@@ -103,7 +154,6 @@ async function consultarPedidosNube() {
             const detalleVal = obtenerCampoFlexible(fila, ['detalle', 'descripcion', 'productos']) || '';
             const itemsJsonVal = obtenerCampoFlexible(fila, ['items_json', 'items', 'json']);
 
-            // Procesar estado de pago (SI / NO / true / false / pagado)
             const pagadoRaw = String(obtenerCampoFlexible(fila, ['pagado', 'pago', 'status_pago']) || '').toLowerCase().trim();
             const estaPagado = (tipoVal === 'tienda') || (pagadoRaw === 'si' || pagadoRaw === 'true' || pagadoRaw === '1' || pagadoRaw === 'pagado');
 
@@ -134,14 +184,20 @@ async function consultarPedidosNube() {
             };
         });
 
-        const pedidosCola = pedidosGlobalesSheets.filter(p => p.estado === 'cola');
-        if (pedidosCola.length > 0) {
-            const ultimoTurno = pedidosCola[pedidosCola.length - 1].turno;
-            if (ultimoTurnoRegistrado !== '' && ultimoTurnoRegistrado !== ultimoTurno) {
-                if (audioAlerta) audioAlerta.play().catch(() => {});
+        // Detonar sonido de nuevo pedido
+        const turnosActualesCola = pedidosGlobalesSheets.filter(p => p.estado === 'cola').map(p => p.turno);
+        
+        if (primerCargaRealizada) {
+            const hayNuevos = turnosActualesCola.some(t => !turnosConocidosEnCola.has(t));
+            if (hayNuevos) {
+                emitirCampanaNuevoPedido();
+                destellarColumnaCola();
             }
-            ultimoTurnoRegistrado = ultimoTurno;
+        } else {
+            primerCargaRealizada = true;
         }
+
+        turnosConocidosEnCola = new Set(turnosActualesCola);
 
         renderizarTableroKanban();
         actualizarMetricasHeader();
@@ -155,8 +211,18 @@ async function consultarPedidosNube() {
     }
 }
 
+function destellarColumnaCola() {
+    const colCola = document.getElementById('col-cola');
+    if (!colCola) return;
+    colCola.style.transition = 'box-shadow 0.3s ease';
+    colCola.style.boxShadow = '0 0 25px rgba(245, 158, 11, 0.9)';
+    setTimeout(() => {
+        colCola.style.boxShadow = 'none';
+    }, 1800);
+}
+
 // ======================================================
-// 2. RENDERIZADO KANBAN (CON BADGE DE PAGO INTERACTIVO)
+// 2. RENDERIZADO KANBAN CON BOTONES INDEPENDIENTES
 // ======================================================
 function renderizarTableroKanban() {
     const contCola = document.getElementById('containerCola');
@@ -207,28 +273,50 @@ function crearTarjetaHTML(pedido) {
         `;
     });
 
-    let botonAccion = '';
+    let botonesAccionHTML = '';
+
     if (pedido.estado === 'cola') {
-        botonAccion = `
-            <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="iniciarPreparacionPedido('${turnoEscapado}', '${esRecoger ? 'recoger' : 'tienda'}', '${telefonoLimpio}')">
-                <i class="fa-solid fa-fire"></i> Preparar
-            </button>
-        `;
+        if (esRecoger && telefonoLimpio.length >= 10) {
+            botonesAccionHTML = `
+                <button class="btn-card-action" style="flex:1.2; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
+                    <i class="fa-solid fa-fire"></i> Preparar
+                </button>
+                <button class="btn-card-action" title="Notificar Tiempo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="abrirModalTiempoEstimado('${turnoEscapado}', '${telefonoLimpio}')">
+                    <i class="fa-solid fa-clock"></i> Notificar
+                </button>
+            `;
+        } else {
+            botonesAccionHTML = `
+                <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
+                    <i class="fa-solid fa-fire"></i> Preparar
+                </button>
+            `;
+        }
     } else if (pedido.estado === 'preparando') {
-        botonAccion = `
-            <button class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
-                <i class="fa-solid fa-check-double"></i> Listo
-            </button>
-        `;
+        if (esRecoger && telefonoLimpio.length >= 10) {
+            botonesAccionHTML = `
+                <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
+                    <i class="fa-solid fa-check-double"></i> Listo
+                </button>
+                <button class="btn-card-action" title="Avisar que ya está listo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="notificarPedidoListoWhatsApp('${turnoEscapado}', '${telefonoLimpio}')">
+                    <i class="fa-solid fa-bell"></i> Avisar
+                </button>
+            `;
+        } else {
+            botonesAccionHTML = `
+                <button class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
+                    <i class="fa-solid fa-check-double"></i> Listo
+                </button>
+            `;
+        }
     } else {
-        botonAccion = `
+        botonesAccionHTML = `
             <button class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'entregado')">
                 <i class="fa-solid fa-box-archive"></i> Entregar
             </button>
         `;
     }
 
-    // Botón / Badge de Estado de Pago
     const botonPagoHTML = pedido.pagado ? `
         <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', false)">
             <i class="fa-solid fa-circle-check"></i> Pagado
@@ -263,7 +351,7 @@ function crearTarjetaHTML(pedido) {
             </div>
 
             <div style="display:flex; gap:6px; margin-top:8px;">
-                ${botonAccion}
+                ${botonesAccionHTML}
                 <button title="Eliminar / Cancelar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="eliminarPedidoIndividual('${turnoEscapado}')">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -272,7 +360,7 @@ function crearTarjetaHTML(pedido) {
     `;
 }
 
-// Alternar Estado de Pago (Pagado <-> Pago Pendiente)
+// Alternar Estado de Pago con persistencia
 async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
     const turnoReal = decodeURIComponent(turnoEncoded);
 
@@ -294,13 +382,79 @@ async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
                 pagado: nuevoEstadoPago ? 'SI' : 'NO'
             })
         });
-        console.log(`💵 Estado de pago del turno ${turnoReal} actualizado a: ${nuevoEstadoPago ? 'SI' : 'NO'}`);
+        console.log(`💵 Pago del turno ${turnoReal} guardado como: ${nuevoEstadoPago ? 'SI' : 'NO'}`);
     } catch (e) {
         console.warn("Error actualizando pago en Sheets:", e);
     }
 }
 
-// Eliminar Pedido en Google Sheets
+function abrirModalTiempoEstimado(turnoEscapado, telefono) {
+    const turnoReal = decodeURIComponent(turnoEscapado);
+    pedidoTemporalParaTiempo = { turnoEscapado, telefono };
+    
+    const modal = document.getElementById('timeModal');
+    const desc = document.getElementById('timeModalClientDesc');
+    if (desc) desc.textContent = `Indica en cuántos minutos estará listo el turno ${turnoReal}:`;
+
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+    }
+}
+
+function confirmarTiempoYNotificar(minutos) {
+    if (pedidoTemporalParaTiempo) {
+        const turnoReal = decodeURIComponent(pedidoTemporalParaTiempo.turnoEscapado);
+        const tel = pedidoTemporalParaTiempo.telefono;
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${turnoReal}* ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
+        window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
+    }
+    cerrarModalTiempo();
+}
+
+function cerrarModalTiempo() {
+    const modal = document.getElementById('timeModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+    pedidoTemporalParaTiempo = null;
+}
+
+function notificarPedidoListoWhatsApp(turnoEscapado, telefono) {
+    const turnoReal = decodeURIComponent(turnoEscapado);
+    const tel = String(telefono || '').replace(/\D/g, '');
+    const msg = encodeURIComponent(`🍿 *La Engordadera:* ¡Tu pedido *${turnoReal}* ya está LISTO para recoger! 🎉 Puedes pasar a mostrador por él.`);
+    window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
+}
+
+async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
+    const turnoReal = decodeURIComponent(turnoEncoded);
+
+    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
+    if (index !== -1) {
+        pedidosGlobalesSheets[index].estado = nuevoEstado;
+        renderizarTableroKanban();
+        actualizarMetricasHeader();
+    }
+
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
+
+    try {
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'actualizar_estado',
+                sheet: 'Ventas_Historicas',
+                turno: turnoReal,
+                estado: nuevoEstado
+            })
+        });
+    } catch (e) {
+        console.error("Error actualizando estado en Sheets:", e);
+    }
+}
+
 async function eliminarPedidoIndividual(turnoEncoded) {
     const turnoReal = decodeURIComponent(turnoEncoded);
     if (!confirm(`¿Deseas eliminar el pedido ${turnoReal}?`)) return;
@@ -329,87 +483,11 @@ async function eliminarPedidoIndividual(turnoEncoded) {
     }
 }
 
-// Reiniciar el Contador de Turnos
 function reiniciarContadorTurnos() {
     if (!confirm("¿Deseas reiniciar los turnos? El siguiente pedido volverá a comenzar en #T-01 y #R-01.")) return;
     localStorage.removeItem('turno_T_consecutivo');
     localStorage.removeItem('turno_R_consecutivo');
     alert("✅ Consecutivos de turno reiniciados a 0.");
-}
-
-// ======================================================
-// MANEJO ROBUSTO DEL BOTÓN PREPARAR & MODAL DE TIEMPO
-// ======================================================
-function iniciarPreparacionPedido(turnoEscapado, tipo, telefono) {
-    const turnoReal = decodeURIComponent(turnoEscapado);
-    const telLimpio = String(telefono || '').replace(/\D/g, '');
-
-    if (tipo === 'recoger' && telLimpio.length >= 10) {
-        pedidoTemporalParaTiempo = { turnoEscapado: turnoEscapado, telefono: telLimpio };
-        
-        const modal = document.getElementById('timeModal');
-        const desc = document.getElementById('timeModalClientDesc');
-        if (desc) desc.textContent = `Indica en cuántos minutos estará listo el turno ${turnoReal}:`;
-
-        if (modal) {
-            modal.classList.add('active');
-            modal.style.display = 'flex';
-            return;
-        }
-    }
-    
-    cambiarEstadoPedidoNube(turnoEscapado, 'preparando');
-}
-
-function confirmarTiempoYNotificar(minutos) {
-    if (pedidoTemporalParaTiempo && pedidoTemporalParaTiempo.turnoEscapado) {
-        const turnoReal = decodeURIComponent(pedidoTemporalParaTiempo.turnoEscapado);
-        const tel = pedidoTemporalParaTiempo.telefono;
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${turnoReal}* ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
-        
-        window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
-        cambiarEstadoPedidoNube(pedidoTemporalParaTiempo.turnoEscapado, 'preparando');
-    }
-    cerrarModalTiempo();
-}
-
-function cerrarModalTiempo() {
-    const modal = document.getElementById('timeModal');
-    if (modal) {
-        modal.classList.remove('active');
-        modal.style.display = 'none';
-    }
-    if (pedidoTemporalParaTiempo && pedidoTemporalParaTiempo.turnoEscapado) {
-        cambiarEstadoPedidoNube(pedidoTemporalParaTiempo.turnoEscapado, 'preparando');
-    }
-    pedidoTemporalParaTiempo = null;
-}
-
-async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
-    const turnoReal = decodeURIComponent(turnoEncoded);
-
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
-    if (index !== -1) {
-        pedidosGlobalesSheets[index].estado = nuevoEstado;
-        renderizarTableroKanban();
-        actualizarMetricasHeader();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'actualizar_estado',
-                sheet: 'Ventas_Historicas',
-                turno: turnoReal,
-                estado: nuevoEstado
-            })
-        });
-    } catch (e) {
-        console.error("Error actualizando estado en Sheets:", e);
-    }
 }
 
 function limpiarEntregadosAntiguos() {
