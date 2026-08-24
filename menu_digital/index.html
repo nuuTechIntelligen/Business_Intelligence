@@ -3,315 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Engordadera | Frituras y Botanas</title>
+    <title>Menú Digital | La Engordadera</title>
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=9">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="styles.css?v=25">
 </head>
 <body>
 
-    <!-- HERO -->
-    <header class="hero">
-        <div class="hero-overlay"></div>
-        
-        <!-- BOTÓN DE SELLOS SUPERIOR DERECHO (ESTILO APP MÓVIL) -->
-        <button class="btn-loyalty-corner" onclick="abrirModalConsultaLealtad()" title="Consultar Sellos">
-            <i class="fa-solid fa-star"></i> <span>Mis Sellos</span>
-        </button>
-
-        <div class="container hero-content">
-            <div class="logo-container">
-                <span class="sub-logo">FRITURAS Y BOTANAS</span>
-                <img src="images/logo.png" alt="Frituras y Botanas La Engordadera" class="hero-logo-img">
-            </div>
-            <p class="hero-tagline">🔥 ¡Las botanas más antojables, picantes y crujientes! 🔥</p>
-            
-            <div style="display: flex; justify-content: center;">
-                <a href="#menu-nav" class="btn-primary glow-btn">
-                    <i class="fa-solid fa-utensils"></i> Ver Menú Interactivo
-                </a>
-            </div>
-
-            <!-- CARRUSEL DE PROMOS LIMPIO (SOLO IMAGEN + BOTÓN) -->
-            <div class="promo-gallery-container" id="heroBannerContainer" style="display: none;">
-                <div class="promo-slider-viewport" id="promoSliderViewport">
-                    <div class="promo-slider-wrapper" id="bannerSliderTrack"></div>
-                    
-                    <button class="slider-arrow prev" onclick="moverBannerManual(-1)" aria-label="Anterior">&#10094;</button>
-                    <button class="slider-arrow next" onclick="moverBannerManual(1)" aria-label="Siguiente">&#10095;</button>
+    <!-- ========================================== -->
+    <!-- 1. ENCABEZADO Y BOTÓN DE PUNTOS            -->
+    <!-- ========================================== -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="brand-logo">
+                <span class="brand-emoji">🍿</span>
+                <div class="brand-titles">
+                    <h1>LA ENGORDADERA</h1>
+                    <p>Botanas, Antojos & Preparados</p>
                 </div>
-                
-                <div class="promo-dots" id="promoDotsContainer"></div>
             </div>
+            
+            <!-- Botón Consultar Puntos -->
+            <button class="btn-loyalty-check" onclick="abrirModalConsultaLealtad()">
+                <i class="fa-solid fa-star"></i> Consultar puntos
+            </button>
         </div>
     </header>
 
-    <!-- NAVEGACIÓN DINÁMICA -->
-    <nav class="sticky-nav" id="menu-nav">
+    <!-- ========================================== -->
+    <!-- 2. CARRUSEL DE PROMOCIONES                -->
+    <!-- ========================================== -->
+    <section class="hero-banner-section" id="heroBannerContainer" style="display: none;">
+        <div class="banner-slider-wrapper">
+            <div class="banner-slider-track" id="bannerSliderTrack"></div>
+            <button class="slider-btn prev" onclick="moverBannerManual(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="slider-btn next" onclick="moverBannerManual(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="promo-dots-container" id="promoDotsContainer"></div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. NAVEGACIÓN POR CATEGORÍAS               -->
+    <!-- ========================================== -->
+    <nav class="categories-nav">
         <div class="nav-scroll-wrapper" id="nav-categories-container"></div>
     </nav>
 
-    <!-- CONTENIDO DINÁMICO -->
-    <main class="container main-content" id="menu-sections-container">
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Cargando el menú más antojable...</p>
+    <!-- ========================================== -->
+    <!-- 4. SECCIONES DEL MENÚ                     -->
+    <!-- ========================================== -->
+    <main class="menu-container" id="menu-sections-container">
+        <div class="loading-state" style="text-align: center; padding: 60px 20px;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: #F59E0B; margin-bottom: 12px;"></i>
+            <p style="color: #64748B; font-weight: 600;">Cargando botanas deliciosas...</p>
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="container text-center">
-            <h3>FRITURAS Y BOTANAS LA ENGORDADERA</h3>
-            <p>📍 ¡Atendiéndote con el mejor sabor y antojo!</p>
-            <p class="copyright">© 2026 La Engordadera - Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
-    <!-- BARRA FLOTANTE DE PEDIDO -->
-    <div class="cart-floating-bar" id="cartBar">
+    <!-- ========================================== -->
+    <!-- 5. BARRA FLOTANTE DEL CARRITO              -->
+    <!-- ========================================== -->
+    <div class="cart-bar" id="cartBar" onclick="iniciarFlujoCheckout()">
         <div class="cart-info">
-            <i class="fa-solid fa-basket-shopping"></i>
-            <span id="cartCount">0 productos</span> | <strong id="cartTotal">$0.00</strong>
+            <span class="cart-count" id="cartCount">0 productos</span>
+            <span class="cart-total" id="cartTotal">$0.00</span>
         </div>
-        <button class="btn-whatsapp" onclick="iniciarFlujoCheckout()">
-            <i class="fa-solid fa-receipt"></i> Ver Pedido / Turno
+        <button class="btn-checkout">
+            <span>Ver Pedido</span> <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
-    <!-- BOTÓN FLOTANTE INDEPENDIENTE -->
-    <a href="javascript:void(0)" class="wa-float-btn" onclick="iniciarFlujoCheckout()" title="Ver Pedido">
-        <i class="fa-solid fa-basket-shopping"></i>
-    </a>
+    <!-- ========================================== -->
+    <!-- 6. PIE DE PÁGINA Y REDES SOCIALES          -->
+    <!-- ========================================== -->
+    <footer class="main-footer" style="text-align: center; padding: 40px 20px 100px; margin-top: 40px; border-top: 1px solid #E2E8F0; background: #FFFFFF; position: relative; z-index: 10;">
+        <div class="footer-brand" style="margin-bottom: 16px;">
+            <span style="font-size: 2rem;">🍿</span>
+            <h3 style="font-family: 'Fredoka', cursive; color: #1E293B; margin: 4px 0 0 0;">LA ENGORDADERA</h3>
+            <p style="color: #64748B; font-size: 0.85rem; margin: 2px 0 0 0;">¡El sabor que te consiente!</p>
+        </div>
 
-    <!-- 1. MODAL DE PERSONALIZACIÓN -->
+        <!-- Contenedor Dinámico de Redes Sociales -->
+        <div class="footer-social" id="footerSocialIcons" style="display: flex; justify-content: center; gap: 14px; margin-bottom: 20px;">
+            <!-- Renderizado dinámico desde script.js -->
+        </div>
+
+        <p style="color: #94A3B8; font-size: 0.75rem; margin: 0;">&copy; 2026 La Engordadera. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- 7. MODALES (PRODUCTO, UPSELL, PUNTOS, CHECKOUT, TICKET) -->
+    <!-- ========================================== -->
+    
+    <!-- Modal Personalizar Producto -->
     <div class="modal-overlay" id="productModal">
         <div class="modal-card">
             <button class="modal-close" onclick="cerrarModal()">&times;</button>
             <div class="modal-header">
-                <h3 id="modalProductTitle">Nombre Producto</h3>
+                <h3 id="modalProductTitle">Botana</h3>
+                <p id="modalProductDesc"></p>
                 <span class="modal-price" id="modalProductPrice">$0.00</span>
             </div>
-            <p class="modal-desc" id="modalProductDesc">Descripción del producto</p>
-
-            <form id="modalForm" onsubmit="event.preventDefault(); confirmarAgregarAlCarrito();">
-                <div id="modalAmountGroup" class="modal-group" style="display: none;">
-                    <label class="modal-group-title">💵 ¿De cuánto quieres tu botana?</label>
-                    <div class="amount-pills-grid" id="modalAmountPills"></div>
-                    <div class="amount-input-wrapper" id="modalCustomWrapper">
-                        <span>$</span>
-                        <input type="number" id="modalCustomAmount" class="input-amount" placeholder="0.00">
+            
+            <div class="modal-body">
+                <!-- Venta por Monto -->
+                <div class="modal-group" id="modalAmountGroup" style="display: none;">
+                    <label class="modal-group-title">¿De cuánto quieres tu botana?</label>
+                    <div class="amount-pills" id="modalAmountPills"></div>
+                    <div class="custom-amount-wrapper" id="modalCustomWrapper" style="display: none; margin-top: 10px;">
+                        <input type="number" id="modalCustomAmount" class="custom-amount-input" placeholder="Ingresa monto...">
                     </div>
-                    <small id="modalMinAmountMsg" class="min-amount-hint"></small>
+                    <small id="modalMinAmountMsg" style="color: #D97706; display: block; margin-top: 4px;"></small>
                 </div>
 
-                <div id="modalBaseGroup" class="modal-group" style="display: none;">
+                <!-- Grupo Base -->
+                <div class="modal-group" id="modalBaseGroup" style="display: none;">
                     <label class="modal-group-title" id="modalBaseTitle">Selecciona tu Base</label>
-                    <div class="options-grid" id="modalBaseOptions"></div>
+                    <div class="options-container" id="modalBaseOptions"></div>
                 </div>
 
-                <div id="modalIngredientsGroup" class="modal-group" style="display: none;">
-                    <div class="group-title-flex">
-                        <label class="modal-group-title" id="modalIngredientsTitle">¿Qué ingredientes le ponemos?</label>
+                <!-- Grupo Ingredientes -->
+                <div class="modal-group" id="modalIngredientsGroup" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label class="modal-group-title" id="modalIngredientsTitle" style="margin: 0;">Ingredientes</label>
                         <span class="limit-badge" id="modalIngredientsLimitBadge" style="display: none;"></span>
                     </div>
-                    <div class="options-grid" id="modalIngredientsOptions"></div>
+                    <div class="options-container" id="modalIngredientsOptions"></div>
                 </div>
 
-                <div id="modalExtrasGroup" class="modal-group" style="display: none;">
-                    <div class="group-title-flex">
-                        <label class="modal-group-title" id="modalExtrasTitle">🧀 Extras / Toppings Adicionales</label>
-                    </div>
-                    <div class="options-grid" id="modalExtrasOptions"></div>
+                <!-- Grupo Extras -->
+                <div class="modal-group" id="modalExtrasGroup" style="display: none;">
+                    <label class="modal-group-title" id="modalExtrasTitle">🧀 Extras Adicionales</label>
+                    <div class="options-container" id="modalExtrasOptions"></div>
                 </div>
 
-                <div id="modalSaucesGroup" class="modal-group" style="display: none;">
-                    <label class="modal-group-title" id="modalSaucesTitle">Selecciona tu Salsa</label>
-                    <div class="options-grid" id="modalSaucesOptions"></div>
+                <!-- Grupo Salsas -->
+                <div class="modal-group" id="modalSaucesGroup" style="display: none;">
+                    <label class="modal-group-title" id="modalSaucesTitle">Salsas & Aderezos</label>
+                    <div class="options-container" id="modalSaucesOptions"></div>
                 </div>
+            </div>
 
-                <div class="modal-actions">
-                    <button type="submit" class="btn-confirm-add" id="btnConfirmProduct">
-                        <i class="fa-solid fa-cart-plus"></i> Agregar al Pedido (<span id="modalBtnLivePrice">$0.00</span>)
-                    </button>
-                </div>
-            </form>
+            <div class="modal-footer">
+                <button class="btn-confirm-add" onclick="confirmarAgregarAlCarrito()">
+                    <span>Agregar al Pedido</span>
+                    <strong id="modalBtnLivePrice">$0.00</strong>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- 2. MODAL DE UPSELLING -->
+    <!-- Modal Upselling -->
     <div class="modal-overlay" id="upsellModal">
-        <div class="modal-card" style="max-width: 440px; text-align: center;">
-            <button class="modal-close" onclick="cerrarUpsellYAbrirCheckout()">&times;</button>
-            <div style="font-size: 2.2rem; margin-bottom: 6px;">🥤🍰</div>
-            <h3 style="font-family: var(--font-heading); color: #222; font-size: 1.2rem;">¿Se te antoja algo más?</h3>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Completa tu antojo con una bebida fría o un postre dulce:</p>
-            <div class="upsell-items-list" id="upsellItemsList"></div>
-            <div class="modal-actions" style="display: flex; gap: 8px;">
-                <button class="btn-secondary w-100" onclick="cerrarUpsellYAbrirCheckout()">Continuar con mi orden</button>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🥤 ¿Se te antoja algo más?</h3>
+                <p>Complementa tu orden antes de continuar</p>
+            </div>
+            <div class="upsell-list" id="upsellItemsList"></div>
+            <div class="modal-footer" style="margin-top: 14px;">
+                <button class="btn-skip-upsell" onclick="cerrarUpsellYAbrirCheckout()">No, gracias, continuar al pedido</button>
             </div>
         </div>
     </div>
 
-    <!-- 3. MODAL DE CONSULTA DE SELLOS -->
+    <!-- Modal Consulta de Puntos -->
     <div class="modal-overlay" id="loyaltyQueryModal">
-        <div class="modal-card ticket-card" style="max-width: 420px;">
+        <div class="modal-card">
             <button class="modal-close" onclick="cerrarModalConsultaLealtad()">&times;</button>
-            <div class="ticket-header">
-                <span class="ticket-badge" style="background:#FEF08A; color:#854D0E;">⭐ CONSULTA DE RECOMPENSAS</span>
-                <h4>Mis Sellos de Fidelidad</h4>
-                <p>Ingresa tu número celular registrado para ver tu avance:</p>
+            <div class="modal-header">
+                <h3>⭐ Consultar mis Puntos</h3>
+                <p>Consulta tus puntos acumulados en el cuatrimestre vigente</p>
             </div>
-            
-            <div style="margin: 15px 0;">
-                <div style="display: flex; gap: 6px;">
-                    <input type="tel" id="queryPhoneInput" placeholder="Ej. 4421234567" class="checkout-input" maxlength="10">
-                    <button class="btn-confirm-add" style="width: auto; padding: 0 16px; margin: 0;" onclick="consultarSellosEnSheets()">
-                        <i class="fa-solid fa-search"></i>
-                    </button>
+            <div class="modal-body">
+                <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                    <input type="tel" id="queryPhoneInput" placeholder="Número celular (10 dígitos)" maxlength="10" style="flex: 1; padding: 12px; border: 1.5px solid #CBD5E1; border-radius: 10px; font-size: 0.95rem;">
+                    <button type="button" class="btn-submit-order" style="width: auto; padding: 0 16px;" onclick="consultarSellosEnSheets()">Buscar</button>
                 </div>
-            </div>
-
-            <div id="loyaltyQueryResult" style="display: none;">
-                <div class="loyalty-grid" id="queryStampsContainer"></div>
-                <div class="loyalty-progress-box">
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" id="queryProgressBar"></div>
+                
+                <div id="loyaltyQueryResult" style="display: none; background: #F8FAFC; padding: 14px; border-radius: 12px; border: 1px solid #E2E8F0;">
+                    <div id="queryStampsContainer"></div>
+                    <div class="loyalty-progress-wrapper" style="margin-top: 10px; background: #E2E8F0; height: 10px; border-radius: 10px; overflow: hidden;">
+                        <div id="queryProgressBar" style="width: 0%; height: 100%; background: #F59E0B; transition: width 0.4s ease;"></div>
                     </div>
-                    <small id="queryProgressText">0 de 8 sellos</small>
+                    <p id="queryProgressText" style="font-size: 0.82rem; color: #475569; margin: 8px 0 0 0; text-align: center;"></p>
                 </div>
             </div>
-
-            <button class="btn-secondary w-100" onclick="cerrarModalConsultaLealtad()" style="margin-top: 15px;">
-                Cerrar
-            </button>
         </div>
     </div>
 
-    <!-- 4. MODAL DE CHECKOUT -->
+    <!-- Modal Checkout -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-card">
             <button class="modal-close" onclick="cerrarModalCheckout()">&times;</button>
             <div class="modal-header">
-                <h3>Resumen de tu Pedido</h3>
-                <span class="modal-price" id="checkoutTotalPrice">$0.00</span>
+                <h3>🛒 Confirmar Pedido</h3>
             </div>
-            <p class="modal-desc">Revisa tus botanas y elige cómo deseas recibir tu orden.</p>
+            <div class="modal-body">
+                <div class="checkout-items-list" id="checkoutItemsList"></div>
 
-            <div class="checkout-items-list" id="checkoutItemsList"></div>
-            <div class="loyalty-checkout-box" id="loyaltyCheckoutBox"></div>
-
-            <form id="checkoutForm" onsubmit="event.preventDefault(); procesarGeneracionTurno();">
-                <div class="modal-group">
-                    <label class="modal-group-title">📍 ¿Dónde consumirás?</label>
-                    <div class="order-type-selector">
-                        <label class="type-card active" id="typeStoreLabel">
-                            <input type="radio" name="orderType" value="tienda" checked onchange="cambiarTipoPedido('tienda')">
-                            <i class="fa-solid fa-store"></i>
-                            <div>
-                                <strong>En Tienda</strong>
-                                <small>Pagas al recibir en mostrador</small>
-                            </div>
-                        </label>
-                        <label class="type-card" id="typePickupLabel">
-                            <input type="radio" name="orderType" value="recoger" onchange="cambiarTipoPedido('recoger')">
-                            <i class="fa-solid fa-bag-shopping"></i>
-                            <div>
-                                <strong>Para Recoger</strong>
-                                <small>Requiere pago previo</small>
-                            </div>
-                        </label>
-                    </div>
+                <div class="checkout-total-row" style="display: flex; justify-content: space-between; align-items: center; margin: 14px 0; font-size: 1.2rem; font-weight: 700;">
+                    <span>Total a Pagar:</span>
+                    <span id="checkoutTotalPrice" style="color: #F59E0B;">$0.00</span>
                 </div>
 
-                <div class="modal-group">
-                    <label class="modal-group-title">👤 ¿A qué nombre sale tu pedido?</label>
-                    <input type="text" id="clientNameInput" required placeholder="Escribe tu nombre o apodo..." class="checkout-input">
+                <div class="loyalty-checkout-box" id="loyaltyCheckoutBox" style="display: none; background: #FEF3C7; border: 1px solid #FDE68A; padding: 10px; border-radius: 10px; font-size: 0.82rem; margin-bottom: 14px;"></div>
+
+                <!-- Tipo de Entrega -->
+                <div class="order-type-selector" style="display: flex; gap: 8px; margin-bottom: 14px;">
+                    <label class="type-btn active" id="typeStoreLabel" style="flex: 1; text-align: center; padding: 10px; border: 1.5px solid #CBD5E1; border-radius: 10px; cursor: pointer;">
+                        <input type="radio" name="orderType" value="tienda" checked onchange="cambiarTipoPedido('tienda')" style="display: none;">
+                        🏪 Consumo en Tienda
+                    </label>
+                    <label class="type-btn" id="typePickupLabel" style="flex: 1; text-align: center; padding: 10px; border: 1.5px solid #CBD5E1; border-radius: 10px; cursor: pointer;">
+                        <input type="radio" name="orderType" value="recoger" onchange="cambiarTipoPedido('recoger')" style="display: none;">
+                        🛍️ Para Recoger
+                    </label>
                 </div>
 
-                <div class="modal-group" id="phoneInputGroup">
-                    <label class="modal-group-title" id="phoneLabelTitle">📱 Celular / WhatsApp (10 dígitos):</label>
-                    <input type="tel" id="clientPhoneInput" placeholder="Ej. 4421234567" class="checkout-input" maxlength="10">
-                    <small id="loyaltyPhoneHint" style="font-size: 0.72rem; color: #666; display: block; margin-top: 4px;"></small>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Tu Nombre:</label>
+                    <input type="text" id="clientNameInput" placeholder="¿A nombre de quién?" style="width: 100%; padding: 12px; border: 1.5px solid #CBD5E1; border-radius: 10px; box-sizing: border-box;">
                 </div>
 
-                <div class="modal-actions">
-                    <button type="submit" class="btn-confirm-add btn-generate-ticket" id="btnSubmitOrder">
-                        <i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno
-                    </button>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Celular WhatsApp: <small id="loyaltyPhoneHint" style="color: #94A3B8; font-weight: 400;"></small></label>
+                    <input type="tel" id="clientPhoneInput" placeholder="10 dígitos para tus puntos" maxlength="10" style="width: 100%; padding: 12px; border: 1.5px solid #CBD5E1; border-radius: 10px; box-sizing: border-box;">
                 </div>
-            </form>
+
+                <button type="button" class="btn-submit-order" id="btnSubmitOrder" onclick="procesarGeneracionTurno()" style="width: 100%; background: #F59E0B; color: #000; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer;">
+                    <i class="fa-solid fa-ticket"></i> Confirmar y Generar Turno
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- 5. MODAL DE BOLETO DIGITAL -->
+    <!-- Modal Ticket / Turno Generado -->
     <div class="modal-overlay" id="ticketModal">
-        <div class="modal-card ticket-card">
-            <button class="modal-close" onclick="cerrarTicketModal()">&times;</button>
-            <div class="ticket-header">
-                <span class="ticket-badge" id="ticketBadgeType">🏪 EN TIENDA</span>
-                <p>¡Pedido registrado con éxito!</p>
-                <div class="ticket-number" id="ticketNumberDisplay">#T-01</div>
-                <h4 id="ticketClientName">Cliente: Juan</h4>
+        <div class="modal-card" style="text-align: center;">
+            <span class="ticket-badge" id="ticketBadgeType" style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 8px;"></span>
+            
+            <h1 id="ticketNumberDisplay" style="font-family: 'Fredoka', cursive; font-size: 3.5rem; color: #F59E0B; margin: 4px 0;">#T-01</h1>
+            <p id="ticketClientName" style="font-weight: 600; color: #334155; margin: 0 0 12px 0;"></p>
+
+            <div id="ticketLoyaltyBanner" style="display: none; margin-bottom: 12px;"></div>
+            <div id="ticketPaymentAlert" class="ticket-payment-alert" style="padding: 10px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 14px; text-align: left;"></div>
+
+            <!-- Pago en Línea (Para Recoger) -->
+            <div id="onlinePaymentContainer" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px; margin-bottom: 14px; text-align: left;">
+                <h4 style="margin: 0 0 8px 0; color: #1E293B;">💳 Opciones de Pago Rápido</h4>
+                
+                <a id="btnMercadoPagoLink" href="#" target="_blank" class="btn-mp-pay" style="display: block; text-align: center; background: #009EE3; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 700; margin-bottom: 10px;">
+                    Pagar con Mercado Pago (<span id="ticketMpTotal">$0.00</span>)
+                </a>
+
+                <div style="font-size: 0.8rem; color: #475569; background: #FFF; padding: 8px; border-radius: 8px; border: 1px dashed #CBD5E1;">
+                    <strong>Transferencia SPEI:</strong><br>
+                    Banco: <span id="bankTitularText"></span><br>
+                    CLABE: <strong id="clabeNumberText"></strong>
+                    <button type="button" id="btnCopyClabe" onclick="copiarClabeAlPortapapeles()" style="display: block; width: 100%; margin-top: 6px; background: #E2E8F0; border: none; padding: 6px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        📋 Copiar CLABE
+                    </button>
+                    <small style="display: block; margin-top: 4px; color: #94A3B8;">Concepto: <span id="transferConceptoTurno"></span></small>
+                </div>
             </div>
 
-            <div class="ticket-body">
-                <div id="ticketLoyaltyBanner" style="display: none; margin-top: 10px;"></div>
+            <button type="button" class="btn-wa-receipt" onclick="enviarComprobanteWhatsApp()" style="width: 100%; background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-bottom: 8px;">
+                <i class="fa-brands fa-whatsapp"></i> Enviar Pedido por WhatsApp
+            </button>
 
-                <div class="ticket-status-box" id="ticketStatusBox">
-                    <i class="fa-solid fa-clock"></i>
-                    <div>
-                        <strong id="ticketStatusTitle">En Cola de Espera</strong>
-                        <p id="ticketStatusDesc">Tu pedido pasará a preparación en breve.</p>
-                    </div>
-                </div>
-
-                <div class="ticket-payment-alert" id="ticketPaymentAlert"></div>
-
-                <div class="online-payment-card" id="onlinePaymentContainer" style="display: none;">
-                    <span class="step-badge">Paso 1: Realiza tu pago</span>
-                    
-                    <a href="https://mercadopago.com.mx" target="_blank" class="btn-mp-pay" id="btnMercadoPagoLink">
-                        <i class="fa-solid fa-bolt"></i> Pagar con Mercado Pago (<span id="ticketMpTotal">$0.00</span>)
-                    </a>
-
-                    <div class="bank-transfer-box">
-                        <div class="bank-transfer-header">
-                            <span>o Transferencia Bancaria Directa:</span>
-                        </div>
-                        <div class="clabe-row">
-                            <div>
-                                <small id="bankTitularText">Mercado Pago / La Engordadera</small>
-                                <strong id="clabeNumberText">123456789012345678</strong>
-                            </div>
-                            <button type="button" class="btn-copy-clabe" onclick="copiarClabeAlPortapapeles()" id="btnCopyClabe">
-                                <i class="fa-solid fa-copy"></i> Copiar
-                            </button>
-                        </div>
-                        <small style="display: block; font-size: 0.7rem; color: #666; margin-top: 4px;">Concepto: <strong id="transferConceptoTurno">#R-01</strong></small>
-                    </div>
-                    
-                    <span class="step-badge" style="margin-top: 12px;">Paso 2: Envía tu comprobante</span>
-                </div>
-
-                <small id="kioskCountdown" style="display: block; color: #888; margin-bottom: 10px; font-weight: 600;"></small>
-
-                <div class="ticket-actions">
-                    <button class="btn-whatsapp w-100" id="btnTicketWhatsApp" onclick="enviarComprobanteWhatsApp()">
-                        <i class="fa-brands fa-whatsapp"></i> Enviar Pedido a WhatsApp
-                    </button>
-                    <button class="btn-secondary w-100" onclick="cerrarTicketModal()">
-                        <i class="fa-solid fa-check"></i> Terminar y Hacer Nuevo Pedido
-                    </button>
-                </div>
-            </div>
+            <button type="button" onclick="cerrarTicketModal()" style="background: none; border: none; color: #64748B; font-weight: 600; cursor: pointer; font-size: 0.85rem;">
+                Cerrar y nuevo pedido
+            </button>
+            
+            <small id="kioskCountdown" style="display: block; margin-top: 8px; color: #94A3B8; font-size: 0.75rem;"></small>
         </div>
     </div>
 
-    <script src="script.js?v=9"></script>
+    <!-- Script Principal -->
+    <script src="script.js?v=25"></script>
 </body>
 </html>
