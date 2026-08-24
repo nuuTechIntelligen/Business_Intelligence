@@ -746,7 +746,6 @@ function actualizarBarraPildoraCarrito() {
     if (badgeEl) badgeEl.textContent = totalCount;
     if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
 
-    // Renderizado horizontal de mini chips con nombres de botanas
     if (chipsContainer) {
         chipsContainer.innerHTML = carrito.slice(-3).map(item => `
             <span class="mini-snack-chip">
@@ -1054,7 +1053,6 @@ async function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    // Si es para recoger, guardamos persistencia en localStorage para que no se pierda
     if (tipoPedido === 'recoger') {
         localStorage.setItem('engordadera_ultimo_pedido_activo', JSON.stringify(ultimoPedidoGenerado));
     }
@@ -1166,7 +1164,6 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
     }
 
     if (pedido.tipo === 'tienda') {
-        // EN TIENDA: Flujo Rápido con temporizador
         badgeType.textContent = '🏪 CONSUMO EN TIENDA';
         badgeType.className = 'ticket-badge badge-tienda';
         paymentAlert.className = 'ticket-payment-alert alert-tienda';
@@ -1181,10 +1178,9 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
         
         iniciarCuentaRegresivaKiosko(20);
     } else {
-        // PARA RECOGER: Sin temporizador, Total Gigante, Copiado en 1 clic y Link Dinámico
         if (temporizadorKiosko) clearInterval(temporizadorKiosko);
         if (countdownEl) countdownEl.textContent = '';
-        if (btnClose) btnClose.style.display = 'none'; // No se puede cerrar con la X accidentalmente
+        if (btnClose) btnClose.style.display = 'none';
 
         badgeType.textContent = '🛍️ PARA RECOGER';
         badgeType.className = 'ticket-badge badge-recoger';
@@ -1206,7 +1202,6 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
         if (btnWaText) btnWaText.textContent = '📲 Paso Final: Enviar Comprobante por WhatsApp';
         if (btnFinishText) btnFinishText.textContent = 'Ya envié mi comprobante (Cerrar)';
 
-        // Generar enlace dinámico con la API de Mercado Pago
         solicitarLinkDinamicoMercadoPago(pedido);
     }
 
@@ -1218,7 +1213,7 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
     const loadingHint = document.getElementById('mpLoadingHint');
     if (!btnMp) return;
 
-    btnMp.href = LINK_MERCADOPAGO; // Enlace fallback inicial
+    btnMp.href = LINK_MERCADOPAGO;
     if (loadingHint) loadingHint.style.display = 'block';
 
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
@@ -1255,7 +1250,6 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
     }
 }
 
-// Funciones de Copiado Rápido
 function copiarMontoExacto() {
     if (!ultimoPedidoGenerado) return;
     const montoStr = ultimoPedidoGenerado.total.toFixed(2);
