@@ -1,7 +1,7 @@
 // ======================================================
 // MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES DINÁMICAS)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
