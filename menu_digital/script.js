@@ -1,7 +1,7 @@
 // ======================================================
 // MENU LA ENGORDADERA (BARRA PÍLDORA + MERCADO PAGO DINÁMICO + PERSISTENCIA)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -736,11 +736,11 @@ function actualizarBarraPildoraCarrito() {
     if (!barEl) return;
 
     if (totalCount === 0) {
-        barEl.style.display = 'none';
+        barEl.style.setProperty('display', 'none', 'important');
         return;
     }
 
-    barEl.style.display = 'flex';
+    barEl.style.setProperty('display', 'flex', 'important');
     if (badgeEl) badgeEl.textContent = totalCount;
     if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
 
