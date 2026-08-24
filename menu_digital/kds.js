@@ -1,5 +1,5 @@
 // ======================================================
-// KDS EN LA NUBE - LA ENGORDADERA (MOTOR ROBUSTO)
+// KDS EN LA NUBE - LA ENGORDADERA (MOTOR DIRECTO Y SEGURO)
 // ======================================================
 const SHEETDB_INPUT = "sq3j6nb77cl27"; 
 const INTERVALO_CONSULTA_SEGUNDOS = 4;
@@ -15,6 +15,21 @@ let pedidosKDS = [];
 let filtroEstacionActual = 'TODOS';
 let ultimoTurnoRegistrado = '';
 let audioAlerta = null;
+
+// Lector flexible insensible a mayúsculas/minúsculas
+function obtenerCampo(obj, posiblesNombres) {
+    if (!obj || typeof obj !== 'object') return '';
+    const keys = Object.keys(obj);
+    for (let p of posiblesNombres) {
+        const pNorm = p.toLowerCase().trim();
+        for (let k of keys) {
+            if (k.toLowerCase().trim() === pNorm) {
+                return obj[k];
+            }
+        }
+    }
+    return '';
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     audioAlerta = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -41,43 +56,52 @@ async function consultarPedidosNube() {
         const data = await res.json();
 
         if (!Array.isArray(data)) {
-            console.warn("⚠️ Respuesta de SheetDB no es un arreglo:", data);
+            console.warn("⚠️ Respuesta de SheetDB no es un array:", data);
             return;
         }
 
-        console.log(`📥 [KDS] ${data.length} registros obtenidos de Ventas_Historicas`);
+        console.log(`📥 [KDS] ${data.length} filas leídas de Ventas_Historicas`);
 
         const pedidosProcesados = data.map(fila => {
+            const turnoVal = obtenerCampo(fila, ['turno', 'id_turno', 'ticket']) || '#T-00';
+            const clienteVal = obtenerCampo(fila, ['cliente', 'nombre']) || 'Cliente';
+            const telefonoVal = obtenerCampo(fila, ['telefono', 'tel', 'celular']) || '';
+            const tipoVal = obtenerCampo(fila, ['tipo', 'tipo_pedido']) || 'tienda';
+            const totalVal = parseFloat(obtenerCampo(fila, ['total', 'monto']) || 0);
+            const fechaVal = obtenerCampo(fila, ['fecha', 'hora', 'fecha_completa']) || new Date().toISOString();
+            const detalleVal = obtenerCampo(fila, ['detalle', 'descripcion', 'productos']) || '';
+            const itemsJsonVal = obtenerCampo(fila, ['items_json', 'items', 'json']);
+
             let items = [];
             try {
-                if (fila.items_json && fila.items_json.trim().startsWith('[')) {
-                    items = JSON.parse(fila.items_json);
-                } else if (fila.detalle) {
-                    items = fila.detalle.split('|').map(d => ({ nombre: d.trim(), extras: [], precio: 0 }));
+                if (itemsJsonVal && String(itemsJsonVal).trim().startsWith('[')) {
+                    items = JSON.parse(itemsJsonVal);
+                } else if (detalleVal) {
+                    items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], precio: 0 }));
                 }
             } catch (e) {
-                items = [{ nombre: fila.detalle || 'Botana', extras: [], precio: parseFloat(fila.total || 0) }];
+                items = [{ nombre: detalleVal || 'Botana', extras: [], precio: totalVal }];
             }
 
-            // Normalizar estado (si está vacío se asume 'cola')
-            let estadoRaw = String(fila.estado || 'cola').toLowerCase().trim();
-            if (!estadoRaw || estadoRaw === 'undefined') estadoRaw = 'cola';
+            // Normalización del estado
+            let estadoRaw = String(obtenerCampo(fila, ['estado', 'status']) || 'cola').toLowerCase().trim();
+            if (!estadoRaw || estadoRaw === 'undefined' || estadoRaw === '') estadoRaw = 'cola';
 
             return {
-                turno: fila.turno || '#T-00',
-                cliente: fila.cliente || 'Cliente',
-                telefono: fila.telefono || '',
-                tipo: (fila.tipo || 'tienda').toLowerCase().trim(),
-                total: parseFloat(fila.total || 0),
-                fecha_completa: fila.fecha || new Date().toISOString(),
+                turno: turnoVal,
+                cliente: clienteVal,
+                telefono: telefonoVal,
+                tipo: tipoVal.toLowerCase().trim(),
+                total: totalVal,
+                fecha_completa: fechaVal,
                 estado: estadoRaw,
                 items: items
             };
         });
 
-        // Mostrar todo lo que no esté marcado explícitamente como 'listo', 'entregado' o 'cancelado'
+        // Filtrar comandas activas (cola o preparando)
         const activos = pedidosProcesados.filter(p => p.estado === 'cola' || p.estado === 'preparando');
-        console.log(`🔥 [KDS] Comandas activas para mostrar:`, activos);
+        console.log(`🔥 [KDS] Comandas activas en cocina (${activos.length}):`, activos);
 
         if (activos.length > 0) {
             const ultimoTurno = activos[activos.length - 1].turno;
@@ -91,20 +115,20 @@ async function consultarPedidosNube() {
         renderizarTarjetasKDS();
         actualizarMetricasKDS(pedidosProcesados);
     } catch (error) {
-        console.error("❌ Error en sincronización KDS:", error);
+        console.error("❌ Error consultando KDS en la nube:", error);
     }
 }
 
 function reproducirAlertaSonora() {
     if (audioAlerta) {
-        audioAlerta.play().catch(() => console.log("Audio en espera de interacción"));
+        audioAlerta.play().catch(() => console.log("Audio esperando interacción"));
     }
 }
 
 function renderizarTarjetasKDS() {
     const grid = document.getElementById('kdsOrdersGrid');
     if (!grid) {
-        console.error("❌ No se encontró el elemento HTML con id 'kdsOrdersGrid'");
+        console.error("❌ No existe el contenedor con id 'kdsOrdersGrid'");
         return;
     }
 
@@ -150,6 +174,9 @@ function renderizarTarjetasKDS() {
             `;
         });
 
+        // Escapar comillas para evitar errores en onclick
+        const turnoEscapado = encodeURIComponent(pedido.turno);
+
         tarjeta.innerHTML = `
             <div class="kds-card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <span class="kds-turno-badge" style="font-size:1.4rem; font-weight:800; color:#E91E63;">${pedido.turno}</span>
@@ -171,11 +198,11 @@ function renderizarTarjetasKDS() {
 
             <div class="kds-card-actions" style="margin-top:14px;">
                 ${pedido.estado === 'cola' ? `
-                    <button class="btn-kds-action btn-start" style="width:100%; background:#FF9800; color:white; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${pedido.turno}', 'preparando')">
+                    <button class="btn-kds-action btn-start" style="width:100%; background:#FF9800; color:white; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
                         <i class="fa-solid fa-fire"></i> Preparar
                     </button>
                 ` : `
-                    <button class="btn-kds-action btn-ready" style="width:100%; background:#10B981; color:white; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${pedido.turno}', 'listo')">
+                    <button class="btn-kds-action btn-ready" style="width:100%; background:#10B981; color:white; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
                         <i class="fa-solid fa-check-double"></i> Marcar Listo
                     </button>
                 `}
@@ -186,8 +213,13 @@ function renderizarTarjetasKDS() {
     });
 }
 
-async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
-    const index = pedidosKDS.findIndex(p => p.turno === turno);
+// 3. Actualización Robusta hacia SheetDB
+async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
+    const turnoReal = decodeURIComponent(turnoEncoded);
+    console.log(`🔄 Cambiando estado de ${turnoReal} a "${nuevoEstado}"...`);
+
+    // 1. Cambio visual instantáneo en pantalla
+    const index = pedidosKDS.findIndex(p => p.turno === turnoReal);
     if (index !== -1) {
         if (nuevoEstado === 'listo') {
             pedidosKDS.splice(index, 1);
@@ -199,9 +231,10 @@ async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
 
     if (!SHEETDB_ID) return;
 
+    // 2. Envío a SheetDB con URL limpia y codificada
     try {
-        const patchUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/turno/${encodeURIComponent(turno)}?sheet=Ventas_Historicas`;
-        await fetch(patchUrl, {
+        const patchUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/turno/${encodeURIComponent(turnoReal)}?sheet=Ventas_Historicas`;
+        const res = await fetch(patchUrl, {
             method: 'PATCH',
             headers: {
                 'Accept': 'application/json',
@@ -213,9 +246,11 @@ async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
                 }
             })
         });
-        console.log(`✅ [SheetDB] Turno ${turno} actualizado a ${nuevoEstado}`);
+
+        const resData = await res.json();
+        console.log(`✅ [SheetDB] Resultado de actualización:`, resData);
     } catch (e) {
-        console.error("Error al actualizar estado en Sheets:", e);
+        console.error("❌ Error enviando PATCH a SheetDB:", e);
     }
 }
 
