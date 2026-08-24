@@ -1,7 +1,7 @@
 // ======================================================
 // MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES + SOMBRAS FLOTANTES)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -68,6 +68,7 @@ function parsearExtraConCosto(textoOpcion) {
     return { nombreLimpio: str, costoExtra: 0, textoCompleto: str };
 }
 
+// Cálculo dinámico de puntos según escala configurada
 function calcularPuntosPorMonto(total) {
     if (!ESCALA_PUNTOS_COMPRA || total < 5) return 0;
     const rangos = ESCALA_PUNTOS_COMPRA.split(',').map(r => r.trim());
@@ -86,6 +87,7 @@ function calcularPuntosPorMonto(total) {
     return Math.floor(total * 0.1);
 }
 
+// Obtener cuatrimestre vigente y fecha límite
 function obtenerInfoCuatrimestreActual() {
     const ahora = new Date();
     const anio = ahora.getFullYear();
@@ -109,18 +111,22 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarConfiguracionGlobal();
 });
 
+// 2. Inyección de más siluetas de botanas flotando con mayor visibilidad
 function inyectarSombrasFriturasFlotantes() {
     if (document.getElementById('floatingSnacksContainer')) return;
     const container = document.createElement('div');
     container.id = 'floatingSnacksContainer';
-    container.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:0.12;';
+    container.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:0.25;';
     
     container.innerHTML = `
-        <i class="fa-solid fa-cookie snack-item snack-1" style="position:absolute; top:8%; left:5%; font-size:3.5rem; color:#94A3B8; animation: floatSlow 14s ease-in-out infinite alternate;"></i>
-        <i class="fa-solid fa-pepper-hot snack-item snack-2" style="position:absolute; top:28%; right:7%; font-size:3rem; color:#94A3B8; animation: floatSlow 18s ease-in-out infinite alternate-reverse;"></i>
-        <i class="fa-solid fa-lemon snack-item snack-3" style="position:absolute; top:55%; left:8%; font-size:2.8rem; color:#94A3B8; animation: floatSlow 12s ease-in-out infinite alternate;"></i>
-        <i class="fa-solid fa-bottle-droplet snack-item snack-4" style="position:absolute; top:78%; right:10%; font-size:3.2rem; color:#94A3B8; animation: floatSlow 16s ease-in-out infinite alternate-reverse;"></i>
-        <i class="fa-solid fa-cheese snack-item snack-5" style="position:absolute; top:90%; left:12%; font-size:2.5rem; color:#94A3B8; animation: floatSlow 20s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-cookie snack-item" style="position:absolute; top:6%; left:4%; font-size:3.8rem; color:#64748B; animation: floatSlow 14s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-pepper-hot snack-item" style="position:absolute; top:18%; right:6%; font-size:3.2rem; color:#EF4444; animation: floatSlow 18s ease-in-out infinite alternate-reverse;"></i>
+        <i class="fa-solid fa-lemon snack-item" style="position:absolute; top:35%; left:7%; font-size:3.4rem; color:#F59E0B; animation: floatSlow 12s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-bottle-droplet snack-item" style="position:absolute; top:48%; right:8%; font-size:3.6rem; color:#DC2626; animation: floatSlow 16s ease-in-out infinite alternate-reverse;"></i>
+        <i class="fa-solid fa-cheese snack-item" style="position:absolute; top:62%; left:5%; font-size:3.5rem; color:#F59E0B; animation: floatSlow 20s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-fire-flame-curved snack-item" style="position:absolute; top:75%; right:6%; font-size:3.8rem; color:#EA580C; animation: floatSlow 15s ease-in-out infinite alternate-reverse;"></i>
+        <i class="fa-solid fa-candy-cane snack-item" style="position:absolute; top:88%; left:8%; font-size:3.2rem; color:#EC4899; animation: floatSlow 13s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-cookie-bite snack-item" style="position:absolute; top:94%; right:10%; font-size:3.6rem; color:#64748B; animation: floatSlow 17s ease-in-out infinite alternate-reverse;"></i>
     `;
     
     if (!document.getElementById('snackFloatStyles')) {
@@ -129,8 +135,8 @@ function inyectarSombrasFriturasFlotantes() {
         style.textContent = `
             @keyframes floatSlow {
                 0% { transform: translateY(0px) rotate(0deg); }
-                50% { transform: translateY(-30px) rotate(15deg); }
-                100% { transform: translateY(15px) rotate(-10deg); }
+                50% { transform: translateY(-35px) rotate(20deg); }
+                100% { transform: translateY(20px) rotate(-15deg); }
             }
         `;
         document.head.appendChild(style);
@@ -163,16 +169,17 @@ async function cargarConfiguracionGlobal() {
             const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
             if (filaBanco && filaBanco.valor) BANCO_TITULAR = filaBanco.valor.trim();
 
-            const fFb = config.find(c => limpiarTexto(c.clave) === 'LINK_FACEBOOK');
+            // 1. Mapeo flexible de Redes Sociales
+            const fFb = config.find(c => limpiarTexto(c.clave).includes('FACEBOOK') || limpiarTexto(c.clave).includes('FB'));
             if (fFb && fFb.valor) LINK_FACEBOOK = fFb.valor.trim();
 
-            const fIg = config.find(c => limpiarTexto(c.clave) === 'LINK_INSTAGRAM');
+            const fIg = config.find(c => limpiarTexto(c.clave).includes('INSTAGRAM') || limpiarTexto(c.clave).includes('IG'));
             if (fIg && fIg.valor) LINK_INSTAGRAM = fIg.valor.trim();
 
-            const fTk = config.find(c => limpiarTexto(c.clave) === 'LINK_TIKTOK');
+            const fTk = config.find(c => limpiarTexto(c.clave).includes('TIKTOK') || limpiarTexto(c.clave).includes('TK'));
             if (fTk && fTk.valor) LINK_TIKTOK = fTk.valor.trim();
 
-            const fWa = config.find(c => limpiarTexto(c.clave) === 'LINK_WHATSAPP');
+            const fWa = config.find(c => limpiarTexto(c.clave).includes('WHATSAPP') || limpiarTexto(c.clave).includes('WA'));
             if (fWa && fWa.valor) LINK_WHATSAPP_DIRECTO = fWa.valor.trim();
 
             renderizarRedesSocialesFooter();
@@ -182,15 +189,18 @@ async function cargarConfiguracionGlobal() {
     }
 }
 
+// 1. Renderizado de Redes Sociales con diseño llamativo
 function renderizarRedesSocialesFooter() {
     const footerContainer = document.getElementById('footerSocialIcons');
     if (!footerContainer) return;
 
+    const waLink = LINK_WHATSAPP_DIRECTO || `https://wa.me/${NUMERO_WHATSAPP}`;
+
     footerContainer.innerHTML = `
-        ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="social-btn facebook" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
-        ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="social-btn instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></a>` : ''}
-        ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" class="social-btn tiktok" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>` : ''}
-        ${LINK_WHATSAPP_DIRECTO ? `<a href="${LINK_WHATSAPP_DIRECTO}" target="_blank" class="social-btn whatsapp" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+        ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#1877F2; color:#FFF; border-radius:50%; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 10px rgba(24,119,242,0.3);"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
+        ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4); color:#FFF; border-radius:50%; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 10px rgba(221,42,123,0.3);"><i class="fa-brands fa-instagram"></i></a>` : ''}
+        ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#000000; color:#FFF; border-radius:50%; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fa-brands fa-tiktok"></i></a>` : ''}
+        <a href="${waLink}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#25D366; color:#FFF; border-radius:50%; text-decoration:none; font-size:1.3rem; box-shadow:0 4px 10px rgba(37,211,102,0.3);"><i class="fa-brands fa-whatsapp"></i></a>
     `;
 }
 
