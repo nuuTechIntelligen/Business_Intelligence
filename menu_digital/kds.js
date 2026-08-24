@@ -573,3 +573,32 @@ function exportarReporteVentasCSV() {
     link.click();
     document.body.removeChild(link);
 }
+
+// ======================================================
+// REINICIAR / BORRAR HISTORIAL FINANCIERO
+// ======================================================
+async function borrarHistorialFinanciero() {
+    const confirmar = confirm("⚠️ ¿Estás seguro de que deseas reiniciar todo el historial de ventas? Esta acción limpiará la tabla de finanzas y las gráficas.");
+    if (!confirmar) return;
+
+    // 1. Limpiar datos locales en memoria
+    pedidosGlobalesSheets = [];
+    
+    // 2. Refrescar vistas, métricas y gráficas
+    renderizarTableroKanban();
+    actualizarMetricasHeader();
+    actualizarModuloFinanzas();
+
+    // 3. Eliminar registros en Google Sheets vía SheetDB
+    if (SHEETDB_ID) {
+        try {
+            const deleteUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/all?sheet=Ventas_Historicas`;
+            await fetch(deleteUrl, { method: 'DELETE' });
+            console.log("✅ Historial eliminado de Google Sheets.");
+        } catch (e) {
+            console.warn("No se pudo vaciar la hoja en Google Sheets directamente:", e);
+        }
+    }
+
+    alert("✅ El historial financiero ha sido reiniciado correctamente.");
+}
