@@ -26,20 +26,28 @@
     --font-body: 'Poppins', sans-serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; font-size: 16px; }
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
 
-/* FONDO ESTILO DOODLE WHATSAPP CON BOTANAS (NÍTIDO Y VISIBLE) */
+html { 
+    scroll-behavior: smooth; 
+    font-size: 16px; 
+}
+
+/* FONDO ESTILO DOODLE WHATSAPP CON BOTANAS */
 body {
     font-family: var(--font-body);
     background-color: #FFF8FA;
-    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%27180%27%20height%3D%27180%27%20viewBox%3D%270%200%20180%20180%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23E91E63%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-opacity%3D%270.18%27%3E%3C!--%20Palomita%20--%3E%3Cpath%20d%3D%27M25%2025%20c-3%200-5%203-5%206%200%202%201%203%202%204%20-3%201-4%204-4%207%200%204%203%207%207%207%20h10%20c4%200%207-3%207-7%200-3-2-5-4-7%201-1%202-2%202-4%200-3-3-6-6-6%20-2%200-3%201-4%202%20-1-1-3-2-5-2z%27/%3E%3C!--%20Refresco%20/%20Vaso%20con%20popote%20--%3E%3Cpath%20d%3D%27M135%2025%20l4%2028%20h18%20l4-28%20z%20M140%2025%20l3-12%20h4%20M132%2032%20h28%27/%3E%3C!--%20Nacho%20con%20queso%20--%3E%3Cpath%20d%3D%27M30%20110%20l-16%2028%20h32%20z%20M22%20125%20q4%204%208%200%27/%3E%3C!--%20Chile%20/%20Jalape%C3%B1o%20--%3E%3Cpath%20d%3D%27M140%20115%20c-7%200-12%206-13%2013%20-1%206%202%2011%206%2015%204%204%2010%206%2015%205%206-1%2010-5%2011-11%201-7-3-15-10-19%20-1-.5-2-1-3-1%20-2-.7-4-1.2-6-1.2%20v-4%20h-3%20v4z%27/%3E%3C!--%20Papa%20frita%20/%20Chip%20ondulada%20--%3E%3Cpath%20d%3D%27M85%2040%20c6-3%2014-1%2018%203%204%205%205%2012%203%2017%20-3%205-9%207-15%206%20-6-1-9-7-8-13%202-6%206-10%2010-13%27/%3E%3C!--%20Botella%20de%20salsa%20--%3E%3Cpath%20d%3D%27M85%20130%20v-6%20h3%20v-4%20h-6%20v4%20h3%20v6%20h-5%20v22%20h10%20v-22%20z%20M83%20140%20h4%27/%3E%3C!--%20Rebanada%20de%20Lim%C3%B3n%20--%3E%3Cpath%20d%3D%27M25%2070%20a12%2012%200%200%200%2024%200%20z%20M25%2070%20h24%20M37%2070%20l-6%208%20M37%2070%20l6%208%27/%3E%3C!--%20Chispas%20/%20Estrellas%20decorativas%20--%3E%3Cpath%20d%3D%27M145%2075%20l1%204%204%201%20-4%201%20-1%204%20-1-4%20-4-1%204-1%20z%27/%3E%3Cpath%20d%3D%27M80%2095%20l1%203%203%201%20-3%201%20-1%203%20-1-3%20-3-1%203-1%20z%27/%3E%3Cpath%20d%3D%27M70%2015%20l1%203%203%201%20-3%201%20-1%203%20-1-3%20-3-1%203-1%20z%27/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%27180%27%20height%3D%27180%27%20viewBox%3D%270%200%20180%20180%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23E91E63%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M25%2025%20c-3%200-5%203-5%206%200%202%201%203%202%204%20-3%201-4%204-4%207%200%204%203%207%207%207%20h10%20c4%200%207-3%207-7%200-3-2-5-4-7%201-1%202-2%202-4%200-3-3-6-6-6%20-2%200-3%201-4%202%20-1-1-3-2-5-2z%27/%3E%3Cpath%20d%3D%27M135%2025%20l4%2028%20h18%20l4-28%20z%20M140%2025%20l3-12%20h4%20M132%2032%20h28%27/%3E%3Cpath%20d%3D%27M30%20110%20l-16%2028%20h32%20z%20M22%20125%20q4%204%208%200%27/%3E%3Cpath%20d%3D%27M140%20115%20c-7%200-12%206-13%2013%20-1%206%202%2011%206%2015%204%204%2010%206%2015%205%206-1%2010-5%2011-11%201-7-3-15-10-19%20-1-.5-2-1-3-1%20-2-.7-4-1.2-6-1.2%20v-4%20h-3%20v4z%27/%3E%3Cpath%20d%3D%27M85%2040%20c6-3%2014-1%2018%203%204%205%205%2012%203%2017%20-3%205-9%207-15%206%20-6-1-9-7-8-13%202-6%206-10%2010-13%27/%3E%3Cpath%20d%3D%27M85%20130%20v-6%20h3%20v-4%20h-6%20v4%20h3%20v6%20h-5%20v22%20h10%20v-22%20z%20M83%20140%20h4%27/%3E%3Cpath%20d%3D%27M25%2070%20a12%2012%200%200%200%2024%200%20z%20M25%2070%20h24%20M37%2070%20l-6%208%20M37%2070%20l6%208%27/%3E%3Cpath%20d%3D%27M145%2075%20l1%204%204%201%20-4%201%20-1%204%20-1-4%20-4-1%204-1%20z%27/%3E%3Cpath%20d%3D%27M80%2095%20l1%203%203%201%20-3%201%20-1%203%20-1-3%20-3-1%203-1%20z%27/%3E%3Cpath%20d%3D%27M70%2015%20l1%203%203%201%20-3%201%20-1%203%20-1-3%20-3-1%203-1%20z%27/%3E%3C/g%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 180px 180px;
     background-attachment: fixed;
     color: var(--text-dark);
     line-height: 1.4;
-    padding-bottom: 90px;
+    padding-bottom: 110px;
 }
 
 .container {
@@ -69,7 +77,6 @@ body {
     pointer-events: none;
 }
 
-/* BOTONES SUPERIORES (REDES EN MÓVIL + PUNTOS) */
 .header-top-actions {
     position: absolute;
     top: 10px;
@@ -403,7 +410,137 @@ body {
 .btn-add.disabled { background-color: #888; cursor: not-allowed; }
 
 /* ====================================================== */
-/* 5. MODALES Y SELECTORES (CENTRADOS)                    */
+/* 5. BARRA FLOTANTE HÍBRIDA PÍLDORA (CORREGIDA)          */
+/* ====================================================== */
+.cart-pill-bar {
+    position: fixed !important;
+    bottom: 18px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 24px) !important;
+    max-width: 600px !important;
+    background-color: #FFFFFF !important;
+    border: 2px solid var(--primary-pink) !important;
+    border-radius: 50px !important;
+    padding: 8px 12px 8px 14px !important;
+    display: none;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 12px !important;
+    box-shadow: 0 10px 30px rgba(233, 30, 99, 0.35) !important;
+    z-index: 9999 !important;
+    cursor: pointer;
+    box-sizing: border-box !important;
+}
+
+.cart-pill-bar.active {
+    display: flex !important;
+}
+
+.cart-pill-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+}
+
+.cart-badge-circle {
+    position: relative !important;
+    background: #FFF0F5 !important;
+    color: var(--primary-pink) !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.1rem !important;
+    border: 1.5px solid var(--primary-pink) !important;
+    flex-shrink: 0 !important;
+}
+
+.cart-badge-circle span {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    background: var(--primary-pink) !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-heading) !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.cart-price-column {
+    display: flex !important;
+    flex-direction: column !important;
+    line-height: 1.1 !important;
+    flex-shrink: 0 !important;
+}
+
+.cart-price-column small {
+    font-size: 0.65rem !important;
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+}
+
+.cart-price-column strong {
+    font-family: var(--font-heading) !important;
+    font-size: 1.15rem !important;
+    color: var(--primary-pink) !important;
+}
+
+.cart-mini-chips {
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    white-space: nowrap !important;
+    flex: 1 !important;
+}
+.cart-mini-chips::-webkit-scrollbar { display: none; }
+
+.mini-snack-chip {
+    background: #FFF0F5 !important;
+    border: 1px solid #F8BBD0 !important;
+    color: #880E4F !important;
+    padding: 3px 8px !important;
+    border-radius: 12px !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+}
+
+.btn-pill-checkout {
+    background: linear-gradient(135deg, #FFC107, #FFA000) !important;
+    color: #000000 !important;
+    border: none !important;
+    padding: 9px 16px !important;
+    border-radius: 30px !important;
+    font-family: var(--font-heading) !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 3px 10px rgba(255, 160, 0, 0.4) !important;
+    white-space: nowrap !important;
+}
+
+/* ====================================================== */
+/* 6. MODALES Y SELECTORES (CENTRADOS)                    */
 /* ====================================================== */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -461,6 +598,50 @@ body {
     gap: 6px; box-shadow: 0 3px 10px rgba(233, 30, 99, 0.25);
 }
 
+/* RECUADRO GIGANTE DE COBRO */
+.giant-total-box {
+    background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+    border: 2px solid #FCD34D;
+    border-radius: 16px;
+    padding: 14px 12px;
+    margin-bottom: 14px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+}
+.giant-total-box small {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #92400E;
+    letter-spacing: 0.5px;
+    display: block;
+}
+.giant-amount {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #B45309;
+    line-height: 1.1;
+    margin: 4px 0 8px 0;
+}
+.btn-copy-amount {
+    background: #FFFFFF;
+    border: 1.5px solid #F59E0B;
+    color: #B45309;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.15s;
+}
+.btn-copy-amount:hover {
+    background: #FEF3C7;
+}
+
 /* UPSELLING */
 .upsell-items-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; max-height: 200px; overflow-y: auto; }
 .upsell-card { display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px 10px; text-align: left; }
@@ -468,9 +649,7 @@ body {
 .upsell-info span { color: var(--primary-green); font-weight: 700; font-size: 0.8rem; font-family: var(--font-heading); }
 .btn-add-upsell { background: var(--primary-yellow); border: none; padding: 5px 10px; border-radius: 16px; font-family: var(--font-heading); font-size: 0.72rem; font-weight: 700; cursor: pointer; }
 
-/* ====================================================== */
-/* 6. LEALTAD Y PUNTOS                                    */
-/* ====================================================== */
+/* LEALTAD */
 .loyalty-checkout-box {
     background: #FEF9C3; border: 1.2px dashed #FACC15; border-radius: 10px; padding: 8px 10px;
     margin-bottom: 12px; font-size: 0.75rem; text-align: left;
@@ -493,9 +672,7 @@ body {
 .reward-unlocked-card h4 { font-family: var(--font-heading); font-size: 0.95rem; margin-bottom: 3px; }
 .reward-unlocked-card p { font-size: 0.75rem; line-height: 1.2; }
 
-/* ====================================================== */
-/* 7. CHECKOUT Y BOLETO DIGITAL                           */
-/* ====================================================== */
+/* CHECKOUT */
 .checkout-items-list { max-height: 160px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px 10px; background: #FAFAFA; }
 .checkout-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid #EEE; font-size: 0.78rem; }
 .checkout-item:last-child { border-bottom: none; }
@@ -532,9 +709,7 @@ body {
 .alert-tienda { background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
 .alert-recoger { background: #FFF7ED; border: 1px solid #FFEDD5; color: #9A3412; }
 
-/* ====================================================== */
-/* 8. PAGO MÓVIL (MERCADO PAGO Y CLABE)                   */
-/* ====================================================== */
+/* PAGO MÓVIL */
 .online-payment-card {
     background: #F8FAFC; border: 1.2px solid #E2E8F0; border-radius: 12px;
     padding: 10px; margin-bottom: 12px; text-align: center;
@@ -554,7 +729,7 @@ body {
 
 .bank-transfer-box {
     background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;
-    padding: 8px; text-align: left;
+    padding: 10px; text-align: left;
 }
 .bank-transfer-header { font-size: 0.68rem; color: #64748B; font-weight: 600; margin-bottom: 4px; }
 .clabe-row { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
@@ -572,9 +747,7 @@ body {
 .w-100 { width: 100%; }
 .btn-secondary { background: #F3F4F6; color: #333; border: 1px solid #DDD; padding: 8px; border-radius: 25px; font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
 
-/* ====================================================== */
-/* 9. FOOTER ANCHO COMPLETO PARA PC (OPCIÓN 1)            */
-/* ====================================================== */
+/* FOOTER PC ANCHO COMPLETO */
 .footer-community {
     width: 100%;
     margin-top: 50px;
@@ -657,9 +830,7 @@ body {
     color: #999999;
 }
 
-/* ====================================================== */
-/* 10. MODAL FLOTANTE CENTRADO DE REDES (MÓVIL)          */
-/* ====================================================== */
+/* MODAL SOCIAL MÓVIL */
 .social-modal-links-grid {
     display: flex;
     flex-direction: column;
@@ -687,24 +858,9 @@ body {
     font-size: 1.3rem;
 }
 
-/* ====================================================== */
-/* 11. BARRA FLOTANTE Y GENERALES                         */
-/* ====================================================== */
-.cart-floating-bar {
-    position: fixed; bottom: 0; left: 0; width: 100%; background: #FFFFFF;
-    box-shadow: 0 -3px 15px rgba(0,0,0,0.12); padding: 8px 14px; display: flex;
-    align-items: center; justify-content: space-between; z-index: 1000; border-top: 2px solid var(--primary-yellow);
-}
-.cart-info { font-size: 0.78rem; color: var(--text-dark); }
-.cart-info i { color: var(--primary-orange); margin-right: 3px; }
-.btn-whatsapp {
-    background-color: #25D366; color: white; border: none; padding: 8px 14px;
-    border-radius: 25px; font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; gap: 5px; cursor: pointer;
-}
+/* GENERALES */
 .wa-float-btn {
-    position: fixed; bottom: 64px; right: 14px; background-color: #25D366;
-    color: white; width: 44px; height: 44px; border-radius: 50%; display: flex;
-    align-items: center; justify-content: center; font-size: 1.4rem; text-decoration: none; z-index: 999;
+    display: none;
 }
 
 .loading-state { text-align: center; padding: 40px 14px; color: var(--text-muted); font-family: var(--font-heading); grid-column: 1 / -1; }
@@ -718,9 +874,7 @@ body {
 .desktop-only { display: none; }
 .mobile-only { display: flex; }
 
-/* ====================================================== */
-/* 12. MEDIA QUERIES RESPONSIVAS (PC & TABLET)            */
-/* ====================================================== */
+/* MEDIA QUERIES */
 @media (min-width: 600px) {
     .grid-container { grid-template-columns: repeat(3, 1fr); gap: 14px; }
     .hero { padding: 35px 16px 22px 16px; }
