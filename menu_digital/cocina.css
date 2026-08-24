@@ -1,19 +1,30 @@
-/* ====================================================== */
-/* 1. VARIABLES Y BASE DEL KDS                            */
-/* ====================================================== */
+/* ======================================================
+   KDS & POS COCINA - LA ENGORDADERA
+   PALETA DUAL PINK (Rosa Mexicano & Rosa Suave) + UX DARK MODE
+====================================================== */
 :root {
-    --bg-dark: #121212;
-    --card-dark: #1E1E1E;
-    --card-border: #2D2D2D;
-    --text-main: #EEEEEE;
-    --text-muted: #9E9E9E;
+    /* Tonos Rosa de Marca */
+    --kds-pink-main: #E91E63;        /* Rosa Mexicano La Engordadera */
+    --kds-pink-dark: #C2185B;        /* Rosa Profundo para bordes y headers */
+    --kds-pink-light: #F48FB1;       /* Rosa Claro / Pastel para acentos */
+    --kds-pink-soft: rgba(233, 30, 99, 0.15); /* Fondo glow sutil */
     
-    --color-cola: #FACC15;
-    --color-prep: #FB923C;
-    --color-listo: #34D399;
-    --color-recoger: #E91E63;
-    --color-tienda: #00A8E8;
+    /* Superficies y Fondos UX (Dark Mode Suave para Cocina) */
+    --kds-bg-app: #120B10;           /* Fondo base con subtono ciruela oscuro */
+    --kds-bg-surface: #1E121A;       /* Fondo de columnas y paneles */
+    --kds-bg-card: #281823;          /* Fondo de comandas y tarjetas */
+    --kds-bg-card-hover: #341E2E;    /* Hover de tarjeta */
+    --kds-border: #4A273D;           /* Bordes con tinte rosa oscuro */
     
+    /* Estados Semafóricos de Cocina (Alto Contraste) */
+    --kds-status-cola: #F59E0B;      /* Ámbar en cola */
+    --kds-status-prep: #EC4899;      /* Rosa vibrante en preparación */
+    --kds-status-listo: #10B981;     /* Verde esmeralda listo */
+    
+    /* Tipografía */
+    --kds-text-primary: #FFFFFF;
+    --kds-text-secondary: #FCE4EC;   /* Blanco rosáceo para lectura rápida */
+    --kds-text-muted: #B3889B;       /* Texto secundario */
     --font-heading: 'Fredoka', cursive, sans-serif;
     --font-body: 'Poppins', sans-serif;
 }
@@ -25,26 +36,26 @@
 }
 
 body {
+    background-color: var(--kds-bg-app);
+    color: var(--kds-text-primary);
     font-family: var(--font-body);
-    background-color: var(--bg-dark);
-    color: var(--text-main);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow-x: hidden;
 }
 
-/* ====================================================== */
-/* 2. ENCABEZADO Y FILTRO DE ESTACIONES                   */
-/* ====================================================== */
+/* ======================================================
+   1. ENCABEZADO SUPERIOR
+====================================================== */
 .kds-header {
-    background: #181818;
-    border-bottom: 2px solid #2A2A2A;
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #1E121A 0%, #2A1121 100%);
+    border-bottom: 2px solid var(--kds-pink-main);
+    padding: 10px 18px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     gap: 16px;
     flex-wrap: wrap;
+    box-shadow: 0 4px 20px rgba(233, 30, 99, 0.25);
 }
 
 .kds-brand {
@@ -52,359 +63,473 @@ body {
     align-items: center;
     gap: 10px;
 }
-.kds-brand .logo-emoji { font-size: 1.8rem; }
-.kds-brand h1 { font-family: var(--font-heading); font-size: 1.2rem; color: #FFCB05; letter-spacing: 1px; }
-.kds-brand small { color: var(--text-muted); font-size: 0.72rem; }
 
+.kds-brand .logo-emoji {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 2px 6px rgba(233, 30, 99, 0.5));
+}
+
+.kds-brand h1 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--kds-pink-light);
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+}
+
+.kds-brand small {
+    color: var(--kds-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Pestañas de Vista (Comandas vs Caja POS vs Finanzas) */
 .kds-tabs {
     display: flex;
-    background: #252525;
-    border-radius: 30px;
-    padding: 3px;
-    gap: 4px;
+    gap: 8px;
+    background: #140B11;
+    padding: 4px;
+    border-radius: 25px;
+    border: 1px solid var(--kds-border);
 }
+
 .kds-tab-btn {
     background: transparent;
+    color: var(--kds-text-muted);
     border: none;
-    color: #AAA;
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 20px;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s;
-}
-.kds-tab-btn.active {
-    background: #FFCB05;
-    color: #000;
-    font-weight: 700;
+    transition: all 0.2s ease;
 }
 
+.kds-tab-btn.active {
+    background: var(--kds-pink-main);
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(233, 30, 99, 0.4);
+}
+
+/* Filtros por Estación */
 .station-filters {
     display: flex;
     gap: 6px;
 }
+
 .btn-station {
-    background: #262626;
-    border: 1px solid #3E3E3E;
-    color: #BBB;
-    padding: 5px 12px;
-    border-radius: 16px;
-    font-size: 0.78rem;
-    font-family: var(--font-heading);
+    background: #190E16;
+    border: 1px solid var(--kds-border);
+    color: var(--kds-text-secondary);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
+
 .btn-station.active {
-    background: #00A8E8;
-    border-color: #00A8E8;
-    color: #FFF;
+    background: var(--kds-pink-soft);
+    border-color: var(--kds-pink-light);
+    color: #FFFFFF;
     font-weight: 700;
 }
 
-.kds-metrics { display: flex; gap: 8px; }
-.metric-pill {
-    background: #222222;
-    border: 1px solid #333333;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
+/* Métricas en Cabecera */
+.kds-metrics {
+    display: flex;
+    gap: 8px;
 }
-.metric-pill strong { font-family: var(--font-heading); font-size: 0.95rem; margin-left: 4px; }
-.metric-pill.active-prep strong { color: var(--color-prep); }
-.metric-pill.done strong { color: var(--color-listo); }
 
-.kds-actions { display: flex; align-items: center; gap: 12px; }
-.live-clock {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    color: #FFCB05;
-    background: #222;
-    padding: 4px 10px;
-    border-radius: 8px;
-    border: 1px solid #333;
-}
-.btn-clear-history {
-    background: #252525;
-    color: #AAA;
-    border: 1px solid #3D3D3D;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-family: var(--font-heading);
-    font-size: 0.82rem;
-    cursor: pointer;
-    display: inline-flex;
+.metric-pill {
+    background: #170C13;
+    border: 1px solid var(--kds-border);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    display: flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s ease;
 }
-.btn-clear-history:hover { background: #333333; color: #FFCB05; border-color: #555555; }
+.metric-pill strong { color: var(--kds-status-cola); }
+.metric-pill.active-prep strong { color: var(--kds-pink-light); }
+.metric-pill.done strong { color: var(--kds-status-listo); }
 
-/* ====================================================== */
-/* 3. TABLERO KANBAN                                      */
-/* ====================================================== */
+/* Acciones y Reloj */
+.kds-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-clear-history {
+    background: #1E121A;
+    border: 1px solid var(--kds-border);
+    color: var(--kds-pink-light);
+    padding: 7px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-clear-history:hover {
+    background: var(--kds-pink-main);
+    color: #FFFFFF;
+}
+
+.live-clock {
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--kds-pink-light);
+    background: #140B11;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--kds-border);
+}
+
+/* ======================================================
+   2. TABLERO KANBAN DE COCINA
+====================================================== */
 .kds-board {
-    flex-grow: 1;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    gap: 16px;
     padding: 16px;
-    overflow-x: auto;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: calc(100vh - 85px);
 }
 
 .kds-column {
-    background: #181818;
-    border: 1px solid #262626;
-    border-radius: 14px;
+    background: var(--kds-bg-surface);
+    border: 1.5px solid var(--kds-border);
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 90px);
     overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .column-header {
-    padding: 10px 14px;
-    font-family: var(--font-heading);
-    font-size: 0.95rem;
-    border-bottom: 2px solid transparent;
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--kds-border);
 }
-.col-header-cola { background: rgba(250, 204, 21, 0.1); border-color: var(--color-cola); color: var(--color-cola); }
-.col-header-prep { background: rgba(251, 146, 60, 0.1); border-color: var(--color-prep); color: var(--color-prep); }
-.col-header-listos { background: rgba(52, 211, 153, 0.1); border-color: var(--color-listo); color: var(--color-listo); }
+
+.column-header h2 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.col-header-cola {
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.2), transparent);
+    border-bottom-color: var(--kds-status-cola);
+    color: #FCD34D;
+}
+
+.col-header-prep {
+    background: linear-gradient(90deg, rgba(233, 30, 99, 0.25), transparent);
+    border-bottom-color: var(--kds-pink-main);
+    color: var(--kds-pink-light);
+}
+
+.col-header-listos {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), transparent);
+    border-bottom-color: var(--kds-status-listo);
+    color: #6EE7B7;
+}
 
 .orders-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* ====================================================== */
-/* 4. TARJETAS DE COMANDA Y SEMÁFORO DE TIEMPO            */
-/* ====================================================== */
-.order-card {
-    background: var(--card-dark);
-    border: 1.5px solid var(--card-border);
-    border-radius: 12px;
     padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    position: relative;
-    transition: transform 0.15s ease, border-color 0.2s ease;
-}
-
-/* SEMÁFOROS DE TIEMPO */
-.timer-pill {
-    font-family: var(--font-heading);
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.timer-green { background: #064E3B; color: #34D399; border: 1px solid #059669; }
-.timer-yellow { background: #713F12; color: #FDE047; border: 1px solid #CA8A04; }
-.timer-red {
-    background: #7F1D1D;
-    color: #FCA5A5;
-    border: 1px solid #DC2626;
-    animation: pulseRed 1.2s infinite;
-}
-@keyframes pulseRed {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
-    50% { transform: scale(1.02); box-shadow: 0 0 8px 3px rgba(220, 38, 38, 0.7); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
-}
-
-.order-card.timer-border-red {
-    border-color: #DC2626;
-}
-
-.order-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #2B2B2B;
-    padding-bottom: 8px;
-}
-.order-turn-badge {
-    font-family: var(--font-heading);
-    font-size: 1.25rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
-}
-.badge-tienda { background: #0284C7; color: #FFF; }
-.badge-recoger { background: #EA580C; color: #FFF; }
-
-.order-meta { display: flex; align-items: center; gap: 6px; }
-.order-type-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
-.tag-tienda { background: #0369A1; color: #E0F2FE; }
-.tag-recoger { background: #C2410C; color: #FFEDD5; }
-
-.order-client-name { font-weight: 600; font-size: 0.85rem; color: #DDD; }
-
-.payment-status-box {
-    padding: 6px 8px;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-.payment-done { background: #064E3B; color: #6EE7B7; }
-.payment-pending { background: #7C2D12; color: #FDBA74; }
-.btn-toggle-pay {
-    background: rgba(0,0,0,0.3);
-    color: #FFF;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 0.65rem;
-    cursor: pointer;
-}
-
-.order-items-list {
-    background: #141414;
-    border-radius: 8px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 180px;
     overflow-y: auto;
+    flex: 1;
+    max-height: calc(100vh - 170px);
 }
-.order-item-row { border-bottom: 1px dashed #282828; padding-bottom: 4px; }
-.order-item-row:last-child { border-bottom: none; }
-.order-item-title { font-family: var(--font-heading); font-size: 0.85rem; color: #FFCB05; }
-.order-item-details { font-size: 0.72rem; color: #BBB; line-height: 1.2; margin-top: 2px; }
-.order-item-extras { font-size: 0.72rem; color: #38BDF8; font-weight: 600; }
 
-.card-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-.btn-kds {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    font-family: var(--font-heading);
+/* ======================================================
+   3. TARJETA DE COMANDA
+====================================================== */
+.kds-card {
+    background: var(--kds-bg-card);
+    border: 1.5px solid var(--kds-border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    position: relative;
+}
+
+.kds-card:hover {
+    transform: translateY(-2px);
+    background: var(--kds-bg-card-hover);
+    border-color: var(--kds-pink-light);
+}
+
+.kds-card.state-preparando {
+    border-color: rgba(233, 30, 99, 0.6);
+    box-shadow: 0 0 15px rgba(233, 30, 99, 0.2);
+}
+
+.kds-item-row {
+    margin-bottom: 6px;
+    border-bottom: 1px dashed rgba(244, 143, 177, 0.15);
+    padding-bottom: 4px;
+}
+
+.kds-item-row strong {
+    color: #FFFFFF;
+    font-size: 0.95rem;
+}
+
+.kds-item-row p {
+    color: var(--kds-text-secondary);
+    font-size: 0.78rem;
+    margin-top: 2px;
+}
+
+/* Semáforos de Tiempo */
+.kds-timer-badge {
+    font-weight: 700;
     font-size: 0.85rem;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+}
+
+.timer-green .kds-timer-badge { color: #10B981; }
+.timer-yellow .kds-timer-badge { color: #F59E0B; }
+.timer-red-blink {
+    animation: blinkRed 1.2s infinite alternate;
+}
+.timer-red-blink .kds-timer-badge { color: #EF4444; font-weight: 900; }
+
+@keyframes blinkRed {
+    from { border-color: #EF4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+    to { border-color: #7F1D1D; box-shadow: none; }
+}
+
+/* ======================================================
+   4. BOTONES DE ACCIÓN EN COMANDAS
+====================================================== */
+.btn-card-action {
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: transform 0.1s ease;
+    transition: transform 0.15s ease, filter 0.15s ease;
 }
-.btn-kds:active { transform: scale(0.97); }
-.btn-start { background: var(--color-prep); color: #000; }
-.btn-finish { background: var(--color-listo); color: #000; }
-.btn-wa-notify { background: #25D366; color: #FFF; }
-.btn-deliver { background: #3B82F6; color: #FFF; }
 
-/* ====================================================== */
-/* 5. PANEL DE FINANZAS Y GRÁFICAS                        */
-/* ====================================================== */
+.btn-card-action:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+/* ======================================================
+   5. PANEL DE CORTE Y FINANZAS
+====================================================== */
 .finance-panel {
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    width: 100%;
 }
+
 .finance-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
 }
+
 .finance-card {
-    background: var(--card-dark);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 16px;
+    background: var(--kds-bg-surface);
+    border: 1.5px solid var(--kds-border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
 }
-.finance-card h3 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
-.finance-card strong { font-family: var(--font-heading); font-size: 1.5rem; color: #FFCB05; display: block; }
-.finance-card small { font-size: 0.72rem; color: #888; }
-.text-tienda { color: #38BDF8 !important; }
-.text-recoger { color: #FB923C !important; }
+
+.finance-card h3 {
+    font-size: 0.82rem;
+    color: var(--kds-text-muted);
+    margin-bottom: 6px;
+}
+
+.finance-card strong {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    color: var(--kds-pink-light);
+    display: block;
+}
 
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
 }
+
 .chart-card {
-    background: #1E1E1E;
-    border: 1px solid #2D2D2D;
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
+    background: var(--kds-bg-surface);
+    border: 1.5px solid var(--kds-border);
+    border-radius: 16px;
+    padding: 18px;
 }
+
 .chart-card h3 {
     font-family: var(--font-heading);
-    font-size: 0.95rem;
-    color: #FFCB05;
+    font-size: 1.1rem;
+    color: var(--kds-pink-light);
     margin-bottom: 12px;
 }
+
 .chart-wrapper {
+    height: 260px;
     position: relative;
-    height: 240px;
-    width: 100%;
 }
 
 .finance-table-wrapper {
-    background: var(--card-dark);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 16px;
+    background: var(--kds-bg-surface);
+    border: 1.5px solid var(--kds-border);
+    border-radius: 16px;
+    padding: 18px;
     overflow-x: auto;
 }
-.table-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-.table-header-flex h2 { font-family: var(--font-heading); font-size: 1.1rem; color: #FFCB05; }
-.btn-export {
-    background: #16A34A;
-    color: #FFF;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
+
+.table-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.table-header-flex h2 {
     font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--kds-pink-light);
+}
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 0.85rem;
+}
+
+.finance-table th {
+    background: #170C13;
+    color: var(--kds-pink-light);
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid var(--kds-border);
+}
+
+.finance-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--kds-border);
+    color: var(--kds-text-secondary);
+}
+
+/* ======================================================
+   6. MODAL DE TIEMPO ESTIMADO
+====================================================== */
+.modal-time-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 11, 16, 0.85);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.modal-time-overlay.active {
+    display: flex;
+}
+
+.modal-time-card {
+    background: #20111C;
+    border: 2px solid var(--kds-pink-main);
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(233, 30, 99, 0.4);
+}
+
+.modal-time-card h3 {
+    font-family: var(--font-heading);
+    color: var(--kds-pink-light);
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+}
+
+.modal-time-card p {
+    color: var(--kds-text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+}
+
+.time-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.btn-time-opt {
+    background: var(--kds-bg-card);
+    border: 1.5px solid var(--kds-border);
+    color: #FFFFFF;
+    padding: 14px;
+    border-radius: 12px;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.15s ease;
 }
 
-.finance-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; }
-.finance-table th { background: #141414; padding: 10px; color: var(--text-muted); border-bottom: 1px solid #333; }
-.finance-table td { padding: 10px; border-bottom: 1px solid #252525; }
+.btn-time-opt:hover {
+    background: var(--kds-pink-main);
+    border-color: var(--kds-pink-light);
+    transform: scale(1.03);
+}
 
-/* MODAL DE TIEMPO */
-.modal-time-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 9999;
+.btn-cancel-time {
+    background: transparent;
+    border: none;
+    color: var(--kds-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
 }
-.modal-time-card {
-    background: #1E1E1E; border: 1px solid #333; border-radius: 14px; padding: 20px;
-    width: 90%; max-width: 380px; text-align: center;
+
+/* ======================================================
+   7. RESPONSIVIDAD
+====================================================== */
+@media (max-width: 1024px) {
+    .kds-board { grid-template-columns: 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
 }
-.modal-time-card h3 { font-family: var(--font-heading); color: #FFCB05; margin-bottom: 8px; font-size: 1.1rem; }
-.modal-time-card p { font-size: 0.8rem; color: #BBB; margin-bottom: 16px; }
-.time-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-.btn-time-opt {
-    background: #2D2D2D; color: #FFF; border: 1px solid #444; padding: 10px;
-    border-radius: 8px; font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; cursor: pointer;
-}
-.btn-time-opt:hover { background: #FFCB05; color: #000; }
-.btn-cancel-time { background: transparent; color: #888; border: none; font-size: 0.75rem; cursor: pointer; }
