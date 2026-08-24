@@ -1,8 +1,9 @@
 // ======================================================
-// KDS EN LA NUBE - LA ENGORDADERA (MOTOR DIRECTO Y SEGURO)
+// KDS EN LA NUBE CON AUTODIAGNÓSTICO EN PANTALLA
 // ======================================================
+// IMPORTANTE: Pon tu ID real aquí (ej: "abc123xyz" o la URL completa de SheetDB)
 const SHEETDB_INPUT = "sq3j6nb77cl27"; 
-const INTERVALO_CONSULTA_SEGUNDOS = 4;
+const INTERVALO_SEGUNDOS = 4;
 
 function obtenerIdLimpioSheetDB(input) {
     if (!input || input.includes("TU_ID")) return "";
@@ -16,14 +17,14 @@ let filtroEstacionActual = 'TODOS';
 let ultimoTurnoRegistrado = '';
 let audioAlerta = null;
 
-// Lector flexible insensible a mayúsculas/minúsculas
+// Lector flexible de propiedades de Google Sheets
 function obtenerCampo(obj, posiblesNombres) {
     if (!obj || typeof obj !== 'object') return '';
     const keys = Object.keys(obj);
     for (let p of posiblesNombres) {
-        const pNorm = p.toLowerCase().trim();
+        const pNorm = p.toLowerCase().replace(/[^a-z0-9]/g, '');
         for (let k of keys) {
-            if (k.toLowerCase().trim() === pNorm) {
+            if (k.toLowerCase().replace(/[^a-z0-9]/g, '') === pNorm) {
                 return obj[k];
             }
         }
@@ -33,37 +34,65 @@ function obtenerCampo(obj, posiblesNombres) {
 
 document.addEventListener('DOMContentLoaded', () => {
     audioAlerta = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    crearBarraDiagnostico();
     
     iniciarKDS();
-    setInterval(consultarPedidosNube, INTERVALO_CONSULTA_SEGUNDOS * 1000);
+    setInterval(consultarPedidosNube, INTERVALO_SEGUNDOS * 1000);
     setInterval(actualizarSemaforosTiempo, 1000);
 });
 
+// Barra de estado visual en la parte superior del KDS
+function crearBarraDiagnostico() {
+    if (document.getElementById('kdsDebugBar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'kdsDebugBar';
+    bar.style.cssText = 'position:fixed; bottom:10px; left:10px; background:#1E293B; color:#F8FAFC; padding:6px 14px; border-radius:20px; font-family:monospace; font-size:0.75rem; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.3); display:flex; align-items:center; gap:8px;';
+    bar.innerHTML = `<span>⏳ Conectando con Google Sheets...</span>`;
+    document.body.appendChild(bar);
+}
+
+function actualizarBarraDiagnostico(mensaje, esError = false) {
+    const bar = document.getElementById('kdsDebugBar');
+    if (!bar) return;
+    bar.style.background = esError ? '#DC2626' : '#0F172A';
+    bar.innerHTML = `${esError ? '⚠️' : '🟢'} ${mensaje}`;
+}
+
 async function iniciarKDS() {
-    console.log("🍳 Iniciando KDS con SheetDB ID:", SHEETDB_ID);
+    if (!SHEETDB_ID) {
+        actualizarBarraDiagnostico("ERROR: Falta colocar tu ID de SheetDB en kds.js", true);
+        mostrarErrorEnGrid("⚠️ Falta colocar tu ID de SheetDB en la línea 5 de <code>kds.js</code>.");
+        return;
+    }
     await consultarPedidosNube();
 }
 
 async function consultarPedidosNube() {
-    if (!SHEETDB_ID) {
-        console.error("❌ Falta configurar el SHEETDB_ID en kds.js");
-        return;
-    }
+    if (!SHEETDB_ID) return;
 
     try {
-        const url = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`;
-        const res = await fetch(url);
-        const data = await res.json();
+        // Intentar leer la pestaña Ventas_Historicas (o Ventas Historicas)
+        let url = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas_Historicas`;
+        let res = await fetch(url);
+        let data = await res.json();
+
+        // Si dio error de pestaña no encontrada, intentar con espacio
+        if (data && data.error && data.error.includes("not found")) {
+            url = `https://sheetdb.io/api/v1/${SHEETDB_ID}?sheet=Ventas%20Historicas`;
+            res = await fetch(url);
+            data = await res.json();
+        }
 
         if (!Array.isArray(data)) {
-            console.warn("⚠️ Respuesta de SheetDB no es un array:", data);
+            actualizarBarraDiagnostico(`Error SheetDB: ${data.error || 'Respuesta inválida'}`, true);
+            mostrarErrorEnGrid(`Error al leer Google Sheets: ${data.error || 'Verifica el nombre de la pestaña'}`);
             return;
         }
 
-        console.log(`📥 [KDS] ${data.length} filas leídas de Ventas_Historicas`);
+        actualizarBarraDiagnostico(`Conectado a Sheets | Filas totales: ${data.length} | Última sinc: ${new Date().toLocaleTimeString()}`);
 
-        const pedidosProcesados = data.map(fila => {
-            const turnoVal = obtenerCampo(fila, ['turno', 'id_turno', 'ticket']) || '#T-00';
+        const pedidosProcesados = data.map((fila, index) => {
+            const turnoVal = obtenerCampo(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
             const clienteVal = obtenerCampo(fila, ['cliente', 'nombre']) || 'Cliente';
             const telefonoVal = obtenerCampo(fila, ['telefono', 'tel', 'celular']) || '';
             const tipoVal = obtenerCampo(fila, ['tipo', 'tipo_pedido']) || 'tienda';
@@ -80,7 +109,7 @@ async function consultarPedidosNube() {
                     items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], precio: 0 }));
                 }
             } catch (e) {
-                items = [{ nombre: detalleVal || 'Botana', extras: [], precio: totalVal }];
+                items = [{ nombre: detalleVal || 'Botana Preparada', extras: [], precio: totalVal }];
             }
 
             // Normalización del estado
@@ -99,9 +128,8 @@ async function consultarPedidosNube() {
             };
         });
 
-        // Filtrar comandas activas (cola o preparando)
+        // Comandas activas: todo lo que NO esté marcado como 'listo', 'entregado' o 'cancelado'
         const activos = pedidosProcesados.filter(p => p.estado === 'cola' || p.estado === 'preparando');
-        console.log(`🔥 [KDS] Comandas activas en cocina (${activos.length}):`, activos);
 
         if (activos.length > 0) {
             const ultimoTurno = activos[activos.length - 1].turno;
@@ -115,20 +143,32 @@ async function consultarPedidosNube() {
         renderizarTarjetasKDS();
         actualizarMetricasKDS(pedidosProcesados);
     } catch (error) {
-        console.error("❌ Error consultando KDS en la nube:", error);
+        actualizarBarraDiagnostico(`Fallo de Red: ${error.message}`, true);
     }
 }
 
 function reproducirAlertaSonora() {
     if (audioAlerta) {
-        audioAlerta.play().catch(() => console.log("Audio esperando interacción"));
+        audioAlerta.play().catch(() => console.log("Audio esperando interacción del usuario"));
+    }
+}
+
+function mostrarErrorEnGrid(mensaje) {
+    const grid = document.getElementById('kdsOrdersGrid');
+    if (grid) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #FEF2F2; border: 2px dashed #EF4444; border-radius: 16px; color: #991B1B;">
+                <h3 style="margin-bottom: 8px;">⚠️ Aviso de Conexión</h3>
+                <p>${mensaje}</p>
+            </div>
+        `;
     }
 }
 
 function renderizarTarjetasKDS() {
     const grid = document.getElementById('kdsOrdersGrid');
     if (!grid) {
-        console.error("❌ No existe el contenedor con id 'kdsOrdersGrid'");
+        console.error("❌ No existe el elemento HTML #kdsOrdersGrid en kds.html");
         return;
     }
 
@@ -174,7 +214,6 @@ function renderizarTarjetasKDS() {
             `;
         });
 
-        // Escapar comillas para evitar errores en onclick
         const turnoEscapado = encodeURIComponent(pedido.turno);
 
         tarjeta.innerHTML = `
@@ -213,12 +252,9 @@ function renderizarTarjetasKDS() {
     });
 }
 
-// 3. Actualización Robusta hacia SheetDB
 async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
     const turnoReal = decodeURIComponent(turnoEncoded);
-    console.log(`🔄 Cambiando estado de ${turnoReal} a "${nuevoEstado}"...`);
 
-    // 1. Cambio visual instantáneo en pantalla
     const index = pedidosKDS.findIndex(p => p.turno === turnoReal);
     if (index !== -1) {
         if (nuevoEstado === 'listo') {
@@ -231,10 +267,9 @@ async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
 
     if (!SHEETDB_ID) return;
 
-    // 2. Envío a SheetDB con URL limpia y codificada
     try {
         const patchUrl = `https://sheetdb.io/api/v1/${SHEETDB_ID}/turno/${encodeURIComponent(turnoReal)}?sheet=Ventas_Historicas`;
-        const res = await fetch(patchUrl, {
+        await fetch(patchUrl, {
             method: 'PATCH',
             headers: {
                 'Accept': 'application/json',
@@ -246,11 +281,8 @@ async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
                 }
             })
         });
-
-        const resData = await res.json();
-        console.log(`✅ [SheetDB] Resultado de actualización:`, resData);
     } catch (e) {
-        console.error("❌ Error enviando PATCH a SheetDB:", e);
+        console.error("Error actualizando estado en Sheets:", e);
     }
 }
 
