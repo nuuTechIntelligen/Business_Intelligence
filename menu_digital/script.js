@@ -1,7 +1,7 @@
 // ======================================================
-// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES HÍBRIDAS)
+// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + MAPS + REDES HÍBRIDAS)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -12,10 +12,10 @@ let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
-// Enlaces de Redes Sociales
+// Enlaces de Redes Sociales y Google Maps (Con Fallbacks por defecto)
 let LINK_FACEBOOK = "";
 let LINK_INSTAGRAM = "";
-let LINK_TIKTOK = "";
+let LINK_GOOGLE_MAPS = "https://maps.google.com"; // Fallback para que nunca desaparezca el botón
 let LINK_WHATSAPP_DIRECTO = "";
 
 let productosGlobales = [];
@@ -104,9 +104,9 @@ function obtenerInfoCuatrimestreActual() {
 // 1. CARGA DINÁMICA DEL MENÚ & CONFIGURACIÓN
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
+    renderizarRedesSocialesFooter(); // Render inicial inmediato con fallbacks
     cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
-    renderizarRedesSocialesFooter();
 });
 
 async function cargarConfiguracionGlobal() {
@@ -118,80 +118,72 @@ async function cargarConfiguracionGlobal() {
     try {
         const res = await fetch(`${WEB_APP_URL}?sheet=Configuracion`);
         const config = await res.json();
+        
         if (Array.isArray(config)) {
-            const filaPremio = config.find(c => limpiarTexto(c.clave) === 'PREMIO_LEALTAD');
-            if (filaPremio && filaPremio.valor) PREMIO_LEALTAD = filaPremio.valor.trim();
+            config.forEach(fila => {
+                const clave = limpiarTexto(obtenerPropiedadFlexible(fila, ['clave', 'key', 'nombre', 'propiedad', 'campo']));
+                const valor = String(obtenerPropiedadFlexible(fila, ['valor', 'value', 'link', 'enlace', 'dato']) || '').trim();
 
-            const filaMeta = config.find(c => limpiarTexto(c.clave) === 'PUNTOS_META_PREMIO');
-            if (filaMeta && !isNaN(parseInt(filaMeta.valor, 10))) PUNTOS_META_PREMIO = parseInt(filaMeta.valor, 10);
+                if (!clave || !valor) return;
 
-            const filaEscala = config.find(c => limpiarTexto(c.clave) === 'ESCALA_PUNTOS_COMPRA');
-            if (filaEscala && filaEscala.valor) ESCALA_PUNTOS_COMPRA = filaEscala.valor.trim();
-
-            const filaMp = config.find(c => limpiarTexto(c.clave) === 'LINK_MERCADOPAGO');
-            if (filaMp && filaMp.valor) LINK_MERCADOPAGO = filaMp.valor.trim();
-
-            const filaClabe = config.find(c => limpiarTexto(c.clave) === 'CLABE_INTERBANCARIA' || limpiarTexto(c.clave) === 'CLABE');
-            if (filaClabe && filaClabe.valor) CLABE_BANCARIA = filaClabe.valor.trim();
-
-            const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
-            if (filaBanco && filaBanco.valor) BANCO_TITULAR = filaBanco.valor.trim();
-
-            const fFb = config.find(c => limpiarTexto(c.clave).includes('FACEBOOK') || limpiarTexto(c.clave).includes('FB'));
-            if (fFb && fFb.valor) LINK_FACEBOOK = fFb.valor.trim();
-
-            const fIg = config.find(c => limpiarTexto(c.clave).includes('INSTAGRAM') || limpiarTexto(c.clave).includes('IG'));
-            if (fIg && fIg.valor) LINK_INSTAGRAM = fIg.valor.trim();
-
-            const fTk = config.find(c => limpiarTexto(c.clave).includes('TIKTOK') || limpiarTexto(c.clave).includes('TK'));
-            if (fTk && fTk.valor) LINK_TIKTOK = fTk.valor.trim();
-
-            const fWa = config.find(c => limpiarTexto(c.clave).includes('WHATSAPP') || limpiarTexto(c.clave).includes('WA'));
-            if (fWa && fWa.valor) LINK_WHATSAPP_DIRECTO = fWa.valor.trim();
+                if (clave.includes('PREMIO')) PREMIO_LEALTAD = valor;
+                else if (clave.includes('PUNTOS_META') || clave.includes('META')) PUNTOS_META_PREMIO = parseInt(valor, 10) || 100;
+                else if (clave.includes('ESCALA')) ESCALA_PUNTOS_COMPRA = valor;
+                else if (clave.includes('MERCADOPAGO') || clave.includes('MP')) LINK_MERCADOPAGO = valor;
+                else if (clave.includes('CLABE')) CLABE_BANCARIA = valor;
+                else if (clave.includes('TITULAR') || clave.includes('BANCO')) BANCO_TITULAR = valor;
+                
+                // Mapeo flexible e insensible a variaciones de nombre para Redes & Maps
+                else if (clave.includes('FACEBOOK') || clave.includes('FB')) LINK_FACEBOOK = valor;
+                else if (clave.includes('INSTAGRAM') || clave.includes('IG')) LINK_INSTAGRAM = valor;
+                else if (clave.includes('MAPS') || clave.includes('GOOGLE') || clave.includes('UBICACION') || clave.includes('OPINION')) LINK_GOOGLE_MAPS = valor;
+                else if (clave.includes('WHATSAPP') || clave.includes('WA')) LINK_WHATSAPP_DIRECTO = valor;
+            });
 
             renderizarRedesSocialesFooter();
         }
     } catch (e) {
-        console.warn("Configuración usando valores locales.");
+        console.warn("Configuración usando valores por defecto:", e);
         renderizarRedesSocialesFooter();
     }
 }
 
-// Renderizado Híbrido: Tarjeta Comunidad en PC + Bottom Sheet en Móvil
+// Renderizado Híbrido: Tarjeta Fullwidth en PC + Modal Centrado en Móvil
 function renderizarRedesSocialesFooter() {
     const waLink = LINK_WHATSAPP_DIRECTO || `https://wa.me/${NUMERO_WHATSAPP}`;
+    const mapsLink = LINK_GOOGLE_MAPS || "https://maps.google.com";
     
-    // 1. Versión PC (Píldoras Elegantes)
+    // 1. Versión PC (Píldoras Elegantes a Ancho Completo)
     const pcContainer = document.getElementById('footerSocialIconsDesktop');
     if (pcContainer) {
         pcContainer.innerHTML = `
             ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="social-pill-btn" style="background:#1877F2;"><i class="fa-brands fa-facebook-f"></i> Facebook</a>` : ''}
             ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="social-pill-btn" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF);"><i class="fa-brands fa-instagram"></i> Instagram</a>` : ''}
-            ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" class="social-pill-btn" style="background:#000000;"><i class="fa-brands fa-tiktok"></i> TikTok</a>` : ''}
-            <a href="${waLink}" target="_blank" class="social-pill-btn" style="background:#25D366;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+            <a href="${mapsLink}" target="_blank" class="social-pill-btn" style="background:#EA4335;"><i class="fa-solid fa-location-dot"></i> Opiniones en Google Maps</a>
+            <a href="${waLink}" target="_blank" class="social-pill-btn" style="background:#25D366;"><i class="fa-brands fa-whatsapp"></i> WhatsApp Directo</a>
         `;
     }
 
-    // 2. Versión Móvil (Drawer Táctil Grande)
+    // 2. Versión Móvil (Modal Flotante Centrado)
     const mobileContainer = document.getElementById('footerSocialIconsMobile');
     if (mobileContainer) {
         mobileContainer.innerHTML = `
-            ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="drawer-social-card" style="background:#1877F2;"><i class="fa-brands fa-facebook-f"></i> <span>Facebook</span></a>` : ''}
-            ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="drawer-social-card" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF);"><i class="fa-brands fa-instagram"></i> <span>Instagram</span></a>` : ''}
-            ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" class="drawer-social-card" style="background:#000000;"><i class="fa-brands fa-tiktok"></i> <span>TikTok</span></a>` : ''}
-            <a href="${waLink}" target="_blank" class="drawer-social-card" style="background:#25D366;"><i class="fa-brands fa-whatsapp"></i> <span>WhatsApp</span></a>
+            ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="social-modal-card-btn" style="background:#1877F2;"><i class="fa-brands fa-facebook-f"></i> <span>Síguenos en Facebook</span></a>` : ''}
+            ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="social-modal-card-btn" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF);"><i class="fa-brands fa-instagram"></i> <span>Síguenos en Instagram</span></a>` : ''}
+            <a href="${mapsLink}" target="_blank" class="social-modal-card-btn" style="background:#EA4335;"><i class="fa-solid fa-location-dot"></i> <span>Califícanos en Google Maps</span></a>
+            <a href="${waLink}" target="_blank" class="social-modal-card-btn" style="background:#25D366;"><i class="fa-brands fa-whatsapp"></i> <span>Escríbenos por WhatsApp</span></a>
         `;
     }
 }
 
-function abrirDrawerRedes() {
-    const drawer = document.getElementById('socialDrawerOverlay');
-    if (drawer) drawer.classList.add('active');
+function abrirModalRedesMovil() {
+    const modal = document.getElementById('socialModalOverlay');
+    if (modal) modal.classList.add('active');
 }
 
-function cerrarDrawerRedes() {
-    const drawer = document.getElementById('socialDrawerOverlay');
-    if (drawer) drawer.classList.remove('active');
+function cerrarModalRedesMovil() {
+    const modal = document.getElementById('socialModalOverlay');
+    if (modal) modal.classList.remove('active');
 }
 
 async function cargarMenuDesdeWebApp() {
