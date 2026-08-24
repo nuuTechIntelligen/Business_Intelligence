@@ -1,16 +1,22 @@
 // ======================================================
-// CONFIGURACIÓN WEB APP (GOOGLE APPS SCRIPT) & WHATSAPP
+// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES + SOMBRAS FLOTANTES)
 // ======================================================
-// Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// Variables dinámicas
-let MONTO_MINIMO_SELLO = 80.00;
+// Variables dinámicas desde Google Sheets
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
+let PUNTOS_META_PREMIO = 100;
+let ESCALA_PUNTOS_COMPRA = "5-20:1, 21-50:3, 51-100:6, 101-200:15, 201-9999:25";
 let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
+
+// Enlaces de Redes Sociales
+let LINK_FACEBOOK = "";
+let LINK_INSTAGRAM = "";
+let LINK_TIKTOK = "";
+let LINK_WHATSAPP_DIRECTO = "";
 
 let productosGlobales = [];
 let productoSeleccionado = null;
@@ -43,9 +49,7 @@ function obtenerPropiedadFlexible(obj, clavesPosibles) {
         const cpNormal = limpiarTexto(cp).replace(/[^A-Z0-9]/g, '');
         for (let k of llaves) {
             const kNormal = limpiarTexto(k).replace(/[^A-Z0-9]/g, '');
-            if (kNormal === cpNormal) {
-                return obj[k];
-            }
+            if (kNormal === cpNormal) return obj[k];
         }
     }
     return '';
@@ -64,13 +68,76 @@ function parsearExtraConCosto(textoOpcion) {
     return { nombreLimpio: str, costoExtra: 0, textoCompleto: str };
 }
 
+function calcularPuntosPorMonto(total) {
+    if (!ESCALA_PUNTOS_COMPRA || total < 5) return 0;
+    const rangos = ESCALA_PUNTOS_COMPRA.split(',').map(r => r.trim());
+    for (let r of rangos) {
+        const partes = r.split(':');
+        if (partes.length === 2) {
+            const lims = partes[0].split('-');
+            const min = parseFloat(lims[0]);
+            const max = parseFloat(lims[1]);
+            const pts = parseInt(partes[1], 10);
+            if (total >= min && total <= max) {
+                return pts;
+            }
+        }
+    }
+    return Math.floor(total * 0.1);
+}
+
+function obtenerInfoCuatrimestreActual() {
+    const ahora = new Date();
+    const anio = ahora.getFullYear();
+    const mes = ahora.getMonth();
+
+    if (mes <= 3) {
+        return { id: `C1-${anio}`, nombre: `1er Cuatrimestre ${anio}`, vence: `30 de Abril de ${anio}` };
+    } else if (mes <= 7) {
+        return { id: `C2-${anio}`, nombre: `2do Cuatrimestre ${anio}`, vence: `31 de Agosto de ${anio}` };
+    } else {
+        return { id: `C3-${anio}`, nombre: `3er Cuatrimestre ${anio}`, vence: `31 de Diciembre de ${anio}` };
+    }
+}
+
 // ======================================================
-// 1. CARGA DIRECTA DESDE GOOGLE APPS SCRIPT
+// 1. CARGA DINÁMICA DEL MENÚ & CONFIGURACIÓN
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
+    inyectarSombrasFriturasFlotantes();
     cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
 });
+
+function inyectarSombrasFriturasFlotantes() {
+    if (document.getElementById('floatingSnacksContainer')) return;
+    const container = document.createElement('div');
+    container.id = 'floatingSnacksContainer';
+    container.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:0.12;';
+    
+    container.innerHTML = `
+        <i class="fa-solid fa-cookie snack-item snack-1" style="position:absolute; top:8%; left:5%; font-size:3.5rem; color:#94A3B8; animation: floatSlow 14s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-pepper-hot snack-item snack-2" style="position:absolute; top:28%; right:7%; font-size:3rem; color:#94A3B8; animation: floatSlow 18s ease-in-out infinite alternate-reverse;"></i>
+        <i class="fa-solid fa-lemon snack-item snack-3" style="position:absolute; top:55%; left:8%; font-size:2.8rem; color:#94A3B8; animation: floatSlow 12s ease-in-out infinite alternate;"></i>
+        <i class="fa-solid fa-bottle-droplet snack-item snack-4" style="position:absolute; top:78%; right:10%; font-size:3.2rem; color:#94A3B8; animation: floatSlow 16s ease-in-out infinite alternate-reverse;"></i>
+        <i class="fa-solid fa-cheese snack-item snack-5" style="position:absolute; top:90%; left:12%; font-size:2.5rem; color:#94A3B8; animation: floatSlow 20s ease-in-out infinite alternate;"></i>
+    `;
+    
+    if (!document.getElementById('snackFloatStyles')) {
+        const style = document.createElement('style');
+        style.id = 'snackFloatStyles';
+        style.textContent = `
+            @keyframes floatSlow {
+                0% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-30px) rotate(15deg); }
+                100% { transform: translateY(15px) rotate(-10deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.prepend(container);
+}
 
 async function cargarConfiguracionGlobal() {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
@@ -78,11 +145,14 @@ async function cargarConfiguracionGlobal() {
         const res = await fetch(`${WEB_APP_URL}?sheet=Configuracion`);
         const config = await res.json();
         if (Array.isArray(config)) {
-            const filaMonto = config.find(c => limpiarTexto(c.clave) === 'MONTO_MINIMO_SELLO');
-            if (filaMonto && !isNaN(parseFloat(filaMonto.valor))) MONTO_MINIMO_SELLO = parseFloat(filaMonto.valor);
-
             const filaPremio = config.find(c => limpiarTexto(c.clave) === 'PREMIO_LEALTAD');
             if (filaPremio && filaPremio.valor) PREMIO_LEALTAD = filaPremio.valor.trim();
+
+            const filaMeta = config.find(c => limpiarTexto(c.clave) === 'PUNTOS_META_PREMIO');
+            if (filaMeta && !isNaN(parseInt(filaMeta.valor, 10))) PUNTOS_META_PREMIO = parseInt(filaMeta.valor, 10);
+
+            const filaEscala = config.find(c => limpiarTexto(c.clave) === 'ESCALA_PUNTOS_COMPRA');
+            if (filaEscala && filaEscala.valor) ESCALA_PUNTOS_COMPRA = filaEscala.valor.trim();
 
             const filaMp = config.find(c => limpiarTexto(c.clave) === 'LINK_MERCADOPAGO');
             if (filaMp && filaMp.valor) LINK_MERCADOPAGO = filaMp.valor.trim();
@@ -92,10 +162,36 @@ async function cargarConfiguracionGlobal() {
 
             const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
             if (filaBanco && filaBanco.valor) BANCO_TITULAR = filaBanco.valor.trim();
+
+            const fFb = config.find(c => limpiarTexto(c.clave) === 'LINK_FACEBOOK');
+            if (fFb && fFb.valor) LINK_FACEBOOK = fFb.valor.trim();
+
+            const fIg = config.find(c => limpiarTexto(c.clave) === 'LINK_INSTAGRAM');
+            if (fIg && fIg.valor) LINK_INSTAGRAM = fIg.valor.trim();
+
+            const fTk = config.find(c => limpiarTexto(c.clave) === 'LINK_TIKTOK');
+            if (fTk && fTk.valor) LINK_TIKTOK = fTk.valor.trim();
+
+            const fWa = config.find(c => limpiarTexto(c.clave) === 'LINK_WHATSAPP');
+            if (fWa && fWa.valor) LINK_WHATSAPP_DIRECTO = fWa.valor.trim();
+
+            renderizarRedesSocialesFooter();
         }
     } catch (e) {
-        console.warn("Configuración por defecto cargada.");
+        console.warn("Configuración usando valores locales.");
     }
+}
+
+function renderizarRedesSocialesFooter() {
+    const footerContainer = document.getElementById('footerSocialIcons');
+    if (!footerContainer) return;
+
+    footerContainer.innerHTML = `
+        ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="social-btn facebook" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
+        ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="social-btn instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></a>` : ''}
+        ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" class="social-btn tiktok" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>` : ''}
+        ${LINK_WHATSAPP_DIRECTO ? `<a href="${LINK_WHATSAPP_DIRECTO}" target="_blank" class="social-btn whatsapp" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+    `;
 }
 
 async function cargarMenuDesdeWebApp() {
@@ -123,8 +219,8 @@ async function cargarMenuDesdeWebApp() {
         console.error("Error al cargar menú:", error);
         document.getElementById('menu-sections-container').innerHTML = `
             <div style="text-align:center; padding:50px 20px;">
-                <p style="color:#D32F2F; font-weight:700; font-size:1.1rem;">⚠️ No se pudo conectar con el menú en la nube.</p>
-                <small style="color:#666;">Verifica la URL de tu Google Apps Script.</small>
+                <p style="color:#D32F2F; font-weight:700; font-size:1.1rem;">⚠️ No se pudo cargar el menú en la nube.</p>
+                <small style="color:#666;">Verifica la conexión con tu Google Apps Script.</small>
             </div>
         `;
     }
@@ -706,7 +802,7 @@ function cerrarUpsellYAbrirCheckout() {
 }
 
 // ======================================================
-// 4. CONSULTA DE SELLOS DE LEALTAD
+// 4. CONSULTA PÚBLICA DE PUNTOS CUATRIMESTRALES
 // ======================================================
 function abrirModalConsultaLealtad() {
     document.getElementById('loyaltyQueryResult').style.display = 'none';
@@ -729,27 +825,35 @@ async function consultarSellosEnSheets() {
         const res = await fetch(`${WEB_APP_URL}?sheet=Clientes_Lealtad&action=search&telefono=${tel}`);
         const data = await res.json();
         
-        let sellos = 0;
+        let puntos = 0;
         let nombre = 'Cliente';
+        const infoCuatri = obtenerInfoCuatrimestreActual();
 
         if (Array.isArray(data) && data.length > 0) {
-            sellos = parseInt(data[0].sellos_acumulados || '0', 10);
-            nombre = data[0].nombre || 'Cliente';
+            const c = data[0];
+            const cuatriCliente = String(c.cuatrimestre_vigente || '').trim();
+            
+            if (cuatriCliente === infoCuatri.id) {
+                puntos = parseInt(c.puntos_acumulados || '0', 10);
+            } else {
+                puntos = 0;
+            }
+            nombre = c.nombre || 'Cliente';
         }
 
         const container = document.getElementById('queryStampsContainer');
-        container.innerHTML = '';
-        for (let i = 1; i <= 8; i++) {
-            const slot = document.createElement('div');
-            slot.className = `stamp-slot ${i <= sellos ? 'stamped' : ''}`;
-            slot.innerHTML = i <= sellos ? '<i class="fa-solid fa-stamp"></i>' : `${i}`;
-            container.appendChild(slot);
-        }
+        container.innerHTML = `
+            <div style="text-align:center; padding:10px 0; width:100%;">
+                <div style="font-size:2.4rem; font-weight:800; color:#F59E0B;">⭐ ${puntos} <span style="font-size:1.1rem; color:#6B7280;">/ ${PUNTOS_META_PREMIO} pts</span></div>
+                <small style="color:#4B5563; display:block; margin-top:4px;">Periodo: <strong>${infoCuatri.nombre}</strong> (Vence: ${infoCuatri.vence})</small>
+            </div>
+        `;
 
-        document.getElementById('queryProgressBar').style.width = `${(sellos / 8) * 100}%`;
-        document.getElementById('queryProgressText').textContent = sellos === 8 
-            ? `🎉 ¡Felicidades ${nombre}! Tienes 8 sellos. Tu recompensa disponible: ${PREMIO_LEALTAD}.` 
-            : `Hola ${nombre}, llevas ${sellos} de 8 sellos acumulados.`;
+        const porcentaje = Math.min(100, Math.round((puntos / PUNTOS_META_PREMIO) * 100));
+        document.getElementById('queryProgressBar').style.width = `${porcentaje}%`;
+        document.getElementById('queryProgressText').textContent = puntos >= PUNTOS_META_PREMIO 
+            ? `🎉 ¡Felicidades ${nombre}! Alcanzaste la meta. Recompensa disponible: ${PREMIO_LEALTAD}.` 
+            : `Hola ${nombre}, llevas ${puntos} de ${PUNTOS_META_PREMIO} puntos acumulados en este cuatrimestre.`;
 
         document.getElementById('loyaltyQueryResult').style.display = 'block';
     } catch (e) {
@@ -758,7 +862,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT Y TURNOS GLOBALES
+// 5. CHECKOUT Y PUNTOS AUTOMÁTICOS
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -800,21 +904,19 @@ function abrirModalCheckout() {
     const phoneInput = document.getElementById('clientPhoneInput');
     const phoneHint = document.getElementById('loyaltyPhoneHint');
 
-    if (total >= MONTO_MINIMO_SELLO) {
+    const puntosEstimados = calcularPuntosPorMonto(total);
+    const infoCuatri = obtenerInfoCuatrimestreActual();
+
+    if (puntosEstimados > 0) {
         loyaltyBox.style.display = 'block';
         loyaltyBox.innerHTML = `
-            <strong style="color:#854D0E;">⭐ ¡Felicidades! Tu compra califica para 1 Sello de Lealtad (Mínimo: $${MONTO_MINIMO_SELLO.toFixed(2)})</strong><br>
-            <small style="color:#A16207;">Ingresa tu celular abajo para registrar tu sello en Google Sheets (8 sellos = ${PREMIO_LEALTAD}).</small>
+            <strong style="color:#854D0E;">⭐ ¡Esta compra suma +${puntosEstimados} PUNTOS de Lealtad!</strong><br>
+            <small style="color:#A16207;">Válidos para el <strong>${infoCuatri.nombre}</strong> (Meta: ${PUNTOS_META_PREMIO} pts = ${PREMIO_LEALTAD}).</small>
         `;
         phoneInput.required = true;
-        phoneHint.textContent = "* Requerido para acumular tu sello en este pedido.";
+        phoneHint.textContent = "* Ingresa tu celular a 10 dígitos para abonar tus puntos.";
     } else {
-        const falta = (MONTO_MINIMO_SELLO - total).toFixed(2);
-        loyaltyBox.style.display = 'block';
-        loyaltyBox.innerHTML = `
-            <strong style="color:#4B5563;">⭐ Programa de Lealtad (Mínimo $${MONTO_MINIMO_SELLO.toFixed(2)})</strong><br>
-            <small style="color:#6B7280;">Te faltan <strong>$${falta}</strong> en tu orden para ganar 1 sello de fidelidad hoy.</small>
-        `;
+        loyaltyBox.style.display = 'none';
         phoneInput.required = false;
         phoneHint.textContent = "(Opcional para consumo en tienda)";
     }
@@ -894,9 +996,10 @@ async function procesarGeneracionTurno() {
     const tipoPedido = document.querySelector('input[name="orderType"]:checked').value;
     const telefonoCliente = document.getElementById('clientPhoneInput').value.trim().replace(/\D/g, '');
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
+    const puntosGanados = calcularPuntosPorMonto(total);
 
-    if (total >= MONTO_MINIMO_SELLO && (!telefonoCliente || telefonoCliente.length < 10)) {
-        alert("Para acumular tu sello de lealtad, por favor ingresa tu celular a 10 dígitos.");
+    if (puntosGanados > 0 && (!telefonoCliente || telefonoCliente.length < 10)) {
+        alert("Para acumular tus puntos de lealtad, por favor ingresa tu celular a 10 dígitos.");
         return;
     }
 
@@ -906,9 +1009,9 @@ async function procesarGeneracionTurno() {
 
     const numeroTurno = await obtenerSiguienteTurnoGlobal(tipoPedido);
 
-    let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
-    if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
-        infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
+    let infoPuntos = { puntosGanados: 0, puntosTotales: 0, premioDesbloqueado: false };
+    if (puntosGanados > 0 && telefonoCliente.length === 10) {
+        infoPuntos = await procesarPuntosEnGoogleSheets(telefonoCliente, nombreCliente, puntosGanados);
     }
 
     ultimoPedidoGenerado = {
@@ -921,7 +1024,7 @@ async function procesarGeneracionTurno() {
         total: total,
         estado: 'cola',
         pagado: tipoPedido === 'tienda',
-        lealtad: infoLealtad,
+        puntos: infoPuntos,
         fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         fecha_completa: new Date().toISOString()
     };
@@ -939,15 +1042,19 @@ async function procesarGeneracionTurno() {
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
-async function procesarSelloEnGoogleSheets(telefono, nombre) {
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
+async function procesarPuntosEnGoogleSheets(telefono, nombre, puntosGanados) {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
+        return { puntosGanados: puntosGanados, puntosTotales: puntosGanados, premioDesbloqueado: false };
+    }
 
     try {
         const payload = {
-            action: 'procesar_sello',
+            action: 'procesar_puntos',
             sheet: 'Clientes_Lealtad',
             telefono: telefono,
-            nombre: nombre
+            nombre: nombre,
+            puntos_ganados: puntosGanados,
+            meta_puntos: PUNTOS_META_PREMIO
         };
 
         const res = await fetch(WEB_APP_URL, {
@@ -956,7 +1063,7 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
         });
         return await res.json();
     } catch (err) {
-        return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
+        return { puntosGanados: puntosGanados, puntosTotales: puntosGanados, premioDesbloqueado: false };
     }
 }
 
@@ -972,6 +1079,7 @@ async function respaldarVentaEnGoogleSheets(pedido) {
                 telefono: pedido.telefono || '',
                 tipo: pedido.tipo,
                 total: pedido.total,
+                pagado: pedido.pagado ? 'SI' : 'NO',
                 fecha: pedido.fecha_completa,
                 estado: 'cola',
                 items_json: JSON.stringify(pedido.items),
@@ -1002,19 +1110,19 @@ function mostrarBoletoTurno(pedido) {
     document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
     document.getElementById('ticketClientName').textContent = `Cliente: ${pedido.cliente}`;
 
-    if (pedido.lealtad && pedido.lealtad.aplicaSello) {
+    if (pedido.puntos && pedido.puntos.puntosGanados > 0) {
         loyaltyBanner.style.display = 'block';
-        if (pedido.lealtad.regaloDesbloqueado) {
+        if (pedido.puntos.premioDesbloqueado) {
             loyaltyBanner.innerHTML = `
-                <div class="reward-unlocked-card">
-                    <h4>🎁 ¡RECOMPENSA DE 8 SELLOS DESBLOQUEADA!</h4>
-                    <p>¡Felicidades! Has completado tu tarjeta. <strong>Reclama en mostrador: ${PREMIO_LEALTAD}</strong>.</p>
+                <div class="reward-unlocked-card" style="background:#DCFCE7; border:1px solid #86EFAC; border-radius:10px; padding:10px; color:#14532D; margin-bottom:10px;">
+                    <h4 style="margin:0; font-size:0.95rem;">🎁 ¡RECOMPENSA DE PUNTOS DESBLOQUEADA!</h4>
+                    <p style="margin:4px 0 0 0; font-size:0.8rem;">¡Felicidades! Alcanzaste los ${PUNTOS_META_PREMIO} puntos. <strong>Reclama en mostrador: ${PREMIO_LEALTAD}</strong>.</p>
                 </div>
             `;
         } else {
             loyaltyBanner.innerHTML = `
-                <div style="background:#FEF9C3; border:1px solid #FDE047; border-radius:10px; padding:8px; font-size:0.8rem; color:#854D0E;">
-                    ⭐ <strong>¡Sumaste 1 sello!</strong> Llevas <strong>${pedido.lealtad.sellosActuales} de 8 sellos</strong> acumulados.
+                <div style="background:#FEF9C3; border:1px solid #FDE047; border-radius:10px; padding:8px; font-size:0.82rem; color:#854D0E; margin-bottom:10px;">
+                    ⭐ <strong>¡Ganaste +${pedido.puntos.puntosGanados} Puntos!</strong> Llevas <strong>${pedido.puntos.puntosTotales} de ${PUNTOS_META_PREMIO} puntos</strong> en este cuatrimestre.
                 </div>
             `;
         }
@@ -1129,11 +1237,11 @@ function enviarComprobanteWhatsApp() {
     mensaje += `\n━━━━━━━━━━━━━━━━━━━━━\n`;
     mensaje += `💰 *TOTAL A PAGAR:* *$${p.total.toFixed(2)}*\n`;
 
-    if (p.lealtad && p.lealtad.aplicaSello) {
-        if (p.lealtad.regaloDesbloqueado) {
-            mensaje += `🎁 *¡RECOMPENSA GANADA!:* 8/8 sellos acumulados (Premio: ${PREMIO_LEALTAD})\n`;
+    if (p.puntos && p.puntos.puntosGanados > 0) {
+        if (p.puntos.premioDesbloqueado) {
+            mensaje += `🎁 *¡RECOMPENSA DE PUNTOS GANADA!:* Meta alcanzada (${PREMIO_LEALTAD})\n`;
         } else {
-            mensaje += `⭐ *SELLOS DE FIDELIDAD:* Llevo ${p.lealtad.sellosActuales}/8 sellos\n`;
+            mensaje += `⭐ *PUNTOS ACUMULADOS:* +${p.puntos.puntosGanados} pts (Total: ${p.puntos.puntosTotales}/${PUNTOS_META_PREMIO})\n`;
         }
     }
 
