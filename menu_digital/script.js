@@ -738,19 +738,18 @@ function actualizarBarraPildoraCarrito() {
     if (!barEl) return;
 
     if (totalCount === 0) {
-        barEl.style.display = 'none';
+        barEl.classList.remove('active');
         return;
     }
 
-    barEl.style.display = 'flex';
+    barEl.classList.add('active');
     if (badgeEl) badgeEl.textContent = totalCount;
     if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
 
-    // Renderizado horizontal de mini chips con nombres de botanas
     if (chipsContainer) {
-        chipsContainer.innerHTML = carrito.slice(-3).map(item => `
+        chipsContainer.innerHTML = carrito.slice(-2).map(item => `
             <span class="mini-snack-chip">
-                🍿 ${item.nombre.length > 14 ? item.nombre.substring(0, 12) + '...' : item.nombre}
+                🍿 ${item.nombre.length > 12 ? item.nombre.substring(0, 10) + '..' : item.nombre}
             </span>
         `).join('');
     }
