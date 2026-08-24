@@ -103,6 +103,10 @@ async function consultarPedidosNube() {
             const detalleVal = obtenerCampoFlexible(fila, ['detalle', 'descripcion', 'productos']) || '';
             const itemsJsonVal = obtenerCampoFlexible(fila, ['items_json', 'items', 'json']);
 
+            // Procesar estado de pago (SI / NO / true / false / pagado)
+            const pagadoRaw = String(obtenerCampoFlexible(fila, ['pagado', 'pago', 'status_pago']) || '').toLowerCase().trim();
+            const estaPagado = (tipoVal === 'tienda') || (pagadoRaw === 'si' || pagadoRaw === 'true' || pagadoRaw === '1' || pagadoRaw === 'pagado');
+
             let items = [];
             try {
                 if (itemsJsonVal && String(itemsJsonVal).trim().startsWith('[')) {
@@ -123,6 +127,7 @@ async function consultarPedidosNube() {
                 telefono: telefonoVal,
                 tipo: tipoVal,
                 total: totalVal,
+                pagado: estaPagado,
                 fecha_completa: fechaVal,
                 estado: estadoRaw,
                 items: items
@@ -151,7 +156,7 @@ async function consultarPedidosNube() {
 }
 
 // ======================================================
-// 2. RENDERIZADO KANBAN CON BOTÓN DE ELIMINAR (TIENDA & RECOGER)
+// 2. RENDERIZADO KANBAN (CON BADGE DE PAGO INTERACTIVO)
 // ======================================================
 function renderizarTableroKanban() {
     const contCola = document.getElementById('containerCola');
@@ -223,13 +228,27 @@ function crearTarjetaHTML(pedido) {
         `;
     }
 
+    // Botón / Badge de Estado de Pago
+    const botonPagoHTML = pedido.pagado ? `
+        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', false)">
+            <i class="fa-solid fa-circle-check"></i> Pagado
+        </button>
+    ` : `
+        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', true)">
+            <i class="fa-solid fa-clock-rotate-left"></i> Pago Pendiente
+        </button>
+    `;
+
     return `
         <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1px solid #334155; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
-                <span style="background:${esRecoger ? '#EA580C' : '#0284C7'}; color:#FFF; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;">
-                    ${esRecoger ? '🛍️ RECOGER' : '🏪 EN TIENDA'}
-                </span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="background:${esRecoger ? '#EA580C' : '#0284C7'}; color:#FFF; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;">
+                        ${esRecoger ? '🛍️ RECOGER' : '🏪 EN TIENDA'}
+                    </span>
+                    ${botonPagoHTML}
+                </div>
                 <span class="kds-timer-badge" style="font-weight:700; font-size:0.85rem;">
                     <i class="fa-solid fa-clock"></i> ${semaforo.tiempoFormateado}
                 </span>
@@ -253,7 +272,35 @@ function crearTarjetaHTML(pedido) {
     `;
 }
 
-// 2. Eliminar Pedido en Google Sheets
+// Alternar Estado de Pago (Pagado <-> Pago Pendiente)
+async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
+    const turnoReal = decodeURIComponent(turnoEncoded);
+
+    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
+    if (index !== -1) {
+        pedidosGlobalesSheets[index].pagado = nuevoEstadoPago;
+        renderizarTableroKanban();
+    }
+
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
+
+    try {
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'actualizar_pago',
+                sheet: 'Ventas_Historicas',
+                turno: turnoReal,
+                pagado: nuevoEstadoPago ? 'SI' : 'NO'
+            })
+        });
+        console.log(`💵 Estado de pago del turno ${turnoReal} actualizado a: ${nuevoEstadoPago ? 'SI' : 'NO'}`);
+    } catch (e) {
+        console.warn("Error actualizando pago en Sheets:", e);
+    }
+}
+
+// Eliminar Pedido en Google Sheets
 async function eliminarPedidoIndividual(turnoEncoded) {
     const turnoReal = decodeURIComponent(turnoEncoded);
     if (!confirm(`¿Deseas eliminar el pedido ${turnoReal}?`)) return;
@@ -265,7 +312,7 @@ async function eliminarPedidoIndividual(turnoEncoded) {
         actualizarMetricasHeader();
     }
 
-    if (!WEB_APP_URL) return;
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
 
     try {
         await fetch(WEB_APP_URL, {
@@ -282,7 +329,7 @@ async function eliminarPedidoIndividual(turnoEncoded) {
     }
 }
 
-// 3. Reiniciar el Contador de Turnos
+// Reiniciar el Contador de Turnos
 function reiniciarContadorTurnos() {
     if (!confirm("¿Deseas reiniciar los turnos? El siguiente pedido volverá a comenzar en #T-01 y #R-01.")) return;
     localStorage.removeItem('turno_T_consecutivo');
@@ -297,7 +344,6 @@ function iniciarPreparacionPedido(turnoEscapado, tipo, telefono) {
     const turnoReal = decodeURIComponent(turnoEscapado);
     const telLimpio = String(telefono || '').replace(/\D/g, '');
 
-    // Si es para recoger y tiene teléfono registrado, abrimos el modal
     if (tipo === 'recoger' && telLimpio.length >= 10) {
         pedidoTemporalParaTiempo = { turnoEscapado: turnoEscapado, telefono: telLimpio };
         
@@ -307,12 +353,11 @@ function iniciarPreparacionPedido(turnoEscapado, tipo, telefono) {
 
         if (modal) {
             modal.classList.add('active');
-            modal.style.display = 'flex'; // Garantizar visibilidad
+            modal.style.display = 'flex';
             return;
         }
     }
     
-    // Si no tiene teléfono o no está el modal, pasa directo a preparando
     cambiarEstadoPedidoNube(turnoEscapado, 'preparando');
 }
 
