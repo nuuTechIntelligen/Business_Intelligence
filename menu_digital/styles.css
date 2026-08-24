@@ -58,7 +58,7 @@ body {
     box-shadow: 0 4px 18px rgba(233, 30, 99, 0.35);
 }
 
-/* BOTÓN DE SELLOS EN LA ESQUINA SUPERIOR DERECHA */
+/* BOTÓN DE PUNTOS EN LA ESQUINA SUPERIOR DERECHA */
 .btn-loyalty-corner {
     position: absolute;
     top: 10px;
@@ -197,7 +197,6 @@ body {
     transform: scale(1.03);
 }
 
-/* OVERLAY: OCULTO EN MÓVIL POR DEFECTO PARA NO AMONTONAR */
 .promo-slide-overlay {
     position: absolute;
     bottom: 0;
@@ -214,7 +213,7 @@ body {
 }
 
 .promo-slide-info {
-    display: none; /* Se oculta en móviles para dejar la imagen limpia */
+    display: none;
 }
 
 .promo-slide-info h4 {
@@ -233,7 +232,6 @@ body {
     line-height: 1;
 }
 
-/* BOTÓN DE ACCIÓN DEL BANNER */
 .btn-promo-action {
     background: var(--primary-yellow);
     color: #000;
@@ -251,13 +249,12 @@ body {
     flex-shrink: 0;
     box-shadow: 0 3px 8px rgba(0,0,0,0.35);
     transition: transform 0.15s ease;
-    margin-left: auto; /* Se alinea a la derecha en móviles */
+    margin-left: auto;
 }
 .btn-promo-action:hover {
     transform: scale(1.05);
 }
 
-/* FLECHAS */
 .slider-arrow {
     position: absolute;
     top: 50%;
@@ -279,7 +276,6 @@ body {
 .slider-arrow.prev { left: 6px; }
 .slider-arrow.next { right: 6px; }
 
-/* DOTS */
 .promo-dots {
     display: flex;
     justify-content: center;
@@ -324,7 +320,7 @@ body {
 .section-title { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; display: inline-block; filter: drop-shadow(1px 1px 0px var(--logo-dark-border)); }
 
 /* ====================================================== */
-/* 4. SECCIONES Y CUADRÍCULA DE PRODUCTOS                */
+/* 4. SECCIONES Y CUADRÍCULA DE PRODUCTOS                 */
 /* ====================================================== */
 .main-content { padding-top: 16px; }
 .menu-section { margin-bottom: 28px; scroll-margin-top: 65px; }
@@ -433,7 +429,7 @@ body {
 .btn-add-upsell { background: var(--primary-yellow); border: none; padding: 5px 10px; border-radius: 16px; font-family: var(--font-heading); font-size: 0.72rem; font-weight: 700; cursor: pointer; }
 
 /* ====================================================== */
-/* 6. LEALTAD Y SELLOS                                    */
+/* 6. LEALTAD Y PUNTOS                                    */
 /* ====================================================== */
 .loyalty-checkout-box {
     background: #FEF9C3; border: 1.2px dashed #FACC15; border-radius: 10px; padding: 8px 10px;
@@ -537,12 +533,35 @@ body {
 .btn-secondary { background: #F3F4F6; color: #333; border: 1px solid #DDD; padding: 8px; border-radius: 25px; font-family: var(--font-heading); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
 
 /* ====================================================== */
-/* 9. FOOTER Y BOTONES FLOTANTES                          */
+/* 9. FOOTER, REDES SOCIALES Y BOTONES FLOTANTES          */
 /* ====================================================== */
-.footer { background: var(--dark-bg); color: white; padding: 20px 12px; margin-top: 30px; }
+.footer { background: var(--dark-bg); color: white; padding: 25px 12px; margin-top: 30px; }
 .footer h3 { font-family: var(--font-heading); color: var(--primary-yellow); margin-bottom: 4px; font-size: 1rem; }
 .footer p { font-size: 0.75rem; color: #BBB; }
 .copyright { margin-top: 10px; font-size: 0.68rem; color: #777; }
+
+/* Enlaces de Redes Sociales en Footer */
+.footer-social-links {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 14px 0;
+}
+.footer-social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 1.15rem;
+    transition: transform 0.2s ease;
+}
+.footer-social-links a:hover {
+    transform: scale(1.1);
+}
 
 .cart-floating-bar {
     position: fixed; bottom: 0; left: 0; width: 100%; background: #FFFFFF;
@@ -577,7 +596,6 @@ body {
     .hero-logo-img { max-width: 320px; }
     .btn-loyalty-corner { top: 16px; right: 20px; padding: 7px 16px; font-size: 0.85rem; }
     
-    /* EN PC SE MUESTRA EL TÍTULO DE PROMO Y DESCRIPCIÓN */
     .promo-gallery-container { max-width: 680px; padding: 10px; }
     .promo-banner-image { aspect-ratio: 2.5 / 1; }
     .promo-slide-info { display: block; }
