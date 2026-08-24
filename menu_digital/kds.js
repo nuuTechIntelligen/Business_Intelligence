@@ -1,10 +1,12 @@
 // ======================================================
-// KDS & FINANZAS LA ENGORDADERA (GOOGLE APPS SCRIPT WEB APP)
+// KDS & FINANZAS & POS MOSTRADOR LA ENGORDADERA
 // ======================================================
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 let INTERVALO_SEGUNDOS = 4;
 
 let pedidosGlobalesSheets = [];
+let productosMenuPOS = [];
+let carritoPOS = [];
 let filtroEstacionActual = 'TODAS';
 let turnosConocidosEnCola = new Set();
 let primerCargaRealizada = false;
@@ -37,16 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
     crearBarraDiagnostico();
     iniciarReloj();
     
-    // Desbloquear Audio al primer toque en cualquier parte del KDS
     document.addEventListener('click', desbloquearAudioNativo, { once: true });
     document.addEventListener('touchstart', desbloquearAudioNativo, { once: true });
 
     iniciarKDS();
+    cargarProductosParaPOS();
     setInterval(consultarPedidosNube, INTERVALO_SEGUNDOS * 1000);
     setInterval(actualizarSemaforosTiempo, 1000);
 });
 
-// Síntesis de Sonido POS Nativo (Doble Tono Restaurantero)
 function desbloquearAudioNativo() {
     try {
         if (!audioContext) {
@@ -67,7 +68,6 @@ function emitirCampanaNuevoPedido() {
 
         const ahora = audioContext.currentTime;
 
-        // Tono 1 (880 Hz)
         const osc1 = audioContext.createOscillator();
         const gain1 = audioContext.createGain();
         osc1.type = 'triangle';
@@ -79,7 +79,6 @@ function emitirCampanaNuevoPedido() {
         osc1.start(ahora);
         osc1.stop(ahora + 0.35);
 
-        // Tono 2 (1174.66 Hz)
         const osc2 = audioContext.createOscillator();
         const gain2 = audioContext.createGain();
         osc2.type = 'triangle';
@@ -95,7 +94,6 @@ function emitirCampanaNuevoPedido() {
     }
 }
 
-// 1. Etiqueta de Conexión en Pantalla
 function crearBarraDiagnostico() {
     if (document.getElementById('kdsDebugBar')) return;
     const bar = document.createElement('div');
@@ -184,7 +182,6 @@ async function consultarPedidosNube() {
             };
         });
 
-        // Detonar sonido de nuevo pedido
         const turnosActualesCola = pedidosGlobalesSheets.filter(p => p.estado === 'cola').map(p => p.turno);
         
         if (primerCargaRealizada) {
@@ -221,9 +218,6 @@ function destellarColumnaCola() {
     }, 1800);
 }
 
-// ======================================================
-// 2. RENDERIZADO KANBAN CON BOTONES INDEPENDIENTES
-// ======================================================
 function renderizarTableroKanban() {
     const contCola = document.getElementById('containerCola');
     const contPrep = document.getElementById('containerPrep');
@@ -360,7 +354,6 @@ function crearTarjetaHTML(pedido) {
     `;
 }
 
-// Alternar Estado de Pago con persistencia
 async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
     const turnoReal = decodeURIComponent(turnoEncoded);
 
@@ -533,25 +526,207 @@ function actualizarSemaforosTiempo() {
     });
 }
 
+// ======================================================
+// 3. SISTEMA POS MOSTRADOR RÁPIDO
+// ======================================================
+async function cargarProductosParaPOS() {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
+    try {
+        const res = await fetch(`${WEB_APP_URL}?sheet=Productos`);
+        const prods = await res.json();
+        if (Array.isArray(prods)) {
+            productosMenuPOS = prods;
+            renderizarBotoneraPOS();
+        }
+    } catch (e) {
+        console.warn("No se cargó menú para POS.");
+    }
+}
+
+function renderizarBotoneraPOS() {
+    const grid = document.getElementById('posProductsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    productosMenuPOS.forEach(p => {
+        const precioNum = parseFloat(p.precio || 0);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.style.cssText = 'background: #0F172A; border: 1px solid #334155; border-radius: 12px; padding: 12px; color: #FFF; text-align: left; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 80px; transition: transform 0.1s ease;';
+        btn.innerHTML = `
+            <strong style="font-size: 0.9rem; color: #F8FAFC; display: block; margin-bottom: 4px;">${p.nombre}</strong>
+            <span style="color: #F59E0B; font-weight: 700; font-size: 1rem;">$${precioNum.toFixed(2)}</span>
+        `;
+        btn.onclick = () => agregarItemPOS(p.nombre, precioNum);
+        grid.appendChild(btn);
+    });
+}
+
+function agregarItemPOS(nombre, precio) {
+    carritoPOS.push({ nombre, precio: parseFloat(precio) || 0 });
+    renderizarCarritoPOS();
+}
+
+function agregarItemManualPOS() {
+    const concept = document.getElementById('posCustomConcept').value.trim() || 'Botana Libre';
+    const price = parseFloat(document.getElementById('posCustomPrice').value) || 0;
+
+    if (price <= 0) {
+        alert("Ingresa un monto válido");
+        return;
+    }
+
+    carritoPOS.push({ nombre: concept, precio: price });
+    document.getElementById('posCustomConcept').value = '';
+    document.getElementById('posCustomPrice').value = '';
+    renderizarCarritoPOS();
+}
+
+function renderizarCarritoPOS() {
+    const list = document.getElementById('posCartItemsList');
+    const totalEl = document.getElementById('posTotalCobro');
+    if (!list || !totalEl) return;
+
+    if (carritoPOS.length === 0) {
+        list.innerHTML = '<p style="color: #64748B; text-align: center; margin: 30px 0;">No hay productos seleccionados</p>';
+        totalEl.textContent = '$0.00';
+        return;
+    }
+
+    let total = 0;
+    list.innerHTML = carritoPOS.map((item, idx) => {
+        total += item.precio;
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #334155;">
+                <span style="color: #F8FAFC; font-size: 0.9rem;">${item.nombre}</span>
+                <div>
+                    <strong style="color: #F59E0B; margin-right: 8px;">$${item.precio.toFixed(2)}</strong>
+                    <button type="button" onclick="eliminarItemPOS(${idx})" style="background: transparent; color: #EF4444; border: none; font-size: 1.1rem; cursor: pointer;">&times;</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    totalEl.textContent = `$${total.toFixed(2)}`;
+}
+
+function eliminarItemPOS(index) {
+    carritoPOS.splice(index, 1);
+    renderizarCarritoPOS();
+}
+
+function vaciarCarritoPOS() {
+    carritoPOS = [];
+    document.getElementById('posClientInput').value = '';
+    renderizarCarritoPOS();
+}
+
+async function registrarVentaManualPOS() {
+    if (carritoPOS.length === 0) {
+        alert("Agrega al menos un producto para cobrar.");
+        return;
+    }
+
+    const clienteInput = document.getElementById('posClientInput').value.trim() || 'Cliente Mostrador';
+    const despacharYa = document.getElementById('posMarkReadyDirectly').checked;
+    const total = carritoPOS.reduce((sum, it) => sum + it.precio, 0);
+
+    let turnoManual = '#T-' + Math.floor(Math.random() * 90 + 10);
+    if (pedidosGlobalesSheets.length > 0) {
+        let max = 0;
+        pedidosGlobalesSheets.forEach(p => {
+            const m = String(p.turno || '').match(/^#?T-(\d+)/i);
+            if (m && parseInt(m[1], 10) > max) max = parseInt(m[1], 10);
+        });
+        turnoManual = `#T-${max + 1 < 10 ? '0' + (max + 1) : max + 1}`;
+    }
+
+    const puntosGanados = Math.max(1, Math.floor(total * 0.1));
+
+    if (WEB_APP_URL && clienteInput.length >= 3) {
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'procesar_puntos',
+                    sheet: 'Clientes_Lealtad',
+                    telefono: clienteInput.replace(/\D/g, '') || clienteInput,
+                    nombre: clienteInput,
+                    puntos_ganados: puntosGanados,
+                    meta_puntos: 100
+                })
+            });
+        } catch (e) {}
+    }
+
+    const payloadVenta = {
+        action: 'insertar_venta',
+        sheet: 'Ventas_Historicas',
+        data: {
+            turno: turnoManual,
+            cliente: clienteInput,
+            telefono: clienteInput,
+            tipo: 'tienda',
+            total: total,
+            pagado: 'SI',
+            fecha: new Date().toISOString(),
+            estado: despacharYa ? 'listo' : 'cola',
+            items_json: JSON.stringify(carritoPOS),
+            detalle: carritoPOS.map(i => i.nombre + ' ($' + i.precio + ')').join(' | ')
+        }
+    };
+
+    if (WEB_APP_URL) {
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(payloadVenta)
+            });
+        } catch (e) {}
+    }
+
+    alert(`✅ ¡Venta cobrada con éxito!\nTurno: ${turnoManual}\nTotal: $${total.toFixed(2)}\nPuntos sumados: +${puntosGanados} pts`);
+    vaciarCarritoPOS();
+    await consultarPedidosNube();
+    mostrarVista(despacharYa ? 'pos' : 'kds');
+}
+
 function mostrarVista(vista) {
     const vistaKDS = document.getElementById('vistaKDS');
+    const vistaPOS = document.getElementById('vistaPOS');
     const vistaFin = document.getElementById('vistaFinanzas');
+    
     const btnKDS = document.getElementById('tabBtnKDS');
+    const btnPOS = document.getElementById('tabBtnPOS');
     const btnFin = document.getElementById('tabBtnFinanzas');
+    
     const filters = document.getElementById('stationFiltersHeader');
+    const metrics = document.getElementById('kdsMetricsHeader');
+
+    if (vistaKDS) vistaKDS.style.display = 'none';
+    if (vistaPOS) vistaPOS.style.display = 'none';
+    if (vistaFin) vistaFin.style.display = 'none';
+
+    btnKDS.classList.remove('active');
+    btnPOS.classList.remove('active');
+    btnFin.classList.remove('active');
 
     if (vista === 'kds') {
         vistaKDS.style.display = 'grid';
-        vistaFin.style.display = 'none';
         btnKDS.classList.add('active');
-        btnFin.classList.remove('active');
         if (filters) filters.style.display = 'flex';
+        if (metrics) metrics.style.display = 'flex';
+    } else if (vista === 'pos') {
+        vistaPOS.style.display = 'block';
+        btnPOS.classList.add('active');
+        if (filters) filters.style.display = 'none';
+        if (metrics) metrics.style.display = 'none';
+        renderizarCarritoPOS();
     } else {
-        vistaKDS.style.display = 'none';
         vistaFin.style.display = 'block';
         btnFin.classList.add('active');
-        btnKDS.classList.remove('active');
         if (filters) filters.style.display = 'none';
+        if (metrics) metrics.style.display = 'flex';
         actualizarModuloFinanzas();
     }
 }
