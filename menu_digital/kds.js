@@ -1,5 +1,5 @@
 // ======================================================
-// KDS & FINANZAS LA ENGORDADERA (NUBE GOOGLE SHEETS)
+// KDS & FINANZAS LA ENGORDADERA (NUBE GOOGLE SHEETS + ANALÍTICA)
 // ======================================================
 const SHEETDB_INPUT = "sq3j6nb77cl27"; 
 const INTERVALO_SEGUNDOS = 4;
@@ -16,6 +16,10 @@ let filtroEstacionActual = 'TODAS';
 let ultimoTurnoRegistrado = '';
 let audioAlerta = null;
 let pedidoTemporalParaTiempo = null;
+
+// Instancias de Chart.js
+let chartVentasDiasInstance = null;
+let chartTopProductosInstance = null;
 
 function normalizarTextoClave(txt) {
     if (!txt) return '';
@@ -126,14 +130,19 @@ async function consultarPedidosNube() {
 
         renderizarTableroKanban();
         actualizarMetricasHeader();
-        actualizarModuloFinanzas();
+
+        // Actualizar analítica si la pestaña de finanzas está activa
+        const vistaFin = document.getElementById('vistaFinanzas');
+        if (vistaFin && vistaFin.style.display !== 'none') {
+            actualizarModuloFinanzas();
+        }
     } catch (error) {
         console.error("Error al consultar Sheets:", error);
     }
 }
 
 // ======================================================
-// RENDERIZADO DE LAS 3 COLUMNAS KANBAN
+// RENDERIZADO KANBAN
 // ======================================================
 function renderizarTableroKanban() {
     const contCola = document.getElementById('containerCola');
@@ -157,9 +166,9 @@ function renderizarTableroKanban() {
     document.getElementById('countPrep').textContent = enPrep.length;
     document.getElementById('countListos').textContent = listos.length;
 
-    contCola.innerHTML = enCola.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column">Sin pedidos en cola</div>';
-    contPrep.innerHTML = enPrep.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column">Nada en preparación</div>';
-    contListos.innerHTML = listos.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column">Sin pedidos listos</div>';
+    contCola.innerHTML = enCola.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column" style="text-align:center; padding:20px; color:#64748B;">Sin pedidos en cola</div>';
+    contPrep.innerHTML = enPrep.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column" style="text-align:center; padding:20px; color:#64748B;">Nada en preparación</div>';
+    contListos.innerHTML = listos.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column" style="text-align:center; padding:20px; color:#64748B;">Sin pedidos listos</div>';
 }
 
 function crearTarjetaHTML(pedido) {
@@ -228,7 +237,6 @@ function crearTarjetaHTML(pedido) {
     `;
 }
 
-// Manejo de Modal de Tiempo para Pedidos "Para Recoger"
 function iniciarPreparacionPedido(turnoEscapado, tipo, telefono) {
     if (tipo === 'recoger' && telefono && telefono.length === 10) {
         pedidoTemporalParaTiempo = { turnoEscapado, telefono };
@@ -391,7 +399,7 @@ function actualizarMetricasHeader() {
 }
 
 // ======================================================
-// MÓDULO DE CORTE Y FINANZAS
+// MÓDULO DE CORTE, FINANZAS Y GRÁFICAS (CHART.JS)
 // ======================================================
 function actualizarModuloFinanzas() {
     const ventas = pedidosGlobalesSheets;
@@ -443,6 +451,103 @@ function actualizarModuloFinanzas() {
                 <td><strong>$${v.total.toFixed(2)}</strong></td>
             </tr>
         `).join('');
+    }
+
+    // Renderizar Gráficas
+    renderizarGraficasFinancieras(ventas);
+}
+
+function renderizarGraficasFinancieras(ventas) {
+    if (typeof Chart === 'undefined') {
+        console.warn("Chart.js no está cargado");
+        return;
+    }
+
+    // 1. Agrupar Ventas por Fecha (YYYY-MM-DD)
+    const ventasPorFecha = {};
+    ventas.forEach(v => {
+        const fechaDia = v.fecha_completa ? v.fecha_completa.split('T')[0] : 'Hoy';
+        ventasPorFecha[fechaDia] = (ventasPorFecha[fechaDia] || 0) + v.total;
+    });
+
+    const labelsDias = Object.keys(ventasPorFecha);
+    const dataDias = Object.values(ventasPorFecha);
+
+    // 2. Agrupar Conteo por Producto
+    const productosConteo = {};
+    ventas.forEach(v => {
+        v.items.forEach(it => {
+            const nombreProd = it.nombre || 'Botana';
+            productosConteo[nombreProd] = (productosConteo[nombreProd] || 0) + 1;
+        });
+    });
+
+    const topProductosSorted = Object.entries(productosConteo)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    const labelsProds = topProductosSorted.map(p => p[0]);
+    const dataProds = topProductosSorted.map(p => p[1]);
+
+    // Canvas 1: Ventas por Día
+    const canvasDias = document.getElementById('chartVentasDias');
+    if (canvasDias) {
+        if (chartVentasDiasInstance) chartVentasDiasInstance.destroy();
+        chartVentasDiasInstance = new Chart(canvasDias, {
+            type: 'line',
+            data: {
+                labels: labelsDias.length > 0 ? labelsDias : ['Sin datos'],
+                datasets: [{
+                    label: 'Ventas ($MXN)',
+                    data: dataDias.length > 0 ? dataDias : [0],
+                    borderColor: '#F59E0B',
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#F59E0B',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#94A3B8', font: { family: 'Poppins' } } }
+                },
+                scales: {
+                    x: { ticks: { color: '#94A3B8' }, grid: { color: '#334155' } },
+                    y: { ticks: { color: '#94A3B8' }, grid: { color: '#334155' } }
+                }
+            }
+        });
+    }
+
+    // Canvas 2: Top Productos
+    const canvasProds = document.getElementById('chartTopProductos');
+    if (canvasProds) {
+        if (chartTopProductosInstance) chartTopProductosInstance.destroy();
+        chartTopProductosInstance = new Chart(canvasProds, {
+            type: 'doughnut',
+            data: {
+                labels: labelsProds.length > 0 ? labelsProds : ['Sin ventas'],
+                datasets: [{
+                    data: dataProds.length > 0 ? dataProds : [1],
+                    backgroundColor: ['#F59E0B', '#10B981', '#0284C7', '#EC4899', '#8B5CF6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94A3B8', font: { family: 'Poppins' } }
+                    }
+                }
+            }
+        });
     }
 }
 
