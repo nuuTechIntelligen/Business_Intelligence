@@ -1,7 +1,7 @@
 // ======================================================
 // KDS EN LA NUBE - LA ENGORDADERA (MOTOR ROBUSTO)
 // ======================================================
-const SHEETDB_INPUT = "TU_ID_O_URL_AQUI"; 
+const SHEETDB_INPUT = "sq3j6nb77cl27"; 
 const INTERVALO_CONSULTA_SEGUNDOS = 4;
 
 function obtenerIdLimpioSheetDB(input) {
