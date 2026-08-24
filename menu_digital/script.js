@@ -15,7 +15,7 @@ let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 // Enlaces de Redes Sociales y Google Maps (Con Fallbacks por defecto)
 let LINK_FACEBOOK = "";
 let LINK_INSTAGRAM = "";
-let LINK_GOOGLE_MAPS = "https://maps.google.com"; // Fallback para que nunca desaparezca el botón
+let LINK_GOOGLE_MAPS = "https://maps.google.com";
 let LINK_WHATSAPP_DIRECTO = "";
 
 let productosGlobales = [];
@@ -104,7 +104,7 @@ function obtenerInfoCuatrimestreActual() {
 // 1. CARGA DINÁMICA DEL MENÚ & CONFIGURACIÓN
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
-    renderizarRedesSocialesFooter(); // Render inicial inmediato con fallbacks
+    renderizarRedesSocialesFooter();
     cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
 });
@@ -133,7 +133,6 @@ async function cargarConfiguracionGlobal() {
                 else if (clave.includes('CLABE')) CLABE_BANCARIA = valor;
                 else if (clave.includes('TITULAR') || clave.includes('BANCO')) BANCO_TITULAR = valor;
                 
-                // Mapeo flexible e insensible a variaciones de nombre para Redes & Maps
                 else if (clave.includes('FACEBOOK') || clave.includes('FB')) LINK_FACEBOOK = valor;
                 else if (clave.includes('INSTAGRAM') || clave.includes('IG')) LINK_INSTAGRAM = valor;
                 else if (clave.includes('MAPS') || clave.includes('GOOGLE') || clave.includes('UBICACION') || clave.includes('OPINION')) LINK_GOOGLE_MAPS = valor;
@@ -178,12 +177,18 @@ function renderizarRedesSocialesFooter() {
 
 function abrirModalRedesMovil() {
     const modal = document.getElementById('socialModalOverlay');
-    if (modal) modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+    }
 }
 
 function cerrarModalRedesMovil() {
     const modal = document.getElementById('socialModalOverlay');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
 }
 
 async function cargarMenuDesdeWebApp() {
