@@ -1211,23 +1211,14 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
     const loadingHint = document.getElementById('mpLoadingHint');
     if (!btnMp) return;
 
-    // 1. Estado de carga: Desactivamos temporalmente el botón para que el cliente no dé clic al link genérico
     btnMp.style.pointerEvents = 'none';
     btnMp.style.opacity = '0.6';
-    btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generando cobro de $${pedido.total.toFixed(2)}...`;
+    btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Conectando monto exacto...`;
+    
     if (loadingHint) {
         loadingHint.style.display = 'block';
         loadingHint.style.color = '#0284C7';
-        loadingHint.textContent = '⏳ Conectando con Mercado Pago para fijar el monto exacto...';
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
-        btnMp.href = LINK_MERCADOPAGO;
-        btnMp.style.pointerEvents = 'auto';
-        btnMp.style.opacity = '1';
-        btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar con Mercado Pago ($${pedido.total.toFixed(2)})`;
-        if (loadingHint) loadingHint.style.display = 'none';
-        return;
+        loadingHint.textContent = '⏳ Creando sesión de cobro por $' + pedido.total.toFixed(2) + '...';
     }
 
     try {
@@ -1246,28 +1237,28 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
         const data = await res.json();
 
         if (data.init_point) {
-            // Asignamos el enlace único oficial que ya contiene el total bloqueado
+            // ENLACE DINÁMICO CON MONTO EXACTO GENERADO CON ÉXITO
             btnMp.href = data.init_point;
             btnMp.style.pointerEvents = 'auto';
             btnMp.style.opacity = '1';
             btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar $${pedido.total.toFixed(2)} en Mercado Pago`;
             
             if (loadingHint) {
-                loadingHint.textContent = '✅ Monto exacto configurado en Mercado Pago';
+                loadingHint.textContent = '✅ Monto exacto configurado ($' + pedido.total.toFixed(2) + ')';
                 loadingHint.style.color = '#10B981';
             }
         } else {
-            throw new Error(data.error || "No se obtuvo init_point");
+            throw new Error(data.error || "No se recibió init_point");
         }
     } catch (e) {
-        console.warn("Error al crear preferencia dinámica:", e);
-        // Fallback en caso de error
+        console.error("Fallo dinámico MP:", e);
+        // Fallback al link manual
         btnMp.href = LINK_MERCADOPAGO;
         btnMp.style.pointerEvents = 'auto';
         btnMp.style.opacity = '1';
-        btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar con Mercado Pago ($${pedido.total.toFixed(2)})`;
+        btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar en Mercado Pago ($${pedido.total.toFixed(2)})`;
         if (loadingHint) {
-            loadingHint.textContent = '⚠️ Ingresa manualmente $' + pedido.total.toFixed(2) + ' al pagar.';
+            loadingHint.textContent = '⚠️ ' + (e.message || 'Ingresa manualmente el monto al pagar.');
             loadingHint.style.color = '#DC2626';
         }
     }
