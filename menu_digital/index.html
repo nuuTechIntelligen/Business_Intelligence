@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=50">
+    <link rel="stylesheet" href="styles.css?v=100">
 </head>
 <body>
 
@@ -18,14 +18,11 @@
     <header class="hero">
         <div class="hero-overlay"></div>
         
-        <!-- BOTONES SUPERIORES (REDES EN MÓVIL + PUNTOS) -->
         <div class="header-top-actions">
-            <!-- Botón Redes (Solo Móvil) -->
             <button class="btn-social-drawer-trigger mobile-only" onclick="abrirModalRedesMovil()" title="Nuestras Redes y Opiniones">
                 <i class="fa-solid fa-share-nodes"></i>
             </button>
 
-            <!-- Botón de Puntos -->
             <button class="btn-loyalty-corner" onclick="abrirModalConsultaLealtad()" title="Ver o consultar mis puntos">
                 <i class="fa-solid fa-star"></i> <span>Ver o consultar mis puntos</span>
             </button>
@@ -44,7 +41,7 @@
                 </a>
             </div>
 
-            <!-- CARRUSEL DE PROMOS LIMPIO -->
+            <!-- CARRUSEL DE PROMOS -->
             <div class="promo-gallery-container" id="heroBannerContainer" style="display: none;">
                 <div class="promo-slider-viewport" id="promoSliderViewport">
                     <div class="promo-slider-wrapper" id="bannerSliderTrack"></div>
@@ -89,20 +86,17 @@
         </div>
     </footer>
 
-    <!-- ========================================== -->
-    <!-- BARRA FLOTANTE HÍBRIDA PÍLDORA (OPCIÓN A + B) -->
-    <!-- ========================================== -->
+    <!-- BARRA FLOTANTE HÍBRIDA PÍLDORA -->
     <div class="cart-pill-bar" id="cartBar" onclick="iniciarFlujoCheckout()">
         <div class="cart-pill-left">
-            <div class="cart-badge-circle" id="cartBadgeCircle">
+            <div class="cart-badge-circle">
                 <i class="fa-solid fa-basket-shopping"></i>
                 <span id="cartCountBadge">0</span>
             </div>
             <div class="cart-price-column">
-                <small id="cartItemsLabel">Tu Antojo</small>
+                <small>Tu Antojo</small>
                 <strong id="cartTotalDisplay">$0.00</strong>
             </div>
-            <!-- Carrusel horizontal de mini botanas en canasta -->
             <div class="cart-mini-chips" id="cartMiniChipsContainer"></div>
         </div>
 
@@ -112,9 +106,9 @@
         </button>
     </div>
 
-    <!-- MODAL FLOTANTE CENTRADO DE REDES (MÓVIL) -->
+    <!-- MODAL FLOTANTE DE REDES (MÓVIL) -->
     <div class="modal-overlay" id="socialModalOverlay">
-        <div class="modal-card social-modal-center" style="max-width: 400px; text-align: center;">
+        <div class="modal-card" style="max-width: 400px; text-align: center;">
             <button class="modal-close" onclick="cerrarModalRedesMovil()">&times;</button>
             <div style="font-size: 2.2rem; margin-bottom: 4px;">🍿</div>
             <h3 style="font-family: var(--font-heading); color: var(--primary-pink); font-size: 1.25rem;">La Engordadera</h3>
@@ -288,7 +282,7 @@
         </div>
     </div>
 
-    <!-- 5. MODAL DE BOLETO DIGITAL CON PERSISTENCIA Y TOTAL GIGANTE -->
+    <!-- 5. MODAL DE BOLETO DIGITAL -->
     <div class="modal-overlay" id="ticketModal">
         <div class="modal-card ticket-card">
             <button class="modal-close" id="btnTicketModalClose" onclick="cerrarTicketModal()">&times;</button>
@@ -313,10 +307,8 @@
 
                 <div class="ticket-payment-alert" id="ticketPaymentAlert"></div>
 
-                <!-- SECCIÓN ESPECIAL PARA RECOGER (TOTAL GIGANTE + LINK MP + DATOS COPIABLES) -->
                 <div class="online-payment-card" id="onlinePaymentContainer" style="display: none;">
                     
-                    <!-- TOTAL GIGANTE -->
                     <div class="giant-total-box">
                         <small>TOTAL EXACTO A PAGAR:</small>
                         <div class="giant-amount" id="ticketGiantAmountDisplay">$0.00</div>
@@ -327,7 +319,6 @@
 
                     <span class="step-badge">Opción 1: Pago en línea dinámico</span>
                     
-                    <!-- Botón Dinámico de Mercado Pago -->
                     <a href="#" target="_blank" class="btn-mp-pay" id="btnMercadoPagoLink">
                         <i class="fa-solid fa-bolt"></i> Pagar con Mercado Pago (<span id="ticketMpTotal">$0.00</span>)
                     </a>
@@ -335,7 +326,6 @@
 
                     <span class="step-badge" style="margin-top: 10px;">Opción 2: Transferencia SPEI</span>
 
-                    <!-- Datos Bancarios Copiables en 1 Clic -->
                     <div class="bank-transfer-box">
                         <div class="bank-transfer-header">
                             <span>Datos de Transferencia:</span>
@@ -386,6 +376,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=50"></script>
+    <script src="script.js?v=100"></script>
 </body>
 </html>
