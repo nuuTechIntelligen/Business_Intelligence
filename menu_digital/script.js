@@ -1,7 +1,7 @@
 // ======================================================
-// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + MAPS + REDES HÍBRIDAS)
+// MENU LA ENGORDADERA (BARRA PÍLDORA + MERCADO PAGO DINÁMICO + PERSISTENCIA)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -12,7 +12,7 @@ let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
-// Enlaces de Redes Sociales y Google Maps (Con Fallbacks por defecto)
+// Enlaces de Redes Sociales y Google Maps
 let LINK_FACEBOOK = "";
 let LINK_INSTAGRAM = "";
 let LINK_GOOGLE_MAPS = "https://maps.google.com";
@@ -26,6 +26,7 @@ let limiteIngredientesActual = 0;
 let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
+let whatsappEnviadoConfirmado = false;
 
 let bannersPromoActivos = [];
 let indiceBannerActual = 0;
@@ -101,13 +102,28 @@ function obtenerInfoCuatrimestreActual() {
 }
 
 // ======================================================
-// 1. CARGA DINÁMICA DEL MENÚ & CONFIGURACIÓN
+// 1. INICIALIZACIÓN
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
+    actualizarBarraPildoraCarrito();
     renderizarRedesSocialesFooter();
     cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
+    verificarPedidoActivoEnAlmacenamiento();
 });
+
+function verificarPedidoActivoEnAlmacenamiento() {
+    const guardado = localStorage.getItem('engordadera_ultimo_pedido_activo');
+    if (guardado) {
+        try {
+            const p = JSON.parse(guardado);
+            if (p && p.tipo === 'recoger') {
+                ultimoPedidoGenerado = p;
+                mostrarBoletoTurno(p, true);
+            }
+        } catch (e) {}
+    }
+}
 
 async function cargarConfiguracionGlobal() {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
@@ -142,17 +158,14 @@ async function cargarConfiguracionGlobal() {
             renderizarRedesSocialesFooter();
         }
     } catch (e) {
-        console.warn("Configuración usando valores por defecto:", e);
         renderizarRedesSocialesFooter();
     }
 }
 
-// Renderizado Híbrido: Tarjeta Fullwidth en PC + Modal Centrado en Móvil
 function renderizarRedesSocialesFooter() {
     const waLink = LINK_WHATSAPP_DIRECTO || `https://wa.me/${NUMERO_WHATSAPP}`;
     const mapsLink = LINK_GOOGLE_MAPS || "https://maps.google.com";
     
-    // 1. Versión PC (Píldoras Elegantes a Ancho Completo)
     const pcContainer = document.getElementById('footerSocialIconsDesktop');
     if (pcContainer) {
         pcContainer.innerHTML = `
@@ -163,7 +176,6 @@ function renderizarRedesSocialesFooter() {
         `;
     }
 
-    // 2. Versión Móvil (Modal Flotante Centrado)
     const mobileContainer = document.getElementById('footerSocialIconsMobile');
     if (mobileContainer) {
         mobileContainer.innerHTML = `
@@ -213,7 +225,6 @@ async function cargarMenuDesdeWebApp() {
         renderizarMenu(productosHoy.length > 0 ? productosHoy : productos);
         iniciarNavegacionScroll();
     } catch (error) {
-        console.error("Error al cargar menú:", error);
         document.getElementById('menu-sections-container').innerHTML = `
             <div style="text-align:center; padding:50px 20px;">
                 <p style="color:#D32F2F; font-weight:700; font-size:1.1rem;">⚠️ No se pudo cargar el menú en la nube.</p>
@@ -224,7 +235,7 @@ async function cargarMenuDesdeWebApp() {
 }
 
 // ======================================================
-// CARRUSEL DE PROMOS
+// 2. CARRUSEL DE PROMOS
 // ======================================================
 function renderizarGaleriaPromos(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
@@ -394,7 +405,7 @@ function manejarClicTarjeta(productoId, estaDisponible) {
 }
 
 // ======================================================
-// 2. MODAL Y PERSONALIZACIÓN
+// 3. MODAL Y PERSONALIZACIÓN
 // ======================================================
 function abrirModalPersonalizacion(productoId) {
     const prod = productosGlobales.find(p => p.id == productoId);
@@ -708,28 +719,45 @@ function confirmarAgregarAlCarrito() {
         esPorMonto: esPorMonto
     });
 
-    actualizarBarraCarrito();
+    actualizarBarraPildoraCarrito();
     cerrarModal();
-
-    const cartBar = document.getElementById('cartBar');
-    if (cartBar) {
-        cartBar.style.transform = 'scale(1.03)';
-        setTimeout(() => cartBar.style.transform = 'scale(1)', 150);
-    }
-}
-
-function actualizarBarraCarrito() {
-    const totalCount = carrito.length;
-    const totalPrice = carrito.reduce((sum, item) => sum + item.precio, 0);
-
-    const countEl = document.getElementById('cartCount');
-    const totalEl = document.getElementById('cartTotal');
-    if (countEl) countEl.textContent = `${totalCount} ${totalCount === 1 ? 'producto' : 'productos'}`;
-    if (totalEl) totalEl.textContent = `$${totalPrice.toFixed(2)}`;
 }
 
 // ======================================================
-// 3. UPSELLING
+// 4. RENDERIZADO DE BARRA PÍLDORA HÍBRIDA (OPCIÓN A + B)
+// ======================================================
+function actualizarBarraPildoraCarrito() {
+    const totalCount = carrito.length;
+    const totalPrice = carrito.reduce((sum, item) => sum + item.precio, 0);
+
+    const barEl = document.getElementById('cartBar');
+    const badgeEl = document.getElementById('cartCountBadge');
+    const totalDisplayEl = document.getElementById('cartTotalDisplay');
+    const chipsContainer = document.getElementById('cartMiniChipsContainer');
+
+    if (!barEl) return;
+
+    if (totalCount === 0) {
+        barEl.style.display = 'none';
+        return;
+    }
+
+    barEl.style.display = 'flex';
+    if (badgeEl) badgeEl.textContent = totalCount;
+    if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
+
+    // Renderizado horizontal de mini chips con nombres de botanas
+    if (chipsContainer) {
+        chipsContainer.innerHTML = carrito.slice(-3).map(item => `
+            <span class="mini-snack-chip">
+                🍿 ${item.nombre.length > 14 ? item.nombre.substring(0, 12) + '...' : item.nombre}
+            </span>
+        `).join('');
+    }
+}
+
+// ======================================================
+// 5. UPSELLING & CHECKOUT
 // ======================================================
 function iniciarFlujoCheckout() {
     if (carrito.length === 0) {
@@ -788,7 +816,7 @@ function agregarUpsellDirecto(prodId) {
             estacion: obtenerPropiedadFlexible(prod, ['estacion_cocina', 'estacion']) || 'FRIA',
             esPorMonto: false
         });
-        actualizarBarraCarrito();
+        actualizarBarraPildoraCarrito();
     }
     cerrarUpsellYAbrirCheckout();
 }
@@ -799,7 +827,7 @@ function cerrarUpsellYAbrirCheckout() {
 }
 
 // ======================================================
-// 4. CONSULTA PÚBLICA DE PUNTOS CUATRIMESTRALES
+// 6. CONSULTA DE PUNTOS
 // ======================================================
 function abrirModalConsultaLealtad() {
     document.getElementById('loyaltyQueryResult').style.display = 'none';
@@ -859,7 +887,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 5. CHECKOUT Y PUNTOS AUTOMÁTICOS
+// 7. CHECKOUT & GENERACIÓN DINÁMICA
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -927,7 +955,7 @@ function cerrarModalCheckout() {
 
 function eliminarDelCarrito(index) {
     carrito.splice(index, 1);
-    actualizarBarraCarrito();
+    actualizarBarraPildoraCarrito();
     if (carrito.length === 0) cerrarModalCheckout();
     else abrirModalCheckout();
 }
@@ -1026,9 +1054,10 @@ async function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
-    const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
-    pedidosActuales.push(ultimoPedidoGenerado);
-    localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
+    // Si es para recoger, guardamos persistencia en localStorage para que no se pierda
+    if (tipoPedido === 'recoger') {
+        localStorage.setItem('engordadera_ultimo_pedido_activo', JSON.stringify(ultimoPedidoGenerado));
+    }
 
     await respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
@@ -1092,17 +1121,26 @@ async function respaldarVentaEnGoogleSheets(pedido) {
             method: 'POST',
             body: JSON.stringify(payload)
         });
-        console.log("✅ Venta guardada en Google Sheets");
     } catch (e) {
         console.error("Error al insertar venta en Sheets:", e);
     }
 }
 
-function mostrarBoletoTurno(pedido) {
+// ======================================================
+// 8. PANTALLA DE BOLETO DIGITAL & PAGO EXACTO
+// ======================================================
+async function mostrarBoletoTurno(pedido, esRestaurado = false) {
+    whatsappEnviadoConfirmado = false;
     const badgeType = document.getElementById('ticketBadgeType');
     const paymentAlert = document.getElementById('ticketPaymentAlert');
     const onlinePaymentCard = document.getElementById('onlinePaymentContainer');
     const loyaltyBanner = document.getElementById('ticketLoyaltyBanner');
+    const btnClose = document.getElementById('btnTicketModalClose');
+    const countdownEl = document.getElementById('kioskCountdown');
+    const btnWa = document.getElementById('btnTicketWhatsApp');
+    const btnFinish = document.getElementById('btnFinishOrder');
+    const btnFinishText = document.getElementById('btnFinishText');
+    const btnWaText = document.getElementById('btnWaText');
 
     document.getElementById('ticketNumberDisplay').textContent = pedido.turno;
     document.getElementById('ticketClientName').textContent = `Cliente: ${pedido.cliente}`;
@@ -1128,6 +1166,7 @@ function mostrarBoletoTurno(pedido) {
     }
 
     if (pedido.tipo === 'tienda') {
+        // EN TIENDA: Flujo Rápido con temporizador
         badgeType.textContent = '🏪 CONSUMO EN TIENDA';
         badgeType.className = 'ticket-badge badge-tienda';
         paymentAlert.className = 'ticket-payment-alert alert-tienda';
@@ -1136,30 +1175,93 @@ function mostrarBoletoTurno(pedido) {
             Pagarás <strong>$${pedido.total.toFixed(2)}</strong> al momento de recibir tus botanas preparadas.
         `;
         if (onlinePaymentCard) onlinePaymentCard.style.display = 'none';
+        if (btnClose) btnClose.style.display = 'block';
+        if (btnWaText) btnWaText.textContent = 'Enviar Pedido a WhatsApp';
+        if (btnFinishText) btnFinishText.textContent = 'Terminar y Hacer Nuevo Pedido';
+        
+        iniciarCuentaRegresivaKiosko(20);
     } else {
+        // PARA RECOGER: Sin temporizador, Total Gigante, Copiado en 1 clic y Link Dinámico
+        if (temporizadorKiosko) clearInterval(temporizadorKiosko);
+        if (countdownEl) countdownEl.textContent = '';
+        if (btnClose) btnClose.style.display = 'none'; // No se puede cerrar con la X accidentalmente
+
         badgeType.textContent = '🛍️ PARA RECOGER';
         badgeType.className = 'ticket-badge badge-recoger';
         paymentAlert.className = 'ticket-payment-alert alert-recoger';
         paymentAlert.innerHTML = `
             <strong>⚠️ Pago Previo Requerido:</strong><br>
-            Para comenzar a preparar tu orden de <strong>$${pedido.total.toFixed(2)}</strong>, realiza tu pago en línea o transferencia y envía el comprobante por WhatsApp.
+            Para iniciar tu orden, realiza tu pago exacto y envía el comprobante por WhatsApp.
         `;
         
         if (onlinePaymentCard) {
             onlinePaymentCard.style.display = 'block';
-            const btnMp = document.getElementById('btnMercadoPagoLink');
-            const mpTotalEl = document.getElementById('ticketMpTotal');
-            if (btnMp) btnMp.href = LINK_MERCADOPAGO;
-            if (mpTotalEl) mpTotalEl.textContent = `$${pedido.total.toFixed(2)}`;
-
+            document.getElementById('ticketGiantAmountDisplay').textContent = `$${pedido.total.toFixed(2)}`;
+            document.getElementById('ticketMpTotal').textContent = `$${pedido.total.toFixed(2)}`;
             document.getElementById('bankTitularText').textContent = BANCO_TITULAR;
             document.getElementById('clabeNumberText').textContent = CLABE_BANCARIA;
             document.getElementById('transferConceptoTurno').textContent = pedido.turno;
         }
+
+        if (btnWaText) btnWaText.textContent = '📲 Paso Final: Enviar Comprobante por WhatsApp';
+        if (btnFinishText) btnFinishText.textContent = 'Ya envié mi comprobante (Cerrar)';
+
+        // Generar enlace dinámico con la API de Mercado Pago
+        solicitarLinkDinamicoMercadoPago(pedido);
     }
 
     document.getElementById('ticketModal').classList.add('active');
-    iniciarCuentaRegresivaKiosko(20);
+}
+
+async function solicitarLinkDinamicoMercadoPago(pedido) {
+    const btnMp = document.getElementById('btnMercadoPagoLink');
+    const loadingHint = document.getElementById('mpLoadingHint');
+    if (!btnMp) return;
+
+    btnMp.href = LINK_MERCADOPAGO; // Enlace fallback inicial
+    if (loadingHint) loadingHint.style.display = 'block';
+
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
+        if (loadingHint) loadingHint.style.display = 'none';
+        return;
+    }
+
+    try {
+        const payload = {
+            action: 'crear_preferencia_mp',
+            turno: pedido.turno,
+            cliente: pedido.cliente,
+            total: pedido.total,
+            items: pedido.items
+        };
+
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.init_point) {
+            btnMp.href = data.init_point;
+            if (loadingHint) {
+                loadingHint.textContent = '⚡ Enlace dinámico listo con monto exacto';
+                loadingHint.style.color = '#10B981';
+            }
+        } else {
+            if (loadingHint) loadingHint.style.display = 'none';
+        }
+    } catch (e) {
+        if (loadingHint) loadingHint.style.display = 'none';
+    }
+}
+
+// Funciones de Copiado Rápido
+function copiarMontoExacto() {
+    if (!ultimoPedidoGenerado) return;
+    const montoStr = ultimoPedidoGenerado.total.toFixed(2);
+    navigator.clipboard.writeText(montoStr).then(() => {
+        alert(`✅ Monto exacto copiado: $${montoStr}`);
+    }).catch(() => prompt("Copia el monto:", montoStr));
 }
 
 function copiarClabeAlPortapapeles() {
@@ -1174,7 +1276,20 @@ function copiarClabeAlPortapapeles() {
                 btn.classList.remove('copied');
             }, 2000);
         }
-    }).catch(err => alert(`CLABE: ${CLABE_BANCARIA}`));
+    }).catch(err => prompt("Copia la CLABE:", CLABE_BANCARIA));
+}
+
+function copiarConceptoTurno() {
+    if (!ultimoPedidoGenerado) return;
+    const turno = ultimoPedidoGenerado.turno;
+    navigator.clipboard.writeText(turno).then(() => {
+        const btn = document.getElementById('btnCopyConcept');
+        if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Copiado!';
+            setTimeout(() => btn.innerHTML = orig, 2000);
+        }
+    }).catch(() => prompt("Copia el turno:", turno));
 }
 
 function iniciarCuentaRegresivaKiosko(segundosRestantes) {
@@ -1195,7 +1310,14 @@ function iniciarCuentaRegresivaKiosko(segundosRestantes) {
 }
 
 function cerrarTicketModal() {
+    if (ultimoPedidoGenerado && ultimoPedidoGenerado.tipo === 'recoger' && !whatsappEnviadoConfirmado) {
+        if (!confirm("⚠️ ¿Ya enviaste tu comprobante por WhatsApp? Si cierras la ventana asegúrate de haber realizado tu pago.")) {
+            return;
+        }
+    }
+    
     if (temporizadorKiosko) clearInterval(temporizadorKiosko);
+    localStorage.removeItem('engordadera_ultimo_pedido_activo');
     document.getElementById('ticketModal').classList.remove('active');
     reiniciarParaNuevoPedido();
 }
@@ -1203,7 +1325,7 @@ function cerrarTicketModal() {
 function reiniciarParaNuevoPedido() {
     if (temporizadorKiosko) clearInterval(temporizadorKiosko);
     carrito = [];
-    actualizarBarraCarrito();
+    actualizarBarraPildoraCarrito();
     document.getElementById('clientNameInput').value = '';
     document.getElementById('clientPhoneInput').value = '';
     document.getElementById('ticketModal').classList.remove('active');
@@ -1211,6 +1333,7 @@ function reiniciarParaNuevoPedido() {
 
 function enviarComprobanteWhatsApp() {
     if (!ultimoPedidoGenerado) return;
+    whatsappEnviadoConfirmado = true;
     if (temporizadorKiosko) clearInterval(temporizadorKiosko);
 
     const p = ultimoPedidoGenerado;
@@ -1250,7 +1373,7 @@ function enviarComprobanteWhatsApp() {
 }
 
 // ======================================================
-// 6. AUTOSCROLL HORIZONTAL DE NAVEGACIÓN
+// 9. AUTOSCROLL HORIZONTAL DE NAVEGACIÓN
 // ======================================================
 function iniciarNavegacionScroll() {
     const navButtons = document.querySelectorAll('.nav-btn');
