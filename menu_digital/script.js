@@ -1,7 +1,7 @@
 // ======================================================
 // MENU LA ENGORDADERA (BARRA PÍLDORA + MERCADO PAGO DINÁMICO + PERSISTENCIA)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -191,7 +191,6 @@ function abrirModalRedesMovil() {
     const modal = document.getElementById('socialModalOverlay');
     if (modal) {
         modal.classList.add('active');
-        modal.style.display = 'flex';
     }
 }
 
@@ -199,7 +198,6 @@ function cerrarModalRedesMovil() {
     const modal = document.getElementById('socialModalOverlay');
     if (modal) {
         modal.classList.remove('active');
-        modal.style.display = 'none';
     }
 }
 
@@ -724,7 +722,7 @@ function confirmarAgregarAlCarrito() {
 }
 
 // ======================================================
-// 4. RENDERIZADO DE BARRA PÍLDORA HÍBRIDA (OPCIÓN A + B)
+// 4. RENDERIZADO DE BARRA PÍLDORA HÍBRIDA
 // ======================================================
 function actualizarBarraPildoraCarrito() {
     const totalCount = carrito.length;
@@ -738,11 +736,11 @@ function actualizarBarraPildoraCarrito() {
     if (!barEl) return;
 
     if (totalCount === 0) {
-        barEl.style.display = 'none';
+        barEl.classList.remove('visible');
         return;
     }
 
-    barEl.style.display = 'flex';
+    barEl.classList.add('visible');
     if (badgeEl) badgeEl.textContent = totalCount;
     if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
 
