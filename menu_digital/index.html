@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body>
 
@@ -18,10 +18,18 @@
     <header class="hero">
         <div class="hero-overlay"></div>
         
-        <!-- BOTÓN DE PUNTOS SUPERIOR DERECHO -->
-        <button class="btn-loyalty-corner" onclick="abrirModalConsultaLealtad()" title="Ver o consultar mis puntos">
-            <i class="fa-solid fa-star"></i> <span>Ver o consultar mis puntos</span>
-        </button>
+        <!-- BOTONES SUPERIORES (REDES EN MÓVIL + PUNTOS) -->
+        <div class="header-top-actions">
+            <!-- Botón Social Drawer (Solo Móvil) -->
+            <button class="btn-social-drawer-trigger mobile-only" onclick="abrirDrawerRedes()" title="Nuestras Redes Sociales">
+                <i class="fa-solid fa-share-nodes"></i>
+            </button>
+
+            <!-- Botón de Puntos -->
+            <button class="btn-loyalty-corner" onclick="abrirModalConsultaLealtad()" title="Ver o consultar mis puntos">
+                <i class="fa-solid fa-star"></i> <span>Ver o consultar mis puntos</span>
+            </button>
+        </div>
 
         <div class="container hero-content">
             <div class="logo-container">
@@ -63,16 +71,21 @@
         </div>
     </main>
 
-    <!-- FOOTER CON REDES SOCIALES -->
-    <footer class="footer">
-        <div class="container text-center">
-            <h3>FRITURAS Y BOTANAS LA ENGORDADERA</h3>
-            <p>📍 ¡Atendiéndote con el mejor sabor y antojo!</p>
-            
-            <!-- Contenedor dinámico de Redes Sociales -->
-            <div class="footer-social-links" id="footerSocialIcons"></div>
-            
-            <p class="copyright">© 2026 La Engordadera - Todos los derechos reservados.</p>
+    <!-- FOOTER OPCIÓN 1: TARJETA COMUNIDAD (PC ONLY) -->
+    <footer class="footer-community desktop-only">
+        <div class="community-card">
+            <div class="community-header">
+                <span class="community-badge">✨ Únete al Antojo</span>
+                <h3>¡Síguenos en Redes Sociales!</h3>
+                <p>Descubre nuevas promociones, preparados de temporada y dinámicas especiales.</p>
+            </div>
+
+            <div class="community-social-pills" id="footerSocialIconsDesktop"></div>
+
+            <div class="community-bottom">
+                <span>🍿 <strong>La Engordadera</strong> | Antojos preparados al momento</span>
+                <p class="copyright">© 2026 Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 
@@ -91,6 +104,24 @@
     <a href="javascript:void(0)" class="wa-float-btn" onclick="iniciarFlujoCheckout()" title="Ver Pedido">
         <i class="fa-solid fa-basket-shopping"></i>
     </a>
+
+    <!-- DRAWER OPCIÓN 3: BOTTOM SHEET REDES (MÓVIL) -->
+    <div class="social-drawer-overlay" id="socialDrawerOverlay" onclick="cerrarDrawerRedes()">
+        <div class="social-drawer-sheet" onclick="event.stopPropagation()">
+            <div class="drawer-handle"></div>
+            <div class="drawer-header">
+                <span class="drawer-emoji">🍿</span>
+                <h4>Comunidad La Engordadera</h4>
+                <p>Conéctate con nosotros en tus redes favoritas:</p>
+            </div>
+            
+            <div class="drawer-social-grid" id="footerSocialIconsMobile"></div>
+
+            <button type="button" class="btn-close-drawer" onclick="cerrarDrawerRedes()">
+                Listo / Volver al Menú
+            </button>
+        </div>
+    </div>
 
     <!-- 1. MODAL DE PERSONALIZACIÓN -->
     <div class="modal-overlay" id="productModal">
@@ -316,6 +347,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=10"></script>
+    <script src="script.js?v=35"></script>
 </body>
 </html>
