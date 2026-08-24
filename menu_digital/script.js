@@ -736,11 +736,11 @@ function actualizarBarraPildoraCarrito() {
     if (!barEl) return;
 
     if (totalCount === 0) {
-        barEl.classList.remove('visible');
+        barEl.style.display = 'none';
         return;
     }
 
-    barEl.classList.add('visible');
+    barEl.style.display = 'flex';
     if (badgeEl) badgeEl.textContent = totalCount;
     if (totalDisplayEl) totalDisplayEl.textContent = `$${totalPrice.toFixed(2)}`;
 
