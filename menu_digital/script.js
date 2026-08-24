@@ -2,7 +2,7 @@
 // CONFIGURACIÓN WEB APP (GOOGLE APPS SCRIPT) & WHATSAPP
 // ======================================================
 // Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
-const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas
