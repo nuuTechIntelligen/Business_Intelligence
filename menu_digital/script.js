@@ -1,7 +1,7 @@
 // ======================================================
-// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES DINÁMICAS)
+// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES HÍBRIDAS)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -68,7 +68,6 @@ function parsearExtraConCosto(textoOpcion) {
     return { nombreLimpio: str, costoExtra: 0, textoCompleto: str };
 }
 
-// Cálculo dinámico de puntos según escala configurada
 function calcularPuntosPorMonto(total) {
     if (!ESCALA_PUNTOS_COMPRA || total < 5) return 0;
     const rangos = ESCALA_PUNTOS_COMPRA.split(',').map(r => r.trim());
@@ -87,7 +86,6 @@ function calcularPuntosPorMonto(total) {
     return Math.floor(total * 0.1);
 }
 
-// Obtener cuatrimestre vigente y fecha límite
 function obtenerInfoCuatrimestreActual() {
     const ahora = new Date();
     const anio = ahora.getFullYear();
@@ -108,7 +106,7 @@ function obtenerInfoCuatrimestreActual() {
 document.addEventListener('DOMContentLoaded', () => {
     cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
-    renderizarRedesSocialesFooter(); // Render inicial inmediato
+    renderizarRedesSocialesFooter();
 });
 
 async function cargarConfiguracionGlobal() {
@@ -139,7 +137,6 @@ async function cargarConfiguracionGlobal() {
             const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
             if (filaBanco && filaBanco.valor) BANCO_TITULAR = filaBanco.valor.trim();
 
-            // Mapeo flexible de Redes Sociales
             const fFb = config.find(c => limpiarTexto(c.clave).includes('FACEBOOK') || limpiarTexto(c.clave).includes('FB'));
             if (fFb && fFb.valor) LINK_FACEBOOK = fFb.valor.trim();
 
@@ -160,19 +157,41 @@ async function cargarConfiguracionGlobal() {
     }
 }
 
-// Inyección y Renderizado de Botones de Redes Sociales en el Footer
+// Renderizado Híbrido: Tarjeta Comunidad en PC + Bottom Sheet en Móvil
 function renderizarRedesSocialesFooter() {
-    const footerContainer = document.getElementById('footerSocialIcons');
-    if (!footerContainer) return;
-
     const waLink = LINK_WHATSAPP_DIRECTO || `https://wa.me/${NUMERO_WHATSAPP}`;
+    
+    // 1. Versión PC (Píldoras Elegantes)
+    const pcContainer = document.getElementById('footerSocialIconsDesktop');
+    if (pcContainer) {
+        pcContainer.innerHTML = `
+            ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="social-pill-btn" style="background:#1877F2;"><i class="fa-brands fa-facebook-f"></i> Facebook</a>` : ''}
+            ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="social-pill-btn" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF);"><i class="fa-brands fa-instagram"></i> Instagram</a>` : ''}
+            ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" class="social-pill-btn" style="background:#000000;"><i class="fa-brands fa-tiktok"></i> TikTok</a>` : ''}
+            <a href="${waLink}" target="_blank" class="social-pill-btn" style="background:#25D366;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+        `;
+    }
 
-    footerContainer.innerHTML = `
-        ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" style="background:#1877F2;" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
-        ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);" title="Instagram"><i class="fa-brands fa-instagram"></i></a>` : ''}
-        ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" style="background:#000000; border: 1px solid #333;" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>` : ''}
-        <a href="${waLink}" target="_blank" style="background:#25D366;" title="WhatsApp Atención Directa"><i class="fa-brands fa-whatsapp"></i></a>
-    `;
+    // 2. Versión Móvil (Drawer Táctil Grande)
+    const mobileContainer = document.getElementById('footerSocialIconsMobile');
+    if (mobileContainer) {
+        mobileContainer.innerHTML = `
+            ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" class="drawer-social-card" style="background:#1877F2;"><i class="fa-brands fa-facebook-f"></i> <span>Facebook</span></a>` : ''}
+            ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" class="drawer-social-card" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF);"><i class="fa-brands fa-instagram"></i> <span>Instagram</span></a>` : ''}
+            ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" class="drawer-social-card" style="background:#000000;"><i class="fa-brands fa-tiktok"></i> <span>TikTok</span></a>` : ''}
+            <a href="${waLink}" target="_blank" class="drawer-social-card" style="background:#25D366;"><i class="fa-brands fa-whatsapp"></i> <span>WhatsApp</span></a>
+        `;
+    }
+}
+
+function abrirDrawerRedes() {
+    const drawer = document.getElementById('socialDrawerOverlay');
+    if (drawer) drawer.classList.add('active');
+}
+
+function cerrarDrawerRedes() {
+    const drawer = document.getElementById('socialDrawerOverlay');
+    if (drawer) drawer.classList.remove('active');
 }
 
 async function cargarMenuDesdeWebApp() {
