@@ -142,16 +142,21 @@ async function cargarConfiguracionGlobal() {
 
                 if (!clave || !valor) return;
 
-                if (clave.includes('PREMIO')) PREMIO_LEALTAD = valor;
-                else if (clave.includes('PUNTOS_META') || clave.includes('META')) PUNTOS_META_PREMIO = parseInt(valor, 10) || 100;
+                // Ignorar tokens de seguridad en el frontend
+                if (clave.includes('TOKEN') || clave.includes('SECRET') || clave.includes('PASS')) return;
+
+                if (clave === 'PREMIO' || clave.includes('PREMIO_LEALTAD')) PREMIO_LEALTAD = valor;
+                else if (clave === 'PUNTOS_META' || clave === 'META_PUNTOS') PUNTOS_META_PREMIO = parseInt(valor, 10) || 100;
                 else if (clave.includes('ESCALA')) ESCALA_PUNTOS_COMPRA = valor;
-                else if (clave.includes('MERCADOPAGO') || clave.includes('MP')) LINK_MERCADOPAGO = valor;
+                else if ((clave === 'LINK_MERCADOPAGO' || clave === 'LINK_MP' || clave === 'MERCADOPAGO') && valor.startsWith('http')) {
+                    LINK_MERCADOPAGO = valor;
+                }
                 else if (clave.includes('CLABE')) CLABE_BANCARIA = valor;
                 else if (clave.includes('TITULAR') || clave.includes('BANCO')) BANCO_TITULAR = valor;
                 
                 else if (clave.includes('FACEBOOK') || clave.includes('FB')) LINK_FACEBOOK = valor;
                 else if (clave.includes('INSTAGRAM') || clave.includes('IG')) LINK_INSTAGRAM = valor;
-                else if (clave.includes('MAPS') || clave.includes('GOOGLE') || clave.includes('UBICACION') || clave.includes('OPINION')) LINK_GOOGLE_MAPS = valor;
+                else if (clave.includes('MAPS') || clave.includes('GOOGLE') || clave.includes('UBICACION')) LINK_GOOGLE_MAPS = valor;
                 else if (clave.includes('WHATSAPP') || clave.includes('WA')) LINK_WHATSAPP_DIRECTO = valor;
             });
 
