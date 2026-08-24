@@ -2,7 +2,7 @@
 // KDS & FINANZAS LA ENGORDADERA (GOOGLE APPS SCRIPT WEB APP)
 // ======================================================
 // Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 let INTERVALO_SEGUNDOS = 4;
 
 let pedidosGlobalesSheets = [];
@@ -290,22 +290,39 @@ function reiniciarContadorTurnos() {
     alert("✅ Consecutivos de turno reiniciados a 0.");
 }
 
+// ======================================================
+// MANEJO ROBUSTO DEL BOTÓN PREPARAR & MODAL DE TIEMPO
+// ======================================================
 function iniciarPreparacionPedido(turnoEscapado, tipo, telefono) {
-    if (tipo === 'recoger' && telefono && telefono.length === 10) {
-        pedidoTemporalParaTiempo = { turnoEscapado, telefono };
+    const turnoReal = decodeURIComponent(turnoEscapado);
+    const telLimpio = String(telefono || '').replace(/\D/g, '');
+
+    // Si es para recoger y tiene teléfono registrado, abrimos el modal
+    if (tipo === 'recoger' && telLimpio.length >= 10) {
+        pedidoTemporalParaTiempo = { turnoEscapado: turnoEscapado, telefono: telLimpio };
+        
         const modal = document.getElementById('timeModal');
+        const desc = document.getElementById('timeModalClientDesc');
+        if (desc) desc.textContent = `Indica en cuántos minutos estará listo el turno ${turnoReal}:`;
+
         if (modal) {
             modal.classList.add('active');
+            modal.style.display = 'flex'; // Garantizar visibilidad
             return;
         }
     }
+    
+    // Si no tiene teléfono o no está el modal, pasa directo a preparando
     cambiarEstadoPedidoNube(turnoEscapado, 'preparando');
 }
 
 function confirmarTiempoYNotificar(minutos) {
-    if (pedidoTemporalParaTiempo) {
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${decodeURIComponent(pedidoTemporalParaTiempo.turnoEscapado)}* ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
-        window.open(`https://wa.me/521${pedidoTemporalParaTiempo.telefono}?text=${msg}`, '_blank');
+    if (pedidoTemporalParaTiempo && pedidoTemporalParaTiempo.turnoEscapado) {
+        const turnoReal = decodeURIComponent(pedidoTemporalParaTiempo.turnoEscapado);
+        const tel = pedidoTemporalParaTiempo.telefono;
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${turnoReal}* ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
+        
+        window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
         cambiarEstadoPedidoNube(pedidoTemporalParaTiempo.turnoEscapado, 'preparando');
     }
     cerrarModalTiempo();
@@ -313,8 +330,11 @@ function confirmarTiempoYNotificar(minutos) {
 
 function cerrarModalTiempo() {
     const modal = document.getElementById('timeModal');
-    if (modal) modal.classList.remove('active');
-    if (pedidoTemporalParaTiempo) {
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+    if (pedidoTemporalParaTiempo && pedidoTemporalParaTiempo.turnoEscapado) {
         cambiarEstadoPedidoNube(pedidoTemporalParaTiempo.turnoEscapado, 'preparando');
     }
     pedidoTemporalParaTiempo = null;
@@ -330,7 +350,7 @@ async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
         actualizarMetricasHeader();
     }
 
-    if (!WEB_APP_URL) return;
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
 
     try {
         await fetch(WEB_APP_URL, {
