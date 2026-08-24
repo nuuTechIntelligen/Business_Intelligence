@@ -1,7 +1,7 @@
 // ======================================================
-// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES + SOMBRAS FLOTANTES)
+// MENU LA ENGORDADERA (PUNTOS CUATRIMESTRALES + REDES SOCIALES DINÁMICAS)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
@@ -106,47 +106,17 @@ function obtenerInfoCuatrimestreActual() {
 // 1. CARGA DINÁMICA DEL MENÚ & CONFIGURACIÓN
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
-    inyectarSombrasFriturasFlotantes();
     cargarMenuDesdeWebApp();
     cargarConfiguracionGlobal();
+    renderizarRedesSocialesFooter(); // Render inicial inmediato
 });
 
-// 2. Inyección de más siluetas de botanas flotando con mayor visibilidad
-function inyectarSombrasFriturasFlotantes() {
-    if (document.getElementById('floatingSnacksContainer')) return;
-    const container = document.createElement('div');
-    container.id = 'floatingSnacksContainer';
-    container.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:0.25;';
-    
-    container.innerHTML = `
-        <i class="fa-solid fa-cookie snack-item" style="position:absolute; top:6%; left:4%; font-size:3.8rem; color:#64748B; animation: floatSlow 14s ease-in-out infinite alternate;"></i>
-        <i class="fa-solid fa-pepper-hot snack-item" style="position:absolute; top:18%; right:6%; font-size:3.2rem; color:#EF4444; animation: floatSlow 18s ease-in-out infinite alternate-reverse;"></i>
-        <i class="fa-solid fa-lemon snack-item" style="position:absolute; top:35%; left:7%; font-size:3.4rem; color:#F59E0B; animation: floatSlow 12s ease-in-out infinite alternate;"></i>
-        <i class="fa-solid fa-bottle-droplet snack-item" style="position:absolute; top:48%; right:8%; font-size:3.6rem; color:#DC2626; animation: floatSlow 16s ease-in-out infinite alternate-reverse;"></i>
-        <i class="fa-solid fa-cheese snack-item" style="position:absolute; top:62%; left:5%; font-size:3.5rem; color:#F59E0B; animation: floatSlow 20s ease-in-out infinite alternate;"></i>
-        <i class="fa-solid fa-fire-flame-curved snack-item" style="position:absolute; top:75%; right:6%; font-size:3.8rem; color:#EA580C; animation: floatSlow 15s ease-in-out infinite alternate-reverse;"></i>
-        <i class="fa-solid fa-candy-cane snack-item" style="position:absolute; top:88%; left:8%; font-size:3.2rem; color:#EC4899; animation: floatSlow 13s ease-in-out infinite alternate;"></i>
-        <i class="fa-solid fa-cookie-bite snack-item" style="position:absolute; top:94%; right:10%; font-size:3.6rem; color:#64748B; animation: floatSlow 17s ease-in-out infinite alternate-reverse;"></i>
-    `;
-    
-    if (!document.getElementById('snackFloatStyles')) {
-        const style = document.createElement('style');
-        style.id = 'snackFloatStyles';
-        style.textContent = `
-            @keyframes floatSlow {
-                0% { transform: translateY(0px) rotate(0deg); }
-                50% { transform: translateY(-35px) rotate(20deg); }
-                100% { transform: translateY(20px) rotate(-15deg); }
-            }
-        `;
-        document.head.appendChild(style);
+async function cargarConfiguracionGlobal() {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
+        renderizarRedesSocialesFooter();
+        return;
     }
 
-    document.body.prepend(container);
-}
-
-async function cargarConfiguracionGlobal() {
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
     try {
         const res = await fetch(`${WEB_APP_URL}?sheet=Configuracion`);
         const config = await res.json();
@@ -169,7 +139,7 @@ async function cargarConfiguracionGlobal() {
             const filaBanco = config.find(c => limpiarTexto(c.clave) === 'BANCO_TITULAR' || limpiarTexto(c.clave) === 'TITULAR');
             if (filaBanco && filaBanco.valor) BANCO_TITULAR = filaBanco.valor.trim();
 
-            // 1. Mapeo flexible de Redes Sociales
+            // Mapeo flexible de Redes Sociales
             const fFb = config.find(c => limpiarTexto(c.clave).includes('FACEBOOK') || limpiarTexto(c.clave).includes('FB'));
             if (fFb && fFb.valor) LINK_FACEBOOK = fFb.valor.trim();
 
@@ -186,10 +156,11 @@ async function cargarConfiguracionGlobal() {
         }
     } catch (e) {
         console.warn("Configuración usando valores locales.");
+        renderizarRedesSocialesFooter();
     }
 }
 
-// 1. Renderizado de Redes Sociales con diseño llamativo
+// Inyección y Renderizado de Botones de Redes Sociales en el Footer
 function renderizarRedesSocialesFooter() {
     const footerContainer = document.getElementById('footerSocialIcons');
     if (!footerContainer) return;
@@ -197,10 +168,10 @@ function renderizarRedesSocialesFooter() {
     const waLink = LINK_WHATSAPP_DIRECTO || `https://wa.me/${NUMERO_WHATSAPP}`;
 
     footerContainer.innerHTML = `
-        ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#1877F2; color:#FFF; border-radius:50%; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 10px rgba(24,119,242,0.3);"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
-        ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4); color:#FFF; border-radius:50%; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 10px rgba(221,42,123,0.3);"><i class="fa-brands fa-instagram"></i></a>` : ''}
-        ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#000000; color:#FFF; border-radius:50%; text-decoration:none; font-size:1.2rem; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fa-brands fa-tiktok"></i></a>` : ''}
-        <a href="${waLink}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#25D366; color:#FFF; border-radius:50%; text-decoration:none; font-size:1.3rem; box-shadow:0 4px 10px rgba(37,211,102,0.3);"><i class="fa-brands fa-whatsapp"></i></a>
+        ${LINK_FACEBOOK ? `<a href="${LINK_FACEBOOK}" target="_blank" style="background:#1877F2;" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>` : ''}
+        ${LINK_INSTAGRAM ? `<a href="${LINK_INSTAGRAM}" target="_blank" style="background:linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);" title="Instagram"><i class="fa-brands fa-instagram"></i></a>` : ''}
+        ${LINK_TIKTOK ? `<a href="${LINK_TIKTOK}" target="_blank" style="background:#000000; border: 1px solid #333;" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>` : ''}
+        <a href="${waLink}" target="_blank" style="background:#25D366;" title="WhatsApp Atención Directa"><i class="fa-brands fa-whatsapp"></i></a>
     `;
 }
 
@@ -854,7 +825,7 @@ async function consultarSellosEnSheets() {
         const container = document.getElementById('queryStampsContainer');
         container.innerHTML = `
             <div style="text-align:center; padding:10px 0; width:100%;">
-                <div style="font-size:2.4rem; font-weight:800; color:#F59E0B;">⭐ ${puntos} <span style="font-size:1.1rem; color:#6B7280;">/ ${PUNTOS_META_PREMIO} pts</span></div>
+                <div style="font-size:2.4rem; font-weight:800; color:#E91E63;">⭐ ${puntos} <span style="font-size:1.1rem; color:#6B7280;">/ ${PUNTOS_META_PREMIO} pts</span></div>
                 <small style="color:#4B5563; display:block; margin-top:4px;">Periodo: <strong>${infoCuatri.nombre}</strong> (Vence: ${infoCuatri.vence})</small>
             </div>
         `;
@@ -1124,15 +1095,15 @@ function mostrarBoletoTurno(pedido) {
         loyaltyBanner.style.display = 'block';
         if (pedido.puntos.premioDesbloqueado) {
             loyaltyBanner.innerHTML = `
-                <div class="reward-unlocked-card" style="background:#DCFCE7; border:1px solid #86EFAC; border-radius:10px; padding:10px; color:#14532D; margin-bottom:10px;">
-                    <h4 style="margin:0; font-size:0.95rem;">🎁 ¡RECOMPENSA DE PUNTOS DESBLOQUEADA!</h4>
-                    <p style="margin:4px 0 0 0; font-size:0.8rem;">¡Felicidades! Alcanzaste los ${PUNTOS_META_PREMIO} puntos. <strong>Reclama en mostrador: ${PREMIO_LEALTAD}</strong>.</p>
+                <div class="reward-unlocked-card">
+                    <h4>🎁 ¡RECOMPENSA DE PUNTOS DESBLOQUEADA!</h4>
+                    <p>¡Felicidades! Has alcanzado la meta. <strong>Reclama en mostrador: ${PREMIO_LEALTAD}</strong>.</p>
                 </div>
             `;
         } else {
             loyaltyBanner.innerHTML = `
-                <div style="background:#FEF9C3; border:1px solid #FDE047; border-radius:10px; padding:8px; font-size:0.82rem; color:#854D0E; margin-bottom:10px;">
-                    ⭐ <strong>¡Ganaste +${pedido.puntos.puntosGanados} Puntos!</strong> Llevas <strong>${pedido.puntos.puntosTotales} de ${PUNTOS_META_PREMIO} puntos</strong> en este cuatrimestre.
+                <div style="background:#FEF9C3; border:1px solid #FDE047; border-radius:10px; padding:8px; font-size:0.8rem; color:#854D0E;">
+                    ⭐ <strong>¡Sumaste +${pedido.puntos.puntosGanados} puntos!</strong> Llevas <strong>${pedido.puntos.puntosTotales} de ${PUNTOS_META_PREMIO} puntos</strong> en este cuatrimestre.
                 </div>
             `;
         }
@@ -1249,9 +1220,9 @@ function enviarComprobanteWhatsApp() {
 
     if (p.puntos && p.puntos.puntosGanados > 0) {
         if (p.puntos.premioDesbloqueado) {
-            mensaje += `🎁 *¡RECOMPENSA DE PUNTOS GANADA!:* Meta alcanzada (${PREMIO_LEALTAD})\n`;
+            mensaje += `🎁 *¡RECOMPENSA GANADA!:* Meta alcanzada (${PREMIO_LEALTAD})\n`;
         } else {
-            mensaje += `⭐ *PUNTOS ACUMULADOS:* +${p.puntos.puntosGanados} pts (Total: ${p.puntos.puntosTotales}/${PUNTOS_META_PREMIO})\n`;
+            mensaje += `⭐ *PUNTOS ACUMULADOS:* Llevo ${p.puntos.puntosTotales}/${PUNTOS_META_PREMIO} pts (+${p.puntos.puntosGanados} en esta orden)\n`;
         }
     }
 
