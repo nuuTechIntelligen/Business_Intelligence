@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=35">
+    <link rel="stylesheet" href="styles.css?v=40">
 </head>
 <body>
 
@@ -20,8 +20,8 @@
         
         <!-- BOTONES SUPERIORES (REDES EN MÓVIL + PUNTOS) -->
         <div class="header-top-actions">
-            <!-- Botón Social Drawer (Solo Móvil) -->
-            <button class="btn-social-drawer-trigger mobile-only" onclick="abrirDrawerRedes()" title="Nuestras Redes Sociales">
+            <!-- Botón Redes (Solo Móvil) -->
+            <button class="btn-social-drawer-trigger mobile-only" onclick="abrirModalRedesMovil()" title="Nuestras Redes y Opiniones">
                 <i class="fa-solid fa-share-nodes"></i>
             </button>
 
@@ -71,19 +71,19 @@
         </div>
     </main>
 
-    <!-- FOOTER OPCIÓN 1: TARJETA COMUNIDAD (PC ONLY) -->
+    <!-- FOOTER ANCHO COMPLETO PARA VERSIÓN PC -->
     <footer class="footer-community desktop-only">
-        <div class="community-card">
+        <div class="community-fullwidth-card">
             <div class="community-header">
-                <span class="community-badge">✨ Únete al Antojo</span>
-                <h3>¡Síguenos en Redes Sociales!</h3>
-                <p>Descubre nuevas promociones, preparados de temporada y dinámicas especiales.</p>
+                <span class="community-badge">✨ Únete a la Comunidad</span>
+                <h3>¡Conéctate con La Engordadera!</h3>
+                <p>Síguenos en redes sociales, déjanos tu opinión en Google Maps o haz tus pedidos directamente por WhatsApp.</p>
             </div>
 
             <div class="community-social-pills" id="footerSocialIconsDesktop"></div>
 
             <div class="community-bottom">
-                <span>🍿 <strong>La Engordadera</strong> | Antojos preparados al momento</span>
+                <span>🍿 <strong>La Engordadera</strong> | Antojos preparados con el mejor sazón</span>
                 <p class="copyright">© 2026 Todos los derechos reservados.</p>
             </div>
         </div>
@@ -105,20 +105,18 @@
         <i class="fa-solid fa-basket-shopping"></i>
     </a>
 
-    <!-- DRAWER OPCIÓN 3: BOTTOM SHEET REDES (MÓVIL) -->
-    <div class="social-drawer-overlay" id="socialDrawerOverlay" onclick="cerrarDrawerRedes()">
-        <div class="social-drawer-sheet" onclick="event.stopPropagation()">
-            <div class="drawer-handle"></div>
-            <div class="drawer-header">
-                <span class="drawer-emoji">🍿</span>
-                <h4>Comunidad La Engordadera</h4>
-                <p>Conéctate con nosotros en tus redes favoritas:</p>
-            </div>
+    <!-- MODAL FLOTANTE CENTRADO DE REDES Y OPINIONES (MÓVIL) -->
+    <div class="modal-overlay" id="socialModalOverlay">
+        <div class="modal-card social-modal-center" style="max-width: 400px; text-align: center;">
+            <button class="modal-close" onclick="cerrarModalRedesMovil()">&times;</button>
+            <div style="font-size: 2.2rem; margin-bottom: 4px;">🍿</div>
+            <h3 style="font-family: var(--font-heading); color: var(--primary-pink); font-size: 1.25rem;">La Engordadera</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Conéctate, síguenos o califica tu experiencia:</p>
             
-            <div class="drawer-social-grid" id="footerSocialIconsMobile"></div>
+            <div class="social-modal-links-grid" id="footerSocialIconsMobile"></div>
 
-            <button type="button" class="btn-close-drawer" onclick="cerrarDrawerRedes()">
-                Listo / Volver al Menú
+            <button type="button" class="btn-secondary w-100" onclick="cerrarModalRedesMovil()" style="margin-top: 14px;">
+                Cerrar
             </button>
         </div>
     </div>
@@ -347,6 +345,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=35"></script>
+    <script src="script.js?v=40"></script>
 </body>
 </html>
