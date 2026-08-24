@@ -1,18 +1,22 @@
 // ======================================================
 // CONFIGURACIÓN SHEETDB & WHATSAPP
 // ======================================================
-const SHEETDB_INPUT = "sq3j6nb77cl27"; 
+// Puedes pegar tu ID (ej: abc123xyz) O la URL completa (ej: https://sheetdb.io/api/v1/abc123xyz)
+const SHEETDB_INPUT = "TU_ID_O_URL_AQUI"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
+// Variables dinámicas (se actualizan desde la pestaña 'Configuracion' de Google Sheets)
 let MONTO_MINIMO_SELLO = 80.00;
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
+// Extractor seguro de ID de SheetDB
 function obtenerIdLimpioSheetDB(input) {
     if (!input || input.includes("TU_ID")) return "";
-    return input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
+    const limpio = input.trim().replace(/^https?:\/\/sheetdb\.io\/api\/v1\//i, "").split("?")[0].replace(/\/$/, "");
+    return limpio;
 }
 
 const SHEETDB_ID = obtenerIdLimpioSheetDB(SHEETDB_INPUT);
@@ -149,7 +153,7 @@ async function cargarMenuDesdeSheetDB() {
 }
 
 // ======================================================
-// CARRUSEL DE PROMOS (TEXTO PC + BOTÓN RESPONSIVO)
+// CARRUSEL DE PROMOS (TEXTO EN PC + BOTÓN RESPONSIVO)
 // ======================================================
 function renderizarGaleriaPromos(productos) {
     const bannerContainer = document.getElementById('heroBannerContainer');
@@ -928,6 +932,7 @@ async function procesarGeneracionTurno() {
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando pedido...';
 
+    // 1. Procesar Registro en Clientes_Lealtad
     let infoLealtad = { aplicaSello: false, sellosActuales: 0, regaloDesbloqueado: false };
     if (total >= MONTO_MINIMO_SELLO && telefonoCliente.length === 10) {
         infoLealtad = await procesarSelloEnGoogleSheets(telefonoCliente, nombreCliente);
@@ -950,10 +955,12 @@ async function procesarGeneracionTurno() {
         fecha_completa: new Date().toISOString()
     };
 
+    // 2. Guardar en KDS Local de respaldo
     const pedidosActuales = JSON.parse(localStorage.getItem('engordadera_pedidos_cocina') || '[]');
     pedidosActuales.push(ultimoPedidoGenerado);
     localStorage.setItem('engordadera_pedidos_cocina', JSON.stringify(pedidosActuales));
 
+    // 3. Respaldo asegurado en Ventas_Historicas para KDS en la Nube
     await respaldarVentaEnGoogleSheets(ultimoPedidoGenerado);
 
     btnSubmit.disabled = false;
@@ -963,6 +970,7 @@ async function procesarGeneracionTurno() {
     mostrarBoletoTurno(ultimoPedidoGenerado);
 }
 
+// Inserción / Actualización de Clientes_Lealtad
 async function procesarSelloEnGoogleSheets(telefono, nombre) {
     if (!SHEETDB_ID) {
         return { aplicaSello: true, sellosActuales: 1, regaloDesbloqueado: false };
@@ -1031,6 +1039,7 @@ async function procesarSelloEnGoogleSheets(telefono, nombre) {
     }
 }
 
+// Inserción en Ventas_Historicas con soporte para KDS en la Nube
 async function respaldarVentaEnGoogleSheets(pedido) {
     if (!SHEETDB_ID) return;
     try {
@@ -1042,6 +1051,8 @@ async function respaldarVentaEnGoogleSheets(pedido) {
                 tipo: pedido.tipo,
                 total: pedido.total,
                 fecha: pedido.fecha_completa,
+                estado: 'cola',
+                items_json: JSON.stringify(pedido.items),
                 detalle: pedido.items.map(i => {
                     let txt = `${i.nombre} ($${i.precio})`;
                     if (i.extras && i.extras.length > 0) txt += ` [Extras: ${i.extras.join(', ')}]`;
@@ -1061,7 +1072,7 @@ async function respaldarVentaEnGoogleSheets(pedido) {
         });
 
         const resJson = await res.json();
-        console.log("✅ [SheetDB] Venta registrada en Ventas_Historicas:", resJson);
+        console.log("✅ [SheetDB] Venta registrada en la nube:", resJson);
     } catch (e) {
         console.error("❌ Error al insertar venta en Sheets:", e);
     }
