@@ -1,16 +1,19 @@
 /* ======================================================
-   ESTILOS GENERALES Y VARIABLES - LA ENGORDADERA
+   PALETA DE COLORES ORIGINAL - LA ENGORDADERA
 ====================================================== */
 :root {
-    --primary-yellow: #F59E0B;
-    --primary-pink: #EC4899;
-    --primary-blue: #0284C7;
-    --primary-green: #10B981;
-    --primary-red: #EF4444;
-    --bg-light: #F8FAFC;
-    --text-dark: #1E293B;
-    --text-muted: #64748B;
-    --card-bg: #FFFFFF;
+    --primary-pink: #E91E63;       /* Rosa Mexicano Original */
+    --primary-pink-dark: #C2185B;
+    --primary-pink-light: #FCE4EC;
+    --accent-yellow: #FFC107;      /* Amarillo Mostaza */
+    --accent-yellow-dark: #FFA000;
+    --accent-blue: #0288D1;        /* Azul Cyan */
+    --accent-green: #2E7D32;       /* Verde Éxito */
+    --bg-main: #FFFFFF;
+    --bg-secondary: #FAFAFA;
+    --text-main: #212121;
+    --text-muted: #757575;
+    --border-color: #EEEEEE;
     --font-heading: 'Fredoka', cursive, sans-serif;
     --font-body: 'Poppins', sans-serif;
 }
@@ -22,25 +25,25 @@
 }
 
 body {
-    background-color: var(--bg-light);
-    color: var(--text-dark);
+    background-color: var(--bg-main);
+    color: var(--text-main);
     font-family: var(--font-body);
-    padding-bottom: 90px;
+    padding-bottom: 95px;
     position: relative;
     min-height: 100vh;
 }
 
 /* ======================================================
-   HEADER & BOTÓN CONSULTAR PUNTOS
+   1. ENCABEZADO CON LOGO ROSA
 ====================================================== */
 .main-header {
     background: #FFFFFF;
-    border-bottom: 2px solid #E2E8F0;
-    padding: 12px 16px;
+    border-bottom: 2px solid var(--primary-pink-light);
+    padding: 10px 16px;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 10px rgba(233, 30, 99, 0.08);
 }
 
 .header-container {
@@ -57,32 +60,39 @@ body {
     gap: 10px;
 }
 
+.logo-img {
+    height: 46px;
+    width: auto;
+    object-fit: contain;
+}
+
 .brand-emoji {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
 }
 
 .brand-titles h1 {
     font-family: var(--font-heading);
-    font-size: 1.4rem;
-    color: var(--text-dark);
+    font-size: 1.45rem;
+    color: var(--primary-pink);
     line-height: 1.1;
-    margin: 0;
+    letter-spacing: -0.5px;
 }
 
 .brand-titles p {
     font-size: 0.75rem;
     color: var(--text-muted);
-    margin: 0;
+    font-weight: 600;
 }
 
 .btn-loyalty-check {
-    background: #FEF3C7;
-    color: #B45309;
-    border: 1.5px solid #FCD34D;
+    background: var(--primary-pink-light);
+    color: var(--primary-pink-dark);
+    border: 1.5px solid var(--primary-pink);
     padding: 8px 14px;
     border-radius: 20px;
-    font-weight: 700;
+    font-family: var(--font-heading);
     font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -91,12 +101,13 @@ body {
 }
 
 .btn-loyalty-check:hover {
-    background: #FDE68A;
-    transform: translateY(-1px);
+    background: var(--primary-pink);
+    color: #FFFFFF;
+    transform: scale(1.02);
 }
 
 /* ======================================================
-   CARRUSEL DE PROMOCIONES
+   2. CARRUSEL DE PROMOCIONES
 ====================================================== */
 .hero-banner-section {
     max-width: 1200px;
@@ -108,9 +119,9 @@ body {
 
 .banner-slider-wrapper {
     position: relative;
-    border-radius: 16px;
+    border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 24px rgba(233, 30, 99, 0.15);
 }
 
 .banner-slider-track {
@@ -145,26 +156,27 @@ body {
 
 .promo-slide-info h4 {
     font-family: var(--font-heading);
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     margin: 0 0 2px 0;
-    color: var(--primary-yellow);
+    color: var(--accent-yellow);
 }
 
 .promo-slide-info p {
     font-size: 0.85rem;
     margin: 0;
-    color: #E2E8F0;
+    color: #F5F5F5;
 }
 
 .btn-promo-action {
-    background: var(--primary-yellow);
-    color: #000;
+    background: var(--primary-pink);
+    color: #FFFFFF;
     border: none;
     padding: 8px 14px;
     border-radius: 10px;
-    font-weight: 700;
+    font-family: var(--font-heading);
     font-size: 0.85rem;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(233, 30, 99, 0.4);
 }
 
 .slider-btn {
@@ -196,32 +208,32 @@ body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #CBD5E1;
+    background: #E0E0E0;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
 .promo-dot.active {
-    background: var(--primary-yellow);
-    width: 20px;
+    background: var(--primary-pink);
+    width: 22px;
     border-radius: 10px;
 }
 
 /* ======================================================
-   NAVEGACIÓN POR CATEGORÍAS
+   3. NAVEGACIÓN POR CATEGORÍAS
 ====================================================== */
 .categories-nav {
     position: sticky;
-    top: 65px;
+    top: 66px;
     background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid #E2E8F0;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
     padding: 10px 0;
     z-index: 90;
 }
 
 .nav-scroll-wrapper {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     overflow-x: auto;
     padding: 0 16px;
     max-width: 1200px;
@@ -231,8 +243,8 @@ body {
 .nav-scroll-wrapper::-webkit-scrollbar { display: none; }
 
 .nav-btn {
-    background: #F1F5F9;
-    border: 1px solid #E2E8F0;
+    background: #F5F5F5;
+    border: 1.5px solid #EEEEEE;
     padding: 8px 16px;
     border-radius: 20px;
     font-family: var(--font-heading);
@@ -247,69 +259,83 @@ body {
 }
 
 .nav-btn.active {
-    background: var(--primary-yellow);
-    color: #000;
-    border-color: var(--primary-yellow);
-    font-weight: 700;
+    background: var(--primary-pink);
+    color: #FFFFFF;
+    border-color: var(--primary-pink);
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
 }
 
+.nav-btn-text.color-pink { color: inherit; }
+
 /* ======================================================
-   SECCIONES Y TARJETAS DEL MENÚ
+   4. SECCIONES Y TARJETAS DEL MENÚ
 ====================================================== */
 .menu-container {
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 24px auto;
     padding: 0 16px;
     position: relative;
     z-index: 10;
 }
 
 .menu-section {
-    margin-bottom: 34px;
-}
-
-.section-header {
-    margin-bottom: 14px;
+    margin-bottom: 36px;
 }
 
 .section-header h2 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--text-dark);
+    font-size: 1.55rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title.color-pink {
+    color: var(--primary-pink);
+}
+.section-title.color-blue {
+    color: var(--accent-blue);
+}
+.section-title.color-yellow {
+    color: var(--accent-yellow-dark);
 }
 
 .section-header p {
     color: var(--text-muted);
     font-size: 0.85rem;
+    margin-top: 2px;
 }
 
 .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
+    gap: 18px;
+    margin-top: 14px;
 }
 
 .card {
     background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 16px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(233, 30, 99, 0.12);
+    border-color: var(--primary-pink-light);
 }
 
 .card-img-placeholder {
     width: 100%;
-    height: 170px;
+    height: 175px;
     background-size: cover;
     background-position: center;
 }
@@ -324,15 +350,15 @@ body {
 
 .card-body h3 {
     font-family: var(--font-heading);
-    font-size: 1.15rem;
-    color: var(--text-dark);
+    font-size: 1.2rem;
+    color: var(--text-main);
     margin: 0 0 6px 0;
 }
 
 .card-desc {
     color: var(--text-muted);
-    font-size: 0.8rem;
-    line-height: 1.3;
+    font-size: 0.82rem;
+    line-height: 1.35;
     margin-bottom: 12px;
 }
 
@@ -345,43 +371,49 @@ body {
 
 .price {
     font-family: var(--font-heading);
-    font-size: 1.25rem;
-    color: var(--primary-yellow);
+    font-size: 1.3rem;
+    color: var(--primary-pink);
     font-weight: 700;
 }
 
 .btn-add {
-    background: #FEF3C7;
-    color: #B45309;
-    border: 1.5px solid #FCD34D;
+    background: var(--primary-pink-light);
+    color: var(--primary-pink-dark);
+    border: 1.5px solid var(--primary-pink);
     padding: 8px 14px;
-    border-radius: 10px;
-    font-weight: 700;
+    border-radius: 12px;
+    font-family: var(--font-heading);
     font-size: 0.85rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-add:hover {
+    background: var(--primary-pink);
+    color: #FFFFFF;
 }
 
 /* ======================================================
-   BARRA FLOTANTE DEL CARRITO
+   5. BARRA FLOTANTE DEL CARRITO
 ====================================================== */
 .cart-bar {
     position: fixed;
-    bottom: 14px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 32px);
     max-width: 600px;
     background: #1E293B;
     color: #FFFFFF;
-    border-radius: 16px;
-    padding: 12px 18px;
+    border-radius: 18px;
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
     z-index: 99;
     cursor: pointer;
     transition: transform 0.2s ease;
@@ -395,33 +427,71 @@ body {
 
 .cart-total {
     font-family: var(--font-heading);
-    font-size: 1.3rem;
-    color: var(--primary-yellow);
+    font-size: 1.35rem;
+    color: var(--accent-yellow);
     font-weight: 700;
 }
 
 .btn-checkout {
-    background: var(--primary-yellow);
-    color: #000;
+    background: var(--primary-pink);
+    color: #FFFFFF;
     border: none;
     padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: 700;
+    border-radius: 12px;
+    font-family: var(--font-heading);
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
 }
 
 /* ======================================================
-   MODALES
+   6. PIE DE PÁGINA Y REDES SOCIALES
+====================================================== */
+.main-footer {
+    text-align: center;
+    padding: 40px 20px 100px;
+    margin-top: 50px;
+    border-top: 1px solid var(--border-color);
+    background: #FFFFFF;
+    position: relative;
+    z-index: 10;
+}
+
+.footer-brand h3 {
+    font-family: var(--font-heading);
+    color: var(--primary-pink);
+    font-size: 1.3rem;
+    margin: 4px 0 0 0;
+}
+
+.footer-brand p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 18px 0;
+}
+
+.footer-copy {
+    color: #9E9E9E;
+    font-size: 0.75rem;
+}
+
+/* ======================================================
+   7. MODALES
 ====================================================== */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(5px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -435,21 +505,21 @@ body {
 
 .modal-card {
     background: #FFFFFF;
-    border-radius: 20px;
-    max-width: 500px;
+    border-radius: 22px;
+    max-width: 480px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    padding: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    padding: 22px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
 }
 
 .modal-close {
     position: absolute;
     top: 14px;
     right: 16px;
-    background: #F1F5F9;
+    background: #F5F5F5;
     border: none;
     width: 32px;
     height: 32px;
@@ -459,21 +529,21 @@ body {
 }
 
 .modal-header {
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 12px;
     margin-bottom: 14px;
 }
 
 .modal-header h3 {
     font-family: var(--font-heading);
-    font-size: 1.4rem;
-    margin: 0;
+    font-size: 1.45rem;
+    color: var(--primary-pink);
 }
 
 .modal-price {
     font-family: var(--font-heading);
-    font-size: 1.3rem;
-    color: var(--primary-yellow);
+    font-size: 1.35rem;
+    color: var(--text-main);
     font-weight: 700;
     display: block;
     margin-top: 4px;
@@ -486,7 +556,7 @@ body {
 .modal-group-title {
     font-weight: 700;
     font-size: 0.9rem;
-    color: var(--text-dark);
+    color: var(--text-main);
     display: block;
     margin-bottom: 8px;
 }
@@ -498,10 +568,10 @@ body {
 }
 
 .option-chip {
-    background: #F8FAFC;
-    border: 1.5px solid #CBD5E1;
+    background: #FAFAFA;
+    border: 1.5px solid #E0E0E0;
     padding: 8px 12px;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 0.85rem;
     cursor: pointer;
     display: flex;
@@ -511,10 +581,10 @@ body {
 }
 
 .option-chip.selected {
-    background: #FEF3C7;
-    border-color: var(--primary-yellow);
-    color: #B45309;
-    font-weight: 600;
+    background: var(--primary-pink-light);
+    border-color: var(--primary-pink);
+    color: var(--primary-pink-dark);
+    font-weight: 700;
 }
 
 .amount-pills {
@@ -524,30 +594,61 @@ body {
 }
 
 .amount-pill {
-    background: #F8FAFC;
-    border: 1.5px solid #CBD5E1;
+    background: #FAFAFA;
+    border: 1.5px solid #E0E0E0;
     padding: 8px 16px;
     border-radius: 20px;
+    font-family: var(--font-heading);
     font-weight: 700;
     cursor: pointer;
 }
 
 .amount-pill.active {
-    background: var(--primary-yellow);
-    border-color: var(--primary-yellow);
-    color: #000;
+    background: var(--primary-pink);
+    border-color: var(--primary-pink);
+    color: #FFFFFF;
 }
 
 .btn-confirm-add {
     width: 100%;
-    background: var(--primary-yellow);
-    color: #000;
+    background: var(--primary-pink);
+    color: #FFFFFF;
     border: none;
     padding: 14px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 1rem;
+    border-radius: 14px;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
     display: flex;
     justify-content: space-between;
     cursor: pointer;
+    box-shadow: 0 4px 14px rgba(233, 30, 99, 0.4);
+}
+
+.btn-submit-order {
+    width: 100%;
+    background: var(--primary-pink);
+    color: #FFFFFF;
+    border: none;
+    padding: 14px;
+    border-radius: 14px;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(233, 30, 99, 0.35);
+}
+
+.type-btn.active {
+    background: var(--primary-pink-light);
+    border-color: var(--primary-pink) !important;
+    color: var(--primary-pink-dark);
+    font-weight: 700;
+}
+
+.badge-tienda {
+    background: var(--accent-blue);
+    color: #FFF;
+}
+.badge-recoger {
+    background: var(--primary-pink);
+    color: #FFF;
 }
