@@ -2,7 +2,7 @@
 // KDS & FINANZAS LA ENGORDADERA (GOOGLE APPS SCRIPT WEB APP)
 // ======================================================
 // Pega aquí la URL de tu Web App de Google Apps Script (termina en /exec)
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID/exec"; 
 let INTERVALO_SEGUNDOS = 4;
 
 let pedidosGlobalesSheets = [];
@@ -92,8 +92,12 @@ async function consultarPedidosNube() {
         pedidosGlobalesSheets = data.map((fila, index) => {
             const turnoVal = obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
             const clienteVal = obtenerCampoFlexible(fila, ['cliente', 'nombre']) || 'Cliente';
-            const telefonoVal = obtenerCampoFlexible(fila, ['telefono', 'tel', 'celular']) || '';
-            const tipoVal = obtenerCampoFlexible(fila, ['tipo', 'tipo_pedido']) || 'tienda';
+            const telefonoVal = String(obtenerCampoFlexible(fila, ['telefono', 'tel', 'celular']) || '');
+            
+            // Normalización tolerante de Tipo (tienda vs recoger)
+            const tipoRaw = normalizarTextoClave(obtenerCampoFlexible(fila, ['tipo', 'tipo_pedido']) || 'tienda');
+            const tipoVal = (tipoRaw.includes('recog') || tipoRaw.includes('llevar')) ? 'recoger' : 'tienda';
+
             const totalVal = parseFloat(obtenerCampoFlexible(fila, ['total', 'monto']) || 0);
             const fechaVal = obtenerCampoFlexible(fila, ['fecha', 'hora', 'fecha_completa']) || new Date().toISOString();
             const detalleVal = obtenerCampoFlexible(fila, ['detalle', 'descripcion', 'productos']) || '';
@@ -117,7 +121,7 @@ async function consultarPedidosNube() {
                 turno: turnoVal,
                 cliente: clienteVal,
                 telefono: telefonoVal,
-                tipo: tipoVal.toLowerCase().trim(),
+                tipo: tipoVal,
                 total: totalVal,
                 fecha_completa: fechaVal,
                 estado: estadoRaw,
@@ -147,7 +151,7 @@ async function consultarPedidosNube() {
 }
 
 // ======================================================
-// 2. RENDERIZADO KANBAN CON BOTÓN DE ELIMINAR
+// 2. RENDERIZADO KANBAN CON BOTÓN DE ELIMINAR (TIENDA & RECOGER)
 // ======================================================
 function renderizarTableroKanban() {
     const contCola = document.getElementById('containerCola');
@@ -178,10 +182,12 @@ function renderizarTableroKanban() {
 
 function crearTarjetaHTML(pedido) {
     const semaforo = calcularSemaforoTiempo(pedido.fecha_completa);
-    const turnoEscapado = encodeURIComponent(pedido.turno);
+    const turnoEscapado = encodeURIComponent(pedido.turno || '');
+    const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
+    const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
 
     let itemsHTML = '';
-    pedido.items.forEach((it, idx) => {
+    (pedido.items || []).forEach((it, idx) => {
         let extras = [];
         if (it.base) extras.push(`Base: ${it.base}`);
         if (it.ingredientes && it.ingredientes.length > 0) extras.push(`Con: ${it.ingredientes.join(', ')}`);
@@ -199,7 +205,7 @@ function crearTarjetaHTML(pedido) {
     let botonAccion = '';
     if (pedido.estado === 'cola') {
         botonAccion = `
-            <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="iniciarPreparacionPedido('${turnoEscapado}', '${pedido.tipo}', '${pedido.telefono}')">
+            <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="iniciarPreparacionPedido('${turnoEscapado}', '${esRecoger ? 'recoger' : 'tienda'}', '${telefonoLimpio}')">
                 <i class="fa-solid fa-fire"></i> Preparar
             </button>
         `;
@@ -221,8 +227,8 @@ function crearTarjetaHTML(pedido) {
         <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1px solid #334155; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
-                <span style="background:${pedido.tipo === 'tienda' ? '#0284C7' : '#EA580C'}; color:#FFF; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;">
-                    ${pedido.tipo === 'tienda' ? '🏪 EN TIENDA' : '🛍️ RECOGER'}
+                <span style="background:${esRecoger ? '#EA580C' : '#0284C7'}; color:#FFF; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;">
+                    ${esRecoger ? '🛍️ RECOGER' : '🏪 EN TIENDA'}
                 </span>
                 <span class="kds-timer-badge" style="font-weight:700; font-size:0.85rem;">
                     <i class="fa-solid fa-clock"></i> ${semaforo.tiempoFormateado}
@@ -230,7 +236,7 @@ function crearTarjetaHTML(pedido) {
             </div>
 
             <div style="font-size:0.85rem; color:#94A3B8; margin-bottom:8px;">
-                👤 Cliente: <strong style="color:#F8FAFC;">${pedido.cliente}</strong>
+                👤 Cliente: <strong style="color:#F8FAFC;">${pedido.cliente}</strong> ${telefonoLimpio ? `<span style="color:#F59E0B; font-size:0.78rem;">(📱 ${telefonoLimpio})</span>` : ''}
             </div>
 
             <div style="margin-bottom:10px;">
