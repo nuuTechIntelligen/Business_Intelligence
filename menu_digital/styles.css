@@ -58,6 +58,12 @@ body {
     box-shadow: 0 4px 18px rgba(233, 30, 99, 0.35);
 }
 
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none; /* Asegura que nunca bloquee los clics */
+}
+
 /* BOTONES SUPERIORES (REDES EN MÓVIL + PUNTOS) */
 .header-top-actions {
     position: absolute;
@@ -66,17 +72,17 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    z-index: 20;
+    z-index: 100; /* Prioridad máxima de clic */
 }
 
 .btn-social-drawer-trigger {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.25);
     color: #FFFFFF;
-    border: 1.2px solid rgba(255, 255, 255, 0.65);
-    width: 32px;
-    height: 32px;
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
     backdrop-filter: blur(6px);
     display: flex;
@@ -84,20 +90,22 @@ body {
     justify-content: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     transition: transform 0.2s, background-color 0.2s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
-.btn-social-drawer-trigger:hover {
-    background: rgba(255, 255, 255, 0.35);
-    transform: scale(1.08);
+.btn-social-drawer-trigger:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.45);
 }
 
 .btn-loyalty-corner {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.25);
     color: #FFFFFF;
-    border: 1.2px solid rgba(255, 255, 255, 0.65);
-    padding: 5px 12px;
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    padding: 6px 14px;
     border-radius: 20px;
     font-family: var(--font-heading);
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 700;
     cursor: pointer;
     backdrop-filter: blur(6px);
@@ -106,11 +114,13 @@ body {
     gap: 5px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     transition: transform 0.2s, background-color 0.2s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 .btn-loyalty-corner i { color: var(--primary-yellow); }
-.btn-loyalty-corner:hover {
-    background: rgba(255, 255, 255, 0.35);
-    transform: scale(1.05);
+.btn-loyalty-corner:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.45);
 }
 
 .logo-container {
@@ -147,6 +157,7 @@ body {
     line-height: 1.2;
 }
 
+/* BOTÓN PRINCIPAL CON EFECTO GLOW */
 .btn-primary {
     display: inline-block;
     background-color: var(--primary-yellow);
@@ -174,6 +185,7 @@ body {
     }
 }
 
+/* CONTENEDOR CON EFECTO GLASSMORPHISM DEL BANNER */
 .promo-gallery-container {
     margin-top: 16px;
     position: relative;
@@ -324,7 +336,7 @@ body {
 /* ====================================================== */
 /* 3. NAVEGACIÓN STICKY                                   */
 /* ====================================================== */
-.sticky-nav { position: sticky; top: 0; z-index: 100; background: #FFFFFF; box-shadow: 0 3px 12px rgba(0,0,0,0.08); padding: 8px 0; width: 100%; }
+.sticky-nav { position: sticky; top: 0; z-index: 90; background: #FFFFFF; box-shadow: 0 3px 12px rgba(0,0,0,0.08); padding: 8px 0; width: 100%; }
 .nav-scroll-wrapper { display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding: 2px 12px; width: 100%; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .nav-scroll-wrapper::-webkit-scrollbar { display: none; }
 
@@ -388,14 +400,14 @@ body {
 .btn-add.disabled { background-color: #888; cursor: not-allowed; }
 
 /* ====================================================== */
-/* 5. MODALES Y SELECTORES                                */
+/* 5. MODALES Y SELECTORES (CENTRADOS)                    */
 /* ====================================================== */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 2000;
     display: none; align-items: center; justify-content: center; padding: 14px;
 }
-.modal-overlay.active { display: flex; }
+.modal-overlay.active { display: flex !important; }
 
 .modal-card {
     background: #FFFFFF; width: 100%; max-width: 480px; max-height: 88vh;
@@ -404,7 +416,7 @@ body {
 }
 @keyframes popUp { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 
-.modal-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 1.6rem; line-height: 1; color: #777; cursor: pointer; }
+.modal-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 1.6rem; line-height: 1; color: #777; cursor: pointer; z-index: 10; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; padding-right: 20px; }
 .modal-header h3 { font-family: var(--font-heading); font-size: 1.15rem; }
 .modal-price { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; color: var(--primary-green); }
