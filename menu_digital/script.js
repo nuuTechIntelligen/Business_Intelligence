@@ -1,14 +1,14 @@
 // ======================================================
 // MENU LA ENGORDADERA (BARRA PÍLDORA + MERCADO PAGO DINÁMICO + PERSISTENCIA)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl9NiFg5WzBJGD9klSJijJVaziy9eOPiSvGhLPiakZeYJ26CVjE0FRuZgmWvSJ5w3wgg/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 // Variables dinámicas desde Google Sheets
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let PUNTOS_META_PREMIO = 100;
 let ESCALA_PUNTOS_COMPRA = "5-20:1, 21-50:3, 51-100:6, 101-200:15, 201-9999:25";
-let LINK_MERCADOPAGO = "https://mercadopago.com.mx";
+let LINK_MERCADOPAGO = "http://link.mercadopago.com.mx/fyblaengordadera";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
@@ -142,13 +142,13 @@ async function cargarConfiguracionGlobal() {
 
                 if (!clave || !valor) return;
 
-                // Ignorar tokens de seguridad en el frontend
+                // Evitar procesar tokens o secretos en frontend
                 if (clave.includes('TOKEN') || clave.includes('SECRET') || clave.includes('PASS')) return;
 
                 if (clave === 'PREMIO' || clave.includes('PREMIO_LEALTAD')) PREMIO_LEALTAD = valor;
                 else if (clave === 'PUNTOS_META' || clave === 'META_PUNTOS') PUNTOS_META_PREMIO = parseInt(valor, 10) || 100;
                 else if (clave.includes('ESCALA')) ESCALA_PUNTOS_COMPRA = valor;
-                else if ((clave === 'LINK_MERCADOPAGO' || clave === 'LINK_MP' || clave === 'MERCADOPAGO') && valor.startsWith('http')) {
+                else if ((clave === 'LINK_MERCADOPAGO' || clave === 'LINK_MP') && valor.startsWith('http')) {
                     LINK_MERCADOPAGO = valor;
                 }
                 else if (clave.includes('CLABE')) CLABE_BANCARIA = valor;
@@ -727,7 +727,7 @@ function confirmarAgregarAlCarrito() {
 }
 
 // ======================================================
-// 4. RENDERIZADO DE BARRA PÍLDORA (ESTRUCTURA VISIBLE)
+// 4. RENDERIZADO DE BARRA PÍLDORA (VISIBLE)
 // ======================================================
 function actualizarBarraPildoraCarrito() {
     const totalCount = carrito.length;
@@ -1213,12 +1213,12 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
 
     btnMp.style.pointerEvents = 'none';
     btnMp.style.opacity = '0.6';
-    btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Conectando monto exacto...`;
+    btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generando cobro de $${pedido.total.toFixed(2)}...`;
     
     if (loadingHint) {
         loadingHint.style.display = 'block';
         loadingHint.style.color = '#0284C7';
-        loadingHint.textContent = '⏳ Creando sesión de cobro por $' + pedido.total.toFixed(2) + '...';
+        loadingHint.textContent = '⏳ Conectando con Mercado Pago para fijar el monto exacto...';
     }
 
     try {
@@ -1237,7 +1237,6 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
         const data = await res.json();
 
         if (data.init_point) {
-            // ENLACE DINÁMICO CON MONTO EXACTO GENERADO CON ÉXITO
             btnMp.href = data.init_point;
             btnMp.style.pointerEvents = 'auto';
             btnMp.style.opacity = '1';
@@ -1251,14 +1250,13 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
             throw new Error(data.error || "No se recibió init_point");
         }
     } catch (e) {
-        console.error("Fallo dinámico MP:", e);
-        // Fallback al link manual
+        console.warn("Fallo dinámico MP:", e);
         btnMp.href = LINK_MERCADOPAGO;
         btnMp.style.pointerEvents = 'auto';
         btnMp.style.opacity = '1';
         btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar en Mercado Pago ($${pedido.total.toFixed(2)})`;
         if (loadingHint) {
-            loadingHint.textContent = '⚠️ ' + (e.message || 'Ingresa manualmente el monto al pagar.');
+            loadingHint.textContent = '⚠️ Ingresa manualmente $' + pedido.total.toFixed(2) + ' al pagar.';
             loadingHint.style.color = '#DC2626';
         }
     }
