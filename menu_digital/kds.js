@@ -139,7 +139,7 @@ async function consultarPedidosNube() {
             return;
         }
 
-        actualizarBarraDiagnostico(`Sheets Conectado (Ilimitado) | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
+        actualizarBarraDiagnostico(`Sheets Conectado | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
 
         pedidosGlobalesSheets = data.map((fila, index) => {
             const turnoVal = obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
@@ -162,7 +162,7 @@ async function consultarPedidosNube() {
                 if (itemsJsonVal && String(itemsJsonVal).trim().startsWith('[')) {
                     items = JSON.parse(itemsJsonVal);
                 } else if (detalleVal) {
-                    items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], ingredientes: [], base: '', salsa: '', precio: 0 }));
+                    items = detalleVal.split('//').map(d => ({ nombre: d.trim(), extras: [], ingredientes: [], base: '', salsa: '', precio: 0 }));
                 }
             } catch (e) {
                 items = [{ nombre: detalleVal || 'Botana', extras: [], ingredientes: [], base: '', salsa: '', precio: totalVal }];
@@ -255,7 +255,6 @@ function crearTarjetaHTML(pedido) {
     const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
     const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
 
-    // Desglose de botanas con ingredientes y extras
     let itemsHTML = '';
     if (pedido.items && pedido.items.length > 0) {
         pedido.items.forEach((it, idx) => {
@@ -388,7 +387,6 @@ function abrirModalDetallePedido(turnoEscapado) {
     badgeTipo.style.color = '#FFF';
     badgeTipo.textContent = esTienda ? '🏪 EN TIENDA' : '🛍️ PARA RECOGER';
 
-    // Opciones de llamada o WhatsApp
     const contactBox = document.getElementById('modalContactActions');
     contactBox.innerHTML = '';
     const telLimpio = String(pedido.telefono || '').replace(/\D/g, '');
@@ -399,7 +397,6 @@ function abrirModalDetallePedido(turnoEscapado) {
         `;
     }
 
-    // Desglose de botanas e ingredientes en el modal
     const itemsList = document.getElementById('modalItemsList');
     if (pedido.items && pedido.items.length > 0) {
         itemsList.innerHTML = pedido.items.map((it, idx) => `
@@ -420,7 +417,6 @@ function abrirModalDetallePedido(turnoEscapado) {
         itemsList.innerHTML = `<p style="font-size:0.85rem; color:#CBD5E1;">${pedido.detalle_crudo || 'Sin detalles'}</p>`;
     }
 
-    // Control de pagos: solo en tienda se permite elegir el método
     const paySelector = document.getElementById('modalPaySelectorWrapper');
     const pickupNotice = document.getElementById('modalPickupPayNotice');
     if (esTienda) {
@@ -454,7 +450,6 @@ async function cambiarEstadoDesdeModal(nuevoEstado) {
     const turno = pedidoModalActivo.turno;
     const esTienda = String(pedidoModalActivo.tipo).toLowerCase().includes('tienda');
 
-    // Si es tienda y eligió método, registrarlo
     if (esTienda && metodoPagoSeleccionadoModal) {
         await alternarEstadoPagoNube(encodeURIComponent(turno), true, metodoPagoSeleccionadoModal);
     }
@@ -601,7 +596,6 @@ function calcularSemaforoTiempo(fechaISO) {
     const ahora = new Date();
     let creacion = new Date(fechaISO);
 
-    // Fallback si viene en formato simple de hora (ej: "18:45")
     if (isNaN(creacion.getTime())) {
         const match = String(fechaISO).match(/(\d{1,2}):(\d{2})/);
         if (match) {
