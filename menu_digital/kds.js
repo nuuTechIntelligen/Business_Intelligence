@@ -1,7 +1,7 @@
 // ======================================================
 // KDS (KITCHEN DISPLAY SYSTEM) - LA ENGORDADERA
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_aQn_T4W_REEMPLAZA_CON_TU_ID/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl9NiFg5WzBJGD9klSJijJVaziy9eOPiSvGhLPiakZeYJ26CVjE0FRuZgmWvSJ5w3wgg/exec"; 
 
 let pedidosActivos = [];
 let pedidoModalActual = null;
