@@ -18,6 +18,67 @@
 
     <!-- Estilos de cocina y finanzas -->
     <link rel="stylesheet" href="cocina.css?v=10">
+
+    <style>
+        /* Estilos del Modal de Detalle KDS */
+        .modal-kds-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+        }
+        .modal-kds-overlay.active { display: flex; }
+        .modal-kds-card {
+            background: #1E293B;
+            border: 2px solid #334155;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+            color: #F8FAFC;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-kds-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            color: #94A3B8;
+            cursor: pointer;
+        }
+        .kds-pay-btn-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .kds-pay-btn {
+            background: #0F172A;
+            color: #F8FAFC;
+            border: 1.5px solid #475569;
+            padding: 8px 6px;
+            border-radius: 8px;
+            font-family: 'Fredoka', cursive;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: center;
+        }
+        .kds-pay-btn.active {
+            background: #E91E63;
+            border-color: #F472B6;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
 
@@ -246,7 +307,71 @@
     </section>
 
     <!-- ========================================== -->
-    <!-- 5. MODAL DE TIEMPO ESTIMADO (PARA RECOGER) -->
+    <!-- 5. MODAL DE DETALLE DEL PEDIDO (INTERACTIVO) -->
+    <!-- ========================================== -->
+    <div class="modal-kds-overlay" id="kdsDetailModal">
+        <div class="modal-kds-card">
+            <button class="modal-kds-close" onclick="cerrarModalDetallePedido()">&times;</button>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:10px;">
+                <div>
+                    <h2 style="font-family:'Fredoka', cursive; color:#F59E0B; font-size:1.8rem; margin:0;" id="modalTurno">#T-01</h2>
+                    <span id="modalCliente" style="color:#CBD5E1; font-size:0.95rem; font-weight:600;">Cliente: Juan</span>
+                </div>
+                <span id="modalBadgeTipo" style="padding:4px 10px; border-radius:12px; font-weight:700; font-size:0.75rem; text-transform:uppercase;">EN TIENDA</span>
+            </div>
+
+            <!-- CONTACTO -->
+            <div style="margin-bottom:14px; background:#0F172A; padding:10px 14px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #334155;">
+                <div>
+                    <small style="color:#94A3B8; display:block;">Celular / Contacto:</small>
+                    <strong id="modalTelefono" style="font-size:0.95rem;">-</strong>
+                </div>
+                <div id="modalContactActions" style="display:flex; gap:6px;"></div>
+            </div>
+
+            <!-- DETALLE DE ITEMS -->
+            <h4 style="font-family:'Fredoka', cursive; color:#F472B6; margin-bottom:8px;">📝 Desglose de Botanas:</h4>
+            <div id="modalItemsList" style="background:#0F172A; border-radius:12px; padding:12px; margin-bottom:14px; max-height:220px; overflow-y:auto; border:1px solid #334155;"></div>
+
+            <!-- SECCIÓN DE COBRO EN TIENDA -->
+            <div id="modalPaymentSection" style="margin-bottom:16px; background:#0F172A; padding:12px; border-radius:12px; border:1px dashed #475569;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.85rem; color:#94A3B8;">Total de la Orden:</span>
+                    <strong style="font-size:1.3rem; color:#10B981;" id="modalTotalMonto">$0.00</strong>
+                </div>
+
+                <div id="modalPaySelectorWrapper" style="margin-top:10px;">
+                    <small style="color:#CBD5E1; display:block; font-weight:600;">Modo de Pago Mostrador (En Tienda):</small>
+                    <div class="kds-pay-btn-group">
+                        <button type="button" class="kds-pay-btn" onclick="seleccionarMetodoPagoModal('Efectivo', this)">💵 Efectivo</button>
+                        <button type="button" class="kds-pay-btn" onclick="seleccionarMetodoPagoModal('Tarjeta', this)">💳 Tarjeta</button>
+                        <button type="button" class="kds-pay-btn" onclick="seleccionarMetodoPagoModal('Transferencia', this)">⚡ Transferencia</button>
+                    </div>
+                </div>
+
+                <div id="modalPickupPayNotice" style="margin-top:8px; display:none;">
+                    <small style="color:#38BDF8;"><i class="fa-solid fa-shield-halved"></i> Pedido Para Recoger: El pago en línea / transferencia se verifica automáticamente.</small>
+                </div>
+            </div>
+
+            <!-- BOTONES DE CAMBIO DE ESTADO -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" style="background:#F59E0B; color:#000; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" id="btnModalPrep" onclick="cambiarEstadoDesdeModal('preparando')">
+                    <i class="fa-solid fa-fire"></i> Mover a Preparación
+                </button>
+                <button type="button" style="background:#10B981; color:#FFF; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" id="btnModalReady" onclick="cambiarEstadoDesdeModal('listo')">
+                    <i class="fa-solid fa-check-double"></i> Marcar como LISTO para Entrega
+                </button>
+                <button type="button" style="background:#475569; color:#FFF; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;" id="btnModalDelivered" onclick="cambiarEstadoDesdeModal('entregado')">
+                    <i class="fa-solid fa-box-archive"></i> Entregado / Archivar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 6. MODAL DE TIEMPO ESTIMADO (PARA RECOGER) -->
     <!-- ========================================== -->
     <div class="modal-time-overlay" id="timeModal">
         <div class="modal-time-card">
@@ -267,6 +392,6 @@
         <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
     </audio>
 
-    <script src="kds.js?v=30"></script>
+    <script src="kds.js?v=35"></script>
 </body>
 </html>
