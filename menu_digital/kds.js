@@ -229,7 +229,7 @@ function renderizarTableroKanban() {
 
     if (!contCola || !contPrep || !contListos) return;
 
-    let pedidos = pedidosGlobalesSheets.filter(p => p.estado !== 'cancelado');
+    let pedidos = pedidosGlobalesSheets.filter(p => p.estado !== 'cancelado' && p.estado !== 'rechazado');
     if (filtroEstacionActual !== 'TODAS') {
         pedidos = pedidos.filter(p => {
             return p.items.some(it => (it.estacion || 'CALIENTE').toUpperCase() === filtroEstacionActual);
@@ -281,29 +281,21 @@ function crearTarjetaHTML(pedido) {
     let botonesAccionHTML = '';
 
     if (pedido.estado === 'cola') {
-        if (esRecoger && telefonoLimpio.length >= 10) {
-            botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1.2; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
-                    <i class="fa-solid fa-fire"></i> Preparar
-                </button>
-                <button class="btn-card-action" title="Notificar Tiempo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); abrirModalTiempoEstimado('${turnoEscapado}', '${telefonoLimpio}')">
-                    <i class="fa-solid fa-clock"></i> Notificar
-                </button>
-            `;
-        } else {
-            botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
-                    <i class="fa-solid fa-fire"></i> Preparar
-                </button>
-            `;
-        }
+        botonesAccionHTML = `
+            <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); aceptarPedidoKDS('${turnoEscapado}', '${telefonoLimpio}')">
+                <i class="fa-solid fa-check"></i> Aceptar
+            </button>
+            <button class="btn-card-action" title="Rechazar y Devolver Dinero" style="background:#DC2626; color:#FFF; border:none; padding:10px 10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); rechazarYReembolsarPedido('${turnoEscapado}', '${telefonoLimpio}')">
+                <i class="fa-solid fa-xmark"></i> Rechazar
+            </button>
+        `;
     } else if (pedido.estado === 'preparando') {
         if (esRecoger && telefonoLimpio.length >= 10) {
             botonesAccionHTML = `
                 <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
                     <i class="fa-solid fa-check-double"></i> Listo
                 </button>
-                <button class="btn-card-action" title="Avisar que ya está listo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); notificarPedidoListoWhatsApp('${turnoEscapado}', '${telefonoLimpio}')">
+                <button class="btn-card-action" title="Avisar por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); notificarPedidoListoWhatsApp('${turnoEscapado}', '${telefonoLimpio}')">
                     <i class="fa-solid fa-bell"></i> Avisar
                 </button>
             `;
@@ -333,7 +325,7 @@ function crearTarjetaHTML(pedido) {
     `;
 
     return `
-        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" onclick="abrirModalDetallePedido('${turnoEscapado}')" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1px solid #334155; box-shadow:0 4px 10px rgba(0,0,0,0.2); cursor:pointer;">
+        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" onclick="abrirModalDetallePedido('${turnoEscapado}')" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1.5px solid ${pedido.estado === 'cola' ? '#F59E0B' : '#334155'}; box-shadow:0 4px 10px rgba(0,0,0,0.2); cursor:pointer;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
                 <div style="display:flex; align-items:center; gap:6px;">
@@ -363,6 +355,54 @@ function crearTarjetaHTML(pedido) {
             </div>
         </div>
     `;
+}
+
+// ======================================================
+// ACEPTAR / RECHAZAR CON REEMBOLSO
+// ======================================================
+async function aceptarPedidoKDS(turnoEscapado, telefono) {
+    const turnoReal = decodeURIComponent(turnoEscapado);
+    await cambiarEstadoPedidoNube(turnoEscapado, 'preparando');
+
+    if (telefono && telefono.length >= 10) {
+        abrirModalTiempoEstimado(turnoEscapado, telefono);
+    }
+}
+
+async function rechazarYReembolsarPedido(turnoEscapado, telefono) {
+    const turnoReal = decodeURIComponent(turnoEscapado);
+    const motivo = prompt(`¿Motivo de rechazo para el turno ${turnoReal}?`, "Saturación en cocina / Sin stock de insumos");
+    if (motivo === null) return;
+
+    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
+    if (index !== -1) {
+        pedidosGlobalesSheets[index].estado = 'rechazado';
+        pedidosGlobalesSheets[index].pagado = false;
+        renderizarTableroKanban();
+        actualizarMetricasHeader();
+    }
+
+    if (WEB_APP_URL && !WEB_APP_URL.includes("TU_SCRIPT_ID")) {
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'rechazar_y_reembolsar',
+                    turno: turnoReal,
+                    motivo: motivo
+                })
+            });
+        } catch (e) {
+            console.error("Error al procesar reembolso:", e);
+        }
+    }
+
+    if (telefono && telefono.length >= 10) {
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu pedido *${turnoReal}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ya ha sido devuelto a tu cuenta.`);
+        window.open(`https://wa.me/521${telefono}?text=${msg}`, '_blank');
+    }
+
+    alert(`✅ Pedido ${turnoReal} rechazado y reembolso procesado.`);
 }
 
 // ======================================================
@@ -503,7 +543,7 @@ function confirmarTiempoYNotificar(minutos) {
     if (pedidoTemporalParaTiempo) {
         const turnoReal = decodeURIComponent(pedidoTemporalParaTiempo.turnoEscapado);
         const tel = pedidoTemporalParaTiempo.telefono;
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${turnoReal}* ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${turnoReal}* fue ACEPTADO y ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
         window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
     }
     cerrarModalTiempo();
@@ -639,7 +679,7 @@ function actualizarSemaforosTiempo() {
 }
 
 // ======================================================
-// 3. SISTEMA POS MOSTRADOR RÁPIDO
+// POS MOSTRADOR
 // ======================================================
 async function cargarProductosParaPOS() {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
@@ -673,6 +713,7 @@ function renderizarBotoneraPOS() {
         grid.appendChild(btn);
     });
 }
+
 function agregarItemPOS(nombre, precio) {
     carritoPOS.push({ nombre, precio: parseFloat(precio) || 0 });
     renderizarCarritoPOS();
@@ -711,7 +752,7 @@ function renderizarCarritoPOS() {
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #334155;">
                 <span style="color: #F8FAFC; font-size: 0.9rem;">${item.nombre}</span>
                 <div>
-                    <strong style="color: #F59E0B; margin-right: 8px;">$${item.precio.toFixed(2)}</strong>
+                    <strong style="color: var(--primary-pink); margin-right: 8px;">$${item.precio.toFixed(2)}</strong>
                     <button type="button" onclick="eliminarItemPOS(${idx})" style="background: transparent; color: #EF4444; border: none; font-size: 1.1rem; cursor: pointer;">&times;</button>
                 </div>
             </div>
@@ -960,12 +1001,12 @@ function renderizarGraficasFinancieras(ventas) {
                 datasets: [{
                     label: 'Ventas ($MXN)',
                     data: dataDias.length > 0 ? dataDias : [0],
-                    borderColor: '#F59E0B',
-                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    borderColor: '#E91E63',
+                    backgroundColor: 'rgba(233, 30, 99, 0.15)',
                     fill: true,
                     tension: 0.3,
                     borderWidth: 3,
-                    pointBackgroundColor: '#F59E0B',
+                    pointBackgroundColor: '#E91E63',
                     pointRadius: 4
                 }]
             },
@@ -992,7 +1033,7 @@ function renderizarGraficasFinancieras(ventas) {
                 labels: labelsProds.length > 0 ? labelsProds : ['Sin ventas'],
                 datasets: [{
                     data: dataProds.length > 0 ? dataProds : [1],
-                    backgroundColor: ['#F59E0B', '#10B981', '#0284C7', '#EC4899', '#8B5CF6'],
+                    backgroundColor: ['#E91E63', '#10B981', '#0284C7', '#FFC107', '#8B5CF6'],
                     borderWidth: 0
                 }]
             },
