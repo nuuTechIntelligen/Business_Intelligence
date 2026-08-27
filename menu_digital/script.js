@@ -1211,32 +1211,45 @@ function iniciarMonitoreoEstadoBoleto(turno) {
     temporizadorMonitoreoCliente = setInterval(async () => {
         if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
         try {
-            const res = await fetch(`${WEB_APP_URL}?action=consultar_estado_pedido&turno=${encodeURIComponent(turno)}&t=${Date.now()}`);
+            const res = await fetch(`${WEB_APP_URL}?action=consultar_estado_pedido&turno=${encodeURIComponent(turno)}&_t=${Date.now()}`);
             const pedido = await res.json();
             const paymentAlert = document.getElementById('ticketPaymentAlert');
+            const badgeType = document.getElementById('ticketBadgeType');
             const onlinePaymentCard = document.getElementById('onlinePaymentContainer');
 
-            if (pedido && paymentAlert) {
-                const est = String(pedido.estado || '').toLowerCase().trim();
+            if (pedido && pedido.estado && paymentAlert) {
+                const est = String(pedido.estado).toLowerCase().trim();
                 
-                if (est.includes('prep') || est === 'preparando') {
+                if (est === 'preparando' || est.includes('prep')) {
                     paymentAlert.className = 'ticket-payment-alert alert-tienda';
                     paymentAlert.innerHTML = `<strong>🔥 ¡Orden Aceptada!</strong><br>Tus botanas ya están en preparación en cocina.`;
-                } else if (est.includes('listo')) {
+                    if (badgeType) {
+                        badgeType.textContent = '🔥 EN PREPARACIÓN';
+                        badgeType.style.background = '#10B981';
+                    }
+                } else if (est === 'listo' || est.includes('list')) {
                     paymentAlert.className = 'ticket-payment-alert alert-tienda';
-                    paymentAlert.innerHTML = `<strong>🎉 ¡Tu pedido está LISTO!</strong><br>Pasa al mostrador a recoger tus botanas.`;
-                } else if (est.includes('rechaz') || est.includes('cancel')) {
+                    paymentAlert.innerHTML = `<strong>🎉 ¡Tu pedido está LISTO!</strong><br>Puedes pasar al mostrador a recoger tus botanas.`;
+                    if (badgeType) {
+                        badgeType.textContent = '✅ LISTO PARA ENTREGA';
+                        badgeType.style.background = '#059669';
+                    }
+                } else if (est === 'rechazado' || est === 'cancelado') {
                     paymentAlert.className = 'ticket-payment-alert';
                     paymentAlert.style.background = '#FEE2E2';
                     paymentAlert.style.borderColor = '#F87171';
                     paymentAlert.style.color = '#991B1B';
-                    paymentAlert.innerHTML = `<strong>❌ Pedido No Disponible:</strong><br>Lo sentimos, no pudimos tomar tu orden. Si realizaste tu pago en línea, tu dinero ha sido devuelto a tu cuenta.`;
+                    paymentAlert.innerHTML = `<strong>❌ Pedido No Disponible:</strong><br>Lo sentimos, cocina no pudo tomar tu orden. Si pagaste en línea, tu dinero ha sido devuelto a tu cuenta.`;
+                    if (badgeType) {
+                        badgeType.textContent = '❌ RECHAZADO';
+                        badgeType.style.background = '#DC2626';
+                    }
                     if (onlinePaymentCard) onlinePaymentCard.style.display = 'none';
                     clearInterval(temporizadorMonitoreoCliente);
                 }
             }
         } catch (e) {}
-    }, 4000);
+    }, 3500);
 }
 
 async function solicitarLinkDinamicoMercadoPago(pedido) {
