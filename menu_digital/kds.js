@@ -664,16 +664,15 @@ function renderizarBotoneraPOS() {
         const precioNum = parseFloat(p.precio || 0);
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.style.cssText = 'background: #0F172A; border: 1px solid #334155; border-radius: 12px; padding: 12px; color: #FFF; text-align: left; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 80px; transition: transform 0.1s ease;';
+        btn.className = 'pos-product-card';
         btn.innerHTML = `
-            <strong style="font-size: 0.9rem; color: #F8FAFC; display: block; margin-bottom: 4px;">${p.nombre}</strong>
-            <span style="color: #F59E0B; font-weight: 700; font-size: 1rem;">$${precioNum.toFixed(2)}</span>
+            <strong style="font-size: 0.9rem; color: #F8FAFC; display: block; margin-bottom: 4px; font-family:var(--font-heading);">${p.nombre}</strong>
+            <span style="color: var(--primary-pink); font-weight: 700; font-size: 1.05rem; font-family:var(--font-heading);">$${precioNum.toFixed(2)}</span>
         `;
         btn.onclick = () => agregarItemPOS(p.nombre, precioNum);
         grid.appendChild(btn);
     });
 }
-
 function agregarItemPOS(nombre, precio) {
     carritoPOS.push({ nombre, precio: parseFloat(precio) || 0 });
     renderizarCarritoPOS();
