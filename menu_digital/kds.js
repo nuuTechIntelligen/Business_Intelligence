@@ -132,7 +132,7 @@ async function enviarPeticionAppsScript(payload) {
     try {
         await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors', // Evita bloqueos de CORS en navegadores
+            mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
         });
@@ -243,20 +243,20 @@ function renderizarTableroKanban() {
 
     if (!contCola || !contPrep || !contListos) return;
 
-    let pedidos = pedidosGlobalesSheets.filter(p => {
+    let pedidosActivos = pedidosGlobalesSheets.filter(p => {
         const est = String(p.estado || '').toLowerCase().trim();
         return est !== 'cancelado' && est !== 'rechazado' && est !== 'entregado';
     });
 
     if (filtroEstacionActual !== 'TODAS') {
-        pedidos = pedidos.filter(p => {
+        pedidosActivos = pedidosActivos.filter(p => {
             return p.items.some(it => (it.estacion || 'CALIENTE').toUpperCase() === filtroEstacionActual);
         });
     }
 
-    const enCola = pedidos.filter(p => p.estado === 'cola');
-    const enPrep = pedidos.filter(p => p.estado === 'preparando');
-    const listos = pedidos.filter(p => p.estado === 'listo');
+    const enCola = pedidosActivos.filter(p => p.estado === 'cola');
+    const enPrep = pedidosActivos.filter(p => p.estado === 'preparando');
+    const listos = pedidosActivos.filter(p => p.estado === 'listo');
 
     document.getElementById('countCola').textContent = enCola.length;
     document.getElementById('countPrep').textContent = enPrep.length;
@@ -271,7 +271,7 @@ function crearTarjetaHTML(pedido) {
     const semaforo = calcularSemaforoTiempo(pedido.fecha_completa);
     const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
     const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
-    const turnoAtributo = pedido.turno.replace(/"/g, '&quot;');
+    const turnoLimpio = String(pedido.turno || '').trim();
 
     let itemsHTML = '';
     if (pedido.items && pedido.items.length > 0) {
@@ -283,7 +283,7 @@ function crearTarjetaHTML(pedido) {
             if (it.salsa) detalles.push(`Salsa: <span style="color:#F472B6;">${it.salsa}</span>`);
 
             itemsHTML += `
-                <div class="kds-item-row" style="margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+                <div style="margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong style="color: #F8FAFC; font-size: 0.95rem;">${idx + 1}. 🍿 ${it.nombre}</strong>
                         ${it.precio ? `<span style="color:#F59E0B; font-size:0.85rem; font-weight:700;">$${parseFloat(it.precio).toFixed(2)}</span>` : ''}
@@ -296,78 +296,70 @@ function crearTarjetaHTML(pedido) {
         itemsHTML = `<div style="color:#CBD5E1; font-size:0.85rem; margin-bottom:6px;">${pedido.detalle_crudo}</div>`;
     }
 
-    let botonesAccionHTML = '';
-
+    let botonesHTML = '';
     if (pedido.estado === 'cola') {
-        botonesAccionHTML = `
-            <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'aceptar', '${turnoAtributo}', '${telefonoLimpio}')">
+        botonesHTML = `
+            <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'aceptar', '${turnoLimpio}', '${telefonoLimpio}')">
                 <i class="fa-solid fa-check"></i> Aceptar
             </button>
-            <button type="button" class="btn-card-action" title="Rechazar Pedido" style="background:#DC2626; color:#FFF; border:none; padding:10px 10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'rechazar', '${turnoAtributo}', '${telefonoLimpio}')">
+            <button type="button" class="btn-card-action" style="background:#DC2626; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'rechazar', '${turnoLimpio}', '${telefonoLimpio}')">
                 <i class="fa-solid fa-xmark"></i> Rechazar
             </button>
         `;
     } else if (pedido.estado === 'preparando') {
-        if (esRecoger && telefonoLimpio.length >= 10) {
-            botonesAccionHTML = `
-                <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'listo', '${turnoAtributo}', '${telefonoLimpio}')">
-                    <i class="fa-solid fa-check-double"></i> Listo
-                </button>
-                <button type="button" class="btn-card-action" title="Avisar por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'avisar', '${turnoAtributo}', '${telefonoLimpio}')">
-                    <i class="fa-solid fa-bell"></i> Avisar
-                </button>
-            `;
-        } else {
-            botonesAccionHTML = `
-                <button type="button" class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'listo', '${turnoAtributo}', '${telefonoLimpio}')">
-                    <i class="fa-solid fa-check-double"></i> Listo
-                </button>
-            `;
-        }
+        botonesHTML = `
+            <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'listo', '${turnoLimpio}', '${telefonoLimpio}')">
+                <i class="fa-solid fa-check-double"></i> Listo
+            </button>
+            ${(esRecoger && telefonoLimpio.length >= 10) ? `
+            <button type="button" class="btn-card-action" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'avisar', '${turnoLimpio}', '${telefonoLimpio}')">
+                <i class="fa-solid fa-bell"></i> Avisar
+            </button>` : ''}
+        `;
     } else {
-        botonesAccionHTML = `
-            <button type="button" class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="manejarAccionBoton(event, 'entregado', '${turnoAtributo}', '${telefonoLimpio}')">
+        botonesHTML = `
+            <button type="button" class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="manejarAccionBoton(event, 'entregado', '${turnoLimpio}', '')">
                 <i class="fa-solid fa-box-archive"></i> Entregar
             </button>
         `;
     }
 
-    const botonPagoHTML = pedido.pagado ? `
-        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="manejarAccionBoton(event, 'pago_no', '${turnoAtributo}', '')">
+    const pagoBadgeHTML = pedido.pagado ? `
+        <button type="button" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'pago_no', '${turnoLimpio}', '')">
             <i class="fa-solid fa-circle-check"></i> Pagado
         </button>
     ` : `
-        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="manejarAccionBoton(event, 'pago_si', '${turnoAtributo}', '')">
-            <i class="fa-solid fa-clock-rotate-left"></i> Pago Pendiente
+        <button type="button" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'pago_si', '${turnoLimpio}', '')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Pendiente
         </button>
     `;
 
     return `
-        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" onclick="abrirModalDetallePedido('${turnoAtributo}')" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1.5px solid ${pedido.estado === 'cola' ? '#F59E0B' : '#334155'}; box-shadow:0 4px 10px rgba(0,0,0,0.2); cursor:pointer;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1.5px solid ${pedido.estado === 'cola' ? '#F59E0B' : '#334155'}; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; cursor:pointer;" onclick="abrirModalDetallePedido('${turnoLimpio}')">
                 <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
                 <div style="display:flex; align-items:center; gap:6px;">
                     <span style="background:${esRecoger ? '#EA580C' : '#0284C7'}; color:#FFF; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;">
                         ${esRecoger ? '🛍️ RECOGER' : '🏪 EN TIENDA'}
                     </span>
-                    ${botonPagoHTML}
+                    ${pagoBadgeHTML}
                 </div>
                 <span class="kds-timer-badge" style="font-weight:700; font-size:0.85rem;">
                     <i class="fa-solid fa-clock"></i> ${semaforo.tiempoFormateado}
                 </span>
             </div>
 
-            <div style="font-size:0.85rem; color:#94A3B8; margin-bottom:8px;">
+            <div style="font-size:0.85rem; color:#94A3B8; margin-bottom:8px; cursor:pointer;" onclick="abrirModalDetallePedido('${turnoLimpio}')">
                 👤 Cliente: <strong style="color:#F8FAFC;">${pedido.cliente}</strong> ${telefonoLimpio ? `<span style="color:#F59E0B; font-size:0.78rem;">(📱 ${telefonoLimpio})</span>` : ''}
             </div>
 
-            <div style="margin-bottom:10px;">
+            <div style="margin-bottom:10px; cursor:pointer;" onclick="abrirModalDetallePedido('${turnoLimpio}')">
                 ${itemsHTML}
             </div>
 
             <div style="display:flex; gap:6px; margin-top:8px;">
-                ${botonesAccionHTML}
-                <button type="button" title="Eliminar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="manejarAccionBoton(event, 'eliminar', '${turnoAtributo}', '')">
+                ${botonesHTML}
+                <button type="button" title="Eliminar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="manejarAccionBoton(event, 'eliminar', '${turnoLimpio}', '')">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -376,10 +368,10 @@ function crearTarjetaHTML(pedido) {
 }
 
 // ======================================================
-// DISPATCHER CENTRAL DE ACCIONES (SIN COLISIONES DE EVENTOS)
+// DISPATCHER CENTRAL (STOPPROPAGATION GARANTIZADO)
 // ======================================================
 async function manejarAccionBoton(e, accion, turno, telefono) {
-    if (e) {
+    if (e && e.stopPropagation) {
         e.stopPropagation();
         e.preventDefault();
     }
@@ -395,7 +387,6 @@ async function manejarAccionBoton(e, accion, turno, telefono) {
     else if (accion === 'rechazar') {
         if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turnoLimpio}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) return;
 
-        // Quitar de la pantalla inmediatamente
         pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => String(p.turno).trim().toUpperCase() !== turnoLimpio.toUpperCase());
         renderizarTableroKanban();
         actualizarMetricasHeader();
@@ -403,7 +394,7 @@ async function manejarAccionBoton(e, accion, turno, telefono) {
         await enviarPeticionAppsScript({
             action: 'rechazar_y_reembolsar',
             turno: turnoLimpio,
-            motivo: 'Saturación en cocina / Sin insumos'
+            motivo: 'Saturación en cocina / Sin stock'
         });
 
         if (telefono && String(telefono).replace(/\D/g, '').length >= 10) {
