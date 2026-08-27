@@ -4,7 +4,6 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// Variables dinámicas desde Google Sheets
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let PUNTOS_META_PREMIO = 100;
 let ESCALA_PUNTOS_COMPRA = "5-20:1, 21-50:3, 51-100:6, 101-200:15, 201-9999:25";
@@ -12,7 +11,6 @@ let LINK_MERCADOPAGO = "http://link.mercadopago.com.mx/fyblaengordadera";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
-// Enlaces de Redes Sociales y Google Maps
 let LINK_FACEBOOK = "";
 let LINK_INSTAGRAM = "";
 let LINK_GOOGLE_MAPS = "https://maps.google.com";
@@ -974,7 +972,7 @@ async function obtenerSiguienteTurnoGlobal(tipo) {
     }
 
     try {
-        const res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas`);
+        const res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas&t=${Date.now()}`);
         const ventas = await res.json();
 
         if (Array.isArray(ventas) && ventas.length > 0) {
@@ -1115,6 +1113,8 @@ async function respaldarVentaEnGoogleSheets(pedido) {
 
         await fetch(WEB_APP_URL, {
             method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
         });
     } catch (e) {
@@ -1211,21 +1211,21 @@ function iniciarMonitoreoEstadoBoleto(turno) {
     temporizadorMonitoreoCliente = setInterval(async () => {
         if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
         try {
-            const res = await fetch(`${WEB_APP_URL}?action=consultar_estado_pedido&turno=${encodeURIComponent(turno)}`);
+            const res = await fetch(`${WEB_APP_URL}?action=consultar_estado_pedido&turno=${encodeURIComponent(turno)}&t=${Date.now()}`);
             const pedido = await res.json();
             const paymentAlert = document.getElementById('ticketPaymentAlert');
             const onlinePaymentCard = document.getElementById('onlinePaymentContainer');
 
-            if (pedido && pedido.estado && paymentAlert) {
-                const est = String(pedido.estado).toLowerCase().trim();
+            if (pedido && paymentAlert) {
+                const est = String(pedido.estado || '').toLowerCase().trim();
                 
-                if (est === 'preparando') {
+                if (est.includes('prep') || est === 'preparando') {
                     paymentAlert.className = 'ticket-payment-alert alert-tienda';
                     paymentAlert.innerHTML = `<strong>🔥 ¡Orden Aceptada!</strong><br>Tus botanas ya están en preparación en cocina.`;
-                } else if (est === 'listo') {
+                } else if (est.includes('listo')) {
                     paymentAlert.className = 'ticket-payment-alert alert-tienda';
                     paymentAlert.innerHTML = `<strong>🎉 ¡Tu pedido está LISTO!</strong><br>Pasa al mostrador a recoger tus botanas.`;
-                } else if (est === 'rechazado' || est === 'cancelado') {
+                } else if (est.includes('rechaz') || est.includes('cancel')) {
                     paymentAlert.className = 'ticket-payment-alert';
                     paymentAlert.style.background = '#FEE2E2';
                     paymentAlert.style.borderColor = '#F87171';
@@ -1236,7 +1236,7 @@ function iniciarMonitoreoEstadoBoleto(turno) {
                 }
             }
         } catch (e) {}
-    }, 5000);
+    }, 4000);
 }
 
 async function solicitarLinkDinamicoMercadoPago(pedido) {
