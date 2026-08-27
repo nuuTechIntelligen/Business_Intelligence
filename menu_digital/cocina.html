@@ -3,344 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantalla de Cocina / KDS - La Engordadera</title>
+    <title>KDS Despacho & Finanzas | La Engordadera</title>
     
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <style>
-        :root {
-            --primary-pink: #E91E63;
-            --primary-yellow: #FFC107;
-            --primary-green: #10B981;
-            --primary-blue: #0284C7;
-            --dark-bg: #111827;
-            --card-bg: #1F2937;
-            --font-heading: 'Fredoka', cursive, sans-serif;
-            --font-body: 'Poppins', sans-serif;
-        }
+    <!-- Chart.js para analítica -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: var(--font-body);
-            background-color: var(--dark-bg);
-            color: #F9FAFB;
-            padding: 14px;
-            min-height: 100vh;
-        }
-
-        /* HEADER */
-        .kds-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 12px 18px;
-            border-radius: 14px;
-            margin-bottom: 16px;
-            border: 1px solid #374151;
-        }
-        .kds-title {
-            font-family: var(--font-heading);
-            font-size: 1.4rem;
-            color: var(--primary-pink);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .kds-stats {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: var(--font-heading);
-            font-size: 0.88rem;
-        }
-        .stat-badge {
-            background: #374151;
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-
-        /* GRID DE COMANDAS */
-        .kds-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 14px;
-        }
-
-        /* TARJETA DE COMANDA */
-        .order-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            border: 2px solid #374151;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-            cursor: pointer;
-            transition: transform 0.15s ease, border-color 0.15s ease;
-        }
-        .order-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary-pink);
-        }
-
-        .order-card-header {
-            padding: 10px 14px;
-            background: #111827;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #374151;
-        }
-        .order-turno {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-yellow);
-        }
-        .order-type-badge {
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 14px;
-            text-transform: uppercase;
-        }
-        .badge-tienda { background: #0284C7; color: white; }
-        .badge-recoger { background: #EA580C; color: white; }
-
-        .order-timer-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 14px;
-            font-size: 0.78rem;
-            background: #283548;
-            border-bottom: 1px solid #374151;
-        }
-        .order-timer {
-            font-family: monospace;
-            font-size: 0.88rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .timer-normal { color: #10B981; }
-        .timer-warning { color: #F59E0B; }
-        .timer-danger { color: #EF4444; }
-
-        .payment-status {
-            font-weight: 700;
-            font-size: 0.72rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-        .pay-paid { background: #065F46; color: #34D399; }
-        .pay-pending { background: #78350F; color: #FCD34D; }
-
-        .order-card-body {
-            padding: 12px 14px;
-            flex: 1;
-            max-height: 260px;
-            overflow-y: auto;
-        }
-        .order-item-row {
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #374151;
-        }
-        .order-item-row:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        .order-item-title {
-            font-family: var(--font-heading);
-            font-size: 0.95rem;
-            color: #FFFFFF;
-            display: flex;
-            justify-content: space-between;
-        }
-        .order-item-sub {
-            font-size: 0.78rem;
-            color: #9CA3AF;
-            margin-top: 2px;
-            line-height: 1.35;
-        }
-
-        .order-card-footer {
-            padding: 10px 14px;
-            background: #111827;
-            display: flex;
-            gap: 8px;
-            border-top: 1px solid #374151;
-        }
-        .btn-kds {
-            flex: 1;
-            padding: 8px 10px;
-            border-radius: 10px;
-            font-family: var(--font-heading);
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .btn-prep { background: #3B82F6; color: white; }
-        .btn-ready { background: var(--primary-green); color: white; }
-        .btn-delivered { background: #6B7280; color: white; }
-
-        /* MODAL DE DETALLE Y COBRO */
-        .kds-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(4px);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 14px;
-        }
-        .kds-modal-overlay.active { display: flex; }
-
-        .kds-modal-card {
-            background: var(--card-bg);
-            border: 2px solid var(--primary-pink);
-            width: 100%;
-            max-width: 520px;
-            max-height: 90vh;
-            border-radius: 18px;
-            padding: 20px;
-            overflow-y: auto;
-            position: relative;
-            color: #F9FAFB;
-        }
-        .modal-close-btn {
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            color: #9CA3AF;
-            cursor: pointer;
-        }
-        .pay-method-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin: 10px 0 14px 0;
-        }
-        .pay-method-btn {
-            background: #374151;
-            color: white;
-            border: 1.5px solid #4B5563;
-            padding: 10px;
-            border-radius: 10px;
-            font-family: var(--font-heading);
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-align: center;
-        }
-        .pay-method-btn.active {
-            background: var(--primary-pink);
-            border-color: #F472B6;
-            font-weight: 700;
-        }
-    </style>
+    <!-- Estilos de cocina y finanzas -->
+    <link rel="stylesheet" href="cocina.css?v=10">
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
+    <!-- ========================================== -->
+    <!-- 1. ENCABEZADO SUPERIOR                     -->
+    <!-- ========================================== -->
     <header class="kds-header">
-        <div class="kds-title">
-            <i class="fa-solid fa-fire-burner"></i>
-            <span>Comandas / Cocina</span>
+        <div class="kds-brand">
+            <span class="logo-emoji">🍿</span>
+            <div>
+                <h1>KDS DESPACHO</h1>
+                <small>La Engordadera</small>
+            </div>
         </div>
-        <div class="kds-stats">
-            <span class="stat-badge"><i class="fa-solid fa-clock"></i> Pendientes: <strong id="kdsCountPending">0</strong></span>
-            <span class="stat-badge"><i class="fa-solid fa-utensils"></i> En Prep: <strong id="kdsCountPrep">0</strong></span>
-            <button onclick="cargarPedidosCocina()" class="btn-kds btn-prep" style="padding:5px 12px; font-size:0.75rem;">
-                <i class="fa-solid fa-rotate"></i> Actualizar
+
+        <!-- SELECTOR DE PESTAÑAS (COMANDAS VS CAJA/POS VS FINANZAS) -->
+        <div class="kds-tabs">
+            <button class="kds-tab-btn active" id="tabBtnKDS" onclick="mostrarVista('kds')">
+                <i class="fa-solid fa-utensils"></i> Comandas
             </button>
+            <button class="kds-tab-btn" id="tabBtnPOS" onclick="mostrarVista('pos')">
+                <i class="fa-solid fa-cash-register"></i> Caja / Venta Directa
+            </button>
+            <button class="kds-tab-btn" id="tabBtnFinanzas" onclick="mostrarVista('finanzas')">
+                <i class="fa-solid fa-chart-line"></i> Corte & Finanzas
+            </button>
+        </div>
+
+        <!-- FILTRO DE ESTACIONES DE COCINA -->
+        <div class="station-filters" id="stationFiltersHeader">
+            <button class="btn-station active" data-station="TODAS" onclick="filtrarPorEstacion('TODAS')">Todas</button>
+            <button class="btn-station" data-station="CALIENTE" onclick="filtrarPorEstacion('CALIENTE')">🔥 Caliente / Frituras</button>
+            <button class="btn-station" data-station="FRIA" onclick="filtrarPorEstacion('FRIA')">🍦 Fría / Postres</button>
+        </div>
+
+        <!-- MÉTRICAS EN TIEMPO REAL -->
+        <div class="kds-metrics" id="kdsMetricsHeader">
+            <div class="metric-pill"><span class="metric-label">Cola:</span> <strong id="metricCola">0</strong></div>
+            <div class="metric-pill active-prep"><span class="metric-label">Prep:</span> <strong id="metricPrep">0</strong></div>
+            <div class="metric-pill done"><span class="metric-label">Listos:</span> <strong id="metricListos">0</strong></div>
+        </div>
+
+        <!-- ACCIONES Y RELOJ -->
+        <div class="kds-actions">
+            <button class="btn-clear-history" onclick="reiniciarContadorTurnos()" title="Reiniciar Consecutivo a #T-01" style="background:#1E293B; border-color:#F59E0B; color:#F59E0B;">
+                <i class="fa-solid fa-rotate-left"></i> Turnos
+            </button>
+            <button class="btn-clear-history" onclick="limpiarEntregadosAntiguos()" title="Limpiar pedidos entregados de la pantalla">
+                <i class="fa-solid fa-broom"></i> Limpiar
+            </button>
+            <span class="live-clock" id="liveClock">00:00:00</span>
         </div>
     </header>
 
-    <!-- GRID DE PEDIDOS -->
-    <main class="kds-grid" id="kdsOrdersContainer">
-        <div style="text-align:center; grid-column:1/-1; padding:40px; color:#9CA3AF;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:10px;"></i>
-            <p>Conectando con la base de datos...</p>
-        </div>
+    <!-- ========================================== -->
+    <!-- 2. VISTA 1: TABLERO KANBAN DE COCINA       -->
+    <!-- ========================================== -->
+    <main class="kds-board" id="vistaKDS">
+        
+        <!-- COLUMNA 1: COLA -->
+        <section class="kds-column" id="col-cola">
+            <div class="column-header col-header-cola">
+                <h2>🟡 En Cola (<span id="countCola">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerCola"></div>
+        </section>
+
+        <!-- COLUMNA 2: PREPARACIÓN -->
+        <section class="kds-column" id="col-prep">
+            <div class="column-header col-header-prep">
+                <h2>🟠 En Preparación (<span id="countPrep">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerPrep"></div>
+        </section>
+
+        <!-- COLUMNA 3: LISTOS -->
+        <section class="kds-column" id="col-listos">
+            <div class="column-header col-header-listos">
+                <h2>🟢 Listos (<span id="countListos">0</span>)</h2>
+            </div>
+            <div class="orders-container" id="containerListos"></div>
+        </section>
+
     </main>
 
-    <!-- MODAL DE DETALLE Y COBRO -->
-    <div class="kds-modal-overlay" id="kdsDetailModal">
-        <div class="kds-modal-card">
-            <button class="modal-close-btn" onclick="cerrarModalCocina()">&times;</button>
+    <!-- ========================================== -->
+    <!-- 3. VISTA 2: POS CAJA / VENTA DIRECTA       -->
+    <!-- ========================================== -->
+    <section class="pos-panel" id="vistaPOS" style="display: none; padding: 16px; background: #0F172A; min-height: 80vh;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1400px; margin: 0 auto;">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #374151; padding-bottom:10px;">
-                <div>
-                    <h2 style="font-family:var(--font-heading); color:var(--primary-yellow); font-size:1.8rem;" id="modalTurno">#R-01</h2>
-                    <span id="modalCliente" style="color:#D1D5DB; font-size:0.95rem; font-weight:600;">Cliente: Juan</span>
+            <!-- Cuadrícula de Productos Rápidos -->
+            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="font-family: 'Fredoka', cursive; color: #F59E0B; margin: 0; font-size: 1.4rem;">
+                        🛒 Botonera de Mostrador
+                    </h2>
+                    <span style="color: #94A3B8; font-size: 0.85rem;">Toca un producto para sumar al cobro</span>
                 </div>
-                <span id="modalBadgeTipo" class="order-type-badge badge-recoger">PARA RECOGER</span>
+
+                <div id="posProductsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-height: 60vh; overflow-y: auto; padding-right: 4px;">
+                    <!-- kds.js inyecta los botones aquí -->
+                </div>
+
+                <!-- Botón Monto Libre / A Granel -->
+                <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #334155; display: flex; gap: 10px; align-items: center;">
+                    <span style="color: #F8FAFC; font-weight: 600; font-size: 0.9rem;">➕ Botana Personalizada / Monto Libre:</span>
+                    <input type="text" id="posCustomConcept" placeholder="Concepto (ej. Papas preparadas)" style="flex: 2; padding: 10px; background: #0F172A; border: 1px solid #475569; border-radius: 8px; color: #FFF;">
+                    <input type="number" id="posCustomPrice" placeholder="$$" style="width: 90px; padding: 10px; background: #0F172A; border: 1px solid #475569; border-radius: 8px; color: #F59E0B; font-weight: 700;">
+                    <button type="button" onclick="agregarItemManualPOS()" style="background: #F59E0B; color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                        + Agregar
+                    </button>
+                </div>
             </div>
 
-            <!-- CONTACTO -->
-            <div style="margin-bottom:14px; background:#111827; padding:10px 14px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+            <!-- Ticket / Cobro del Mostrador -->
+            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <small style="color:#9CA3AF; display:block;">Celular del Cliente:</small>
-                    <strong id="modalTelefono" style="font-size:0.95rem;">-</strong>
-                </div>
-                <div id="modalContactActions" style="display:flex; gap:6px;"></div>
-            </div>
+                    <h3 style="font-family: 'Fredoka', cursive; color: #F8FAFC; margin: 0 0 14px 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+                        🧾 Cobro Actual
+                    </h3>
 
-            <!-- DETALLE DE ITEMS -->
-            <h4 style="font-family:var(--font-heading); color:#F472B6; margin-bottom:8px;">📝 Detalle del Pedido:</h4>
-            <div id="modalItemsList" style="background:#111827; border-radius:12px; padding:12px; margin-bottom:14px; max-height:220px; overflow-y:auto;"></div>
+                    <div id="posCartItemsList" style="max-height: 28vh; overflow-y: auto; margin-bottom: 14px;">
+                        <p style="color: #64748B; text-align: center; margin: 30px 0;">No hay productos seleccionados</p>
+                    </div>
 
-            <!-- SECCIÓN DE COBRO EN TIENDA -->
-            <div id="modalPaymentSection" style="margin-bottom:16px; background:#111827; padding:12px; border-radius:12px; border:1px dashed #4B5563;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.85rem; color:#9CA3AF;">Total a Cobrar:</span>
-                    <strong style="font-size:1.2rem; color:var(--primary-green);" id="modalTotalMonto">$0.00</strong>
-                </div>
+                    <div style="background: #0F172A; padding: 12px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 14px;">
+                        <label style="font-size: 0.8rem; color: #94A3B8; font-weight: 600; display: block; margin-bottom: 4px;">👤 Cliente (Nombre, Celular o ID Tarjeta):</label>
+                        <input type="text" id="posClientInput" placeholder="Ej. Don Pepe, 5512345678 o #045" style="width: 100%; padding: 10px; background: #1E293B; border: 1px solid #475569; border-radius: 8px; color: #FFF; box-sizing: border-box;">
+                        <small style="color: #F59E0B; font-size: 0.72rem; display: block; margin-top: 4px;">* Acepta apodos, niños sin cel o números.</small>
+                    </div>
 
-                <div style="margin-top:8px;">
-                    <small style="color:#D1D5DB; display:block; margin-bottom:4px;">Marcar cómo se cobró en mostrador:</small>
-                    <div class="pay-method-grid">
-                        <button type="button" class="pay-method-btn" onclick="seleccionarMetodoPago('Efectivo', this)">💵 Efectivo</button>
-                        <button type="button" class="pay-method-btn" onclick="seleccionarMetodoPago('Tarjeta', this)">💳 Tarjeta</button>
-                        <button type="button" class="pay-method-btn" onclick="seleccionarMetodoPago('Transferencia', this)">⚡ Transf / MP</button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                        <label style="flex: 1; text-align: center; background: #0F172A; padding: 8px; border-radius: 8px; border: 1px solid #475569; color: #FFF; font-size: 0.8rem; cursor: pointer;">
+                            <input type="checkbox" id="posMarkReadyDirectly" checked> ⚡ Despachar Ya (Listo)
+                        </label>
                     </div>
                 </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 1.4rem; font-weight: 800;">
+                        <span style="color: #94A3B8;">Total a Cobrar:</span>
+                        <span id="posTotalCobro" style="color: #10B981;">$0.00</span>
+                    </div>
+
+                    <button type="button" onclick="registrarVentaManualPOS()" style="width: 100%; background: #10B981; color: #FFF; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                        <i class="fa-solid fa-circle-check"></i> Cobrar y Registrar Venta
+                    </button>
+                    <button type="button" onclick="vaciarCarritoPOS()" style="width: 100%; background: transparent; color: #94A3B8; border: none; margin-top: 8px; font-size: 0.8rem; cursor: pointer;">
+                        Cancelar / Limpiar
+                    </button>
+                </div>
             </div>
 
-            <!-- BOTONES DE ACCIÓN DE ESTADO -->
-            <div style="display:flex; flex-direction:column; gap:8px;">
-                <button type="button" class="btn-kds btn-prep" id="btnModalPrep" onclick="cambiarEstadoDesdeModal('preparando')">
-                    <i class="fa-solid fa-fire"></i> Pasar a Preparación
-                </button>
-                <button type="button" class="btn-kds btn-ready" id="btnModalReady" onclick="cambiarEstadoDesdeModal('listo')">
-                    <i class="fa-solid fa-bell"></i> Marcar como LISTO para Entrega
-                </button>
-                <button type="button" class="btn-kds btn-delivered" id="btnModalDelivered" onclick="cambiarEstadoDesdeModal('entregado')">
-                    <i class="fa-solid fa-check-double"></i> Entregado / Archivar
-                </button>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 4. VISTA 3: PANEL DE FINANZAS Y ANALÍTICA  -->
+    <!-- ========================================== -->
+    <section class="finance-panel" id="vistaFinanzas" style="display: none;">
+        <div class="finance-grid">
+            <div class="finance-card">
+                <h3>Venta Total Acumulada</h3>
+                <strong id="finTotalVentas">$0.00</strong>
+                <small id="finTotalPedidos">0 órdenes registradas</small>
             </div>
+            <div class="finance-card">
+                <h3>Venta En Tienda</h3>
+                <strong id="finVentaTienda" class="text-tienda">$0.00</strong>
+                <small id="finPedidosTienda">0 órdenes</small>
+            </div>
+            <div class="finance-card">
+                <h3>Venta Para Recoger</h3>
+                <strong id="finVentaRecoger" class="text-recoger">$0.00</strong>
+                <small id="finPedidosRecoger">0 órdenes</small>
+            </div>
+            <div class="finance-card">
+                <h3>Ticket Promedio</h3>
+                <strong id="finTicketPromedio">$0.00</strong>
+                <small>Por cliente</small>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📈 Ventas por Día (Histórico)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartVentasDias"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🍿 Top Productos Más Vendidos</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartTopProductos"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="finance-table-wrapper">
+            <div class="table-header-flex">
+                <h2>📋 Detalle de Ventas Registradas</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-export" onclick="exportarReporteVentasCSV()">
+                        <i class="fa-solid fa-file-excel"></i> Descargar Histórico (CSV)
+                    </button>
+                    <button class="btn-clear-history" onclick="borrarHistorialFinanciero()" style="background:#7F1D1D; color:#FCA5A5; border-color:#991B1B;">
+                        <i class="fa-solid fa-trash"></i> Reiniciar Historial
+                    </button>
+                </div>
+            </div>
+            <table class="finance-table">
+                <thead>
+                    <tr>
+                        <th>Turno</th>
+                        <th>Fecha / Hora</th>
+                        <th>Cliente</th>
+                        <th>Modalidad</th>
+                        <th>Detalle de Productos</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="financeTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 5. MODAL DE TIEMPO ESTIMADO (PARA RECOGER) -->
+    <!-- ========================================== -->
+    <div class="modal-time-overlay" id="timeModal">
+        <div class="modal-time-card">
+            <h3>⏱️ Tiempo Estimado de Preparación</h3>
+            <p id="timeModalClientDesc">Indica en cuántos minutos estará listo:</p>
+            <div class="time-buttons-grid">
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(10)">10 min</button>
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(15)">15 min</button>
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(20)">20 min</button>
+                <button class="btn-time-opt" onclick="confirmarTiempoYNotificar(30)">30 min</button>
+            </div>
+            <button class="btn-cancel-time" onclick="cerrarModalTiempo()">Cerrar</button>
         </div>
     </div>
 
-    <!-- SCRIPT SEPARADO -->
-    <script src="kds.js?v=101"></script>
+    <!-- Audio de campana de nuevo pedido -->
+    <audio id="orderNotificationSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="kds.js?v=30"></script>
 </body>
 </html>
