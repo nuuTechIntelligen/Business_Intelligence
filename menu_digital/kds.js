@@ -9,8 +9,8 @@ let metodoPagoSeleccionado = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarPedidosCocina();
-    setInterval(cargarPedidosCocina, 8000); // Polling cada 8s
-    setInterval(actualizarTimersEnVivo, 1000); // Cronómetro en tiempo real cada segundo
+    setInterval(cargarPedidosCocina, 8000); // Actualiza órdenes cada 8 segundos
+    setInterval(actualizarTimersEnVivo, 1000); // Cronómetro exacto cada segundo
 });
 
 async function cargarPedidosCocina() {
@@ -22,7 +22,7 @@ async function cargarPedidosCocina() {
 
         if (!Array.isArray(ventas)) return;
 
-        // Filtrar pedidos no finalizados
+        // Filtrar pedidos activos
         pedidosActivos = ventas.filter(v => {
             const est = String(v.estado || '').toLowerCase().trim();
             return est === 'cola' || est === 'preparando' || est === 'listo';
@@ -64,11 +64,11 @@ function renderizarTarjetasCocina() {
         const pagado = String(p.pagado || 'NO').toUpperCase().trim().startsWith('SI');
         const esTienda = String(p.tipo || '').toLowerCase().trim() === 'tienda';
 
-        // Parseo de items
+        // Parseo seguro de items
         let itemsHTML = '';
         try {
             let itemsArray = [];
-            if (p.items_json && p.items_json !== '') {
+            if (p.items_json && String(p.items_json).trim().startsWith('[')) {
                 itemsArray = JSON.parse(p.items_json);
             }
             
@@ -161,7 +161,18 @@ function actualizarTimersEnVivo() {
         const rawDate = el.getAttribute('data-timestamp');
         if (!rawDate) return;
 
-        const fechaPedido = new Date(rawDate).getTime();
+        let fechaPedido = new Date(rawDate).getTime();
+        
+        // Soporte si solo guardó la hora (ej: "18:30")
+        if (isNaN(fechaPedido)) {
+            const matchHora = String(rawDate).match(/(\d{1,2}):(\d{2})/);
+            if (matchHora) {
+                const hoy = new Date();
+                hoy.setHours(parseInt(matchHora[1], 10), parseInt(matchHora[2], 10), 0, 0);
+                fechaPedido = hoy.getTime();
+            }
+        }
+
         if (isNaN(fechaPedido)) return;
 
         const diffSegundos = Math.floor((ahora - fechaPedido) / 1000);
@@ -181,7 +192,7 @@ function actualizarTimersEnVivo() {
     });
 }
 
-// MODAL INTERACTIVO
+// MODAL INTERACTIVO AL CLIC
 function abrirModalDetalleCocina(index) {
     const p = pedidosActivos[index];
     if (!p) return;
@@ -202,28 +213,37 @@ function abrirModalDetalleCocina(index) {
     // Contact Actions
     const contactBox = document.getElementById('modalContactActions');
     contactBox.innerHTML = '';
-    if (p.telefono && p.telefono.length >= 10) {
+    if (p.telefono && String(p.telefono).replace(/\D/g, '').length >= 10) {
+        const cleanTel = String(p.telefono).replace(/\D/g, '');
         contactBox.innerHTML = `
-            <a href="tel:${p.telefono}" class="btn-kds btn-prep" style="padding:4px 10px; text-decoration:none;"><i class="fa-solid fa-phone"></i></a>
-            <a href="https://wa.me/52${p.telefono}" target="_blank" class="btn-kds btn-ready" style="padding:4px 10px; text-decoration:none;"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="tel:${cleanTel}" class="btn-kds btn-prep" style="padding:4px 10px; text-decoration:none;"><i class="fa-solid fa-phone"></i></a>
+            <a href="https://wa.me/52${cleanTel}" target="_blank" class="btn-kds btn-ready" style="padding:4px 10px; text-decoration:none;"><i class="fa-brands fa-whatsapp"></i></a>
         `;
     }
 
     // Desglose de Items
     const itemsBox = document.getElementById('modalItemsList');
     try {
-        const itemsArray = JSON.parse(p.items_json || '[]');
-        itemsBox.innerHTML = itemsArray.map(item => `
-            <div style="margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed #374151;">
-                <strong style="color:var(--primary-yellow); font-size:1.05rem;">🍿 ${item.nombre} ($${item.precio})</strong>
-                <div style="font-size:0.82rem; color:#D1D5DB; margin-top:3px;">
-                    ${item.base ? `• Base: <strong>${item.base}</strong><br>` : ''}
-                    ${item.ingredientes && item.ingredientes.length > 0 ? `• Con: <strong>${item.ingredientes.join(', ')}</strong><br>` : ''}
-                    ${item.extras && item.extras.length > 0 ? `• Extras: <strong style="color:#F472B6;">${item.extras.join(', ')}</strong><br>` : ''}
-                    ${item.salsa ? `• Salsa: <strong>${item.salsa}</strong>` : ''}
+        let itemsArray = [];
+        if (p.items_json && String(p.items_json).trim().startsWith('[')) {
+            itemsArray = JSON.parse(p.items_json);
+        }
+        
+        if (Array.isArray(itemsArray) && itemsArray.length > 0) {
+            itemsBox.innerHTML = itemsArray.map(item => `
+                <div style="margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed #374151;">
+                    <strong style="color:var(--primary-yellow); font-size:1rem;">🍿 ${item.nombre} ($${item.precio})</strong>
+                    <div style="font-size:0.82rem; color:#D1D5DB; margin-top:3px;">
+                        ${item.base ? `• Base: <strong>${item.base}</strong><br>` : ''}
+                        ${item.ingredientes && item.ingredientes.length > 0 ? `• Con: <strong>${item.ingredientes.join(', ')}</strong><br>` : ''}
+                        ${item.extras && item.extras.length > 0 ? `• Extras: <strong style="color:#F472B6;">${item.extras.join(', ')}</strong><br>` : ''}
+                        ${item.salsa ? `• Salsa: <strong>${item.salsa}</strong>` : ''}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
+        } else {
+            itemsBox.innerHTML = `<p style="font-size:0.85rem; color:#D1D5DB;">${p.detalle || 'Detalle no disponible'}</p>`;
+        }
     } catch (e) {
         itemsBox.innerHTML = `<p style="font-size:0.85rem; color:#D1D5DB;">${p.detalle || 'Detalle no disponible'}</p>`;
     }
@@ -269,6 +289,6 @@ async function cambiarEstadoEnBackend(turno, nuevoEstado, metodoPago) {
             body: JSON.stringify(payload)
         });
     } catch (e) {
-        console.error("Error al actualizar estado:", e);
+        console.error("Error al actualizar estado en cocina:", e);
     }
 }
