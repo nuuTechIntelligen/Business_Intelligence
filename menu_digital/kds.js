@@ -368,7 +368,7 @@ function crearTarjetaHTML(pedido) {
 }
 
 // ======================================================
-// DISPATCHER CENTRAL (STOPPROPAGATION GARANTIZADO)
+// DISPATCHER CENTRAL (EJECUCIÓN INMEDIATA)
 // ======================================================
 async function manejarAccionBoton(e, accion, turno, telefono) {
     if (e && e.stopPropagation) {
@@ -385,12 +385,12 @@ async function manejarAccionBoton(e, accion, turno, telefono) {
         }
     } 
     else if (accion === 'rechazar') {
-        if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turnoLimpio}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) return;
-
-        pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => String(p.turno).trim().toUpperCase() !== turnoLimpio.toUpperCase());
+        // 1. Quitar de la vista local de inmediato
+        pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => normalizarTextoClave(p.turno) !== normalizarTextoClave(turnoLimpio));
         renderizarTableroKanban();
         actualizarMetricasHeader();
 
+        // 2. Notificar backend
         await enviarPeticionAppsScript({
             action: 'rechazar_y_reembolsar',
             turno: turnoLimpio,
@@ -403,12 +403,12 @@ async function manejarAccionBoton(e, accion, turno, telefono) {
         }
     }
     else if (accion === 'eliminar') {
-        if (!confirm(`¿Deseas eliminar permanentemente el pedido ${turnoLimpio}?`)) return;
-
-        pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => String(p.turno).trim().toUpperCase() !== turnoLimpio.toUpperCase());
+        // 1. Quitar de la vista local de inmediato
+        pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => normalizarTextoClave(p.turno) !== normalizarTextoClave(turnoLimpio));
         renderizarTableroKanban();
         actualizarMetricasHeader();
 
+        // 2. Eliminar en Sheets
         await enviarPeticionAppsScript({
             action: 'eliminar_pedido',
             sheet: 'Ventas_Historicas',
@@ -437,7 +437,7 @@ async function manejarAccionBoton(e, accion, turno, telefono) {
 // CAMBIO DE ESTADOS Y SINCRONIZACIÓN
 // ======================================================
 async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
-    const idx = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === String(turno).trim().toUpperCase());
+    const idx = pedidosGlobalesSheets.findIndex(p => normalizarTextoClave(p.turno) === normalizarTextoClave(turno));
     if (idx !== -1) {
         pedidosGlobalesSheets[idx].estado = nuevoEstado;
         renderizarTableroKanban();
@@ -453,7 +453,7 @@ async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
 }
 
 async function alternarEstadoPagoNube(turno, nuevoEstadoPago, metodoOpcional = '') {
-    const idx = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === String(turno).trim().toUpperCase());
+    const idx = pedidosGlobalesSheets.findIndex(p => normalizarTextoClave(p.turno) === normalizarTextoClave(turno));
     if (idx !== -1) {
         pedidosGlobalesSheets[idx].pagado = nuevoEstadoPago;
         renderizarTableroKanban();
@@ -472,7 +472,7 @@ async function alternarEstadoPagoNube(turno, nuevoEstadoPago, metodoOpcional = '
 // MODAL DE DETALLE INTERACTIVO KDS
 // ======================================================
 function abrirModalDetallePedido(turno) {
-    const pedido = pedidosGlobalesSheets.find(p => String(p.turno).trim().toUpperCase() === String(turno).trim().toUpperCase());
+    const pedido = pedidosGlobalesSheets.find(p => normalizarTextoClave(p.turno) === normalizarTextoClave(turno));
     if (!pedido) return;
 
     pedidoModalActivo = pedido;
