@@ -127,11 +127,25 @@ async function iniciarKDS() {
     await consultarPedidosNube();
 }
 
+async function enviarPeticionAppsScript(payload) {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
+    try {
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Evita bloqueos de CORS en navegadores
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        console.warn("Error enviando acción a Sheets:", e);
+    }
+}
+
 async function consultarPedidosNube() {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
 
     try {
-        let res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas`);
+        let res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas&t=${Date.now()}`);
         let data = await res.json();
 
         if (!Array.isArray(data)) {
@@ -255,9 +269,9 @@ function renderizarTableroKanban() {
 
 function crearTarjetaHTML(pedido) {
     const semaforo = calcularSemaforoTiempo(pedido.fecha_completa);
-    const turnoSeguro = encodeURIComponent(pedido.turno || '');
     const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
     const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
+    const turnoAtributo = pedido.turno.replace(/"/g, '&quot;');
 
     let itemsHTML = '';
     if (pedido.items && pedido.items.length > 0) {
@@ -286,50 +300,50 @@ function crearTarjetaHTML(pedido) {
 
     if (pedido.estado === 'cola') {
         botonesAccionHTML = `
-            <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); aceptarPedidoKDS('${turnoSeguro}', '${telefonoLimpio}')">
+            <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'aceptar', '${turnoAtributo}', '${telefonoLimpio}')">
                 <i class="fa-solid fa-check"></i> Aceptar
             </button>
-            <button type="button" class="btn-card-action" title="Rechazar y Devolver Dinero" style="background:#DC2626; color:#FFF; border:none; padding:10px 10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); rechazarYReembolsarPedido('${turnoSeguro}', '${telefonoLimpio}')">
+            <button type="button" class="btn-card-action" title="Rechazar Pedido" style="background:#DC2626; color:#FFF; border:none; padding:10px 10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'rechazar', '${turnoAtributo}', '${telefonoLimpio}')">
                 <i class="fa-solid fa-xmark"></i> Rechazar
             </button>
         `;
     } else if (pedido.estado === 'preparando') {
         if (esRecoger && telefonoLimpio.length >= 10) {
             botonesAccionHTML = `
-                <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoSeguro}', 'listo')">
+                <button type="button" class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'listo', '${turnoAtributo}', '${telefonoLimpio}')">
                     <i class="fa-solid fa-check-double"></i> Listo
                 </button>
-                <button type="button" class="btn-card-action" title="Avisar por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); notificarPedidoListoWhatsApp('${turnoSeguro}', '${telefonoLimpio}')">
+                <button type="button" class="btn-card-action" title="Avisar por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'avisar', '${turnoAtributo}', '${telefonoLimpio}')">
                     <i class="fa-solid fa-bell"></i> Avisar
                 </button>
             `;
         } else {
             botonesAccionHTML = `
-                <button type="button" class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoSeguro}', 'listo')">
+                <button type="button" class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="manejarAccionBoton(event, 'listo', '${turnoAtributo}', '${telefonoLimpio}')">
                     <i class="fa-solid fa-check-double"></i> Listo
                 </button>
             `;
         }
     } else {
         botonesAccionHTML = `
-            <button type="button" class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoSeguro}', 'entregado')">
+            <button type="button" class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="manejarAccionBoton(event, 'entregado', '${turnoAtributo}', '${telefonoLimpio}')">
                 <i class="fa-solid fa-box-archive"></i> Entregar
             </button>
         `;
     }
 
     const botonPagoHTML = pedido.pagado ? `
-        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="event.stopPropagation(); alternarEstadoPagoNube('${turnoSeguro}', false)">
+        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="manejarAccionBoton(event, 'pago_no', '${turnoAtributo}', '')">
             <i class="fa-solid fa-circle-check"></i> Pagado
         </button>
     ` : `
-        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="event.stopPropagation(); alternarEstadoPagoNube('${turnoSeguro}', true)">
+        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="manejarAccionBoton(event, 'pago_si', '${turnoAtributo}', '')">
             <i class="fa-solid fa-clock-rotate-left"></i> Pago Pendiente
         </button>
     `;
 
     return `
-        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" onclick="abrirModalDetallePedido('${turnoSeguro}')" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1.5px solid ${pedido.estado === 'cola' ? '#F59E0B' : '#334155'}; box-shadow:0 4px 10px rgba(0,0,0,0.2); cursor:pointer;">
+        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" onclick="abrirModalDetallePedido('${turnoAtributo}')" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1.5px solid ${pedido.estado === 'cola' ? '#F59E0B' : '#334155'}; box-shadow:0 4px 10px rgba(0,0,0,0.2); cursor:pointer;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
                 <div style="display:flex; align-items:center; gap:6px;">
@@ -353,7 +367,7 @@ function crearTarjetaHTML(pedido) {
 
             <div style="display:flex; gap:6px; margin-top:8px;">
                 ${botonesAccionHTML}
-                <button type="button" title="Eliminar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="event.stopPropagation(); eliminarPedidoIndividual('${turnoSeguro}')">
+                <button type="button" title="Eliminar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="manejarAccionBoton(event, 'eliminar', '${turnoAtributo}', '')">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -362,92 +376,112 @@ function crearTarjetaHTML(pedido) {
 }
 
 // ======================================================
-// ACEPTAR, RECHAZAR Y ELIMINAR BLINDADOS
+// DISPATCHER CENTRAL DE ACCIONES (SIN COLISIONES DE EVENTOS)
 // ======================================================
-async function aceptarPedidoKDS(turnoEncoded, telefono) {
-    const turno = decodeURIComponent(turnoEncoded);
-    await cambiarEstadoPedidoNube(turnoEncoded, 'preparando');
+async function manejarAccionBoton(e, accion, turno, telefono) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
 
-    if (telefono && String(telefono).replace(/\D/g, '').length >= 10) {
-        abrirModalTiempoEstimado(turnoEncoded, telefono);
+    const turnoLimpio = String(turno || '').trim();
+
+    if (accion === 'aceptar') {
+        await cambiarEstadoPedidoNube(turnoLimpio, 'preparando');
+        if (telefono && String(telefono).replace(/\D/g, '').length >= 10) {
+            abrirModalTiempoEstimado(turnoLimpio, telefono);
+        }
+    } 
+    else if (accion === 'rechazar') {
+        if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turnoLimpio}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) return;
+
+        // Quitar de la pantalla inmediatamente
+        pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => String(p.turno).trim().toUpperCase() !== turnoLimpio.toUpperCase());
+        renderizarTableroKanban();
+        actualizarMetricasHeader();
+
+        await enviarPeticionAppsScript({
+            action: 'rechazar_y_reembolsar',
+            turno: turnoLimpio,
+            motivo: 'Saturación en cocina / Sin insumos'
+        });
+
+        if (telefono && String(telefono).replace(/\D/g, '').length >= 10) {
+            const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu orden *${turnoLimpio}* por saturación en cocina.\n\n💸 Si realizaste tu pago en línea, tu dinero ha sido devuelto a tu cuenta.`);
+            window.open(`https://wa.me/521${telefono}?text=${msg}`, '_blank');
+        }
+    }
+    else if (accion === 'eliminar') {
+        if (!confirm(`¿Deseas eliminar permanentemente el pedido ${turnoLimpio}?`)) return;
+
+        pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => String(p.turno).trim().toUpperCase() !== turnoLimpio.toUpperCase());
+        renderizarTableroKanban();
+        actualizarMetricasHeader();
+
+        await enviarPeticionAppsScript({
+            action: 'eliminar_pedido',
+            sheet: 'Ventas_Historicas',
+            turno: turnoLimpio
+        });
+    }
+    else if (accion === 'listo') {
+        await cambiarEstadoPedidoNube(turnoLimpio, 'listo');
+    }
+    else if (accion === 'entregado') {
+        await cambiarEstadoPedidoNube(turnoLimpio, 'entregado');
+    }
+    else if (accion === 'avisar') {
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* ¡Tu pedido *${turnoLimpio}* ya está LISTO para recoger! 🎉 Puedes pasar a mostrador por él.`);
+        window.open(`https://wa.me/521${telefono}?text=${msg}`, '_blank');
+    }
+    else if (accion === 'pago_si') {
+        await alternarEstadoPagoNube(turnoLimpio, true);
+    }
+    else if (accion === 'pago_no') {
+        await alternarEstadoPagoNube(turnoLimpio, false);
     }
 }
 
-async function rechazarYReembolsarPedido(turnoEncoded, telefono) {
-    const turno = decodeURIComponent(turnoEncoded);
-    if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turno}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) {
-        return;
-    }
-
-    const motivo = "Saturación en cocina / Sin stock de insumos";
-
-    // 1. Quitar de la vista local al instante
-    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
-    if (index !== -1) {
-        pedidosGlobalesSheets.splice(index, 1);
+// ======================================================
+// CAMBIO DE ESTADOS Y SINCRONIZACIÓN
+// ======================================================
+async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
+    const idx = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === String(turno).trim().toUpperCase());
+    if (idx !== -1) {
+        pedidosGlobalesSheets[idx].estado = nuevoEstado;
         renderizarTableroKanban();
         actualizarMetricasHeader();
     }
 
-    // 2. Notificar a Apps Script
-    if (WEB_APP_URL && !WEB_APP_URL.includes("TU_SCRIPT_ID")) {
-        try {
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'rechazar_y_reembolsar',
-                    turno: turno,
-                    motivo: motivo
-                })
-            }).catch(err => console.warn("Error background Sheets:", err));
-        } catch (e) {
-            console.warn("Fallo de red:", e);
-        }
-    }
-
-    // 3. Abrir WhatsApp opcional
-    const telLimpio = String(telefono || '').replace(/\D/g, '');
-    if (telLimpio.length >= 10) {
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu orden *${turno}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ya ha sido devuelto a tu cuenta.`);
-        window.open(`https://wa.me/521${telLimpio}?text=${msg}`, '_blank');
-    }
+    await enviarPeticionAppsScript({
+        action: 'actualizar_estado',
+        sheet: 'Ventas_Historicas',
+        turno: turno,
+        estado: nuevoEstado
+    });
 }
 
-async function eliminarPedidoIndividual(turnoEncoded) {
-    const turno = decodeURIComponent(turnoEncoded);
-    if (!confirm(`¿Deseas eliminar el pedido ${turno} permanentemente?`)) return;
-
-    // 1. Quitar de la vista local al instante
-    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
-    if (index !== -1) {
-        pedidosGlobalesSheets.splice(index, 1);
+async function alternarEstadoPagoNube(turno, nuevoEstadoPago, metodoOpcional = '') {
+    const idx = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === String(turno).trim().toUpperCase());
+    if (idx !== -1) {
+        pedidosGlobalesSheets[idx].pagado = nuevoEstadoPago;
         renderizarTableroKanban();
-        actualizarMetricasHeader();
     }
 
-    // 2. Borrar fila en Google Sheets
-    if (WEB_APP_URL && !WEB_APP_URL.includes("TU_SCRIPT_ID")) {
-        try {
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'eliminar_pedido',
-                    sheet: 'Ventas_Historicas',
-                    turno: turno
-                })
-            }).catch(err => console.warn("Error eliminando en Sheets:", err));
-        } catch (e) {
-            console.warn("Error de conexión:", e);
-        }
-    }
+    const textoPago = nuevoEstadoPago ? (metodoOpcional ? `SI (${metodoOpcional})` : 'SI') : 'NO';
+    await enviarPeticionAppsScript({
+        action: 'actualizar_pago',
+        sheet: 'Ventas_Historicas',
+        turno: turno,
+        pagado: textoPago
+    });
 }
 
 // ======================================================
 // MODAL DE DETALLE INTERACTIVO KDS
 // ======================================================
-function abrirModalDetallePedido(turnoEncoded) {
-    const turno = decodeURIComponent(turnoEncoded);
-    const pedido = pedidosGlobalesSheets.find(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
+function abrirModalDetallePedido(turno) {
+    const pedido = pedidosGlobalesSheets.find(p => String(p.turno).trim().toUpperCase() === String(turno).trim().toUpperCase());
     if (!pedido) return;
 
     pedidoModalActivo = pedido;
@@ -528,41 +562,14 @@ async function cambiarEstadoDesdeModal(nuevoEstado) {
     const esTienda = String(pedidoModalActivo.tipo).toLowerCase().includes('tienda');
 
     if (esTienda && metodoPagoSeleccionadoModal) {
-        await alternarEstadoPagoNube(encodeURIComponent(turno), true, metodoPagoSeleccionadoModal);
+        await alternarEstadoPagoNube(turno, true, metodoPagoSeleccionadoModal);
     }
 
-    await cambiarEstadoPedidoNube(encodeURIComponent(turno), nuevoEstado);
+    await cambiarEstadoPedidoNube(turno, nuevoEstado);
     cerrarModalDetallePedido();
 }
 
-async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago, metodoOpcional = '') {
-    const turno = decodeURIComponent(turnoEncoded);
-    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
-    if (index !== -1) {
-        pedidosGlobalesSheets[index].pagado = nuevoEstadoPago;
-        renderizarTableroKanban();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        const textoPago = nuevoEstadoPago ? (metodoOpcional ? `SI (${metodoOpcional})` : 'SI') : 'NO';
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'actualizar_pago',
-                sheet: 'Ventas_Historicas',
-                turno: turno,
-                pagado: textoPago
-            })
-        }).catch(err => console.warn("Error actualizando pago:", err));
-    } catch (e) {
-        console.warn("Error actualizando pago en Sheets:", e);
-    }
-}
-
-function abrirModalTiempoEstimado(turnoEncoded, telefono) {
-    const turno = decodeURIComponent(turnoEncoded);
+function abrirModalTiempoEstimado(turno, telefono) {
     pedidoTemporalParaTiempo = { turno, telefono };
     
     const modal = document.getElementById('timeModal');
@@ -592,39 +599,6 @@ function cerrarModalTiempo() {
         modal.style.display = 'none';
     }
     pedidoTemporalParaTiempo = null;
-}
-
-function notificarPedidoListoWhatsApp(turnoEncoded, telefono) {
-    const turno = decodeURIComponent(turnoEncoded);
-    const tel = String(telefono || '').replace(/\D/g, '');
-    const msg = encodeURIComponent(`🍿 *La Engordadera:* ¡Tu pedido *${turno}* ya está LISTO para recoger! 🎉 Puedes pasar a mostrador por él.`);
-    window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
-}
-
-async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
-    const turno = decodeURIComponent(turnoEncoded);
-    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
-    if (index !== -1) {
-        pedidosGlobalesSheets[index].estado = nuevoEstado;
-        renderizarTableroKanban();
-        actualizarMetricasHeader();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'actualizar_estado',
-                sheet: 'Ventas_Historicas',
-                turno: turno,
-                estado: nuevoEstado
-            })
-        }).catch(err => console.warn("Error actualizando estado:", err));
-    } catch (e) {
-        console.error("Error actualizando estado en Sheets:", e);
-    }
 }
 
 function reiniciarContadorTurnos() {
@@ -804,19 +778,14 @@ async function registrarVentaManualPOS() {
     const puntosGanados = Math.max(1, Math.floor(total * 0.1));
 
     if (WEB_APP_URL && clienteInput.length >= 3) {
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'procesar_puntos',
-                    sheet: 'Clientes_Lealtad',
-                    telefono: clienteInput.replace(/\D/g, '') || clienteInput,
-                    nombre: clienteInput,
-                    puntos_ganados: puntosGanados,
-                    meta_puntos: 100
-                })
-            });
-        } catch (e) {}
+        await enviarPeticionAppsScript({
+            action: 'procesar_puntos',
+            sheet: 'Clientes_Lealtad',
+            telefono: clienteInput.replace(/\D/g, '') || clienteInput,
+            nombre: clienteInput,
+            puntos_ganados: puntosGanados,
+            meta_puntos: 100
+        });
     }
 
     const payloadVenta = {
@@ -836,14 +805,7 @@ async function registrarVentaManualPOS() {
         }
     };
 
-    if (WEB_APP_URL) {
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify(payloadVenta)
-            });
-        } catch (e) {}
-    }
+    await enviarPeticionAppsScript(payloadVenta);
 
     alert(`✅ ¡Venta cobrada con éxito!\nTurno: ${turnoManual}\nTotal: $${total.toFixed(2)}\nPuntos sumados: +${puntosGanados} pts`);
     vaciarCarritoPOS();
@@ -1090,17 +1052,10 @@ async function borrarHistorialFinanciero() {
     actualizarMetricasHeader();
     actualizarModuloFinanzas();
 
-    if (WEB_APP_URL) {
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'borrar_historial',
-                    sheet: 'Ventas_Historicas'
-                })
-            });
-        } catch (e) {}
-    }
+    await enviarPeticionAppsScript({
+        action: 'borrar_historial',
+        sheet: 'Ventas_Historicas'
+    });
 
     alert("✅ El historial financiero ha sido reiniciado.");
 }
