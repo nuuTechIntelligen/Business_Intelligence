@@ -12,6 +12,8 @@ let turnosConocidosEnCola = new Set();
 let primerCargaRealizada = false;
 let audioContext = null;
 let pedidoTemporalParaTiempo = null;
+let pedidoModalActivo = null;
+let metodoPagoSeleccionadoModal = '';
 
 let chartVentasDiasInstance = null;
 let chartTopProductosInstance = null;
@@ -153,17 +155,17 @@ async function consultarPedidosNube() {
             const itemsJsonVal = obtenerCampoFlexible(fila, ['items_json', 'items', 'json']);
 
             const pagadoRaw = String(obtenerCampoFlexible(fila, ['pagado', 'pago', 'status_pago']) || '').toLowerCase().trim();
-            const estaPagado = (tipoVal === 'tienda') || (pagadoRaw === 'si' || pagadoRaw === 'true' || pagadoRaw === '1' || pagadoRaw === 'pagado');
+            const estaPagado = (tipoVal === 'tienda') || (pagadoRaw.startsWith('si') || pagadoRaw === 'true' || pagadoRaw === '1' || pagadoRaw === 'pagado');
 
             let items = [];
             try {
                 if (itemsJsonVal && String(itemsJsonVal).trim().startsWith('[')) {
                     items = JSON.parse(itemsJsonVal);
                 } else if (detalleVal) {
-                    items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], precio: 0 }));
+                    items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], ingredientes: [], base: '', salsa: '', precio: 0 }));
                 }
             } catch (e) {
-                items = [{ nombre: detalleVal || 'Botana', extras: [], precio: totalVal }];
+                items = [{ nombre: detalleVal || 'Botana', extras: [], ingredientes: [], base: '', salsa: '', precio: totalVal }];
             }
 
             let estadoRaw = String(obtenerCampoFlexible(fila, ['estado', 'status']) || 'cola').toLowerCase().trim();
@@ -176,9 +178,11 @@ async function consultarPedidosNube() {
                 tipo: tipoVal,
                 total: totalVal,
                 pagado: estaPagado,
+                pagado_detalle: pagadoRaw,
                 fecha_completa: fechaVal,
                 estado: estadoRaw,
-                items: items
+                items: items,
+                detalle_crudo: detalleVal
             };
         });
 
@@ -251,37 +255,45 @@ function crearTarjetaHTML(pedido) {
     const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
     const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
 
+    // Desglose de botanas con ingredientes y extras
     let itemsHTML = '';
-    (pedido.items || []).forEach((it, idx) => {
-        let extras = [];
-        if (it.base) extras.push(`Base: ${it.base}`);
-        if (it.ingredientes && it.ingredientes.length > 0) extras.push(`Con: ${it.ingredientes.join(', ')}`);
-        if (it.extras && it.extras.length > 0) extras.push(`Extra: ${it.extras.join(', ')}`);
-        if (it.salsa) extras.push(`Salsa: ${it.salsa}`);
+    if (pedido.items && pedido.items.length > 0) {
+        pedido.items.forEach((it, idx) => {
+            let detalles = [];
+            if (it.base) detalles.push(`Base: <span style="color:#FFF;">${it.base}</span>`);
+            if (it.ingredientes && it.ingredientes.length > 0) detalles.push(`Con: <span style="color:#FFF;">${it.ingredientes.join(', ')}</span>`);
+            if (it.extras && it.extras.length > 0) detalles.push(`Extras: <span style="color:#F59E0B; font-weight:600;">${it.extras.join(', ')}</span>`);
+            if (it.salsa) detalles.push(`Salsa: <span style="color:#F472B6;">${it.salsa}</span>`);
 
-        itemsHTML += `
-            <div class="kds-item-row" style="margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
-                <strong style="color: #FFF; font-size: 0.95rem;">${idx + 1}. ${it.nombre}</strong>
-                <p style="color: #94A3B8; font-size: 0.78rem; margin: 2px 0 0 0;">${extras.join(' | ') || 'Estándar'}</p>
-            </div>
-        `;
-    });
+            itemsHTML += `
+                <div class="kds-item-row" style="margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="color: #F8FAFC; font-size: 0.95rem;">${idx + 1}. 🍿 ${it.nombre}</strong>
+                        ${it.precio ? `<span style="color:#F59E0B; font-size:0.85rem; font-weight:700;">$${parseFloat(it.precio).toFixed(2)}</span>` : ''}
+                    </div>
+                    <p style="color: #94A3B8; font-size: 0.78rem; margin: 2px 0 0 0; line-height: 1.35;">${detalles.join(' | ') || 'Clásico'}</p>
+                </div>
+            `;
+        });
+    } else if (pedido.detalle_crudo) {
+        itemsHTML = `<div style="color:#CBD5E1; font-size:0.85rem; margin-bottom:6px;">${pedido.detalle_crudo}</div>`;
+    }
 
     let botonesAccionHTML = '';
 
     if (pedido.estado === 'cola') {
         if (esRecoger && telefonoLimpio.length >= 10) {
             botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1.2; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
+                <button class="btn-card-action" style="flex:1.2; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
                     <i class="fa-solid fa-fire"></i> Preparar
                 </button>
-                <button class="btn-card-action" title="Notificar Tiempo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="abrirModalTiempoEstimado('${turnoEscapado}', '${telefonoLimpio}')">
+                <button class="btn-card-action" title="Notificar Tiempo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); abrirModalTiempoEstimado('${turnoEscapado}', '${telefonoLimpio}')">
                     <i class="fa-solid fa-clock"></i> Notificar
                 </button>
             `;
         } else {
             botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
+                <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
                     <i class="fa-solid fa-fire"></i> Preparar
                 </button>
             `;
@@ -289,40 +301,40 @@ function crearTarjetaHTML(pedido) {
     } else if (pedido.estado === 'preparando') {
         if (esRecoger && telefonoLimpio.length >= 10) {
             botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
+                <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
                     <i class="fa-solid fa-check-double"></i> Listo
                 </button>
-                <button class="btn-card-action" title="Avisar que ya está listo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="notificarPedidoListoWhatsApp('${turnoEscapado}', '${telefonoLimpio}')">
+                <button class="btn-card-action" title="Avisar que ya está listo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); notificarPedidoListoWhatsApp('${turnoEscapado}', '${telefonoLimpio}')">
                     <i class="fa-solid fa-bell"></i> Avisar
                 </button>
             `;
         } else {
             botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
+                <button class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
                     <i class="fa-solid fa-check-double"></i> Listo
                 </button>
             `;
         }
     } else {
         botonesAccionHTML = `
-            <button class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'entregado')">
+            <button class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="event.stopPropagation(); cambiarEstadoPedidoNube('${turnoEscapado}', 'entregado')">
                 <i class="fa-solid fa-box-archive"></i> Entregar
             </button>
         `;
     }
 
     const botonPagoHTML = pedido.pagado ? `
-        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', false)">
+        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="event.stopPropagation(); alternarEstadoPagoNube('${turnoEscapado}', false)">
             <i class="fa-solid fa-circle-check"></i> Pagado
         </button>
     ` : `
-        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', true)">
+        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="event.stopPropagation(); alternarEstadoPagoNube('${turnoEscapado}', true)">
             <i class="fa-solid fa-clock-rotate-left"></i> Pago Pendiente
         </button>
     `;
 
     return `
-        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1px solid #334155; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" onclick="abrirModalDetallePedido('${turnoEscapado}')" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1px solid #334155; box-shadow:0 4px 10px rgba(0,0,0,0.2); cursor:pointer;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
                 <div style="display:flex; align-items:center; gap:6px;">
@@ -346,7 +358,7 @@ function crearTarjetaHTML(pedido) {
 
             <div style="display:flex; gap:6px; margin-top:8px;">
                 ${botonesAccionHTML}
-                <button title="Eliminar / Cancelar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="eliminarPedidoIndividual('${turnoEscapado}')">
+                <button title="Eliminar / Cancelar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="event.stopPropagation(); eliminarPedidoIndividual('${turnoEscapado}')">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -354,7 +366,104 @@ function crearTarjetaHTML(pedido) {
     `;
 }
 
-async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
+// ======================================================
+// MODAL DE DETALLE INTERACTIVO KDS
+// ======================================================
+function abrirModalDetallePedido(turnoEscapado) {
+    const turnoReal = decodeURIComponent(turnoEscapado);
+    const pedido = pedidosGlobalesSheets.find(p => p.turno === turnoReal);
+    if (!pedido) return;
+
+    pedidoModalActivo = pedido;
+    metodoPagoSeleccionadoModal = '';
+
+    document.getElementById('modalTurno').textContent = pedido.turno;
+    document.getElementById('modalCliente').textContent = `Cliente: ${pedido.cliente}`;
+    document.getElementById('modalTelefono').textContent = pedido.telefono || 'Sin registrar';
+    document.getElementById('modalTotalMonto').textContent = `$${parseFloat(pedido.total || 0).toFixed(2)}`;
+
+    const esTienda = String(pedido.tipo).toLowerCase().includes('tienda');
+    const badgeTipo = document.getElementById('modalBadgeTipo');
+    badgeTipo.style.background = esTienda ? '#0284C7' : '#EA580C';
+    badgeTipo.style.color = '#FFF';
+    badgeTipo.textContent = esTienda ? '🏪 EN TIENDA' : '🛍️ PARA RECOGER';
+
+    // Opciones de llamada o WhatsApp
+    const contactBox = document.getElementById('modalContactActions');
+    contactBox.innerHTML = '';
+    const telLimpio = String(pedido.telefono || '').replace(/\D/g, '');
+    if (telLimpio.length >= 10) {
+        contactBox.innerHTML = `
+            <a href="tel:${telLimpio}" class="btn-card-action" style="background:#3B82F6; color:#FFF; padding:5px 10px; border-radius:6px; text-decoration:none;"><i class="fa-solid fa-phone"></i></a>
+            <a href="https://wa.me/521${telLimpio}" target="_blank" class="btn-card-action" style="background:#25D366; color:#FFF; padding:5px 10px; border-radius:6px; text-decoration:none;"><i class="fa-brands fa-whatsapp"></i></a>
+        `;
+    }
+
+    // Desglose de botanas e ingredientes en el modal
+    const itemsList = document.getElementById('modalItemsList');
+    if (pedido.items && pedido.items.length > 0) {
+        itemsList.innerHTML = pedido.items.map((it, idx) => `
+            <div style="margin-bottom:8px; padding-bottom:6px; border-bottom:1px dashed #334155;">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong style="color:#F59E0B; font-size:0.95rem;">${idx + 1}. 🍿 ${it.nombre}</strong>
+                    <span style="color:#10B981; font-weight:700;">$${parseFloat(it.precio || 0).toFixed(2)}</span>
+                </div>
+                <div style="font-size:0.8rem; color:#CBD5E1; margin-top:3px; line-height:1.35;">
+                    ${it.base ? `• Base: <strong>${it.base}</strong><br>` : ''}
+                    ${it.ingredientes && it.ingredientes.length > 0 ? `• Con: <strong>${it.ingredientes.join(', ')}</strong><br>` : ''}
+                    ${it.extras && it.extras.length > 0 ? `• Extras: <strong style="color:#F472B6;">${it.extras.join(', ')}</strong><br>` : ''}
+                    ${it.salsa ? `• Salsa: <strong>${it.salsa}</strong>` : ''}
+                </div>
+            </div>
+        `).join('');
+    } else {
+        itemsList.innerHTML = `<p style="font-size:0.85rem; color:#CBD5E1;">${pedido.detalle_crudo || 'Sin detalles'}</p>`;
+    }
+
+    // Control de pagos: solo en tienda se permite elegir el método
+    const paySelector = document.getElementById('modalPaySelectorWrapper');
+    const pickupNotice = document.getElementById('modalPickupPayNotice');
+    if (esTienda) {
+        paySelector.style.display = 'block';
+        pickupNotice.style.display = 'none';
+    } else {
+        paySelector.style.display = 'none';
+        pickupNotice.style.display = 'block';
+    }
+
+    document.querySelectorAll('.kds-pay-btn').forEach(btn => btn.classList.remove('active'));
+
+    const modal = document.getElementById('kdsDetailModal');
+    if (modal) modal.classList.add('active');
+}
+
+function seleccionarMetodoPagoModal(metodo, btnEl) {
+    metodoPagoSeleccionadoModal = metodo;
+    document.querySelectorAll('.kds-pay-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+}
+
+function cerrarModalDetallePedido() {
+    const modal = document.getElementById('kdsDetailModal');
+    if (modal) modal.classList.remove('active');
+    pedidoModalActivo = null;
+}
+
+async function cambiarEstadoDesdeModal(nuevoEstado) {
+    if (!pedidoModalActivo) return;
+    const turno = pedidoModalActivo.turno;
+    const esTienda = String(pedidoModalActivo.tipo).toLowerCase().includes('tienda');
+
+    // Si es tienda y eligió método, registrarlo
+    if (esTienda && metodoPagoSeleccionadoModal) {
+        await alternarEstadoPagoNube(encodeURIComponent(turno), true, metodoPagoSeleccionadoModal);
+    }
+
+    await cambiarEstadoPedidoNube(encodeURIComponent(turno), nuevoEstado);
+    cerrarModalDetallePedido();
+}
+
+async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago, metodoOpcional = '') {
     const turnoReal = decodeURIComponent(turnoEncoded);
 
     const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
@@ -366,16 +475,16 @@ async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
 
     try {
+        const textoPago = nuevoEstadoPago ? (metodoOpcional ? `SI (${metodoOpcional})` : 'SI') : 'NO';
         await fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'actualizar_pago',
                 sheet: 'Ventas_Historicas',
                 turno: turnoReal,
-                pagado: nuevoEstadoPago ? 'SI' : 'NO'
+                pagado: textoPago
             })
         });
-        console.log(`💵 Pago del turno ${turnoReal} guardado como: ${nuevoEstadoPago ? 'SI' : 'NO'}`);
     } catch (e) {
         console.warn("Error actualizando pago en Sheets:", e);
     }
@@ -470,7 +579,6 @@ async function eliminarPedidoIndividual(turnoEncoded) {
                 turno: turnoReal
             })
         });
-        console.log(`🗑️ Pedido ${turnoReal} eliminado de Sheets`);
     } catch (e) {
         console.warn("Error eliminando pedido:", e);
     }
@@ -491,7 +599,17 @@ function limpiarEntregadosAntiguos() {
 
 function calcularSemaforoTiempo(fechaISO) {
     const ahora = new Date();
-    const creacion = new Date(fechaISO);
+    let creacion = new Date(fechaISO);
+
+    // Fallback si viene en formato simple de hora (ej: "18:45")
+    if (isNaN(creacion.getTime())) {
+        const match = String(fechaISO).match(/(\d{1,2}):(\d{2})/);
+        if (match) {
+            creacion = new Date();
+            creacion.setHours(parseInt(match[1], 10), parseInt(match[2], 10), 0, 0);
+        }
+    }
+
     let diffMs = ahora - creacion;
     if (isNaN(diffMs) || diffMs < 0) diffMs = 0;
 
