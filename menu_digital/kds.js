@@ -282,13 +282,13 @@ function crearTarjetaHTML(pedido) {
 
     if (pedido.estado === 'cola') {
         botonesAccionHTML = `
-            <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); aceptarPedidoKDS('${turnoEscapado}', '${telefonoLimpio}')">
-                <i class="fa-solid fa-check"></i> Aceptar
-            </button>
-            <button class="btn-card-action" title="Rechazar y Devolver Dinero" style="background:#DC2626; color:#FFF; border:none; padding:10px 10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); rechazarYReembolsarPedido('${turnoEscapado}', '${telefonoLimpio}')">
-                <i class="fa-solid fa-xmark"></i> Rechazar
-            </button>
-        `;
+    <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="aceptarPedidoKDS('${turnoEscapado}', '${telefonoLimpio}', event)">
+        <i class="fa-solid fa-check"></i> Aceptar
+    </button>
+    <button class="btn-card-action" title="Rechazar y Devolver Dinero" style="background:#DC2626; color:#FFF; border:none; padding:10px 10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="rechazarYReembolsarPedido('${turnoEscapado}', '${telefonoLimpio}', event)">
+        <i class="fa-solid fa-xmark"></i> Rechazar
+    </button>
+`;
     } else if (pedido.estado === 'preparando') {
         if (esRecoger && telefonoLimpio.length >= 10) {
             botonesAccionHTML = `
