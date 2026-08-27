@@ -362,7 +362,7 @@ function crearTarjetaHTML(pedido) {
 }
 
 // ======================================================
-// ACEPTAR / RECHAZAR CON REEMBOLSO
+// ACEPTAR / RECHAZAR CON REEMBOLSO (BLINDADO)
 // ======================================================
 async function aceptarPedidoKDS(turno, telefono) {
     await cambiarEstadoPedidoNube(turno, 'preparando');
@@ -373,11 +373,15 @@ async function aceptarPedidoKDS(turno, telefono) {
 }
 
 async function rechazarYReembolsarPedido(turno, telefono) {
-    const motivo = prompt(`¿Motivo de rechazo para el turno ${turno}?`, "Saturación en cocina / Sin stock de insumos");
-    if (motivo === null) return;
+    const turnoLimpio = String(turno || '').trim();
+    if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turnoLimpio}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) {
+        return;
+    }
 
-    // 1. Quitar de la vista local de inmediato
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turno);
+    const motivo = "Saturación en cocina / Sin stock de insumos";
+
+    // 1. Quitar de la pantalla de cocina inmediatamente
+    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turnoLimpio.toUpperCase());
     if (index !== -1) {
         pedidosGlobalesSheets.splice(index, 1);
         renderizarTableroKanban();
@@ -387,24 +391,24 @@ async function rechazarYReembolsarPedido(turno, telefono) {
     // 2. Notificar a Apps Script
     if (WEB_APP_URL && !WEB_APP_URL.includes("TU_SCRIPT_ID")) {
         try {
-            await fetch(WEB_APP_URL, {
+            fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'rechazar_y_reembolsar',
-                    turno: turno,
+                    turno: turnoLimpio,
                     motivo: motivo
                 })
-            });
+            }).catch(err => console.warn("Error background Sheets:", err));
         } catch (e) {
-            console.error("Error al procesar reembolso:", e);
+            console.warn("Fallo de red:", e);
         }
     }
 
     // 3. Abrir WhatsApp opcional
-    if (telefono && String(telefono).replace(/\D/g, '').length >= 10) {
-        const cleanTel = String(telefono).replace(/\D/g, '');
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu pedido *${turno}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ya ha sido devuelto a tu cuenta.`);
-        window.open(`https://wa.me/521${cleanTel}?text=${msg}`, '_blank');
+    const telLimpio = String(telefono || '').replace(/\D/g, '');
+    if (telLimpio.length >= 10) {
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu orden *${turnoLimpio}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ha sido devuelto a tu cuenta.`);
+        window.open(`https://wa.me/521${telLimpio}?text=${msg}`, '_blank');
     }
 }
 
