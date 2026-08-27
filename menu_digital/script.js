@@ -4,7 +4,6 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl9NiFg5WzBJGD9klSJijJVaziy9eOPiSvGhLPiakZeYJ26CVjE0FRuZgmWvSJ5w3wgg/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
-// Variables dinámicas desde Google Sheets
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let PUNTOS_META_PREMIO = 100;
 let ESCALA_PUNTOS_COMPRA = "5-20:1, 21-50:3, 51-100:6, 101-200:15, 201-9999:25";
@@ -12,7 +11,6 @@ let LINK_MERCADOPAGO = "http://link.mercadopago.com.mx/fyblaengordadera";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
-// Enlaces de Redes Sociales y Google Maps
 let LINK_FACEBOOK = "";
 let LINK_INSTAGRAM = "";
 let LINK_GOOGLE_MAPS = "https://maps.google.com";
@@ -141,8 +139,6 @@ async function cargarConfiguracionGlobal() {
                 const valor = String(obtenerPropiedadFlexible(fila, ['valor', 'value', 'link', 'enlace', 'dato']) || '').trim();
 
                 if (!clave || !valor) return;
-
-                // Evitar procesar tokens o secretos en frontend
                 if (clave.includes('TOKEN') || clave.includes('SECRET') || clave.includes('PASS')) return;
 
                 if (clave === 'PREMIO' || clave.includes('PREMIO_LEALTAD')) PREMIO_LEALTAD = valor;
@@ -194,16 +190,12 @@ function renderizarRedesSocialesFooter() {
 
 function abrirModalRedesMovil() {
     const modal = document.getElementById('socialModalOverlay');
-    if (modal) {
-        modal.classList.add('active');
-    }
+    if (modal) modal.classList.add('active');
 }
 
 function cerrarModalRedesMovil() {
     const modal = document.getElementById('socialModalOverlay');
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    if (modal) modal.classList.remove('active');
 }
 
 async function cargarMenuDesdeWebApp() {
@@ -727,7 +719,7 @@ function confirmarAgregarAlCarrito() {
 }
 
 // ======================================================
-// 4. RENDERIZADO DE BARRA PÍLDORA (VISIBLE)
+// 4. BARRA PÍLDORA DEL CARRITO
 // ======================================================
 function actualizarBarraPildoraCarrito() {
     const totalCount = carrito.length;
@@ -884,7 +876,7 @@ async function consultarSellosEnSheets() {
 }
 
 // ======================================================
-// 7. CHECKOUT & GENERACIÓN DINÁMICA
+// 7. CHECKOUT Y ENVÍO DE PEDIDO
 // ======================================================
 function abrirModalCheckout() {
     if (carrito.length === 0) {
@@ -1092,6 +1084,16 @@ async function procesarPuntosEnGoogleSheets(telefono, nombre, puntosGanados) {
 async function respaldarVentaEnGoogleSheets(pedido) {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
     try {
+        // Detalle formateado en texto legible con ingredientes para lectura en Sheet
+        const detalleCompleto = pedido.items.map((i, idx) => {
+            let partes = [`${idx + 1}. ${i.nombre} ($${parseFloat(i.precio).toFixed(2)})`];
+            if (i.base) partes.push(`Base: ${i.base}`);
+            if (i.ingredientes && i.ingredientes.length > 0) partes.push(`Con: ${i.ingredientes.join(', ')}`);
+            if (i.extras && i.extras.length > 0) partes.push(`Extras: ${i.extras.join(', ')}`);
+            if (i.salsa) partes.push(`Salsa: ${i.salsa}`);
+            return partes.join(' | ');
+        }).join(' // ');
+
         const payload = {
             action: 'insertar_venta',
             sheet: 'Ventas_Historicas',
@@ -1102,14 +1104,10 @@ async function respaldarVentaEnGoogleSheets(pedido) {
                 tipo: pedido.tipo,
                 total: pedido.total,
                 pagado: pedido.pagado ? 'SI' : 'NO',
-                fecha: pedido.fecha_completa,
-                estado: 'cola',
-                items_json: JSON.stringify(pedido.items),
-                detalle: pedido.items.map(i => {
-                    let txt = `${i.nombre} ($${i.precio})`;
-                    if (i.extras && i.extras.length > 0) txt += ` [Extras: ${i.extras.join(', ')}]`;
-                    return txt;
-                }).join(' | ')
+                fecha: pedido.fecha_completa || new Date().toISOString(),
+                estado: pedido.estado || 'cola',
+                detalle: detalleCompleto,
+                items_json: JSON.stringify(pedido.items)
             }
         };
 
@@ -1123,7 +1121,7 @@ async function respaldarVentaEnGoogleSheets(pedido) {
 }
 
 // ======================================================
-// 8. PANTALLA DE BOLETO DIGITAL & PAGO EXACTO
+// 8. BOLETO DIGITAL & PAGO DINÁMICO
 // ======================================================
 async function mostrarBoletoTurno(pedido, esRestaurado = false) {
     whatsappEnviadoConfirmado = false;
@@ -1133,8 +1131,6 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
     const loyaltyBanner = document.getElementById('ticketLoyaltyBanner');
     const btnClose = document.getElementById('btnTicketModalClose');
     const countdownEl = document.getElementById('kioskCountdown');
-    const btnWa = document.getElementById('btnTicketWhatsApp');
-    const btnFinish = document.getElementById('btnFinishOrder');
     const btnFinishText = document.getElementById('btnFinishText');
     const btnWaText = document.getElementById('btnWaText');
 
