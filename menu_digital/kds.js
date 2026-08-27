@@ -374,6 +374,7 @@ async function rechazarYReembolsarPedido(turnoEscapado, telefono) {
     const motivo = prompt(`¿Motivo de rechazo para el turno ${turnoReal}?`, "Saturación en cocina / Sin stock de insumos");
     if (motivo === null) return;
 
+    // 1. Quitar de la memoria local y de la pantalla de inmediato
     const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
     if (index !== -1) {
         pedidosGlobalesSheets[index].estado = 'rechazado';
@@ -382,6 +383,7 @@ async function rechazarYReembolsarPedido(turnoEscapado, telefono) {
         actualizarMetricasHeader();
     }
 
+    // 2. Notificar al backend en Sheets y Mercado Pago
     if (WEB_APP_URL && !WEB_APP_URL.includes("TU_SCRIPT_ID")) {
         try {
             await fetch(WEB_APP_URL, {
@@ -392,19 +394,19 @@ async function rechazarYReembolsarPedido(turnoEscapado, telefono) {
                     motivo: motivo
                 })
             });
+            // Forzar recarga limpia desde Sheets
+            await consultarPedidosNube();
         } catch (e) {
-            console.error("Error al procesar reembolso:", e);
+            console.error("Error al procesar rechazo:", e);
         }
     }
 
+    // 3. Abrir WhatsApp para avisar al cliente
     if (telefono && telefono.length >= 10) {
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu pedido *${turnoReal}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ya ha sido devuelto a tu cuenta.`);
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu pedido *${turnoReal}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ha sido devuelto a tu cuenta.`);
         window.open(`https://wa.me/521${telefono}?text=${msg}`, '_blank');
     }
-
-    alert(`✅ Pedido ${turnoReal} rechazado y reembolso procesado.`);
 }
-
 // ======================================================
 // MODAL DE DETALLE INTERACTIVO KDS
 // ======================================================
