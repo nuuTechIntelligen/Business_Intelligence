@@ -1,7 +1,7 @@
 // ======================================================
-// MENU LA ENGORDADERA (BARRA PÍLDORA + MERCADO PAGO DINÁMICO + PERSISTENCIA)
+// MENU LA ENGORDADERA (BARRA PÍLDORA + MONITOREO DINÁMICO)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl9NiFg5WzBJGD9klSJijJVaziy9eOPiSvGhLPiakZeYJ26CVjE0FRuZgmWvSJ5w3wgg/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
@@ -24,6 +24,7 @@ let limiteIngredientesActual = 0;
 let carrito = [];
 let ultimoPedidoGenerado = null;
 let temporizadorKiosko = null;
+let temporizadorMonitoreoCliente = null;
 let whatsappEnviadoConfirmado = false;
 
 let bannersPromoActivos = [];
@@ -1084,7 +1085,6 @@ async function procesarPuntosEnGoogleSheets(telefono, nombre, puntosGanados) {
 async function respaldarVentaEnGoogleSheets(pedido) {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
     try {
-        // Detalle formateado en texto legible con ingredientes para lectura en Sheet
         const detalleCompleto = pedido.items.map((i, idx) => {
             let partes = [`${idx + 1}. ${i.nombre} ($${parseFloat(i.precio).toFixed(2)})`];
             if (i.base) partes.push(`Base: ${i.base}`);
@@ -1121,7 +1121,7 @@ async function respaldarVentaEnGoogleSheets(pedido) {
 }
 
 // ======================================================
-// 8. BOLETO DIGITAL & PAGO DINÁMICO
+// 8. BOLETO DIGITAL CON MONITOREO DE ACEPTACIÓN / RECHAZO
 // ======================================================
 async function mostrarBoletoTurno(pedido, esRestaurado = false) {
     whatsappEnviadoConfirmado = false;
@@ -1180,8 +1180,8 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
         badgeType.className = 'ticket-badge badge-recoger';
         paymentAlert.className = 'ticket-payment-alert alert-recoger';
         paymentAlert.innerHTML = `
-            <strong>⚠️ Pago Previo Requerido:</strong><br>
-            Para iniciar tu orden, realiza tu pago exacto y envía el comprobante por WhatsApp.
+            <strong>⏳ Pedido en Validación:</strong><br>
+            Realiza tu pago en Mercado Pago. En cuanto cocina valide tu orden pasará a preparación.
         `;
         
         if (onlinePaymentCard) {
@@ -1197,9 +1197,41 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
         if (btnFinishText) btnFinishText.textContent = 'Ya envié mi comprobante (Cerrar)';
 
         solicitarLinkDinamicoMercadoPago(pedido);
+        iniciarMonitoreoEstadoBoleto(pedido.turno);
     }
 
     document.getElementById('ticketModal').classList.add('active');
+}
+
+function iniciarMonitoreoEstadoBoleto(turno) {
+    if (temporizadorMonitoreoCliente) clearInterval(temporizadorMonitoreoCliente);
+
+    temporizadorMonitoreoCliente = setInterval(async () => {
+        if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
+        try {
+            const res = await fetch(`${WEB_APP_URL}?action=consultar_estado_pedido&turno=${encodeURIComponent(turno)}`);
+            const pedido = await res.json();
+            const paymentAlert = document.getElementById('ticketPaymentAlert');
+
+            if (pedido && pedido.estado) {
+                const est = String(pedido.estado).toLowerCase().trim();
+                if (est === 'preparando') {
+                    paymentAlert.className = 'ticket-payment-alert alert-tienda';
+                    paymentAlert.innerHTML = `<strong>🔥 ¡Orden Aceptada!</strong><br>Tus botanas ya están en preparación en cocina.`;
+                } else if (est === 'listo') {
+                    paymentAlert.className = 'ticket-payment-alert alert-tienda';
+                    paymentAlert.innerHTML = `<strong>🎉 ¡Tu pedido está LISTO!</strong><br>Pasa al mostrador a recoger tus botanas.`;
+                } else if (est === 'rechazado' || est === 'cancelado') {
+                    paymentAlert.className = 'ticket-payment-alert';
+                    paymentAlert.style.background = '#FEE2E2';
+                    paymentAlert.style.borderColor = '#F87171';
+                    paymentAlert.style.color = '#991B1B';
+                    paymentAlert.innerHTML = `<strong>❌ Pedido No Disponible:</strong><br>Lo sentimos, no pudimos tomar tu orden. Si realizaste tu pago en línea, tu dinero ha sido devuelto a tu cuenta.`;
+                    clearInterval(temporizadorMonitoreoCliente);
+                }
+            }
+        } catch (e) {}
+    }, 5000);
 }
 
 async function solicitarLinkDinamicoMercadoPago(pedido) {
@@ -1319,6 +1351,7 @@ function cerrarTicketModal() {
     }
     
     if (temporizadorKiosko) clearInterval(temporizadorKiosko);
+    if (temporizadorMonitoreoCliente) clearInterval(temporizadorMonitoreoCliente);
     localStorage.removeItem('engordadera_ultimo_pedido_activo');
     document.getElementById('ticketModal').classList.remove('active');
     reiniciarParaNuevoPedido();
@@ -1326,6 +1359,7 @@ function cerrarTicketModal() {
 
 function reiniciarParaNuevoPedido() {
     if (temporizadorKiosko) clearInterval(temporizadorKiosko);
+    if (temporizadorMonitoreoCliente) clearInterval(temporizadorMonitoreoCliente);
     carrito = [];
     actualizarBarraPildoraCarrito();
     document.getElementById('clientNameInput').value = '';
