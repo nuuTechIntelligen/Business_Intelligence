@@ -17,10 +17,22 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Estilos de cocina y finanzas -->
-    <link rel="stylesheet" href="cocina.css?v=10">
+    <link rel="stylesheet" href="cocina.css?v=12">
 
     <style>
-        /* Modal de Detalle Interactivo KDS */
+        :root {
+            --primary-pink: #E91E63;
+            --primary-pink-dark: #C2185B;
+            --primary-yellow: #FFC107;
+            --primary-green: #10B981;
+            --bg-dark: #0F172A;
+            --card-dark: #1E293B;
+            --border-dark: #334155;
+            --font-heading: 'Fredoka', cursive, sans-serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        /* Estilos del Modal de Detalle KDS */
         .modal-kds-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -34,8 +46,8 @@
         }
         .modal-kds-overlay.active { display: flex; }
         .modal-kds-card {
-            background: #1E293B;
-            border: 2px solid #334155;
+            background: var(--card-dark);
+            border: 2px solid var(--primary-pink);
             width: 100%;
             max-width: 520px;
             max-height: 90vh;
@@ -44,7 +56,7 @@
             overflow-y: auto;
             position: relative;
             color: #F8FAFC;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.25);
         }
         .modal-kds-close {
             position: absolute;
@@ -68,15 +80,58 @@
             border: 1.5px solid #475569;
             padding: 8px 6px;
             border-radius: 8px;
-            font-family: 'Fredoka', cursive;
+            font-family: var(--font-heading);
             font-size: 0.85rem;
             cursor: pointer;
             text-align: center;
         }
         .kds-pay-btn.active {
-            background: #E91E63;
+            background: var(--primary-pink);
             border-color: #F472B6;
             font-weight: 700;
+        }
+
+        /* BOTÓN EXPORTAR CSV ESTILIZADO */
+        .btn-export {
+            background: linear-gradient(135deg, #10B981, #059669) !important;
+            color: #FFFFFF !important;
+            border: 1px solid #34D399 !important;
+            padding: 8px 14px !important;
+            border-radius: 10px !important;
+            font-family: var(--font-heading) !important;
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+            transition: transform 0.15s ease, background-color 0.15s ease !important;
+        }
+        .btn-export:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #059669, #047857) !important;
+        }
+
+        /* TARJETAS POS EN COLOR ROSA */
+        .pos-product-card {
+            background: var(--card-dark);
+            border: 1.5px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 12px;
+            color: #FFF;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 85px;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .pos-product-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-pink);
+            box-shadow: 0 4px 14px rgba(233, 30, 99, 0.2);
         }
     </style>
 </head>
@@ -165,16 +220,16 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- 3. VISTA 2: POS CAJA / VENTA DIRECTA       -->
+    <!-- 3. VISTA 2: POS CAJA / VENTA DIRECTA (UX ROSA) -->
     <!-- ========================================== -->
     <section class="pos-panel" id="vistaPOS" style="display: none; padding: 16px; background: #0F172A; min-height: 80vh;">
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1400px; margin: 0 auto;">
             
             <!-- Cuadrícula de Productos Rápidos -->
-            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 20px;">
+            <div style="background: #1E293B; border: 1.5px solid #334155; border-radius: 16px; padding: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h2 style="font-family: 'Fredoka', cursive; color: #F59E0B; margin: 0; font-size: 1.4rem;">
-                        🛒 Botonera de Mostrador
+                    <h2 style="font-family: 'Fredoka', cursive; color: var(--primary-pink); margin: 0; font-size: 1.4rem; display:flex; align-items:center; gap:8px;">
+                        <span>🛒</span> Botonera de Mostrador
                     </h2>
                     <span style="color: #94A3B8; font-size: 0.85rem;">Toca un producto para sumar al cobro</span>
                 </div>
@@ -185,20 +240,21 @@
 
                 <!-- Botón Monto Libre / A Granel -->
                 <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #334155; display: flex; gap: 10px; align-items: center;">
-                    <span style="color: #F8FAFC; font-weight: 600; font-size: 0.9rem;">➕ Botana Personalizada / Monto Libre:</span>
-                    <input type="text" id="posCustomConcept" placeholder="Concepto (ej. Papas preparadas)" style="flex: 2; padding: 10px; background: #0F172A; border: 1px solid #475569; border-radius: 8px; color: #FFF;">
-                    <input type="number" id="posCustomPrice" placeholder="$$" style="width: 90px; padding: 10px; background: #0F172A; border: 1px solid #475569; border-radius: 8px; color: #F59E0B; font-weight: 700;">
-                    <button type="button" onclick="agregarItemManualPOS()" style="background: #F59E0B; color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                    <span style="color: #F8FAFC; font-weight: 600; font-size: 0.9rem;">➕ Personalizado / Granel:</span>
+                    <input type="text" id="posCustomConcept" placeholder="Concepto (ej. Papas preparadas)" style="flex: 2; padding: 10px; background: #0F172A; border: 1px solid #475569; border-radius: 8px; color: #FFF; outline:none;">
+                    <input type="number" id="posCustomPrice" placeholder="$$" style="width: 90px; padding: 10px; background: #0F172A; border: 1px solid #475569; border-radius: 8px; color: var(--primary-pink); font-weight: 700; outline:none;">
+                    <button type="button" onclick="agregarItemManualPOS()" style="background: var(--primary-pink); color: #FFF; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-family:var(--font-heading); box-shadow: 0 4px 10px rgba(233,30,99,0.3);">
                         + Agregar
                     </button>
                 </div>
             </div>
 
             <!-- Ticket / Cobro del Mostrador -->
-            <div style="background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="background: #1E293B; border: 1.5px solid var(--primary-pink); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 24px rgba(233, 30, 99, 0.15);">
                 <div>
-                    <h3 style="font-family: 'Fredoka', cursive; color: #F8FAFC; margin: 0 0 14px 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">
-                        🧾 Cobro Actual
+                    <h3 style="font-family: 'Fredoka', cursive; color: #F8FAFC; margin: 0 0 14px 0; border-bottom: 1px solid #334155; padding-bottom: 10px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>🧾 Cobro Actual</span>
+                        <span style="font-size:0.75rem; background:#FFF0F5; color:var(--primary-pink); padding:3px 8px; border-radius:10px; font-weight:700;">MOSTRADOR</span>
                     </h3>
 
                     <div id="posCartItemsList" style="max-height: 28vh; overflow-y: auto; margin-bottom: 14px;">
@@ -207,8 +263,8 @@
 
                     <div style="background: #0F172A; padding: 12px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 14px;">
                         <label style="font-size: 0.8rem; color: #94A3B8; font-weight: 600; display: block; margin-bottom: 4px;">👤 Cliente (Nombre, Celular o ID Tarjeta):</label>
-                        <input type="text" id="posClientInput" placeholder="Ej. Don Pepe, 5512345678 o #045" style="width: 100%; padding: 10px; background: #1E293B; border: 1px solid #475569; border-radius: 8px; color: #FFF; box-sizing: border-box;">
-                        <small style="color: #F59E0B; font-size: 0.72rem; display: block; margin-top: 4px;">* Acepta apodos, niños sin cel o números.</small>
+                        <input type="text" id="posClientInput" placeholder="Ej. Don Pepe, 5512345678 o #045" style="width: 100%; padding: 10px; background: #1E293B; border: 1px solid #475569; border-radius: 8px; color: #FFF; box-sizing: border-box; outline:none;">
+                        <small style="color: var(--primary-pink); font-size: 0.72rem; display: block; margin-top: 4px;">⭐ Sumará puntos de lealtad automáticamente si ingresas celular.</small>
                     </div>
 
                     <div style="display: flex; gap: 8px; margin-bottom: 14px;">
@@ -221,10 +277,10 @@
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 1.4rem; font-weight: 800;">
                         <span style="color: #94A3B8;">Total a Cobrar:</span>
-                        <span id="posTotalCobro" style="color: #10B981;">$0.00</span>
+                        <span id="posTotalCobro" style="color: var(--primary-pink); font-family:var(--font-heading); font-size:1.6rem;">$0.00</span>
                     </div>
 
-                    <button type="button" onclick="registrarVentaManualPOS()" style="width: 100%; background: #10B981; color: #FFF; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                    <button type="button" onclick="registrarVentaManualPOS()" style="width: 100%; background: linear-gradient(135deg, #E91E63, #C2185B); color: #FFF; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(233,30,99,0.4); font-family:var(--font-heading);">
                         <i class="fa-solid fa-circle-check"></i> Cobrar y Registrar Venta
                     </button>
                     <button type="button" onclick="vaciarCarritoPOS()" style="width: 100%; background: transparent; color: #94A3B8; border: none; margin-top: 8px; font-size: 0.8rem; cursor: pointer;">
@@ -392,6 +448,6 @@
         <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
     </audio>
 
-    <script src="kds.js?v=35"></script>
+    <script src="kds.js?v=36"></script>
 </body>
 </html>
