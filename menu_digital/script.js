@@ -1244,15 +1244,27 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
     const loadingHint = document.getElementById('mpLoadingHint');
     if (!btnMp) return;
 
+    // Estado inicial de carga
     btnMp.style.pointerEvents = 'none';
-    btnMp.style.opacity = '0.6';
-    btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generando cobro de $${pedido.total.toFixed(2)}...`;
+    btnMp.style.opacity = '0.7';
+    btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Preparando cobro de $${pedido.total.toFixed(2)}...`;
     
     if (loadingHint) {
         loadingHint.style.display = 'block';
         loadingHint.style.color = '#0284C7';
-        loadingHint.textContent = '⏳ Conectando con Mercado Pago para fijar el monto exacto...';
+        loadingHint.textContent = '⏳ Conectando con Mercado Pago...';
     }
+
+    const desbloquearConFallback = (msgError = '') => {
+        btnMp.href = LINK_MERCADOPAGO;
+        btnMp.style.pointerEvents = 'auto';
+        btnMp.style.opacity = '1';
+        btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar en Mercado Pago ($${pedido.total.toFixed(2)})`;
+        if (loadingHint) {
+            loadingHint.textContent = msgError || `⚠️ Ingresa manualmente $${pedido.total.toFixed(2)} al pagar.`;
+            loadingHint.style.color = '#EA580C';
+        }
+    };
 
     try {
         const payload = {
@@ -1263,35 +1275,36 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
             items: pedido.items
         };
 
+        // Controlador de tiempo límite (timeout de 6 segundos)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+
         const res = await fetch(WEB_APP_URL, {
             method: 'POST',
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
         const data = await res.json();
 
-        if (data.init_point) {
+        if (data && data.init_point) {
             btnMp.href = data.init_point;
             btnMp.style.pointerEvents = 'auto';
             btnMp.style.opacity = '1';
             btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar $${pedido.total.toFixed(2)} en Mercado Pago`;
             
             if (loadingHint) {
-                loadingHint.textContent = '✅ Monto exacto configurado ($' + pedido.total.toFixed(2) + ')';
+                loadingHint.textContent = `✅ Monto exacto fijado ($${pedido.total.toFixed(2)})`;
                 loadingHint.style.color = '#10B981';
             }
         } else {
-            throw new Error(data.error || "No se recibió init_point");
+            desbloquearConFallback(data && data.error ? `⚠️ ${data.error}` : '');
         }
     } catch (e) {
-        console.warn("Fallo dinámico MP:", e);
-        btnMp.href = LINK_MERCADOPAGO;
-        btnMp.style.pointerEvents = 'auto';
-        btnMp.style.opacity = '1';
-        btnMp.innerHTML = `<i class="fa-solid fa-bolt"></i> Pagar en Mercado Pago ($${pedido.total.toFixed(2)})`;
-        if (loadingHint) {
-            loadingHint.textContent = '⚠️ Ingresa manualmente $' + pedido.total.toFixed(2) + ' al pagar.';
-            loadingHint.style.color = '#DC2626';
-        }
+        console.warn("Fallo de preferencia dinámica, activando enlace directo:", e);
+        desbloquearConFallback();
     }
 }
 
