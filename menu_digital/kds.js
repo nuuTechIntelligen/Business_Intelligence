@@ -142,7 +142,7 @@ async function consultarPedidosNube() {
         actualizarBarraDiagnostico(`Sheets Conectado | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
 
         pedidosGlobalesSheets = data.map((fila, index) => {
-            const turnoVal = obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
+            const turnoVal = String(obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`).trim();
             const clienteVal = obtenerCampoFlexible(fila, ['cliente', 'nombre']) || 'Cliente';
             const telefonoVal = String(obtenerCampoFlexible(fila, ['telefono', 'tel', 'celular']) || '');
             
@@ -255,7 +255,7 @@ function renderizarTableroKanban() {
 
 function crearTarjetaHTML(pedido) {
     const semaforo = calcularSemaforoTiempo(pedido.fecha_completa);
-    const turnoSeguro = String(pedido.turno || '').replace(/'/g, "\\'");
+    const turnoSeguro = encodeURIComponent(pedido.turno || '');
     const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
     const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
 
@@ -353,7 +353,7 @@ function crearTarjetaHTML(pedido) {
 
             <div style="display:flex; gap:6px; margin-top:8px;">
                 ${botonesAccionHTML}
-                <button type="button" title="Eliminar / Cancelar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="event.stopPropagation(); eliminarPedidoIndividual('${turnoSeguro}')">
+                <button type="button" title="Eliminar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="event.stopPropagation(); eliminarPedidoIndividual('${turnoSeguro}')">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -362,26 +362,27 @@ function crearTarjetaHTML(pedido) {
 }
 
 // ======================================================
-// ACEPTAR / RECHAZAR CON REEMBOLSO (BLINDADO)
+// ACEPTAR, RECHAZAR Y ELIMINAR BLINDADOS
 // ======================================================
-async function aceptarPedidoKDS(turno, telefono) {
-    await cambiarEstadoPedidoNube(turno, 'preparando');
+async function aceptarPedidoKDS(turnoEncoded, telefono) {
+    const turno = decodeURIComponent(turnoEncoded);
+    await cambiarEstadoPedidoNube(turnoEncoded, 'preparando');
 
     if (telefono && String(telefono).replace(/\D/g, '').length >= 10) {
-        abrirModalTiempoEstimado(turno, telefono);
+        abrirModalTiempoEstimado(turnoEncoded, telefono);
     }
 }
 
-async function rechazarYReembolsarPedido(turno, telefono) {
-    const turnoLimpio = String(turno || '').trim();
-    if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turnoLimpio}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) {
+async function rechazarYReembolsarPedido(turnoEncoded, telefono) {
+    const turno = decodeURIComponent(turnoEncoded);
+    if (!confirm(`⚠️ ¿Deseas rechazar el pedido ${turno}? Si pagó en línea, su dinero será devuelto a su cuenta.`)) {
         return;
     }
 
     const motivo = "Saturación en cocina / Sin stock de insumos";
 
-    // 1. Quitar de la pantalla de cocina inmediatamente
-    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turnoLimpio.toUpperCase());
+    // 1. Quitar de la vista local al instante
+    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
     if (index !== -1) {
         pedidosGlobalesSheets.splice(index, 1);
         renderizarTableroKanban();
@@ -395,7 +396,7 @@ async function rechazarYReembolsarPedido(turno, telefono) {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'rechazar_y_reembolsar',
-                    turno: turnoLimpio,
+                    turno: turno,
                     motivo: motivo
                 })
             }).catch(err => console.warn("Error background Sheets:", err));
@@ -407,16 +408,46 @@ async function rechazarYReembolsarPedido(turno, telefono) {
     // 3. Abrir WhatsApp opcional
     const telLimpio = String(telefono || '').replace(/\D/g, '');
     if (telLimpio.length >= 10) {
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu orden *${turnoLimpio}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ha sido devuelto a tu cuenta.`);
+        const msg = encodeURIComponent(`🍿 *La Engordadera:* Hola. Lamentamos informarte que no pudimos tomar tu orden *${turno}* por el siguiente motivo: *${motivo}*.\n\n💸 Si realizaste tu pago en línea, tu dinero ya ha sido devuelto a tu cuenta.`);
         window.open(`https://wa.me/521${telLimpio}?text=${msg}`, '_blank');
+    }
+}
+
+async function eliminarPedidoIndividual(turnoEncoded) {
+    const turno = decodeURIComponent(turnoEncoded);
+    if (!confirm(`¿Deseas eliminar el pedido ${turno} permanentemente?`)) return;
+
+    // 1. Quitar de la vista local al instante
+    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
+    if (index !== -1) {
+        pedidosGlobalesSheets.splice(index, 1);
+        renderizarTableroKanban();
+        actualizarMetricasHeader();
+    }
+
+    // 2. Borrar fila en Google Sheets
+    if (WEB_APP_URL && !WEB_APP_URL.includes("TU_SCRIPT_ID")) {
+        try {
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'eliminar_pedido',
+                    sheet: 'Ventas_Historicas',
+                    turno: turno
+                })
+            }).catch(err => console.warn("Error eliminando en Sheets:", err));
+        } catch (e) {
+            console.warn("Error de conexión:", e);
+        }
     }
 }
 
 // ======================================================
 // MODAL DE DETALLE INTERACTIVO KDS
 // ======================================================
-function abrirModalDetallePedido(turno) {
-    const pedido = pedidosGlobalesSheets.find(p => p.turno === turno);
+function abrirModalDetallePedido(turnoEncoded) {
+    const turno = decodeURIComponent(turnoEncoded);
+    const pedido = pedidosGlobalesSheets.find(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
     if (!pedido) return;
 
     pedidoModalActivo = pedido;
@@ -497,15 +528,16 @@ async function cambiarEstadoDesdeModal(nuevoEstado) {
     const esTienda = String(pedidoModalActivo.tipo).toLowerCase().includes('tienda');
 
     if (esTienda && metodoPagoSeleccionadoModal) {
-        await alternarEstadoPagoNube(turno, true, metodoPagoSeleccionadoModal);
+        await alternarEstadoPagoNube(encodeURIComponent(turno), true, metodoPagoSeleccionadoModal);
     }
 
-    await cambiarEstadoPedidoNube(turno, nuevoEstado);
+    await cambiarEstadoPedidoNube(encodeURIComponent(turno), nuevoEstado);
     cerrarModalDetallePedido();
 }
 
-async function alternarEstadoPagoNube(turno, nuevoEstadoPago, metodoOpcional = '') {
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turno);
+async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago, metodoOpcional = '') {
+    const turno = decodeURIComponent(turnoEncoded);
+    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
     if (index !== -1) {
         pedidosGlobalesSheets[index].pagado = nuevoEstadoPago;
         renderizarTableroKanban();
@@ -515,7 +547,7 @@ async function alternarEstadoPagoNube(turno, nuevoEstadoPago, metodoOpcional = '
 
     try {
         const textoPago = nuevoEstadoPago ? (metodoOpcional ? `SI (${metodoOpcional})` : 'SI') : 'NO';
-        await fetch(WEB_APP_URL, {
+        fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'actualizar_pago',
@@ -523,13 +555,14 @@ async function alternarEstadoPagoNube(turno, nuevoEstadoPago, metodoOpcional = '
                 turno: turno,
                 pagado: textoPago
             })
-        });
+        }).catch(err => console.warn("Error actualizando pago:", err));
     } catch (e) {
         console.warn("Error actualizando pago en Sheets:", e);
     }
 }
 
-function abrirModalTiempoEstimado(turno, telefono) {
+function abrirModalTiempoEstimado(turnoEncoded, telefono) {
+    const turno = decodeURIComponent(turnoEncoded);
     pedidoTemporalParaTiempo = { turno, telefono };
     
     const modal = document.getElementById('timeModal');
@@ -561,14 +594,16 @@ function cerrarModalTiempo() {
     pedidoTemporalParaTiempo = null;
 }
 
-function notificarPedidoListoWhatsApp(turno, telefono) {
+function notificarPedidoListoWhatsApp(turnoEncoded, telefono) {
+    const turno = decodeURIComponent(turnoEncoded);
     const tel = String(telefono || '').replace(/\D/g, '');
     const msg = encodeURIComponent(`🍿 *La Engordadera:* ¡Tu pedido *${turno}* ya está LISTO para recoger! 🎉 Puedes pasar a mostrador por él.`);
     window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
 }
 
-async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turno);
+async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
+    const turno = decodeURIComponent(turnoEncoded);
+    const index = pedidosGlobalesSheets.findIndex(p => String(p.turno).trim().toUpperCase() === turno.trim().toUpperCase());
     if (index !== -1) {
         pedidosGlobalesSheets[index].estado = nuevoEstado;
         renderizarTableroKanban();
@@ -578,7 +613,7 @@ async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
     if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
 
     try {
-        await fetch(WEB_APP_URL, {
+        fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: 'actualizar_estado',
@@ -586,35 +621,9 @@ async function cambiarEstadoPedidoNube(turno, nuevoEstado) {
                 turno: turno,
                 estado: nuevoEstado
             })
-        });
+        }).catch(err => console.warn("Error actualizando estado:", err));
     } catch (e) {
         console.error("Error actualizando estado en Sheets:", e);
-    }
-}
-
-async function eliminarPedidoIndividual(turno) {
-    if (!confirm(`¿Deseas eliminar el pedido ${turno}?`)) return;
-
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turno);
-    if (index !== -1) {
-        pedidosGlobalesSheets.splice(index, 1);
-        renderizarTableroKanban();
-        actualizarMetricasHeader();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'eliminar_pedido',
-                sheet: 'Ventas_Historicas',
-                turno: turno
-            })
-        });
-    } catch (e) {
-        console.warn("Error eliminando pedido:", e);
     }
 }
 
