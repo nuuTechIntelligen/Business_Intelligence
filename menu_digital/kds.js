@@ -1,946 +1,274 @@
 // ======================================================
-// KDS & FINANZAS & POS MOSTRADOR LA ENGORDADERA
+// KDS (KITCHEN DISPLAY SYSTEM) - LA ENGORDADERA
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
-let INTERVALO_SEGUNDOS = 4;
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_aQn_T4W_REEMPLAZA_CON_TU_ID/exec"; 
 
-let pedidosGlobalesSheets = [];
-let productosMenuPOS = [];
-let carritoPOS = [];
-let filtroEstacionActual = 'TODAS';
-let turnosConocidosEnCola = new Set();
-let primerCargaRealizada = false;
-let audioContext = null;
-let pedidoTemporalParaTiempo = null;
-
-let chartVentasDiasInstance = null;
-let chartTopProductosInstance = null;
-
-function normalizarTextoClave(txt) {
-    if (!txt) return '';
-    return String(txt).toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-}
-
-function obtenerCampoFlexible(obj, posiblesNombres) {
-    if (!obj || typeof obj !== 'object') return '';
-    const keys = Object.keys(obj);
-    for (let p of posiblesNombres) {
-        const pNorm = normalizarTextoClave(p);
-        for (let k of keys) {
-            if (normalizarTextoClave(k) === pNorm) {
-                return obj[k];
-            }
-        }
-    }
-    return '';
-}
+let pedidosActivos = [];
+let pedidoModalActual = null;
+let metodoPagoSeleccionado = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-    crearBarraDiagnostico();
-    iniciarReloj();
-    
-    document.addEventListener('click', desbloquearAudioNativo, { once: true });
-    document.addEventListener('touchstart', desbloquearAudioNativo, { once: true });
-
-    iniciarKDS();
-    cargarProductosParaPOS();
-    setInterval(consultarPedidosNube, INTERVALO_SEGUNDOS * 1000);
-    setInterval(actualizarSemaforosTiempo, 1000);
+    cargarPedidosCocina();
+    setInterval(cargarPedidosCocina, 8000); // Polling cada 8s
+    setInterval(actualizarTimersEnVivo, 1000); // Cronómetro en tiempo real cada segundo
 });
 
-function desbloquearAudioNativo() {
+async function cargarPedidosCocina() {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("REEMPLAZA_CON_TU_ID")) return;
+
     try {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
+        const res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas`);
+        const ventas = await res.json();
+
+        if (!Array.isArray(ventas)) return;
+
+        // Filtrar pedidos no finalizados
+        pedidosActivos = ventas.filter(v => {
+            const est = String(v.estado || '').toLowerCase().trim();
+            return est === 'cola' || est === 'preparando' || est === 'listo';
+        }).reverse();
+
+        renderizarTarjetasCocina();
     } catch (e) {
-        console.warn("AudioContext no disponible:", e);
+        console.warn("Error al cargar pedidos de cocina:", e);
     }
 }
 
-function emitirCampanaNuevoPedido() {
-    try {
-        desbloquearAudioNativo();
-        if (!audioContext) return;
+function renderizarTarjetasCocina() {
+    const container = document.getElementById('kdsOrdersContainer');
+    if (!container) return;
 
-        const ahora = audioContext.currentTime;
+    let countPending = 0;
+    let countPrep = 0;
 
-        const osc1 = audioContext.createOscillator();
-        const gain1 = audioContext.createGain();
-        osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(880, ahora);
-        gain1.gain.setValueAtTime(0.3, ahora);
-        gain1.gain.exponentialRampToValueAtTime(0.001, ahora + 0.35);
-        osc1.connect(gain1);
-        gain1.connect(audioContext.destination);
-        osc1.start(ahora);
-        osc1.stop(ahora + 0.35);
-
-        const osc2 = audioContext.createOscillator();
-        const gain2 = audioContext.createGain();
-        osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(1174.66, ahora + 0.12);
-        gain2.gain.setValueAtTime(0.4, ahora + 0.12);
-        gain2.gain.exponentialRampToValueAtTime(0.001, ahora + 0.6);
-        osc2.connect(gain2);
-        gain2.connect(audioContext.destination);
-        osc2.start(ahora + 0.12);
-        osc2.stop(ahora + 0.6);
-    } catch (e) {
-        console.warn("No se pudo reproducir el sintetizador:", e);
-    }
-}
-
-function crearBarraDiagnostico() {
-    if (document.getElementById('kdsDebugBar')) return;
-    const bar = document.createElement('div');
-    bar.id = 'kdsDebugBar';
-    bar.style.cssText = 'position:fixed; bottom:12px; left:12px; background:#0F172A; color:#F8FAFC; padding:8px 14px; border-radius:12px; font-family:monospace; font-size:0.75rem; z-index:99999; box-shadow:0 4px 14px rgba(0,0,0,0.5); border:1px solid #334155; display:flex; align-items:center; gap:8px;';
-    bar.innerHTML = `<span>⏳ Conectando con Google Sheets...</span>`;
-    document.body.appendChild(bar);
-}
-
-function actualizarBarraDiagnostico(mensaje, esError = false) {
-    const bar = document.getElementById('kdsDebugBar');
-    if (!bar) return;
-    bar.style.background = esError ? '#991B1B' : '#0F172A';
-    bar.innerHTML = `${esError ? '⚠️' : '🟢'} ${mensaje}`;
-}
-
-function iniciarReloj() {
-    setInterval(() => {
-        const clockEl = document.getElementById('liveClock');
-        if (clockEl) clockEl.textContent = new Date().toLocaleTimeString();
-    }, 1000);
-}
-
-async function iniciarKDS() {
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) {
-        actualizarBarraDiagnostico("ERROR: Falta colocar tu URL de Web App en kds.js", true);
-        return;
-    }
-    await consultarPedidosNube();
-}
-
-async function consultarPedidosNube() {
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        let res = await fetch(`${WEB_APP_URL}?sheet=Ventas_Historicas`);
-        let data = await res.json();
-
-        if (!Array.isArray(data)) {
-            actualizarBarraDiagnostico(`Apps Script: ${data.error || 'Respuesta inválida'}`, true);
-            return;
-        }
-
-        actualizarBarraDiagnostico(`Sheets Conectado (Ilimitado) | ${data.length} pedidos | Sinc: ${new Date().toLocaleTimeString()}`);
-
-        pedidosGlobalesSheets = data.map((fila, index) => {
-            const turnoVal = obtenerCampoFlexible(fila, ['turno', 'id_turno', 'ticket']) || `#T-${index + 1}`;
-            const clienteVal = obtenerCampoFlexible(fila, ['cliente', 'nombre']) || 'Cliente';
-            const telefonoVal = String(obtenerCampoFlexible(fila, ['telefono', 'tel', 'celular']) || '');
-            
-            const tipoRaw = normalizarTextoClave(obtenerCampoFlexible(fila, ['tipo', 'tipo_pedido']) || 'tienda');
-            const tipoVal = (tipoRaw.includes('recog') || tipoRaw.includes('llevar')) ? 'recoger' : 'tienda';
-
-            const totalVal = parseFloat(obtenerCampoFlexible(fila, ['total', 'monto']) || 0);
-            const fechaVal = obtenerCampoFlexible(fila, ['fecha', 'hora', 'fecha_completa']) || new Date().toISOString();
-            const detalleVal = obtenerCampoFlexible(fila, ['detalle', 'descripcion', 'productos']) || '';
-            const itemsJsonVal = obtenerCampoFlexible(fila, ['items_json', 'items', 'json']);
-
-            const pagadoRaw = String(obtenerCampoFlexible(fila, ['pagado', 'pago', 'status_pago']) || '').toLowerCase().trim();
-            const estaPagado = (tipoVal === 'tienda') || (pagadoRaw === 'si' || pagadoRaw === 'true' || pagadoRaw === '1' || pagadoRaw === 'pagado');
-
-            let items = [];
-            try {
-                if (itemsJsonVal && String(itemsJsonVal).trim().startsWith('[')) {
-                    items = JSON.parse(itemsJsonVal);
-                } else if (detalleVal) {
-                    items = detalleVal.split('|').map(d => ({ nombre: d.trim(), extras: [], precio: 0 }));
-                }
-            } catch (e) {
-                items = [{ nombre: detalleVal || 'Botana', extras: [], precio: totalVal }];
-            }
-
-            let estadoRaw = String(obtenerCampoFlexible(fila, ['estado', 'status']) || 'cola').toLowerCase().trim();
-            if (!estadoRaw || estadoRaw === 'undefined') estadoRaw = 'cola';
-
-            return {
-                turno: turnoVal,
-                cliente: clienteVal,
-                telefono: telefonoVal,
-                tipo: tipoVal,
-                total: totalVal,
-                pagado: estaPagado,
-                fecha_completa: fechaVal,
-                estado: estadoRaw,
-                items: items
-            };
-        });
-
-        const turnosActualesCola = pedidosGlobalesSheets.filter(p => p.estado === 'cola').map(p => p.turno);
-        
-        if (primerCargaRealizada) {
-            const hayNuevos = turnosActualesCola.some(t => !turnosConocidosEnCola.has(t));
-            if (hayNuevos) {
-                emitirCampanaNuevoPedido();
-                destellarColumnaCola();
-            }
-        } else {
-            primerCargaRealizada = true;
-        }
-
-        turnosConocidosEnCola = new Set(turnosActualesCola);
-
-        renderizarTableroKanban();
-        actualizarMetricasHeader();
-
-        const vistaFin = document.getElementById('vistaFinanzas');
-        if (vistaFin && vistaFin.style.display !== 'none') {
-            actualizarModuloFinanzas();
-        }
-    } catch (error) {
-        actualizarBarraDiagnostico(`Fallo de Red: ${error.message}`, true);
-    }
-}
-
-function destellarColumnaCola() {
-    const colCola = document.getElementById('col-cola');
-    if (!colCola) return;
-    colCola.style.transition = 'box-shadow 0.3s ease';
-    colCola.style.boxShadow = '0 0 25px rgba(245, 158, 11, 0.9)';
-    setTimeout(() => {
-        colCola.style.boxShadow = 'none';
-    }, 1800);
-}
-
-function renderizarTableroKanban() {
-    const contCola = document.getElementById('containerCola');
-    const contPrep = document.getElementById('containerPrep');
-    const contListos = document.getElementById('containerListos');
-
-    if (!contCola || !contPrep || !contListos) return;
-
-    let pedidos = pedidosGlobalesSheets.filter(p => p.estado !== 'cancelado');
-    if (filtroEstacionActual !== 'TODAS') {
-        pedidos = pedidos.filter(p => {
-            return p.items.some(it => (it.estacion || 'CALIENTE').toUpperCase() === filtroEstacionActual);
-        });
-    }
-
-    const enCola = pedidos.filter(p => p.estado === 'cola');
-    const enPrep = pedidos.filter(p => p.estado === 'preparando');
-    const listos = pedidos.filter(p => p.estado === 'listo');
-
-    document.getElementById('countCola').textContent = enCola.length;
-    document.getElementById('countPrep').textContent = enPrep.length;
-    document.getElementById('countListos').textContent = listos.length;
-
-    contCola.innerHTML = enCola.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column" style="text-align:center; padding:20px; color:#64748B;">Sin pedidos en cola</div>';
-    contPrep.innerHTML = enPrep.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column" style="text-align:center; padding:20px; color:#64748B;">Nada en preparación</div>';
-    contListos.innerHTML = listos.map(p => crearTarjetaHTML(p)).join('') || '<div class="kds-empty-column" style="text-align:center; padding:20px; color:#64748B;">Sin pedidos listos</div>';
-}
-
-function crearTarjetaHTML(pedido) {
-    const semaforo = calcularSemaforoTiempo(pedido.fecha_completa);
-    const turnoEscapado = encodeURIComponent(pedido.turno || '');
-    const esRecoger = String(pedido.tipo).toLowerCase().includes('recog');
-    const telefonoLimpio = String(pedido.telefono || '').replace(/\D/g, '');
-
-    let itemsHTML = '';
-    (pedido.items || []).forEach((it, idx) => {
-        let extras = [];
-        if (it.base) extras.push(`Base: ${it.base}`);
-        if (it.ingredientes && it.ingredientes.length > 0) extras.push(`Con: ${it.ingredientes.join(', ')}`);
-        if (it.extras && it.extras.length > 0) extras.push(`Extra: ${it.extras.join(', ')}`);
-        if (it.salsa) extras.push(`Salsa: ${it.salsa}`);
-
-        itemsHTML += `
-            <div class="kds-item-row" style="margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
-                <strong style="color: #FFF; font-size: 0.95rem;">${idx + 1}. ${it.nombre}</strong>
-                <p style="color: #94A3B8; font-size: 0.78rem; margin: 2px 0 0 0;">${extras.join(' | ') || 'Estándar'}</p>
+    if (pedidosActivos.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; grid-column:1/-1; padding:60px 20px; color:#6B7280;">
+                <i class="fa-solid fa-mug-hot" style="font-size:3rem; margin-bottom:12px; color:#4B5563;"></i>
+                <h3 style="font-family:var(--font-heading); font-size:1.3rem; color:#9CA3AF;">No hay órdenes pendientes</h3>
+                <p style="font-size:0.85rem;">Las nuevas botanas aparecerán aquí en tiempo real.</p>
             </div>
         `;
-    });
-
-    let botonesAccionHTML = '';
-
-    if (pedido.estado === 'cola') {
-        if (esRecoger && telefonoLimpio.length >= 10) {
-            botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1.2; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
-                    <i class="fa-solid fa-fire"></i> Preparar
-                </button>
-                <button class="btn-card-action" title="Notificar Tiempo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="abrirModalTiempoEstimado('${turnoEscapado}', '${telefonoLimpio}')">
-                    <i class="fa-solid fa-clock"></i> Notificar
-                </button>
-            `;
-        } else {
-            botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1; background:#F59E0B; color:#000; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'preparando')">
-                    <i class="fa-solid fa-fire"></i> Preparar
-                </button>
-            `;
-        }
-    } else if (pedido.estado === 'preparando') {
-        if (esRecoger && telefonoLimpio.length >= 10) {
-            botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1.2; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
-                    <i class="fa-solid fa-check-double"></i> Listo
-                </button>
-                <button class="btn-card-action" title="Avisar que ya está listo por WhatsApp" style="background:#25D366; color:#FFF; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="notificarPedidoListoWhatsApp('${turnoEscapado}', '${telefonoLimpio}')">
-                    <i class="fa-solid fa-bell"></i> Avisar
-                </button>
-            `;
-        } else {
-            botonesAccionHTML = `
-                <button class="btn-card-action" style="flex:1; background:#10B981; color:#FFF; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'listo')">
-                    <i class="fa-solid fa-check-double"></i> Listo
-                </button>
-            `;
-        }
-    } else {
-        botonesAccionHTML = `
-            <button class="btn-card-action" style="flex:1; background:#475569; color:#FFF; border:none; padding:8px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.8rem;" onclick="cambiarEstadoPedidoNube('${turnoEscapado}', 'entregado')">
-                <i class="fa-solid fa-box-archive"></i> Entregar
-            </button>
-        `;
+        document.getElementById('kdsCountPending').textContent = '0';
+        document.getElementById('kdsCountPrep').textContent = '0';
+        return;
     }
 
-    const botonPagoHTML = pedido.pagado ? `
-        <button type="button" title="Pago Confirmado" style="background:#14532D; color:#86EFAC; border:1px solid #166534; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', false)">
-            <i class="fa-solid fa-circle-check"></i> Pagado
-        </button>
-    ` : `
-        <button type="button" title="Clic para marcar como Pagado" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:3px 8px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="alternarEstadoPagoNube('${turnoEscapado}', true)">
-            <i class="fa-solid fa-clock-rotate-left"></i> Pago Pendiente
-        </button>
-    `;
+    container.innerHTML = '';
 
-    return `
-        <div class="kds-card state-${pedido.estado} ${semaforo.claseAlerta}" data-fecha="${pedido.fecha_completa}" style="background:#1E293B; border-radius:12px; padding:12px; margin-bottom:12px; border:1px solid #334155; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:1.4rem; font-weight:800; color:#F59E0B;">${pedido.turno}</span>
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <span style="background:${esRecoger ? '#EA580C' : '#0284C7'}; color:#FFF; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:700;">
-                        ${esRecoger ? '🛍️ RECOGER' : '🏪 EN TIENDA'}
-                    </span>
-                    ${botonPagoHTML}
-                </div>
-                <span class="kds-timer-badge" style="font-weight:700; font-size:0.85rem;">
-                    <i class="fa-solid fa-clock"></i> ${semaforo.tiempoFormateado}
+    pedidosActivos.forEach((p, idx) => {
+        const estado = String(p.estado || 'cola').toLowerCase().trim();
+        if (estado === 'cola') countPending++;
+        if (estado === 'preparando') countPrep++;
+
+        const pagado = String(p.pagado || 'NO').toUpperCase().trim().startsWith('SI');
+        const esTienda = String(p.tipo || '').toLowerCase().trim() === 'tienda';
+
+        // Parseo de items
+        let itemsHTML = '';
+        try {
+            let itemsArray = [];
+            if (p.items_json && p.items_json !== '') {
+                itemsArray = JSON.parse(p.items_json);
+            }
+            
+            if (Array.isArray(itemsArray) && itemsArray.length > 0) {
+                itemsHTML = itemsArray.map(item => `
+                    <div class="order-item-row">
+                        <div class="order-item-title">
+                            <strong>🍿 ${item.nombre}</strong>
+                            <span style="color:#F472B6;">$${parseFloat(item.precio || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="order-item-sub">
+                            ${item.base ? `• <strong>Base:</strong> ${item.base}<br>` : ''}
+                            ${item.ingredientes && item.ingredientes.length > 0 ? `• <strong>Con:</strong> ${item.ingredientes.join(', ')}<br>` : ''}
+                            ${item.extras && item.extras.length > 0 ? `• <strong>Extras:</strong> <span style="color:#FCD34D;">${item.extras.join(', ')}</span><br>` : ''}
+                            ${item.salsa ? `• <strong>Salsa:</strong> ${item.salsa}` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else if (p.detalle) {
+                itemsHTML = `<div class="order-item-row"><div class="order-item-sub">${p.detalle}</div></div>`;
+            }
+        } catch (e) {
+            itemsHTML = `<div class="order-item-row"><div class="order-item-sub">${p.detalle || 'Detalle no disponible'}</div></div>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.onclick = (e) => {
+            if (e.target.closest('.btn-kds')) return;
+            abrirModalDetalleCocina(idx);
+        };
+
+        card.innerHTML = `
+            <div class="order-card-header">
+                <span class="order-turno">${p.turno || '#--'}</span>
+                <span class="order-type-badge ${esTienda ? 'badge-tienda' : 'badge-recoger'}">
+                    ${esTienda ? '🏪 En Tienda' : '🛍️ Recoger'}
                 </span>
             </div>
 
-            <div style="font-size:0.85rem; color:#94A3B8; margin-bottom:8px;">
-                👤 Cliente: <strong style="color:#F8FAFC;">${pedido.cliente}</strong> ${telefonoLimpio ? `<span style="color:#F59E0B; font-size:0.78rem;">(📱 ${telefonoLimpio})</span>` : ''}
+            <div class="order-timer-bar">
+                <span class="order-timer timer-normal" data-timestamp="${p.fecha || ''}">
+                    <i class="fa-solid fa-stopwatch"></i> <span class="timer-display">00:00</span>
+                </span>
+                <span class="payment-status ${pagado ? 'pay-paid' : 'pay-pending'}">
+                    ${pagado ? '✓ PAGADO' : '⏳ PENDIENTE PAGO'}
+                </span>
             </div>
 
-            <div style="margin-bottom:10px;">
+            <div class="order-card-body">
+                <div style="font-weight:700; color:#F3F4F6; margin-bottom:8px; font-size:0.9rem;">
+                    👤 ${p.cliente || 'Cliente'} ${p.telefono ? `<small style="color:#9CA3AF;">(${p.telefono})</small>` : ''}
+                </div>
                 ${itemsHTML}
             </div>
 
-            <div style="display:flex; gap:6px; margin-top:8px;">
-                ${botonesAccionHTML}
-                <button title="Eliminar / Cancelar Pedido" style="background:#7F1D1D; color:#FCA5A5; border:1px solid #991B1B; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="eliminarPedidoIndividual('${turnoEscapado}')">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+            <div class="order-card-footer">
+                ${estado === 'cola' ? `
+                    <button type="button" class="btn-kds btn-prep" onclick="cambiarEstadoRapido('${p.turno}', 'preparando')">
+                        <i class="fa-solid fa-fire"></i> Preparar
+                    </button>
+                ` : ''}
+                ${estado === 'preparando' ? `
+                    <button type="button" class="btn-kds btn-ready" onclick="cambiarEstadoRapido('${p.turno}', 'listo')">
+                        <i class="fa-solid fa-bell"></i> ¡Listo!
+                    </button>
+                ` : ''}
+                ${estado === 'listo' ? `
+                    <button type="button" class="btn-kds btn-delivered" onclick="cambiarEstadoRapido('${p.turno}', 'entregado')">
+                        <i class="fa-solid fa-check"></i> Entregar
+                    </button>
+                ` : ''}
             </div>
-        </div>
-    `;
-}
-
-async function alternarEstadoPagoNube(turnoEncoded, nuevoEstadoPago) {
-    const turnoReal = decodeURIComponent(turnoEncoded);
-
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
-    if (index !== -1) {
-        pedidosGlobalesSheets[index].pagado = nuevoEstadoPago;
-        renderizarTableroKanban();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'actualizar_pago',
-                sheet: 'Ventas_Historicas',
-                turno: turnoReal,
-                pagado: nuevoEstadoPago ? 'SI' : 'NO'
-            })
-        });
-        console.log(`💵 Pago del turno ${turnoReal} guardado como: ${nuevoEstadoPago ? 'SI' : 'NO'}`);
-    } catch (e) {
-        console.warn("Error actualizando pago en Sheets:", e);
-    }
-}
-
-function abrirModalTiempoEstimado(turnoEscapado, telefono) {
-    const turnoReal = decodeURIComponent(turnoEscapado);
-    pedidoTemporalParaTiempo = { turnoEscapado, telefono };
-    
-    const modal = document.getElementById('timeModal');
-    const desc = document.getElementById('timeModalClientDesc');
-    if (desc) desc.textContent = `Indica en cuántos minutos estará listo el turno ${turnoReal}:`;
-
-    if (modal) {
-        modal.classList.add('active');
-        modal.style.display = 'flex';
-    }
-}
-
-function confirmarTiempoYNotificar(minutos) {
-    if (pedidoTemporalParaTiempo) {
-        const turnoReal = decodeURIComponent(pedidoTemporalParaTiempo.turnoEscapado);
-        const tel = pedidoTemporalParaTiempo.telefono;
-        const msg = encodeURIComponent(`🍿 *La Engordadera:* Tu pedido *${turnoReal}* ya está en preparación 🔥. Estará listo en aproximadamente *${minutos} minutos*. ¡Te esperamos!`);
-        window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
-    }
-    cerrarModalTiempo();
-}
-
-function cerrarModalTiempo() {
-    const modal = document.getElementById('timeModal');
-    if (modal) {
-        modal.classList.remove('active');
-        modal.style.display = 'none';
-    }
-    pedidoTemporalParaTiempo = null;
-}
-
-function notificarPedidoListoWhatsApp(turnoEscapado, telefono) {
-    const turnoReal = decodeURIComponent(turnoEscapado);
-    const tel = String(telefono || '').replace(/\D/g, '');
-    const msg = encodeURIComponent(`🍿 *La Engordadera:* ¡Tu pedido *${turnoReal}* ya está LISTO para recoger! 🎉 Puedes pasar a mostrador por él.`);
-    window.open(`https://wa.me/521${tel}?text=${msg}`, '_blank');
-}
-
-async function cambiarEstadoPedidoNube(turnoEncoded, nuevoEstado) {
-    const turnoReal = decodeURIComponent(turnoEncoded);
-
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
-    if (index !== -1) {
-        pedidosGlobalesSheets[index].estado = nuevoEstado;
-        renderizarTableroKanban();
-        actualizarMetricasHeader();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'actualizar_estado',
-                sheet: 'Ventas_Historicas',
-                turno: turnoReal,
-                estado: nuevoEstado
-            })
-        });
-    } catch (e) {
-        console.error("Error actualizando estado en Sheets:", e);
-    }
-}
-
-async function eliminarPedidoIndividual(turnoEncoded) {
-    const turnoReal = decodeURIComponent(turnoEncoded);
-    if (!confirm(`¿Deseas eliminar el pedido ${turnoReal}?`)) return;
-
-    const index = pedidosGlobalesSheets.findIndex(p => p.turno === turnoReal);
-    if (index !== -1) {
-        pedidosGlobalesSheets.splice(index, 1);
-        renderizarTableroKanban();
-        actualizarMetricasHeader();
-    }
-
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-
-    try {
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'eliminar_pedido',
-                sheet: 'Ventas_Historicas',
-                turno: turnoReal
-            })
-        });
-        console.log(`🗑️ Pedido ${turnoReal} eliminado de Sheets`);
-    } catch (e) {
-        console.warn("Error eliminando pedido:", e);
-    }
-}
-
-function reiniciarContadorTurnos() {
-    if (!confirm("¿Deseas reiniciar los turnos? El siguiente pedido volverá a comenzar en #T-01 y #R-01.")) return;
-    localStorage.removeItem('turno_T_consecutivo');
-    localStorage.removeItem('turno_R_consecutivo');
-    alert("✅ Consecutivos de turno reiniciados a 0.");
-}
-
-function limpiarEntregadosAntiguos() {
-    pedidosGlobalesSheets = pedidosGlobalesSheets.filter(p => p.estado !== 'listo' && p.estado !== 'entregado');
-    renderizarTableroKanban();
-    actualizarMetricasHeader();
-}
-
-function calcularSemaforoTiempo(fechaISO) {
-    const ahora = new Date();
-    const creacion = new Date(fechaISO);
-    let diffMs = ahora - creacion;
-    if (isNaN(diffMs) || diffMs < 0) diffMs = 0;
-
-    const diffMinutos = Math.floor(diffMs / 60000);
-    const diffSegundos = Math.floor((diffMs % 60000) / 1000);
-
-    const minutosTxt = diffMinutos < 10 ? `0${diffMinutos}` : `${diffMinutos}`;
-    const segundosTxt = diffSegundos < 10 ? `0${diffSegundos}` : `${diffSegundos}`;
-    const tiempoFormateado = `${minutosTxt}:${segundosTxt}`;
-
-    let claseAlerta = 'timer-green';
-    if (diffMinutos >= 8 && diffMinutos < 15) {
-        claseAlerta = 'timer-yellow';
-    } else if (diffMinutos >= 15) {
-        claseAlerta = 'timer-red-blink';
-    }
-
-    return { tiempoFormateado, claseAlerta };
-}
-
-function actualizarSemaforosTiempo() {
-    const cards = document.querySelectorAll('.kds-card');
-    cards.forEach(card => {
-        const fecha = card.getAttribute('data-fecha');
-        if (fecha) {
-            const semaforo = calcularSemaforoTiempo(fecha);
-            const timerEl = card.querySelector('.kds-timer-badge');
-            if (timerEl) {
-                timerEl.innerHTML = `<i class="fa-solid fa-clock"></i> ${semaforo.tiempoFormateado}`;
-            }
-        }
-    });
-}
-
-// ======================================================
-// 3. SISTEMA POS MOSTRADOR RÁPIDO
-// ======================================================
-async function cargarProductosParaPOS() {
-    if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
-    try {
-        const res = await fetch(`${WEB_APP_URL}?sheet=Productos`);
-        const prods = await res.json();
-        if (Array.isArray(prods)) {
-            productosMenuPOS = prods;
-            renderizarBotoneraPOS();
-        }
-    } catch (e) {
-        console.warn("No se cargó menú para POS.");
-    }
-}
-
-function renderizarBotoneraPOS() {
-    const grid = document.getElementById('posProductsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-    productosMenuPOS.forEach(p => {
-        const precioNum = parseFloat(p.precio || 0);
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.style.cssText = 'background: #0F172A; border: 1px solid #334155; border-radius: 12px; padding: 12px; color: #FFF; text-align: left; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 80px; transition: transform 0.1s ease;';
-        btn.innerHTML = `
-            <strong style="font-size: 0.9rem; color: #F8FAFC; display: block; margin-bottom: 4px;">${p.nombre}</strong>
-            <span style="color: #F59E0B; font-weight: 700; font-size: 1rem;">$${precioNum.toFixed(2)}</span>
         `;
-        btn.onclick = () => agregarItemPOS(p.nombre, precioNum);
-        grid.appendChild(btn);
+
+        container.appendChild(card);
+    });
+
+    document.getElementById('kdsCountPending').textContent = countPending;
+    document.getElementById('kdsCountPrep').textContent = countPrep;
+    actualizarTimersEnVivo();
+}
+
+// TIMER EN TIEMPO REAL
+function actualizarTimersEnVivo() {
+    const timerEls = document.querySelectorAll('.order-timer');
+    const ahora = new Date().getTime();
+
+    timerEls.forEach(el => {
+        const rawDate = el.getAttribute('data-timestamp');
+        if (!rawDate) return;
+
+        const fechaPedido = new Date(rawDate).getTime();
+        if (isNaN(fechaPedido)) return;
+
+        const diffSegundos = Math.floor((ahora - fechaPedido) / 1000);
+        if (diffSegundos < 0) return;
+
+        const minutos = Math.floor(diffSegundos / 60);
+        const segundos = diffSegundos % 60;
+        const display = `${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+
+        const textSpan = el.querySelector('.timer-display');
+        if (textSpan) textSpan.textContent = display;
+
+        el.classList.remove('timer-normal', 'timer-warning', 'timer-danger');
+        if (minutos < 5) el.classList.add('timer-normal');
+        else if (minutos < 10) el.classList.add('timer-warning');
+        else el.classList.add('timer-danger');
     });
 }
 
-function agregarItemPOS(nombre, precio) {
-    carritoPOS.push({ nombre, precio: parseFloat(precio) || 0 });
-    renderizarCarritoPOS();
-}
+// MODAL INTERACTIVO
+function abrirModalDetalleCocina(index) {
+    const p = pedidosActivos[index];
+    if (!p) return;
 
-function agregarItemManualPOS() {
-    const concept = document.getElementById('posCustomConcept').value.trim() || 'Botana Libre';
-    const price = parseFloat(document.getElementById('posCustomPrice').value) || 0;
+    pedidoModalActual = p;
+    metodoPagoSeleccionado = '';
 
-    if (price <= 0) {
-        alert("Ingresa un monto válido");
-        return;
+    document.getElementById('modalTurno').textContent = p.turno || '#--';
+    document.getElementById('modalCliente').textContent = `Cliente: ${p.cliente || 'Sin Nombre'}`;
+    document.getElementById('modalTelefono').textContent = p.telefono || 'Sin registrar';
+    document.getElementById('modalTotalMonto').textContent = `$${parseFloat(p.total || 0).toFixed(2)}`;
+
+    const esTienda = String(p.tipo || '').toLowerCase().trim() === 'tienda';
+    const badgeTipo = document.getElementById('modalBadgeTipo');
+    badgeTipo.className = `order-type-badge ${esTienda ? 'badge-tienda' : 'badge-recoger'}`;
+    badgeTipo.textContent = esTienda ? '🏪 EN TIENDA' : '🛍️ PARA RECOGER';
+
+    // Contact Actions
+    const contactBox = document.getElementById('modalContactActions');
+    contactBox.innerHTML = '';
+    if (p.telefono && p.telefono.length >= 10) {
+        contactBox.innerHTML = `
+            <a href="tel:${p.telefono}" class="btn-kds btn-prep" style="padding:4px 10px; text-decoration:none;"><i class="fa-solid fa-phone"></i></a>
+            <a href="https://wa.me/52${p.telefono}" target="_blank" class="btn-kds btn-ready" style="padding:4px 10px; text-decoration:none;"><i class="fa-brands fa-whatsapp"></i></a>
+        `;
     }
 
-    carritoPOS.push({ nombre: concept, precio: price });
-    document.getElementById('posCustomConcept').value = '';
-    document.getElementById('posCustomPrice').value = '';
-    renderizarCarritoPOS();
-}
-
-function renderizarCarritoPOS() {
-    const list = document.getElementById('posCartItemsList');
-    const totalEl = document.getElementById('posTotalCobro');
-    if (!list || !totalEl) return;
-
-    if (carritoPOS.length === 0) {
-        list.innerHTML = '<p style="color: #64748B; text-align: center; margin: 30px 0;">No hay productos seleccionados</p>';
-        totalEl.textContent = '$0.00';
-        return;
-    }
-
-    let total = 0;
-    list.innerHTML = carritoPOS.map((item, idx) => {
-        total += item.precio;
-        return `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #334155;">
-                <span style="color: #F8FAFC; font-size: 0.9rem;">${item.nombre}</span>
-                <div>
-                    <strong style="color: #F59E0B; margin-right: 8px;">$${item.precio.toFixed(2)}</strong>
-                    <button type="button" onclick="eliminarItemPOS(${idx})" style="background: transparent; color: #EF4444; border: none; font-size: 1.1rem; cursor: pointer;">&times;</button>
+    // Desglose de Items
+    const itemsBox = document.getElementById('modalItemsList');
+    try {
+        const itemsArray = JSON.parse(p.items_json || '[]');
+        itemsBox.innerHTML = itemsArray.map(item => `
+            <div style="margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed #374151;">
+                <strong style="color:var(--primary-yellow); font-size:1.05rem;">🍿 ${item.nombre} ($${item.precio})</strong>
+                <div style="font-size:0.82rem; color:#D1D5DB; margin-top:3px;">
+                    ${item.base ? `• Base: <strong>${item.base}</strong><br>` : ''}
+                    ${item.ingredientes && item.ingredientes.length > 0 ? `• Con: <strong>${item.ingredientes.join(', ')}</strong><br>` : ''}
+                    ${item.extras && item.extras.length > 0 ? `• Extras: <strong style="color:#F472B6;">${item.extras.join(', ')}</strong><br>` : ''}
+                    ${item.salsa ? `• Salsa: <strong>${item.salsa}</strong>` : ''}
                 </div>
             </div>
-        `;
-    }).join('');
-
-    totalEl.textContent = `$${total.toFixed(2)}`;
-}
-
-function eliminarItemPOS(index) {
-    carritoPOS.splice(index, 1);
-    renderizarCarritoPOS();
-}
-
-function vaciarCarritoPOS() {
-    carritoPOS = [];
-    document.getElementById('posClientInput').value = '';
-    renderizarCarritoPOS();
-}
-
-async function registrarVentaManualPOS() {
-    if (carritoPOS.length === 0) {
-        alert("Agrega al menos un producto para cobrar.");
-        return;
-    }
-
-    const clienteInput = document.getElementById('posClientInput').value.trim() || 'Cliente Mostrador';
-    const despacharYa = document.getElementById('posMarkReadyDirectly').checked;
-    const total = carritoPOS.reduce((sum, it) => sum + it.precio, 0);
-
-    let turnoManual = '#T-' + Math.floor(Math.random() * 90 + 10);
-    if (pedidosGlobalesSheets.length > 0) {
-        let max = 0;
-        pedidosGlobalesSheets.forEach(p => {
-            const m = String(p.turno || '').match(/^#?T-(\d+)/i);
-            if (m && parseInt(m[1], 10) > max) max = parseInt(m[1], 10);
-        });
-        turnoManual = `#T-${max + 1 < 10 ? '0' + (max + 1) : max + 1}`;
-    }
-
-    const puntosGanados = Math.max(1, Math.floor(total * 0.1));
-
-    if (WEB_APP_URL && clienteInput.length >= 3) {
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'procesar_puntos',
-                    sheet: 'Clientes_Lealtad',
-                    telefono: clienteInput.replace(/\D/g, '') || clienteInput,
-                    nombre: clienteInput,
-                    puntos_ganados: puntosGanados,
-                    meta_puntos: 100
-                })
-            });
-        } catch (e) {}
-    }
-
-    const payloadVenta = {
-        action: 'insertar_venta',
-        sheet: 'Ventas_Historicas',
-        data: {
-            turno: turnoManual,
-            cliente: clienteInput,
-            telefono: clienteInput,
-            tipo: 'tienda',
-            total: total,
-            pagado: 'SI',
-            fecha: new Date().toISOString(),
-            estado: despacharYa ? 'listo' : 'cola',
-            items_json: JSON.stringify(carritoPOS),
-            detalle: carritoPOS.map(i => i.nombre + ' ($' + i.precio + ')').join(' | ')
-        }
-    };
-
-    if (WEB_APP_URL) {
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify(payloadVenta)
-            });
-        } catch (e) {}
-    }
-
-    alert(`✅ ¡Venta cobrada con éxito!\nTurno: ${turnoManual}\nTotal: $${total.toFixed(2)}\nPuntos sumados: +${puntosGanados} pts`);
-    vaciarCarritoPOS();
-    await consultarPedidosNube();
-    mostrarVista(despacharYa ? 'pos' : 'kds');
-}
-
-function mostrarVista(vista) {
-    const vistaKDS = document.getElementById('vistaKDS');
-    const vistaPOS = document.getElementById('vistaPOS');
-    const vistaFin = document.getElementById('vistaFinanzas');
-    
-    const btnKDS = document.getElementById('tabBtnKDS');
-    const btnPOS = document.getElementById('tabBtnPOS');
-    const btnFin = document.getElementById('tabBtnFinanzas');
-    
-    const filters = document.getElementById('stationFiltersHeader');
-    const metrics = document.getElementById('kdsMetricsHeader');
-
-    if (vistaKDS) vistaKDS.style.display = 'none';
-    if (vistaPOS) vistaPOS.style.display = 'none';
-    if (vistaFin) vistaFin.style.display = 'none';
-
-    btnKDS.classList.remove('active');
-    btnPOS.classList.remove('active');
-    btnFin.classList.remove('active');
-
-    if (vista === 'kds') {
-        vistaKDS.style.display = 'grid';
-        btnKDS.classList.add('active');
-        if (filters) filters.style.display = 'flex';
-        if (metrics) metrics.style.display = 'flex';
-    } else if (vista === 'pos') {
-        vistaPOS.style.display = 'block';
-        btnPOS.classList.add('active');
-        if (filters) filters.style.display = 'none';
-        if (metrics) metrics.style.display = 'none';
-        renderizarCarritoPOS();
-    } else {
-        vistaFin.style.display = 'block';
-        btnFin.classList.add('active');
-        if (filters) filters.style.display = 'none';
-        if (metrics) metrics.style.display = 'flex';
-        actualizarModuloFinanzas();
-    }
-}
-
-function filtrarPorEstacion(estacion) {
-    filtroEstacionActual = estacion.toUpperCase();
-    const btns = document.querySelectorAll('.btn-station');
-    btns.forEach(b => {
-        if (b.getAttribute('data-station') === filtroEstacionActual) {
-            b.classList.add('active');
-        } else {
-            b.classList.remove('active');
-        }
-    });
-    renderizarTableroKanban();
-}
-
-function actualizarMetricasHeader() {
-    const enCola = pedidosGlobalesSheets.filter(p => p.estado === 'cola').length;
-    const enPrep = pedidosGlobalesSheets.filter(p => p.estado === 'preparando').length;
-    const listos = pedidosGlobalesSheets.filter(p => p.estado === 'listo').length;
-
-    const mCola = document.getElementById('metricCola');
-    const mPrep = document.getElementById('metricPrep');
-    const mListos = document.getElementById('metricListos');
-
-    if (mCola) mCola.textContent = enCola;
-    if (mPrep) mPrep.textContent = enPrep;
-    if (mListos) mListos.textContent = listos;
-}
-
-function actualizarModuloFinanzas() {
-    const ventas = pedidosGlobalesSheets;
-    let totalGeneral = 0;
-    let totalTienda = 0;
-    let totalRecoger = 0;
-    let pedidosTiendaCount = 0;
-    let pedidosRecogerCount = 0;
-
-    ventas.forEach(v => {
-        totalGeneral += v.total;
-        if (v.tipo === 'tienda') {
-            totalTienda += v.total;
-            pedidosTiendaCount++;
-        } else {
-            totalRecoger += v.total;
-            pedidosRecogerCount++;
-        }
-    });
-
-    const ticketProm = ventas.length > 0 ? (totalGeneral / ventas.length) : 0;
-
-    const finTotal = document.getElementById('finTotalVentas');
-    const finTotalPed = document.getElementById('finTotalPedidos');
-    const finTienda = document.getElementById('finVentaTienda');
-    const finPedTienda = document.getElementById('finPedidosTienda');
-    const finRecoger = document.getElementById('finVentaRecoger');
-    const finPedRecoger = document.getElementById('finPedidosRecoger');
-    const finTicket = document.getElementById('finTicketPromedio');
-
-    if (finTotal) finTotal.textContent = `$${totalGeneral.toFixed(2)}`;
-    if (finTotalPed) finTotalPed.textContent = `${ventas.length} órdenes registradas`;
-    if (finTienda) finTienda.textContent = `$${totalTienda.toFixed(2)}`;
-    if (finPedTienda) finPedTienda.textContent = `${pedidosTiendaCount} órdenes`;
-    if (finRecoger) finRecoger.textContent = `$${totalRecoger.toFixed(2)}`;
-    if (finPedRecoger) finPedRecoger.textContent = `${pedidosRecogerCount} órdenes`;
-    if (finTicket) finTicket.textContent = `$${ticketProm.toFixed(2)}`;
-
-    const tbody = document.getElementById('financeTableBody');
-    if (tbody) {
-        tbody.innerHTML = ventas.map(v => `
-            <tr>
-                <td><strong>${v.turno}</strong></td>
-                <td>${new Date(v.fecha_completa).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
-                <td>${v.cliente}</td>
-                <td><span style="background:${v.tipo==='tienda'?'#0284C7':'#EA580C'}; color:#FFF; padding:2px 6px; border-radius:6px; font-size:0.75rem;">${v.tipo.toUpperCase()}</span></td>
-                <td>${v.items.map(i => i.nombre).join(', ')}</td>
-                <td><strong>$${v.total.toFixed(2)}</strong></td>
-            </tr>
         `).join('');
+    } catch (e) {
+        itemsBox.innerHTML = `<p style="font-size:0.85rem; color:#D1D5DB;">${p.detalle || 'Detalle no disponible'}</p>`;
     }
 
-    renderizarGraficasFinancieras(ventas);
+    document.querySelectorAll('.pay-method-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('kdsDetailModal').classList.add('active');
 }
 
-function renderizarGraficasFinancieras(ventas) {
-    if (typeof Chart === 'undefined') return;
-
-    const ventasPorFecha = {};
-    ventas.forEach(v => {
-        const fechaDia = v.fecha_completa ? v.fecha_completa.split('T')[0] : 'Hoy';
-        ventasPorFecha[fechaDia] = (ventasPorFecha[fechaDia] || 0) + v.total;
-    });
-
-    const labelsDias = Object.keys(ventasPorFecha);
-    const dataDias = Object.values(ventasPorFecha);
-
-    const productosConteo = {};
-    ventas.forEach(v => {
-        v.items.forEach(it => {
-            const nombreProd = it.nombre || 'Botana';
-            productosConteo[nombreProd] = (productosConteo[nombreProd] || 0) + 1;
-        });
-    });
-
-    const topProductosSorted = Object.entries(productosConteo)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-    const labelsProds = topProductosSorted.map(p => p[0]);
-    const dataProds = topProductosSorted.map(p => p[1]);
-
-    const canvasDias = document.getElementById('chartVentasDias');
-    if (canvasDias) {
-        if (chartVentasDiasInstance) chartVentasDiasInstance.destroy();
-        chartVentasDiasInstance = new Chart(canvasDias, {
-            type: 'line',
-            data: {
-                labels: labelsDias.length > 0 ? labelsDias : ['Sin datos'],
-                datasets: [{
-                    label: 'Ventas ($MXN)',
-                    data: dataDias.length > 0 ? dataDias : [0],
-                    borderColor: '#F59E0B',
-                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                    fill: true,
-                    tension: 0.3,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#F59E0B',
-                    pointRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: '#94A3B8', font: { family: 'Poppins' } } }
-                },
-                scales: {
-                    x: { ticks: { color: '#94A3B8' }, grid: { color: '#334155' } },
-                    y: { ticks: { color: '#94A3B8' }, grid: { color: '#334155' } }
-                }
-            }
-        });
-    }
-
-    const canvasProds = document.getElementById('chartTopProductos');
-    if (canvasProds) {
-        if (chartTopProductosInstance) chartTopProductosInstance.destroy();
-        chartTopProductosInstance = new Chart(canvasProds, {
-            type: 'doughnut',
-            data: {
-                labels: labelsProds.length > 0 ? labelsProds : ['Sin ventas'],
-                datasets: [{
-                    data: dataProds.length > 0 ? dataProds : [1],
-                    backgroundColor: ['#F59E0B', '#10B981', '#0284C7', '#EC4899', '#8B5CF6'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: '#94A3B8', font: { family: 'Poppins' } }
-                    }
-                }
-            }
-        });
-    }
+function seleccionarMetodoPago(metodo, btnEl) {
+    metodoPagoSeleccionado = metodo;
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
 }
 
-function exportarReporteVentasCSV() {
-    if (pedidosGlobalesSheets.length === 0) {
-        alert("No hay ventas registradas para exportar.");
-        return;
-    }
-
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Turno,Cliente,Telefono,Tipo,Total,Fecha,Detalle\n";
-
-    pedidosGlobalesSheets.forEach(p => {
-        const detalleLimpio = p.items.map(i => i.nombre).join(' | ').replace(/,/g, ' ');
-        csvContent += `"${p.turno}","${p.cliente}","${p.telefono}","${p.tipo}","${p.total}","${p.fecha_completa}","${detalleLimpio}"\n`;
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Ventas_LaEngordadera_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+function cerrarModalCocina() {
+    document.getElementById('kdsDetailModal').classList.remove('active');
+    pedidoModalActual = null;
 }
 
-async function borrarHistorialFinanciero() {
-    if (!confirm("⚠️ ¿Estás seguro de reiniciar todo el historial? Se borrarán los datos de la tabla y las gráficas.")) return;
+async function cambiarEstadoDesdeModal(nuevoEstado) {
+    if (!pedidoModalActual) return;
+    await cambiarEstadoEnBackend(pedidoModalActual.turno, nuevoEstado, metodoPagoSeleccionado);
+    cerrarModalCocina();
+    cargarPedidosCocina();
+}
 
-    pedidosGlobalesSheets = [];
-    renderizarTableroKanban();
-    actualizarMetricasHeader();
-    actualizarModuloFinanzas();
+async function cambiarEstadoRapido(turno, nuevoEstado) {
+    await cambiarEstadoEnBackend(turno, nuevoEstado, '');
+    cargarPedidosCocina();
+}
 
-    if (WEB_APP_URL) {
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'borrar_historial',
-                    sheet: 'Ventas_Historicas'
-                })
-            });
-        } catch (e) {}
+async function cambiarEstadoEnBackend(turno, nuevoEstado, metodoPago) {
+    try {
+        const payload = {
+            action: 'actualizar_estado_cocina',
+            turno: turno,
+            estado: nuevoEstado,
+            metodo_pago: metodoPago
+        };
+
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        console.error("Error al actualizar estado:", e);
     }
-
-    alert("✅ El historial financiero ha sido reiniciado.");
 }
