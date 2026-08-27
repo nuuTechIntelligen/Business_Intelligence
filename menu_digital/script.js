@@ -1,7 +1,7 @@
 // ======================================================
 // MENU LA ENGORDADERA (BARRA PÍLDORA + MONITOREO DINÁMICO)
 // ======================================================
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzl9NiFg5WzBJGD9klSJijJVaziy9eOPiSvGhLPiakZeYJ26CVjE0FRuZgmWvSJ5w3wgg/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
