@@ -4,6 +4,7 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoB4Q5crNsK8UC4oGRpFE8qJWPaHPhhxqdrRO6hNZB1grViQRnkPmxdpRwqhbeno8gqw/exec"; 
 const NUMERO_WHATSAPP = "5215512345678"; 
 
+// Variables dinámicas desde Google Sheets
 let PREMIO_LEALTAD = "1 Botana Mediana Gratis 🍿";
 let PUNTOS_META_PREMIO = 100;
 let ESCALA_PUNTOS_COMPRA = "5-20:1, 21-50:3, 51-100:6, 101-200:15, 201-9999:25";
@@ -11,6 +12,7 @@ let LINK_MERCADOPAGO = "http://link.mercadopago.com.mx/fyblaengordadera";
 let CLABE_BANCARIA = "123456789012345678";
 let BANCO_TITULAR = "Mercado Pago / La Engordadera";
 
+// Enlaces de Redes Sociales y Google Maps
 let LINK_FACEBOOK = "";
 let LINK_INSTAGRAM = "";
 let LINK_GOOGLE_MAPS = "https://maps.google.com";
@@ -1180,7 +1182,13 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
 
         badgeType.textContent = '🛍️ PARA RECOGER';
         badgeType.className = 'ticket-badge badge-recoger';
+        badgeType.style.background = '#EA580C';
+        badgeType.style.color = '#FFFFFF';
+
         paymentAlert.className = 'ticket-payment-alert alert-recoger';
+        paymentAlert.style.background = '#FFFBEB';
+        paymentAlert.style.borderColor = '#FDE68A';
+        paymentAlert.style.color = '#B45309';
         paymentAlert.innerHTML = `
             <strong>⏳ Pedido en Cola de Validación:</strong><br>
             Realiza tu pago en Mercado Pago para asegurar tu orden. En cuanto cocina la valide iniciará tu preparación.
@@ -1207,6 +1215,7 @@ async function mostrarBoletoTurno(pedido, esRestaurado = false) {
 
 function iniciarMonitoreoEstadoBoleto(turno) {
     if (temporizadorMonitoreoCliente) clearInterval(temporizadorMonitoreoCliente);
+    if (temporizadorKiosko) clearInterval(temporizadorKiosko);
 
     temporizadorMonitoreoCliente = setInterval(async () => {
         if (!WEB_APP_URL || WEB_APP_URL.includes("TU_SCRIPT_ID")) return;
@@ -1217,39 +1226,57 @@ function iniciarMonitoreoEstadoBoleto(turno) {
             const badgeType = document.getElementById('ticketBadgeType');
             const onlinePaymentCard = document.getElementById('onlinePaymentContainer');
 
-            if (pedido && pedido.estado && paymentAlert) {
+            if (pedido && pedido.estado && pedido.estado !== 'no_encontrado') {
                 const est = String(pedido.estado).toLowerCase().trim();
                 
-                if (est === 'preparando' || est.includes('prep')) {
-                    paymentAlert.className = 'ticket-payment-alert alert-tienda';
-                    paymentAlert.innerHTML = `<strong>🔥 ¡Orden Aceptada!</strong><br>Tus botanas ya están en preparación en cocina.`;
+                if (est.includes('prep') || est === 'preparando') {
                     if (badgeType) {
                         badgeType.textContent = '🔥 EN PREPARACIÓN';
                         badgeType.style.background = '#10B981';
+                        badgeType.style.color = '#FFFFFF';
                     }
-                } else if (est === 'listo' || est.includes('list')) {
-                    paymentAlert.className = 'ticket-payment-alert alert-tienda';
-                    paymentAlert.innerHTML = `<strong>🎉 ¡Tu pedido está LISTO!</strong><br>Puedes pasar al mostrador a recoger tus botanas.`;
+                    if (paymentAlert) {
+                        paymentAlert.className = 'ticket-payment-alert alert-tienda';
+                        paymentAlert.style.background = '#DCFCE7';
+                        paymentAlert.style.borderColor = '#86EFAC';
+                        paymentAlert.style.color = '#166534';
+                        paymentAlert.innerHTML = `<strong>🔥 ¡Orden Aceptada!</strong><br>Cocina ya validó tu pedido y está en preparación.`;
+                    }
+                } 
+                else if (est.includes('list') || est === 'listo') {
                     if (badgeType) {
-                        badgeType.textContent = '✅ LISTO PARA ENTREGA';
+                        badgeType.textContent = '✅ LISTO PARA RECOGER';
                         badgeType.style.background = '#059669';
+                        badgeType.style.color = '#FFFFFF';
                     }
-                } else if (est === 'rechazado' || est === 'cancelado') {
-                    paymentAlert.className = 'ticket-payment-alert';
-                    paymentAlert.style.background = '#FEE2E2';
-                    paymentAlert.style.borderColor = '#F87171';
-                    paymentAlert.style.color = '#991B1B';
-                    paymentAlert.innerHTML = `<strong>❌ Pedido No Disponible:</strong><br>Lo sentimos, cocina no pudo tomar tu orden. Si pagaste en línea, tu dinero ha sido devuelto a tu cuenta.`;
+                    if (paymentAlert) {
+                        paymentAlert.className = 'ticket-payment-alert alert-tienda';
+                        paymentAlert.style.background = '#DCFCE7';
+                        paymentAlert.style.borderColor = '#86EFAC';
+                        paymentAlert.style.color = '#166534';
+                        paymentAlert.innerHTML = `<strong>🎉 ¡Tu pedido está LISTO!</strong><br>Pasa al mostrador por tus botanas preparadas.`;
+                    }
+                } 
+                else if (est.includes('rechaz') || est.includes('cancel')) {
                     if (badgeType) {
-                        badgeType.textContent = '❌ RECHAZADO';
+                        badgeType.textContent = '❌ ORDEN RECHAZADA';
                         badgeType.style.background = '#DC2626';
+                        badgeType.style.color = '#FFFFFF';
+                    }
+                    if (paymentAlert) {
+                        paymentAlert.style.background = '#FEE2E2';
+                        paymentAlert.style.borderColor = '#F87171';
+                        paymentAlert.style.color = '#991B1B';
+                        paymentAlert.innerHTML = `<strong>❌ Pedido No Disponible:</strong><br>Lo sentimos, cocina no pudo tomar tu orden. Si realizaste pago en línea, tu dinero ha sido devuelto a tu cuenta.`;
                     }
                     if (onlinePaymentCard) onlinePaymentCard.style.display = 'none';
                     clearInterval(temporizadorMonitoreoCliente);
                 }
             }
-        } catch (e) {}
-    }, 3500);
+        } catch (e) {
+            console.warn("Error en monitoreo de estado:", e);
+        }
+    }, 3000);
 }
 
 async function solicitarLinkDinamicoMercadoPago(pedido) {
@@ -1257,7 +1284,6 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
     const loadingHint = document.getElementById('mpLoadingHint');
     if (!btnMp) return;
 
-    // Estado inicial de carga
     btnMp.style.pointerEvents = 'none';
     btnMp.style.opacity = '0.7';
     btnMp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Preparando cobro de $${pedido.total.toFixed(2)}...`;
@@ -1288,7 +1314,6 @@ async function solicitarLinkDinamicoMercadoPago(pedido) {
             items: pedido.items
         };
 
-        // Controlador de tiempo límite (timeout de 6 segundos)
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6000);
 
